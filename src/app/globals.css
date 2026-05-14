@@ -1,0 +1,179 @@
+/* Tailwind v4: load JS config for theme + scan all app/components sources */
+@import "tailwindcss";
+@config "../../tailwind.config.mjs";
+@source "../../src/**/*.{ts,tsx,js,jsx,mdx}";
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #070712;
+  color: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, Segoe UI,
+    Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+}
+
+/* Premium grain for depth */
+.grain:before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.35;
+}
+
+/* Subtle animated glow blobs */
+.glow-blob {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 9999px;
+  filter: blur(48px);
+  opacity: 0.45;
+  background: radial-gradient(circle at 30% 30%, rgba(139, 92, 246, 0.7), transparent 55%),
+    radial-gradient(circle at 70% 70%, rgba(168, 85, 247, 0.55), transparent 60%);
+}
+
+@keyframes premiumParticleFloat {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--pp-dx, 0px), var(--pp-dy, -24px), 0) scale(1.25);
+    opacity: 0;
+  }
+}
+
+.premium-particle {
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.70), rgba(139, 92, 246, 0.18), transparent 70%);
+  filter: blur(0.25px);
+  animation: premiumParticleFloat var(--pp-dur, 12s) ease-in-out infinite;
+  animation-delay: var(--pp-delay, 0s);
+  will-change: transform, opacity;
+}
+
+/* Temporary kill-switch for hydration debugging:
+   - disables *all* animations/transitions (including hover transitions)
+   - keeps layout/markup static across SSR + first client render */
+.static-ui *,
+.static-ui *::before,
+.static-ui *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/*
+ * Quest map stage height.
+ *
+ * Tailwind v4's arbitrary value parser can't handle `var(--name, fallback)`
+ * inside `calc()` (the comma breaks tokenisation), so we ship the rule
+ * directly in CSS. Matches the chrome offsets used by the rest of the app:
+ *   - Mobile: 100dvh − header (72px) − bottom nav (--mobile-nav-h | 128px)
+ *   - Desktop (md+): 100dvh − 2rem
+ */
+.quest-map-stage-height {
+  height: calc(100dvh - 72px - var(--mobile-nav-h, 128px));
+  min-height: 320px;
+}
+@media (min-width: 768px) {
+  .quest-map-stage-height {
+    height: calc(100dvh - 2rem);
+  }
+}
+
+/* Cinematic intro: deterministic motion (no JS random) */
+@keyframes intro-fog-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate3d(1.5%, -2%, 0) scale(1.04);
+    opacity: 0.52;
+  }
+}
+
+@keyframes intro-fog-drift-slow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.02);
+    opacity: 0.28;
+  }
+  50% {
+    transform: translate3d(-2%, 1.5%, 0) scale(1);
+    opacity: 0.42;
+  }
+}
+
+@keyframes intro-star-twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale3d(1, 1, 1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale3d(1.15, 1.15, 1);
+  }
+}
+
+.intro-fog-layer-a {
+  animation: intro-fog-drift 22s ease-in-out infinite;
+}
+
+.intro-fog-layer-b {
+  animation: intro-fog-drift-slow 28s ease-in-out infinite;
+  animation-delay: -6s;
+}
+
+.intro-star {
+  animation: intro-star-twinkle var(--intro-tw-dur, 4.2s) ease-in-out infinite;
+  animation-delay: var(--intro-tw-delay, 0s);
+}
+
+/* XP ladder: gold value pulse (deterministic, no randomness) */
+@keyframes xp-gold-shimmer {
+  0%,
+  100% {
+    filter: brightness(1);
+    text-shadow:
+      0 0 10px rgba(245, 197, 71, 0.4),
+      0 0 22px rgba(245, 197, 71, 0.2);
+  }
+  50% {
+    filter: brightness(1.12);
+    text-shadow:
+      0 0 16px rgba(245, 197, 71, 0.75),
+      0 0 36px rgba(245, 197, 71, 0.35);
+  }
+}
+
+.xp-gold-shimmer {
+  animation: xp-gold-shimmer 2.8s ease-in-out infinite;
+}
+

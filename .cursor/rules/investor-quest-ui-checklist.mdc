@@ -1,0 +1,29 @@
+---
+description: UI checklist for Investor Quest screens (React/Next)
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# Investor Quest UI checklist (apply when editing UI)
+
+## 10-second guardrail (not a dashboard)
+- Prefer **journey + progression language**: unlock, quest, mastery, conviction, level, streak.
+- Avoid “analytics/reporting” framing, spreadsheet-like density, or generic SaaS card grids.
+
+## Interaction + layering (must pass)
+- Interactive elements: `cursor-pointer`, immediate `onClick`, hover feedback works.
+- Decorative-only layers: **must** have `pointer-events: none` (SVG routes, particles, glow/gradient overlays, nexus FX, vignette/fog).
+- Ensure interactive layer is above FX: explicit `z-index` on nodes/cards; avoid accidental stacking contexts.
+- No invisible full-bleed overlay blocking input (`absolute inset-0` wrappers must be `pointer-events-none` unless truly interactive).
+
+## Mobile-first feel
+- Tap targets \(\ge\) 44px where practical; avoid hover-only affordances.
+- Keep transitions fast; no layout shift when modals/overlays open.
+
+## Animation style (premium)
+- Use subtle float/pulse/energy drift; keep motion sparse and cinematic.
+- Avoid bouncy/childish easing and “too many moving things at once”.
+
+## Hydration-safe rules (hard)
+- No `Math.random()` during render; use deterministic seeds or generate in effects.
+- No `window`/measurements during SSR; gate in `useEffect`.

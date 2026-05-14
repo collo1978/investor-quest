@@ -1,0 +1,29 @@
+---
+description: Investor Quest north-star (premium gamified stock research)
+alwaysApply: true
+---
+
+# Investor Quest = premium gamified research (NOT a dashboard)
+
+## Product feeling to reinforce
+- Curiosity, exploration, progression, achievement, mastery, confidence.
+- Frame actions as **unlocking knowledge**, **building conviction**, **leveling up** (not “reading reports”).
+
+## Visual + interaction style
+- Premium fintech game: dark sci‑fi, glassmorphism/holographic UI, neon violet energy, subtle blue accents, cinematic glow.
+- Smooth, responsive, rewarding micro-interactions (hover/click states feel alive, not flashy).
+- Avoid: spreadsheet layouts, flat corporate dashboard UI, bright white surfaces, generic SaaS cards.
+
+## Animation rules
+- Subtle + premium: glow pulses, gentle float, soft particle drift, smooth scaling.
+- Avoid: excessive bouncing, cluttered motion, “cheap” effects.
+
+## Interaction layering (critical)
+- **All important elements must stay clickable/mobile-friendly.**
+- Decorative layers must never intercept input: apply `pointer-events: none` to routes SVG, particles, glow overlays, gradients, nexus FX, fog/vignette layers.
+- Keep the interactive node/card layer above routes/FX (explicit `z-index` / stacking context).
+
+## Tech constraints (hydration-safe)
+- No `Math.random()` during render; no time-based randomness on first paint.
+- No browser-only measurements during SSR; gate client-only logic in effects.
+- Avoid layout shift; keep mobile-first responsiveness.
