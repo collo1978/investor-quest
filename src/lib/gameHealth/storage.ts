@@ -381,6 +381,56 @@ export async function resolveGameHealthIssue(issueId: string): Promise<void> {
     .eq("id", issueId);
 }
 
+const GAME_HEALTH_TABLES = [
+  "game_health_checks",
+  "game_health_issues",
+  "game_health_settings"
+] as const;
+
+/** Confirms Mission Control tables exist in the connected Supabase project. */
+export async function probeGameHealthSchema(): Promise<{
+  ok: boolean;
+  missingTables: string[];
+  settingsRowExists: boolean;
+}> {
+  if (!isSupabaseConfigured()) {
+    return { ok: false, missingTables: [...GAME_HEALTH_TABLES], settingsRowExists: false };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const missingTables: string[] = [];
+
+  for (const table of GAME_HEALTH_TABLES) {
+    const { error } = await supabase.from(table).select("*").limit(1);
+    if (error) {
+      const msg = error.message.toLowerCase();
+      if (
+        error.code === "42P01" ||
+        msg.includes("does not exist") ||
+        msg.includes("could not find the table")
+      ) {
+        missingTables.push(table);
+      }
+    }
+  }
+
+  let settingsRowExists = false;
+  if (!missingTables.includes("game_health_settings")) {
+    const { data } = await supabase
+      .from("game_health_settings")
+      .select("id")
+      .eq("id", "default")
+      .maybeSingle();
+    settingsRowExists = Boolean(data);
+  }
+
+  return {
+    ok: missingTables.length === 0,
+    missingTables,
+    settingsRowExists
+  };
+}
+
 export async function markAlertSent(score: number): Promise<void> {
   if (!isSupabaseConfigured()) return;
 

@@ -6,22 +6,41 @@ import {
   fetchGameHealthSettings,
   fetchLatestGameHealthCheck,
   fetchOpenIssues,
+  probeGameHealthSchema,
   updateGameHealthSettings
 } from "@/lib/gameHealth/storage";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import {
+  getSupabaseEnvDiagnostics,
+  isSupabaseConfigured
+} from "@/lib/supabase/env";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
 export async function GET() {
   if (!isSupabaseConfigured()) {
+    const diagnostics = getSupabaseEnvDiagnostics();
     return NextResponse.json(
       {
         configured: false,
-        error:
-          "Supabase is not configured. Apply game_health migration and set .env.local."
+        error: diagnostics.hint,
+        diagnostics
       },
-      { status: 503 }
+      { status: 503, headers: { "Cache-Control": "no-store" } }
+    );
+  }
+
+  const schema = await probeGameHealthSchema();
+  if (!schema.ok) {
+    const diagnostics = getSupabaseEnvDiagnostics();
+    return NextResponse.json(
+      {
+        configured: false,
+        error: `Mission Control tables missing in Supabase (${schema.missingTables.join(", ")}). Run game_health migration on project ${diagnostics.urlHost ?? "unknown"}.`,
+        diagnostics,
+        schema
+      },
+      { status: 503, headers: { "Cache-Control": "no-store" } }
     );
   }
 
@@ -38,7 +57,8 @@ export async function GET() {
       latest,
       history,
       openIssues,
-      settings
+      settings,
+      schema
     },
     { headers: { "Cache-Control": "no-store" } }
   );

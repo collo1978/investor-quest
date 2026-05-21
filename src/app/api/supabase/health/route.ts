@@ -1,23 +1,29 @@
 import { NextResponse } from "next/server";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import {
+  getSupabaseEnvDiagnostics,
+  isSupabaseConfigured
+} from "@/lib/supabase/env";
 
 export const dynamic = "force-dynamic";
 
 /** Verifies Supabase env + API reachability (no tables required). */
 export async function GET() {
   if (!isSupabaseConfigured()) {
+    const diagnostics = getSupabaseEnvDiagnostics();
     return NextResponse.json(
       {
         ok: false,
         configured: false,
-        message:
-          "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local, then restart the dev server."
+        message: diagnostics.hint,
+        diagnostics
       },
-      { status: 503 }
+      { status: 503, headers: { "Cache-Control": "no-store" } }
     );
   }
+
+  const diagnostics = getSupabaseEnvDiagnostics();
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -33,7 +39,8 @@ export async function GET() {
     return NextResponse.json({
       ok: true,
       configured: true,
-      message: "Supabase connection is ready."
+      message: "Supabase connection is ready.",
+      diagnostics: { urlHost: diagnostics.urlHost }
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

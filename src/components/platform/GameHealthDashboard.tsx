@@ -14,12 +14,26 @@ import type {
   GameHealthSettings
 } from "@/lib/gameHealth/types";
 
+type SupabaseDiagnostics = {
+  configured: boolean;
+  urlHost: string | null;
+  hasNextPublicUrl: boolean;
+  hasServerUrl: boolean;
+  hasNextPublicAnonKey: boolean;
+  hasPublishableKey: boolean;
+  hasServerAnonKey: boolean;
+  urlLooksValid: boolean;
+  hint: string;
+};
+
 type DashboardData = {
   configured: boolean;
   latest: GameHealthCheckRecord | null;
   history: GameHealthCheckRecord[];
   openIssues: GameHealthIssueRecord[];
   settings: GameHealthSettings;
+  diagnostics?: SupabaseDiagnostics;
+  error?: string;
 };
 
 export function GameHealthDashboard() {
@@ -30,16 +44,27 @@ export function GameHealthDashboard() {
   const [settingsForm, setSettingsForm] = useState<GameHealthSettings | null>(null);
   const [showTechnical, setShowTechnical] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [diagnostics, setDiagnostics] = useState<SupabaseDiagnostics | null>(null);
 
   const load = useCallback(async () => {
     try {
+      setLoadError(null);
       const res = await fetch("/api/admin/game-health", { cache: "no-store" });
       const json = (await res.json()) as DashboardData & { error?: string };
-      if (!res.ok) throw new Error(json.error ?? "Failed to load health data.");
+      setDiagnostics(json.diagnostics ?? null);
+      if (!res.ok) {
+        setLoadError(json.error ?? "Mission Control could not reach the database.");
+        setData(json.configured === true ? json : null);
+        if (json.settings) setSettingsForm(json.settings);
+        return;
+      }
       setData(json);
       setSettingsForm(json.settings);
     } catch (err) {
-      setMessage(humanizeTechnicalMessage(err instanceof Error ? err.message : "Load failed."));
+      const msg = humanizeTechnicalMessage(err instanceof Error ? err.message : "Load failed.");
+      setLoadError(msg);
+      setMessage(msg);
     } finally {
       setLoading(false);
     }
@@ -130,9 +155,36 @@ export function GameHealthDashboard() {
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-amber-100">
           <p className="font-semibold text-[17px]">Database setup needed</p>
           <p className="mt-2 text-[15px] leading-relaxed">
-            Apply migration{" "}
-            <code className="text-white/90">20260601120000_game_health.sql</code>{" "}
-            in Supabase, then restart the dev server.
+            {loadError ??
+              "Mission Control cannot connect to Supabase on this deployment."}
+          </p>
+          {diagnostics ? (
+            <ul className="mt-4 space-y-2 text-[13px] text-amber-100/85">
+              <li>
+                Supabase host:{" "}
+                <strong>{diagnostics.urlHost ?? "not detected"}</strong>
+              </li>
+              <li>
+                Env on server: URL{" "}
+                {diagnostics.hasNextPublicUrl || diagnostics.hasServerUrl
+                  ? "yes"
+                  : "missing"}{" "}
+                · Key{" "}
+                {diagnostics.hasNextPublicAnonKey ||
+                diagnostics.hasPublishableKey ||
+                diagnostics.hasServerAnonKey
+                  ? "yes"
+                  : "missing"}
+              </li>
+            </ul>
+          ) : null}
+          <p className="mt-4 text-[13px] leading-relaxed text-amber-100/75">
+            On <strong>Vercel</strong>, set{" "}
+            <code className="text-white/90">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+            <code className="text-white/90">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>{" "}
+            for <strong>Production</strong>, then redeploy. If tables are missing,
+            run the game_health migration in the{" "}
+            <strong>same</strong> Supabase project as that URL.
           </p>
         </div>
       </OpsPageShell>
