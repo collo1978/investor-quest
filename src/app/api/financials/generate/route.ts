@@ -7,6 +7,7 @@ import {
   parseFinancialQuestSlugParam
 } from "@/lib/ai/generateFinancialQuestAnswers";
 import { OpenAiRequestError } from "@/lib/ai/openaiClient";
+import { resolveQuestGenerationOptions } from "@/lib/ai/questGenerationMode";
 import { parseGenerateQuestParams } from "@/lib/quests/parseGenerateQuestParams";
 import { isSecApiConfigured } from "@/lib/sec/env";
 import { validateTickerParam } from "@/lib/sec/validateTicker";
@@ -67,7 +68,11 @@ export async function POST(request: Request) {
       questSlug: parseFinancialQuestSlugParam(slugParam),
       cardIds: genParams.cardIds,
       runExtractIfMissing:
-        genParams.runExtractIfMissing || isSecApiConfigured()
+        genParams.runExtractIfMissing || isSecApiConfigured(),
+      generationOptions: resolveQuestGenerationOptions({
+        forceRegenerate: genParams.forceRegenerate,
+        fastMode: genParams.fastMode
+      })
     });
 
     return NextResponse.json(result, {
