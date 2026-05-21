@@ -341,6 +341,7 @@ export function buildJargonRewriteUserPrompt(params: {
           "- Say how BIG or IMPORTANT the company is (biggest, leading, major player, market position, scale).",
           "- Mention AI market importance if relevant to this company.",
           "- DELETE all lag, stutter, slow-game, and slow-AI language.",
+          '- Include one sentence starting with "Think of it like" or "It\'s like".',
           ""
         ].join("\n")
       : "";
