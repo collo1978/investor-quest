@@ -48,9 +48,14 @@ OPENING RULE
 HUMAN UNDERSTANDING > TECHNICAL PRECISION
 - Optimize for instantly understandable — not technically comprehensive.
 
+CUSTOMER PROBLEM QUESTIONS ("What problem does it solve…")
+- Lead with pain WITHOUT the company, then consequence, then analogy, then benefit WITH them.
+- Never: industries tour, "solutions", innovation hype, "technology is crucial", company-description-first.
+- Good: "without this, games lag, AI feels slow, apps struggle to respond quickly."
+
 BANNED
 - Section headings in the story (no "What we know", "Bottom line", etc.)
-- Bullet points, numbered lists, corporate filler ("leverages", "landscape", "strategic", "robust", "synergies")
+- Bullet points, numbered lists, corporate filler ("leverages", "landscape", "strategic", "robust", "synergies", "industries", "innovation" as filler)
 - Repeating the same idea twice; extra "also" sentences`;
 
 /** Sentence order for the main explanation (before Why investors care). */

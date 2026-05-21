@@ -273,6 +273,8 @@ export async function generatePillarQuestAnswers(
       const finalized = await finalizeQuestAnswer({
         companyName: company.name,
         cardQuestion: card.investorQuestion,
+        questSlug: spec.questSlug,
+        cardId: spec.cardId,
         rawAnswer: raw,
         splitAnswerAndInsight: ctx.splitAnswerAndInsight,
         model: ctx.model,

@@ -14,6 +14,8 @@ import {
 export type FinalizeQuestAnswerInput = {
   companyName: string;
   cardQuestion: string;
+  questSlug?: string;
+  cardId?: string;
   rawAnswer: string;
   splitAnswerAndInsight: (raw: string) => {
     plainEnglishAnswer: string;
@@ -77,6 +79,12 @@ export async function finalizeQuestAnswer(
     Math.floor(finalizeTimeoutMs / (maxJargonRewrites + 1))
   );
 
+  const jargonContext = {
+    cardQuestion: input.cardQuestion,
+    questSlug: input.questSlug,
+    cardId: input.cardId
+  };
+
   let { plainEnglishAnswer, investorInsight } = input.splitAnswerAndInsight(
     input.rawAnswer
   );
@@ -85,12 +93,16 @@ export async function finalizeQuestAnswer(
     return {
       ok: false,
       reason: "Empty answer after parsing.",
-      jargonGate: analyzeQuestJargonGate(""),
+      jargonGate: analyzeQuestJargonGate("", null, jargonContext),
       rewriteAttempts: 0
     };
   }
 
-  let gate = analyzeQuestJargonGate(plainEnglishAnswer, investorInsight);
+  let gate = analyzeQuestJargonGate(
+    plainEnglishAnswer,
+    investorInsight,
+    jargonContext
+  );
   let rewriteAttempts = 0;
 
   if (gate.pass) {
@@ -113,6 +125,8 @@ export async function finalizeQuestAnswer(
           user: buildJargonRewriteUserPrompt({
             companyName: input.companyName,
             cardQuestion: input.cardQuestion,
+            questSlug: input.questSlug,
+            cardId: input.cardId,
             plainEnglishAnswer,
             investorInsight,
             gate
@@ -131,7 +145,11 @@ export async function finalizeQuestAnswer(
       if (!plainEnglishAnswer?.trim()) {
         break;
       }
-      gate = analyzeQuestJargonGate(plainEnglishAnswer, investorInsight);
+      gate = analyzeQuestJargonGate(
+        plainEnglishAnswer,
+        investorInsight,
+        jargonContext
+      );
     } catch (err) {
       console.warn("[quest-pipeline:jargon-rewrite-timeout]", err);
       break;

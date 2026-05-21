@@ -3,7 +3,14 @@
  * Technical/jargon-heavy copy is flagged and must be rewritten before save.
  */
 
+import { isCustomerProblemCard } from "@/lib/quests/customerProblemCard";
 import { splitIntoSentences } from "@/lib/quests/scannableAnswer";
+
+export type QuestJargonGateContext = {
+  cardQuestion?: string;
+  questSlug?: string;
+  cardId?: string;
+};
 
 export type JargonSeverity = "hard" | "soft";
 
@@ -61,7 +68,15 @@ export const HARD_JARGON_PATTERNS: ReadonlyArray<{
   {
     label: "tech platform (generic)",
     re: /\b(?:software|hardware|compute|computing|technology)\s+platforms?\b/i
-  }
+  },
+  { label: "essential for industries", re: /\bessential for industries\b/i },
+  { label: "solutions are essential", re: /\bsolutions are essential\b/i },
+  { label: "technology is crucial", re: /\btechnology is crucial\b/i },
+  { label: "provide solutions", re: /\bprovides? solutions\b/i },
+  { label: "their solutions", re: /\btheir solutions\b/i },
+  { label: "cutting-edge AI", re: /\bcutting[- ]edge ai\b/i },
+  { label: "transformative", re: /\btransformative\b/i },
+  { label: "next-generation", re: /\bnext[- ]generation\b/i }
 ];
 
 /** Softer signals — two or more fail the gate. */
@@ -74,7 +89,12 @@ export const SOFT_JARGON_PATTERNS: ReadonlyArray<{
   { label: "compute (noun)", re: /\bcompute\b/i },
   { label: "solutions", re: /\bsolutions\b/i },
   { label: "leverages", re: /\bleverages?\b/i },
-  { label: "specialized chips", re: /\bspecialized chips?\b/i }
+  { label: "specialized chips", re: /\bspecialized chips?\b/i },
+  { label: "industries (corporate)", re: /\bindustries\b/i },
+  { label: "innovation (buzzword)", re: /\binnovation\b/i },
+  { label: "strategic", re: /\bstrategic\b/i },
+  { label: "landscape", re: /\blandscape\b/i },
+  { label: "enables businesses", re: /\benables? businesses\b/i }
 ];
 
 const TECHNICAL_OPENING_RE = [
@@ -89,6 +109,18 @@ const TECHNICAL_OPENING_JARGON_RE =
 
 const FINAL_SENTENCE_TECH_RE =
   /\b(gpu|graphics processing|platform|infrastructure|semiconductor|computing|rendering|analytics|data center|processing units?|complex tasks?|accelerated|workloads?|hyperscalers?)\b/i;
+
+const CORPORATE_PROBLEM_OPENING_RE = [
+  /^(?:their|the company'?s?|this company'?s?)\s+(?:solutions?|technology|innovation|products?)\b/i,
+  /^(?:[A-Z][A-Za-z0-9&.'-]+\s+){0,2}(?:provides?|offers?|delivers?)\s+(?:solutions?|innovative|cutting[- ]edge)\b/i,
+  /^they\s+(?:provide|offer|deliver)\s+solutions\b/i,
+  /^their\s+solutions\s+are\b/i
+];
+
+function hasCorporateProblemOpening(mainStory: string): boolean {
+  const first = splitIntoSentences(mainStory)[0] ?? mainStory.slice(0, 200);
+  return CORPORATE_PROBLEM_OPENING_RE.some((re) => re.test(first));
+}
 
 export function extractMainStory(text: string): string {
   const trimmed = text.trim();
@@ -147,7 +179,8 @@ function isFinalSentenceTooTechnical(mainStory: string): boolean {
  */
 export function analyzeQuestJargonGate(
   plainEnglishAnswer: string,
-  investorInsight?: string | null
+  investorInsight?: string | null,
+  context?: QuestJargonGateContext
 ): QuestJargonGateResult {
   const combined = [plainEnglishAnswer, investorInsight]
     .filter(Boolean)
@@ -159,18 +192,27 @@ export function analyzeQuestJargonGate(
   const softHits = hits.filter((h) => h.severity === "soft");
   const technicalOpening = hasTechnicalOpening(mainStory);
   const finalSentenceTooTechnical = isFinalSentenceTooTechnical(mainStory);
+  const customerProblem = isCustomerProblemCard({
+    questSlug: context?.questSlug ?? "",
+    cardId: context?.cardId ?? "",
+    cardQuestion: context?.cardQuestion
+  });
+  const corporateProblemOpening =
+    customerProblem && hasCorporateProblemOpening(mainStory);
 
   const flags: string[] = [];
   if (hardHits.length > 0) flags.push("hard_jargon");
   if (softHits.length >= 2) flags.push("soft_jargon_stack");
   if (technicalOpening) flags.push("technical_opening");
   if (finalSentenceTooTechnical) flags.push("final_sentence_too_technical");
+  if (corporateProblemOpening) flags.push("corporate_problem_opening");
 
   const rewriteRequired =
     hardHits.length > 0 ||
     softHits.length >= 2 ||
     technicalOpening ||
-    finalSentenceTooTechnical;
+    finalSentenceTooTechnical ||
+    corporateProblemOpening;
 
   return {
     pass: !rewriteRequired,
@@ -184,9 +226,10 @@ export function analyzeQuestJargonGate(
 
 export function passesQuestJargonGate(
   plainEnglishAnswer: string,
-  investorInsight?: string | null
+  investorInsight?: string | null,
+  context?: QuestJargonGateContext
 ): boolean {
-  return analyzeQuestJargonGate(plainEnglishAnswer, investorInsight).pass;
+  return analyzeQuestJargonGate(plainEnglishAnswer, investorInsight, context).pass;
 }
 
 export function describeJargonGateFailure(result: QuestJargonGateResult): string {
@@ -196,6 +239,11 @@ export function describeJargonGateFailure(result: QuestJargonGateResult): string
   }
   if (result.finalSentenceTooTechnical) {
     parts.push("final sentence still sounds like a tech article");
+  }
+  if (result.flags.includes("corporate_problem_opening")) {
+    parts.push(
+      "opens like a corporate brochure — start with everyday pain WITHOUT the company, not solutions/industries/innovation"
+    );
   }
   const labels = result.hits.map((h) => h.label);
   if (labels.length) {
@@ -237,10 +285,29 @@ export function buildJargonRewriteUserPrompt(params: {
   plainEnglishAnswer: string;
   investorInsight: string | null;
   gate: QuestJargonGateResult;
+  questSlug?: string;
+  cardId?: string;
 }): string {
   const issues = describeJargonGateFailure(params.gate);
   const whyBlock = params.investorInsight
     ? `\n\nWhy investors care:\n${params.investorInsight}`
+    : "";
+
+  const customerProblem = isCustomerProblemCard({
+    questSlug: params.questSlug ?? "",
+    cardId: params.cardId ?? "",
+    cardQuestion: params.cardQuestion
+  });
+
+  const problemCardHint = customerProblem
+    ? [
+        "",
+        "This is the CUSTOMER PROBLEM card. Rewrite as:",
+        "1) everyday pain WITHOUT the company, 2) consequence, 3) one analogy, 4) how life is better WITH them.",
+        "Never use: industries, solutions, innovation, technology is crucial, corporate AI buzzwords.",
+        'Good shape: "without this, games lag, AI feels slow, apps struggle to respond quickly."',
+        ""
+      ].join("\n")
     : "";
 
   return [
@@ -249,7 +316,7 @@ export function buildJargonRewriteUserPrompt(params: {
     "",
     "Problems to fix:",
     issues,
-    "",
+    problemCardHint,
     "Rewrite this entire answer in plain everyday language:",
     "",
     params.plainEnglishAnswer + whyBlock,

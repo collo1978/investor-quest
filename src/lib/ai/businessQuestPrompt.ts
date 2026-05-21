@@ -1,5 +1,10 @@
 import { buildAiPromptFromSectionIds } from "@/lib/sec/aiPromptBuilder";
 import {
+  CUSTOMER_PROBLEM_CARD_PROMPT,
+  CUSTOMER_PROBLEM_STYLE_REFERENCE,
+  isCustomerProblemCard
+} from "@/lib/quests/customerProblemCard";
+import {
   QUEST_ANSWER_FORMAT,
   QUEST_BEGINNER_VOICE,
   splitQuestAnswer
@@ -27,7 +32,7 @@ ${QUEST_ANSWER_FORMAT}
 CARD FOCUS
 - Answer ONLY the card question. Do not drift into the next card's topic.
 - Snapshot card 1 (first card): lightest possible — one everyday product moment, one analogy, one line on what they help power in real life (chips/apps/games/phones — never GPU/platform/infrastructure language). No tech stack, no customer list, no industry tour.
-- Snapshot card 2: one felt customer problem, one analogy, one line on how they deliver value.
+- Snapshot card 2 (customer problem): pain WITHOUT them → consequence → analogy → benefit WITH them. Never industries/solutions/innovation/corporate summary. See CUSTOMER PROBLEM CARD rules in the user prompt when applicable.
 - Snapshot card 3: one line on how well-known/big they feel, one analogy optional, one filing fact on position/scale — still max 4 sentences.
 - Revenue cards: one everyday "where money shows up" moment, one analogy, one revenue fact for THIS card only (product line OR region OR customer type — not all three).
 
@@ -69,6 +74,20 @@ export async function buildBusinessCardUserPrompt(params: {
         ].join("\n")
       : "";
 
+  const customerProblem = isCustomerProblemCard({
+    questSlug: params.questSlug,
+    cardId: params.cardId,
+    cardQuestion: params.cardQuestion
+  });
+
+  const structureHint = customerProblem
+    ? "Write the answer: max 4 short sentences (everyday pain WITHOUT them → consequence → analogy → benefit WITH them); then one-line Why investors care."
+    : "Write the answer: max 4 short sentences (everyday moment → analogy → what they do for THIS card); then one-line Why investors care.";
+
+  const customerProblemBlocks = customerProblem
+    ? ["", CUSTOMER_PROBLEM_CARD_PROMPT, "", CUSTOMER_PROBLEM_STYLE_REFERENCE, ""]
+    : [];
+
   return [
     `Company: ${params.companyName} (${params.ticker})`,
     `Quest: ${params.questTitle}`,
@@ -79,8 +98,8 @@ export async function buildBusinessCardUserPrompt(params: {
     priorBlock,
     "SEC filing excerpts (10-K — Business / related sections):",
     excerptBlocks,
-    "",
-    "Write the answer: max 4 short sentences (everyday moment → analogy → what they do for THIS card); then one-line Why investors care."
+    ...customerProblemBlocks,
+    structureHint
   ].join("\n");
 }
 

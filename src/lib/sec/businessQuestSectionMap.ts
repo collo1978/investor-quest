@@ -26,7 +26,7 @@ export const BUSINESS_QUEST_CARD_SPECS: readonly QuestCardSpec[] = [
     formType: "10-K",
     sectionKeys: ["item_1"],
     promptFocus:
-      "ONLY what problem it solves for customers and how the ecosystem helps people. No revenue tables."
+      "ONLY the everyday customer pain WITHOUT this company, what goes wrong (slow/lag/broken/expensive/confusing), and how life feels better WITH them. Pain → consequence → benefit. No revenue, competitors, or industry overview. Never 'solutions for industries' or corporate AI buzzwords."
   },
   {
     questSlug: "snapshot",

@@ -42,3 +42,42 @@ test("flags technical opening", () => {
   assert.equal(gate.technicalOpening, true);
   assert.equal(gate.pass, false);
 });
+
+const BAD_CORPORATE_PROBLEM = `Their solutions are essential for industries where technology is crucial to innovation.
+
+Think of them as a leader in advanced computing.
+
+They provide innovative technology for many sectors.
+
+Why investors care:
+Growth depends on technology adoption.`;
+
+const GOOD_CUSTOMER_PROBLEM = `When a game stutters or an AI chat takes forever to reply, you're feeling what happens when devices aren't fast enough.
+
+Think of it like a phone trying to run too many apps at once — everything slows down.
+
+They make the powerful parts inside those devices so games, apps, and smart tools feel quick again.
+
+Why investors care:
+If people keep demanding faster games and AI, demand for those parts can keep growing.`;
+
+test("rejects corporate customer-problem answer", () => {
+  const gate = analyzeQuestJargonGate(BAD_CORPORATE_PROBLEM, null, {
+    questSlug: "snapshot",
+    cardId: "card-2",
+    cardQuestion: "What problem does it solve for customers?"
+  });
+  assert.equal(gate.pass, false);
+  assert.ok(gate.hits.some((h) => h.label === "solutions are essential"));
+});
+
+test("passes relatable customer-problem answer", () => {
+  assert.equal(
+    passesQuestJargonGate(GOOD_CUSTOMER_PROBLEM, null, {
+      questSlug: "snapshot",
+      cardId: "card-2",
+      cardQuestion: "What problem does it solve for customers?"
+    }),
+    true
+  );
+});
