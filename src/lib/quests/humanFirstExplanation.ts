@@ -170,7 +170,7 @@ const CONSEQUENCE_RE =
   /\b(so |means |ends up|gets worse|can't |cannot |falls behind|costs more|takes longer|goes wrong|if that|when that)\b/i;
 
 const ANALOGY_RE =
-  /\bthink of (?:it|them|this|the) like\b|\bit'?s like\b|\bimagine\b/i;
+  /\bthink of (?:it|them|this|the) like\b|\bit'?s like\b|\bimagine\b|\blike trying to\b|\blike having a\b|\blike the difference\b/i;
 
 const CORPORATE_OPENING_RE = [
   /^(?:[A-Z][A-Za-z0-9&.'-]+\s+){0,2}(?:is|provides?|offers?|delivers?|specializes|develops?)\b/i,

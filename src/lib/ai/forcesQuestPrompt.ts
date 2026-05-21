@@ -23,8 +23,8 @@ FRAMING (weave into sentences — no extra headings)
 - Negative outside = external headwind.
 - Stay on the assigned force only.`,
   cardFocusBlock: `- Sentence 1: how this force might show up in everyday life (price, delay, safety, hype).
-- Sentence 2: one analogy + helps or hurts in plain words.
-- Sentence 3: one filing fact about this force only.`
+- Sentence 2: REQUIRED — one analogy starting with "Think of it like…" or "It's like…".
+- Sentence 3: one filing fact about this force only (plain words, no jargon).`
 });
 
 export async function buildForcesTopicUserPrompt(
