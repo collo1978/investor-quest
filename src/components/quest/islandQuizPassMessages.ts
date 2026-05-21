@@ -18,59 +18,59 @@ export function islandQuizPassMessage(
   if (pillarId === "forces") return forcesPassMessage(slug);
   if (pillarId === "financials") return financialsPassMessage(slug);
   if (pillarId === "management") return managementPassMessage(slug);
-  return "XP is locked in for this quest. Keep building conviction across the island.";
+  return "You leveled up — XP is locked in. Keep building conviction across the island.";
 }
 
 function businessPassMessage(type: string): string {
   switch (type) {
     case "snapshot":
-      return "You've taken the first step toward understanding the business.";
+      return "You can now explain what this company does in normal life — that's the foundation.";
     case "revenue":
-      return "You can see where the money comes from — that sharpens every judgment call.";
+      return "You see where the money really comes from — that makes every judgment sharper.";
     case "operations":
-      return "You understand how the business runs day to day — execution shapes outcomes.";
+      return "You get how the business actually runs day to day — execution is where plans meet reality.";
     case "advantage":
-      return "You've mapped what protects the business — durable edges compound over time.";
+      return "You know what protects the business — durable edges compound over time.";
     case "industry":
-      return "You've placed the company in its competitive arena — context completes the picture.";
+      return "You see the competitive arena — context completes the picture.";
     default:
       return "Keep building conviction across the Business island.";
   }
 }
 
 function forcesPassMessage(_slug: string): string {
-  return "You've leveled up your read on a force that can help or hurt the stock.";
+  return "You can name a real-world force that could help or hurt this stock — not just buzzwords.";
 }
 
 function financialsPassMessage(slug: string): string {
   switch (slug) {
     case "growth":
-      return "You can read the growth engine — pace and mix shape every upside case.";
+      return "You can read growth in plain terms — pace and mix shape every upside case.";
     case "profitability":
-      return "You know whether profits are real and durable — margins tell the story.";
+      return "You know whether profits feel real — margins tell the everyday story.";
     case "expenses":
-      return "You see how efficiently the company runs — cost discipline compounds.";
+      return "You see how efficiently the company runs — wasted spend shows up fast.";
     case "cash":
-      return "You can judge real cash generation — cash flow funds the future.";
+      return "You can judge real cash — cash is what pays the bills, not headlines.";
     case "financial-strength":
-      return "You've sized up balance-sheet strength — resilience matters when cycles turn.";
+      return "You've sized up financial strength — resilience matters when times get tough.";
     default:
-      return "You've leveled up your read on how the money works.";
+      return "You leveled up your read on how the money works.";
   }
 }
 
 function managementPassMessage(slug: string): string {
   switch (slug) {
     case "mgmt-1":
-      return "You've met the bench — trust in leadership is earned through delivery.";
+      return "You've met the bench — trust is earned when leaders deliver, not just promise.";
     case "mgmt-quiz":
-      return "You've stress-tested the team — incentives and alignment are on your radar.";
+      return "You've stress-tested the team — pay and alignment are on your radar.";
     case "mgmt-2":
-      return "You understand how they're paid — incentives drive behavior over time.";
+      return "You understand how they're paid — incentives drive real behavior.";
     case "mgmt-governance":
-      return "You've checked the guardrails — governance protects minority owners.";
+      return "You've checked the guardrails — oversight protects everyday shareholders.";
     case "mgmt-financial-strength":
-      return "You've connected stewardship to capital — management quality shows up in results.";
+      return "You've connected stewardship to results — management quality shows up in the numbers.";
     default:
       return "You've sharpened your lens on the people running the company.";
   }

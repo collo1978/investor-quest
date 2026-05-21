@@ -3,6 +3,7 @@ import { BUSINESS_QUEST_SYSTEM_PROMPT } from "@/lib/ai/businessQuestPrompt";
 import { FINANCIAL_QUEST_SYSTEM_PROMPT } from "@/lib/ai/financialQuestPrompt";
 import { FORCES_QUEST_SYSTEM_PROMPT } from "@/lib/ai/forcesQuestPrompt";
 import { MANAGEMENT_QUEST_SYSTEM_PROMPT } from "@/lib/ai/managementQuestPrompt";
+import { HUMAN_FIRST_WRITE_INSTRUCTION } from "@/lib/quests/humanFirstExplanation";
 import type { PromptTemplateScope } from "@/lib/supabase/promptTemplates/types";
 
 /** Placeholders documented in Prompt Studio. */
@@ -33,7 +34,7 @@ Focus ONLY on: {{cardPromptFocus}}
 {{priorCardsBlock}}{{filingLabel}}
 {{excerptBlocks}}
 
-Write the answer: max 4 short sentences (everyday moment → analogy → what they do for THIS card); then one-line Why investors care.`;
+${HUMAN_FIRST_WRITE_INSTRUCTION}`;
 
 export const DEFAULT_FORCES_USER_PROMPT_TEMPLATE = `Company: {{companyName}} ({{ticker}})
 Force topic: {{forceTopicTitle}}
@@ -46,7 +47,7 @@ Keyword match in Item 1A: {{keywordMatch}}
 Item 1A — Risk Factors (filtered excerpt):
 {{filteredExcerpt}}
 
-Write the answer: max 4 short sentences (everyday moment → analogy → this force in plain English); then one-line Why investors care.`;
+${HUMAN_FIRST_WRITE_INSTRUCTION}`;
 
 const SYSTEM_BY_PILLAR: Record<PillarId, string> = {
   business: BUSINESS_QUEST_SYSTEM_PROMPT,
@@ -133,7 +134,7 @@ export type CodeDefaultTemplate = {
 
 /** Change note stamped on Prompt Studio sync / reset from code defaults. */
 export const SYNC_FROM_CODE_CHANGE_NOTE =
-  "Synced from code defaults — teenager picture test, zero tech jargon, auto-rewrite gate";
+  "Synced from code defaults — Human-First Explanation Architecture (6-step flow, jargon gate, auto-rewrite before save)";
 
 export function getCodeDefaultForTemplateKey(
   templateKey: string
@@ -156,7 +157,7 @@ export function listCodeDefaultTemplates(): CodeDefaultTemplate[] {
       questSlug: null,
       label: `${pillarLabel} — System prompt`,
       description:
-        "GPT role, voice, format rules, and card-focus guardrails for this island.",
+        "GPT role, human-first 6-step architecture, format rules, and card-focus guardrails for this island.",
       body: getCodeDefaultSystemPrompt(pillarId)
     });
 

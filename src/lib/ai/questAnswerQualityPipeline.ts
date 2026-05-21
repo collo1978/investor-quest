@@ -179,7 +179,7 @@ export async function finalizeQuestAnswer(
 
   return {
     ok: false,
-    reason: `Answer still too technical after ${rewriteAttempts} rewrite(s): ${describeJargonGateFailure(gate)}`,
+    reason: `Answer failed human-first quality after ${rewriteAttempts} rewrite(s): ${describeJargonGateFailure(gate)}`,
     jargonGate: gate,
     rewriteAttempts
   };

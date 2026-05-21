@@ -6,31 +6,31 @@ export const PIPELINE_STATUS_CYCLE_MS = 2800;
 const PILLAR_LINES: Record<PillarId, readonly string[]> = {
   business: [
     "Reading SEC filings…",
-    "Mapping how the company makes money…",
-    "Tracing revenue segments and customers…",
-    "Unpacking operations and competitive edge…",
-    "Translating management narrative into investor language…"
+    "Finding where this shows up in everyday life…",
+    "Translating the business into plain English…",
+    "Checking what problem it solves for people…",
+    "Almost ready — human-first intel incoming…"
   ],
   forces: [
     "Reading SEC filings…",
-    "Analyzing company risks in Item 1A…",
-    "Mapping competitive forces around the business…",
-    "Separating tailwinds from headwinds…",
-    "Building your forces field report…"
+    "Spotting what could help or hurt in real life…",
+    "Separating inside strengths from outside risks…",
+    "Turning risk factors into plain language…",
+    "Packaging your forces field report…"
   ],
   financials: [
     "Reading SEC filings…",
-    "Tracing revenue and margin drivers…",
-    "Stress-testing cash generation…",
-    "Reviewing balance-sheet strength…",
-    "Connecting numbers to investment conviction…"
+    "Turning big numbers into something you can feel…",
+    "Following where the money actually goes…",
+    "Checking if profits and cash match the story…",
+    "Connecting dollars to why investors care…"
   ],
   management: [
     "Reading proxy statements…",
-    "Reviewing management incentives…",
-    "Checking governance and alignment…",
-    "Sizing up capital stewardship…",
-    "Summarizing leadership signals for investors…"
+    "Checking if leaders are aligned with shareholders…",
+    "Translating pay and governance into plain trust signals…",
+    "Sizing up who is really in control…",
+    "Summarizing leadership in everyday terms…"
   ]
 };
 
@@ -40,9 +40,9 @@ const QUEST_OVERRIDES: Partial<
   business: {
     revenue: [
       "Reading SEC filings…",
-      "Mapping revenue segments…",
-      "Sizing geographic mix…",
-      "Linking product lines to dollars…"
+      "Tracing where money shows up in real life…",
+      "Mapping products and regions…",
+      "Plain-English revenue intel loading…"
     ],
     snapshot: [
       "Reading SEC filings…",
@@ -53,26 +53,26 @@ const QUEST_OVERRIDES: Partial<
   forces: {
     "forces-hub-inside": [
       "Scanning internal forces…",
-      "Ranking strengths inside the business…"
+      "Ranking strengths you can picture…"
     ]
   },
   financials: {
     growth: [
       "Reading SEC filings…",
-      "Measuring growth pace and mix…",
-      "Spotting what is accelerating vs fading…"
+      "Measuring growth in everyday terms…",
+      "Spotting what is speeding up vs slowing down…"
     ],
     cash: [
       "Reading SEC filings…",
-      "Following cash from operations…",
-      "Checking whether profits convert to cash…"
+      "Following cash like money in your wallet…",
+      "Checking whether profits turn into real cash…"
     ]
   },
   management: {
     "mgmt-2": [
       "Reading proxy statements…",
-      "Reviewing management incentives…",
-      "Connecting pay to performance…"
+      "Reviewing how leaders get paid…",
+      "Connecting pay to behavior you can trust…"
     ]
   }
 };
@@ -89,8 +89,11 @@ export function getPipelineStatusLines(
 }
 
 export function playerFacingPipelineError(raw: string | null): string {
-  if (!raw) return "Intel refresh hit a snag — try again in a moment.";
+  if (!raw) return "Could not refresh this intel — tap retry in a moment.";
   const lower = raw.toLowerCase();
+  if (lower.includes("teenager") || lower.includes("jargon") || lower.includes("human-first")) {
+    return "Answer was too corporate or technical — regenerating in plain everyday language…";
+  }
   if (lower.includes("extract") || lower.includes("filing")) {
     return "We could not reach the latest filing yet. Tap retry to pull fresh SEC intel.";
   }
@@ -101,4 +104,19 @@ export function playerFacingPipelineError(raw: string | null): string {
     return "High demand on the research line — give it a few seconds, then retry.";
   }
   return "Intel refresh hit a snag — tap retry to run the pipeline again.";
+}
+
+export function playerFacingEmptyQuestCopy(pillarId: PillarId): string {
+  switch (pillarId) {
+    case "business":
+      return "No plain-English cards yet for this company — generate from Mission Control or open another quest.";
+    case "financials":
+      return "Financial intel is not loaded yet — run generation when filings are ready.";
+    case "forces":
+      return "Forces intel is not loaded yet — pull fresh risk factors first.";
+    case "management":
+      return "Management intel is not loaded yet — proxy excerpts need a refresh.";
+    default:
+      return "This quest intel is not ready yet — try again shortly.";
+  }
 }

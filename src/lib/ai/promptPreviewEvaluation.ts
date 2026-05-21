@@ -107,7 +107,11 @@ export async function runEvaluatedPreview(
   );
 
   const quality = analyzePromptAnswerQuality(preview.plainEnglishAnswer, {
-    priorCardSummaries
+    priorCardSummaries,
+    jargonContext: {
+      questSlug: input.questSlug,
+      cardId: input.cardId
+    }
   });
 
   let evaluationId: string | null = null;

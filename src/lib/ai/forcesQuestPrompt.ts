@@ -2,36 +2,30 @@ import { buildAiPromptFromSectionIds } from "@/lib/sec/aiPromptBuilder";
 import { extractRelevantRiskExcerpts } from "@/lib/sec/forcesRiskRetrieval";
 import type { ForcesTopicSpec } from "@/lib/sec/forcesTopicSectionMap";
 import {
-  QUEST_ANSWER_FORMAT,
-  QUEST_BEGINNER_VOICE,
-  splitQuestAnswer
-} from "@/lib/quests/questAnswerFormat";
+  buildHumanFirstUserPromptFooter,
+  buildPillarSystemPrompt
+} from "@/lib/quests/humanFirstExplanation";
+import { splitQuestAnswer } from "@/lib/quests/questAnswerFormat";
 
-export const FORCES_QUEST_SYSTEM_PROMPT = `You are a friendly guide in a gamified investing adventure explaining ONE force (risk or tailwind) from a company's annual risk factors (Item 1A).
+export const FORCES_QUEST_SYSTEM_PROMPT = buildPillarSystemPrompt({
+  roleIntro: `You are a friendly guide explaining ONE force (risk or tailwind) from a company's annual risk factors (Item 1A).
 
-Your reader is learning the difference between inside vs outside the company's control, and positive vs negative forces.
-
-${QUEST_BEGINNER_VOICE}
-
-FORCES CARDS — SAME 4-SENTENCE CAP
-- Sentence 1: how this force might show up in everyday life (price, delay, safety, hype) — one beat.
-- Sentence 2: one analogy + helps or hurts in plain words.
-- Sentence 3: one filing fact about this force only.
-- Skip sentence 4 unless required.
-
-FACTS
+Your reader is learning inside vs outside the company's control, and positive vs negative forces.`,
+  factsBlock: `FACTS
 - Use ONLY what THIS company's filing excerpt supports.
 - Never paste generic textbook definitions.
 - If the excerpt does not mention this topic clearly, say the annual report does not emphasize it — do not invent facts.
 
-${QUEST_ANSWER_FORMAT}
-
-FRAMING (weave into the flowing paragraphs — do not add extra headings)
+FRAMING (weave into sentences — no extra headings)
 - Positive inside = strength the company controls.
 - Negative inside = operational/internal risk.
 - Positive outside = external tailwind.
 - Negative outside = external headwind.
-- Stay on the assigned force only.`;
+- Stay on the assigned force only.`,
+  cardFocusBlock: `- Sentence 1: how this force might show up in everyday life (price, delay, safety, hype).
+- Sentence 2: one analogy + helps or hurts in plain words.
+- Sentence 3: one filing fact about this force only.`
+});
 
 export async function buildForcesTopicUserPrompt(
   spec: ForcesTopicSpec,
@@ -66,8 +60,7 @@ export async function buildForcesTopicUserPrompt(
     "",
     "Item 1A — Risk Factors (filtered excerpt):",
     excerpt || "[no excerpt available]",
-    "",
-    "Write the answer: everyday life first, then analogy, then filing facts; then Why investors care."
+    buildHumanFirstUserPromptFooter()
   ].join("\n");
 }
 

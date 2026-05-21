@@ -4,6 +4,12 @@
  */
 
 import { isCustomerProblemCard } from "@/lib/quests/customerProblemCard";
+import {
+  analyzeHumanFirstStructure,
+  describeHumanFirstFailure,
+  HUMAN_FIRST_SIX_STEPS,
+  type HumanFirstStructureResult
+} from "@/lib/quests/humanFirstExplanation";
 import { splitIntoSentences } from "@/lib/quests/scannableAnswer";
 
 export type QuestJargonGateContext = {
@@ -29,6 +35,8 @@ export type QuestJargonGateResult = {
   technicalOpening: boolean;
   /** Last main-story sentence still sounds like a tech article. */
   finalSentenceTooTechnical: boolean;
+  /** Human-first 6-step architecture compliance. */
+  humanFirst: HumanFirstStructureResult;
   rewriteRequired: boolean;
 };
 
@@ -76,7 +84,12 @@ export const HARD_JARGON_PATTERNS: ReadonlyArray<{
   { label: "their solutions", re: /\btheir solutions\b/i },
   { label: "cutting-edge AI", re: /\bcutting[- ]edge ai\b/i },
   { label: "transformative", re: /\btransformative\b/i },
-  { label: "next-generation", re: /\bnext[- ]generation\b/i }
+  { label: "next-generation", re: /\bnext[- ]generation\b/i },
+  { label: "synergies", re: /\bsynergies\b/i },
+  { label: "best-in-class", re: /\bbest[- ]in[- ]class\b/i },
+  { label: "industry-leading", re: /\bindustry[- ]leading\b/i },
+  { label: "mission-critical", re: /\bmission[- ]critical\b/i },
+  { label: "world-class", re: /\bworld[- ]class\b/i }
 ];
 
 /** Softer signals — two or more fail the gate. */
@@ -94,7 +107,11 @@ export const SOFT_JARGON_PATTERNS: ReadonlyArray<{
   { label: "innovation (buzzword)", re: /\binnovation\b/i },
   { label: "strategic", re: /\bstrategic\b/i },
   { label: "landscape", re: /\blandscape\b/i },
-  { label: "enables businesses", re: /\benables? businesses\b/i }
+  { label: "enables businesses", re: /\benables? businesses\b/i },
+  { label: "robust", re: /\brobust\b/i },
+  { label: "leveraging", re: /\bleveraging\b/i },
+  { label: "stakeholders", re: /\bstakeholders\b/i },
+  { label: "value proposition", re: /\bvalue proposition\b/i }
 ];
 
 const TECHNICAL_OPENING_RE = [
@@ -200,19 +217,26 @@ export function analyzeQuestJargonGate(
   const corporateProblemOpening =
     customerProblem && hasCorporateProblemOpening(mainStory);
 
+  const humanFirst = analyzeHumanFirstStructure(
+    plainEnglishAnswer,
+    investorInsight
+  );
+
   const flags: string[] = [];
   if (hardHits.length > 0) flags.push("hard_jargon");
   if (softHits.length >= 2) flags.push("soft_jargon_stack");
   if (technicalOpening) flags.push("technical_opening");
   if (finalSentenceTooTechnical) flags.push("final_sentence_too_technical");
   if (corporateProblemOpening) flags.push("corporate_problem_opening");
+  if (!humanFirst.pass) flags.push(...humanFirst.flags);
 
   const rewriteRequired =
     hardHits.length > 0 ||
     softHits.length >= 2 ||
     technicalOpening ||
     finalSentenceTooTechnical ||
-    corporateProblemOpening;
+    corporateProblemOpening ||
+    !humanFirst.pass;
 
   return {
     pass: !rewriteRequired,
@@ -220,6 +244,7 @@ export function analyzeQuestJargonGate(
     flags,
     technicalOpening,
     finalSentenceTooTechnical,
+    humanFirst,
     rewriteRequired
   };
 }
@@ -245,6 +270,9 @@ export function describeJargonGateFailure(result: QuestJargonGateResult): string
       "opens like a corporate brochure — start with everyday pain WITHOUT the company, not solutions/industries/innovation"
     );
   }
+  if (!result.humanFirst.pass) {
+    parts.push(describeHumanFirstFailure(result.humanFirst));
+  }
   const labels = result.hits.map((h) => h.label);
   if (labels.length) {
     parts.push(`jargon: ${labels.join(", ")}`);
@@ -252,30 +280,21 @@ export function describeJargonGateFailure(result: QuestJargonGateResult): string
   return parts.join("; ") || "failed teenager picture test";
 }
 
-export const JARGON_REWRITE_SYSTEM_PROMPT = `You are an editor for Investor Quest — a gamified app that explains companies in normal language.
+export const JARGON_REWRITE_SYSTEM_PROMPT = `You are an editor for Investor Quest — rewrite copy so it sounds like a smart friend, not an AI filing summary.
 
-Your ONLY job: rewrite an answer so a normal teenager instantly pictures:
-- where this company shows up in everyday life
-- what it helps power (apps, games, phones, shopping, driving — things people recognize)
-- why people use those things
+${HUMAN_FIRST_SIX_STEPS}
 
-HARD BANS (remove or replace — never keep these):
-GPU, graphics processing unit, SDK, rendering, infrastructure, analytics, accelerated computing, data center, semiconductor, computing platform, cloud platform, ecosystem (as buzzword), complex tasks, workload, hyperscaler, processing units, "networks of computers", specialized technical categories.
+HARD BANS (remove or replace):
+GPU, SDK, infrastructure, analytics, semiconductor, computing platform, cloud platform, solutions (corporate), industries (vague), innovation (filler), synergies, landscape, leverages, "technology is crucial", "solutions are essential".
 
-NEVER open with what the company builds technically.
-NEVER explain product categories — explain what the technology helps people DO.
+NEVER open with what the company builds technically or a corporate brochure tone.
+Explain what the technology helps people DO in everyday life.
 
-GOOD final sentence style:
-"They make the powerful chips helping AI tools, games, and smart technology run faster and smoother."
-
-BAD final sentence style:
-"They mainly sell powerful graphics processing units for computing platforms."
-
-Keep the same facts from the original. Do not invent products or numbers.
-Keep max 4 short sentences in the main story, then:
+Keep the same facts. Do not invent products or numbers.
+Max 4 short sentences in the main story, then:
 
 Why investors care:
-(one short sentence)
+(one short sentence — growth, risk, trust, or strength)
 
 No markdown, bullets, or section headings.`;
 
@@ -302,13 +321,15 @@ export function buildJargonRewriteUserPrompt(params: {
   const problemCardHint = customerProblem
     ? [
         "",
-        "This is the CUSTOMER PROBLEM card. Rewrite as:",
-        "1) everyday pain WITHOUT the company, 2) consequence, 3) one analogy, 4) how life is better WITH them.",
-        "Never use: industries, solutions, innovation, technology is crucial, corporate AI buzzwords.",
-        'Good shape: "without this, games lag, AI feels slow, apps struggle to respond quickly."',
+        "CUSTOMER PROBLEM card: pain WITHOUT them → consequence → analogy → benefit WITH them.",
+        'Good: "without this, games lag, AI feels slow, apps struggle to respond quickly."',
         ""
       ].join("\n")
-    : "";
+    : [
+        "",
+        "Use the 6-step architecture: real life → pain → consequence → analogy → what they do.",
+        ""
+      ].join("\n");
 
   return [
     `Company: ${params.companyName}`,

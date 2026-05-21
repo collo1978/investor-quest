@@ -1,7 +1,12 @@
 import {
+  analyzeHumanFirstStructure,
+  type HumanFirstStructureResult
+} from "@/lib/quests/humanFirstExplanation";
+import {
   analyzeQuestJargonGate,
   findJargonHits,
-  type JargonHit
+  type JargonHit,
+  type QuestJargonGateContext
 } from "@/lib/quests/questJargonGate";
 import { extractVisualNarration } from "@/lib/quests/sanitizeQuestAnswer";
 
@@ -25,14 +30,18 @@ export type PromptQualityAnalysis = {
   };
   teachingFlow: {
     score: number;
-    hasBottomLine: boolean;
-    hasWhatWeKnow: boolean;
-    hasWhyItMatters: boolean;
+    hasWhyInvestorsCare: boolean;
+    hasAnalogy: boolean;
+    hasRealLifeOpening: boolean;
+    humanFirstPass: boolean;
+    humanFirstFlags: string[];
+    legacyAnalystHeadings: boolean;
     bulletCount: number;
     wordCount: number;
     withinTargetLength: boolean;
     tips: string[];
   };
+  humanFirst: HumanFirstStructureResult;
   compositeScore: number;
   flags: string[];
   /** Hard jargon gate — fails teenager picture test. */
@@ -42,6 +51,8 @@ export type PromptQualityAnalysis = {
     flags: string[];
     rewriteRequired: boolean;
   };
+  /** True when answer is ready for production save. */
+  productionReady: boolean;
 };
 
 const FINANCIAL_JARGON_PATTERNS: Array<{ label: string; re: RegExp }> = [
@@ -272,44 +283,53 @@ function analyzeTeachingFlow(text: string): PromptQualityAnalysis["teachingFlow"
   const mainMatch = body.match(/^([\s\S]*?)(?:\n\s*Why investors care:|\n\s*Why it matters:)/i);
   const mainStory = (mainMatch?.[1] ?? body).trim();
   const wordCount = words(mainStory).length;
-  const hasBottomLine = /bottom line:/i.test(body);
-  const hasWhatWeKnow = /what we know:/i.test(body);
-  const hasWhyItMatters =
+  const legacyAnalystHeadings =
+    /bottom line:/i.test(body) || /what we know:/i.test(body);
+  const hasWhyInvestorsCare =
     /why investors care:/i.test(body) || /why it matters:/i.test(body);
   const bulletCount = (body.match(/•\s/g) ?? []).length;
-  const hasAnalogy = /\bthink of (?:it|them|this) like\b|\bit'?s like\b|\bimagine\b/i.test(
-    mainStory
-  );
+  const humanFirst = analyzeHumanFirstStructure(text);
   const withinTargetLength = wordCount >= 30 && wordCount <= 90;
   const sentenceCount = sentences(mainStory).length;
 
   const tips: string[] = [];
-  if (hasBottomLine || hasWhatWeKnow) {
-    tips.push("Remove analyst headings — use short sentences only.");
+  if (legacyAnalystHeadings) {
+    tips.push("Remove analyst headings — use the human-first 6-step flow in plain sentences.");
   }
-  if (!hasAnalogy) tips.push('Add one "Think of it like…" analogy line.');
-  if (!hasWhyItMatters) tips.push('End with "Why investors care:" (one sentence).');
+  if (!humanFirst.hasAnalogy) tips.push('Add one "Think of it like…" analogy line.');
+  if (!humanFirst.hasRealLifeOpening) {
+    tips.push("Open with real life — where the reader already sees or feels this.");
+  }
+  if (!hasWhyInvestorsCare) tips.push('End with "Why investors care:" (one sentence).');
   if (wordCount > 90) tips.push("Too long — cap the main story at ~75 words (max 4 sentences).");
-  if (wordCount < 28) tips.push("Too thin — add one everyday moment or one filing fact.");
+  if (wordCount < 28) tips.push("Too thin — add everyday pain or one filing fact.");
   if (sentenceCount > 4) tips.push("Too many sentences before Why investors care — max 4.");
   if (bulletCount > 0) tips.push("Remove bullet points — flowing sentences only.");
+  if (humanFirst.hasCorporateOpening) {
+    tips.push("Sounds like a brochure — start with everyday life, not company description.");
+  }
 
   let score = 0;
-  if (hasAnalogy) score += 30;
-  if (hasWhyItMatters) score += 28;
-  if (withinTargetLength) score += 24;
-  if (sentenceCount >= 2 && sentenceCount <= 4) score += 18;
-  if (!hasBottomLine && !hasWhatWeKnow) score += 10;
-  if (bulletCount === 0) score += 6;
-  if (hasBottomLine || hasWhatWeKnow) score -= 20;
+  if (humanFirst.hasAnalogy) score += 28;
+  if (humanFirst.hasRealLifeOpening) score += 28;
+  if (hasWhyInvestorsCare) score += 22;
+  if (withinTargetLength) score += 18;
+  if (sentenceCount >= 2 && sentenceCount <= 4) score += 12;
+  if (!legacyAnalystHeadings) score += 8;
+  if (bulletCount === 0) score += 4;
+  if (legacyAnalystHeadings) score -= 25;
   if (wordCount > 100) score -= 25;
+  if (!humanFirst.pass) score -= 20;
   score = Math.max(0, Math.min(100, score));
 
   return {
     score,
-    hasBottomLine,
-    hasWhatWeKnow,
-    hasWhyItMatters,
+    hasWhyInvestorsCare,
+    hasAnalogy: humanFirst.hasAnalogy,
+    hasRealLifeOpening: humanFirst.hasRealLifeOpening,
+    humanFirstPass: humanFirst.pass,
+    humanFirstFlags: humanFirst.flags,
+    legacyAnalystHeadings,
     bulletCount,
     wordCount,
     withinTargetLength,
@@ -319,7 +339,10 @@ function analyzeTeachingFlow(text: string): PromptQualityAnalysis["teachingFlow"
 
 export function analyzePromptAnswerQuality(
   plainEnglishAnswer: string,
-  options?: { priorCardSummaries?: string[] }
+  options?: {
+    priorCardSummaries?: string[];
+    jargonContext?: QuestJargonGateContext;
+  }
 ): PromptQualityAnalysis {
   const text = plainEnglishAnswer.trim();
   const prior = options?.priorCardSummaries ?? [];
@@ -327,20 +350,28 @@ export function analyzePromptAnswerQuality(
   const readability = analyzeReadability(text);
   const repetition = analyzeRepetition(text, prior);
   const teachingFlow = analyzeTeachingFlow(text);
-  const jargonGate = analyzeQuestJargonGate(text);
-
-  let compositeScore = Math.round(
-    readability.score * 0.38 +
-      repetition.score * 0.32 +
-      teachingFlow.score * 0.3
+  const humanFirst = analyzeHumanFirstStructure(text);
+  const jargonGate = analyzeQuestJargonGate(
+    text,
+    null,
+    options?.jargonContext
   );
 
-  if (!jargonGate.pass) {
-    compositeScore = Math.min(compositeScore, 42);
+  let compositeScore = Math.round(
+    readability.score * 0.32 +
+      repetition.score * 0.28 +
+      teachingFlow.score * 0.4
+  );
+
+  if (!jargonGate.pass) compositeScore = Math.min(compositeScore, 42);
+  if (!humanFirst.pass) compositeScore = Math.min(compositeScore, 48);
+  if (teachingFlow.humanFirstPass && jargonGate.pass) {
+    compositeScore = Math.min(100, compositeScore + 8);
   }
 
   const flags: string[] = [];
   if (!jargonGate.pass) flags.push("technical_jargon");
+  if (!humanFirst.pass) flags.push("human_first_structure");
   if (jargonGate.technicalOpening) flags.push("technical_opening");
   if (jargonGate.finalSentenceTooTechnical) {
     flags.push("final_sentence_too_technical");
@@ -348,9 +379,10 @@ export function analyzePromptAnswerQuality(
   if (readability.score < 55) flags.push("low_readability");
   if (repetition.openingRepeated) flags.push("repeated_opening");
   if (repetition.priorCardOverlapRatio > 0.25) flags.push("prior_overlap");
-  if (!teachingFlow.hasWhyItMatters) flags.push("missing_why_investors_care");
+  if (!teachingFlow.hasWhyInvestorsCare) flags.push("missing_why_investors_care");
   if (!teachingFlow.withinTargetLength) flags.push("length_off_target");
   if (teachingFlow.wordCount > 95) flags.push("too_long");
+  if (humanFirst.pass && jargonGate.pass) flags.push("human_first_ready");
 
   for (const re of OPENING_STARTERS) {
     if (re.test(text.split("\n")[0] ?? "")) {
@@ -359,12 +391,16 @@ export function analyzePromptAnswerQuality(
     }
   }
 
+  const productionReady = jargonGate.pass && humanFirst.pass;
+
   return {
     readability,
     repetition,
     teachingFlow,
+    humanFirst,
     compositeScore,
     flags,
+    productionReady,
     jargonGate: {
       pass: jargonGate.pass,
       hits: jargonGate.hits,
@@ -381,6 +417,7 @@ export function shouldRegenerateForJargon(plainEnglishAnswer: string): boolean {
 
 export const PROMPT_STUDIO_TAG_SUGGESTIONS = [
   "beginner-friendly",
+  "human-first",
   "instant-clarity",
   "shorter",
   "warmer-tone",
@@ -391,3 +428,34 @@ export const PROMPT_STUDIO_TAG_SUGGESTIONS = [
   "experimental",
   "production-candidate"
 ] as const;
+
+/** Score quiz `explain` copy (1–2 sentences). */
+export function analyzeQuizExplanationQuality(explain: string): {
+  score: number;
+  tips: string[];
+  jargonHits: string[];
+} {
+  const text = explain.trim();
+  if (!text) return { score: 0, tips: ["Missing explanation."], jargonHits: [] };
+
+  const jargonHits = findJargonHits(text).map((h) => h.label);
+  const wordCount = words(text).length;
+  const tips: string[] = [];
+  let score = 85;
+
+  if (wordCount > 45) {
+    tips.push("Quiz explanation too long — max ~2 short sentences.");
+    score -= 20;
+  }
+  if (jargonHits.length > 0) {
+    tips.push(`Simplify jargon: ${jargonHits.join(", ")}.`);
+    score -= jargonHits.length * 12;
+  }
+  if (!/\b(you|your|people|everyday|feels|means)\b/i.test(text)) {
+    tips.push("Anchor to what the player should picture in real life.");
+    score -= 15;
+  }
+  score = Math.max(0, Math.min(100, score));
+
+  return { score, tips, jargonHits };
+}

@@ -24,9 +24,11 @@ export function PromptQualityScorecard({
         : "Distinct from prior cards"
     },
     {
-      label: "Teaching flow",
+      label: "Human-first flow",
       score: quality.teachingFlow.score,
-      hint: `${quality.teachingFlow.wordCount} words · ${quality.teachingFlow.bulletCount} bullets`
+      hint: quality.teachingFlow.humanFirstPass
+        ? "Real life → pain → analogy → why investors care"
+        : quality.teachingFlow.humanFirstFlags.join(", ") || "Structure needs work"
     }
   ];
 
@@ -46,6 +48,11 @@ export function PromptQualityScorecard({
           <p className="text-2xl font-semibold tabular-nums">
             {quality.compositeScore}
           </p>
+          {quality.productionReady ? (
+            <p className="text-[10px] text-emerald-400/90">Ready to save</p>
+          ) : (
+            <p className="text-[10px] text-amber-300/80">Rewrite required</p>
+          )}
         </div>
         {metrics.map((m) => (
           <div

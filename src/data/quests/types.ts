@@ -59,7 +59,11 @@ export type VisualStyle =
 export type QuizQuestionBase = {
   id: string;
   prompt: string;
-  /** Optional explanation shown in the post-submit review. */
+  /**
+   * Optional explanation shown in the post-submit review.
+   * Human-first rules: 1–2 sentences, real-life anchor, no corporate jargon
+   * (@see lib/quests/humanFirstExplanation QUIZ_EXPLANATION_VOICE).
+   */
   explain?: string;
 };
 

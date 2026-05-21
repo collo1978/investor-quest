@@ -265,9 +265,9 @@ function analyzeNarrativeFlow(
 ): QuestTeachingQualityAnalysis["narrativeFlow"] {
   const complete = cards.filter(
     (c) =>
-      c.quality.teachingFlow.hasBottomLine &&
-      c.quality.teachingFlow.hasWhatWeKnow &&
-      c.quality.teachingFlow.hasWhyItMatters
+      c.quality.teachingFlow.humanFirstPass &&
+      c.quality.teachingFlow.hasWhyInvestorsCare &&
+      !c.quality.teachingFlow.legacyAnalystHeadings
   );
   const structureComplianceRate =
     cards.length > 0
@@ -281,11 +281,11 @@ function analyzeNarrativeFlow(
   const tips: string[] = [];
   if (structureComplianceRate < 100) {
     tips.push(
-      "Keep the same teaching scaffold on every card (Bottom line → What we know → Why it matters)."
+      "Every card should follow human-first flow: real life → pain → consequence → analogy → what they do → Why investors care."
     );
   }
   if (missingStructureCards.length > 0) {
-    tips.push(`Fix structure on: ${missingStructureCards.join(", ")}.`);
+    tips.push(`Fix human-first structure on: ${missingStructureCards.join(", ")}.`);
   }
 
   return {
@@ -447,8 +447,8 @@ export function analyzeQuestTeachingQuality(
         ? "Low readability"
         : c.quality.repetition.openingRepeated
           ? "Repeats prior card"
-          : !c.quality.teachingFlow.hasBottomLine
-            ? "Weak structure"
+          : !c.quality.teachingFlow.humanFirstPass
+            ? "Weak human-first structure"
             : "Low composite score"
   }));
   const strongestCards = [...cards]
@@ -515,7 +515,8 @@ export function evaluateQuestCardsInOrder(
   for (let i = 0; i < ordered.length; i++) {
     const row = ordered[i];
     const quality = analyzePromptAnswerQuality(row.plainEnglishAnswer, {
-      priorCardSummaries: priorSummaries
+      priorCardSummaries: priorSummaries,
+      jargonContext: { questSlug, cardId: row.cardId }
     });
     cards.push({
       cardId: row.cardId,

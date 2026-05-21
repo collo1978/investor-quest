@@ -1,10 +1,10 @@
 import { buildAiPromptFromSectionIds } from "@/lib/sec/aiPromptBuilder";
 import { sanitizeFinancialAnswerText } from "@/lib/financialQuest/sanitizeFinancialAnswer";
 import {
-  QUEST_ANSWER_FORMAT,
-  QUEST_BEGINNER_VOICE,
-  splitQuestAnswer
-} from "@/lib/quests/questAnswerFormat";
+  buildHumanFirstUserPromptFooter,
+  buildPillarSystemPrompt
+} from "@/lib/quests/humanFirstExplanation";
+import { splitQuestAnswer } from "@/lib/quests/questAnswerFormat";
 
 export type PriorFinancialCardSummary = {
   cardId: string;
@@ -12,39 +12,29 @@ export type PriorFinancialCardSummary = {
   summary: string;
 };
 
-export const FINANCIAL_QUEST_SYSTEM_PROMPT = `You are a friendly guide in a gamified investing adventure — not a Wall Street analyst writing a memo.
+export const FINANCIAL_QUEST_SYSTEM_PROMPT = buildPillarSystemPrompt({
+  roleIntro: `You are a friendly guide in a gamified investing adventure — not a Wall Street analyst writing a memo.
 
-Your reader has never read a 10-K. They want to understand what changed and why it matters — fast.
-
-${QUEST_BEGINNER_VOICE}
-
-FINANCIAL CARDS — SAME 4-SENTENCE CAP
-- Sentence 1: what the number feels like in everyday life (paycheck, bill, price tag) — not accounting jargon.
-- Sentence 2: one analogy for scale.
-- Sentence 3: one filing number or trend for THIS card only, woven in plain words.
-- Skip sentence 4 unless required.
-
-FACTS
+Your reader has never read a 10-K. They want to understand what changed and why it matters — fast.`,
+  factsBlock: `FACTS
 - Use ONLY numbers and facts from the SEC excerpts provided.
 - Large company dollar amounts are almost always in billions, not millions — double-check units.
 - If a trend went down, say it went down honestly. Never call a decline "positive growth."
 - If the excerpt does not include a figure, say the annual report does not break that out clearly.
-- Weave key numbers into the flowing paragraphs naturally — do not use bullet lists.
-- Use the analogy to make a big number feel real (e.g. "that's like every household in the country…"), not to repeat the number.
+- Weave key numbers into flowing sentences — no bullet lists.
+- Use analogy to make a big number feel real, not to repeat the number.
 
-${QUEST_ANSWER_FORMAT}
-
-CARD FOCUS
-- Answer ONLY the card question. Do not drift into the next card's topic.
-- Cash card about operating cash flow: do NOT discuss buybacks or dividends there.
-- Cash card about uses of cash: focus on where money went, not re-explaining operating cash flow totals.
-
-NUMBERS (when you mention figures — weave into sentences, never spell numbers out in words)
+NUMBERS (when you mention figures)
 - Good: $111 billion, 12%, 3 years.
 - Bad: "one hundred eleven billion", "twelve percent".
-- Money: $ + number + billion or million (e.g. $62.2 billion).
-- Percents: digits + % (12%, not "12 percent").
-- Never use $B, mm, or accounting shorthand.`;
+- Never use $B, mm, or accounting shorthand.`,
+  cardFocusBlock: `- Answer ONLY the card question.
+- Sentence 1: what the number feels like in everyday life (paycheck, bill, price tag) — not accounting jargon.
+- Sentence 2: one analogy for scale.
+- Sentence 3: one filing number or trend for THIS card only.
+- Cash card (operating): do NOT discuss buybacks or dividends there.
+- Cash card (uses): focus on where money went, not re-explaining operating cash totals.`
+});
 
 export async function buildFinancialCardUserPrompt(params: {
   companyName: string;
@@ -91,8 +81,7 @@ export async function buildFinancialCardUserPrompt(params: {
     priorBlock,
     "SEC filing excerpts (10-K):",
     excerptBlocks,
-    "",
-    "Write the answer: everyday life first, then analogy, then filing facts; then Why investors care."
+    buildHumanFirstUserPromptFooter()
   ].join("\n");
 }
 

@@ -1,35 +1,27 @@
 import { buildAiPromptFromSectionIds } from "@/lib/sec/aiPromptBuilder";
 import type { PriorQuestCardSummary } from "@/lib/ai/generatePillarQuestAnswers";
 import {
-  QUEST_ANSWER_FORMAT,
-  QUEST_BEGINNER_VOICE,
-  splitQuestAnswer
-} from "@/lib/quests/questAnswerFormat";
+  buildHumanFirstUserPromptFooter,
+  buildPillarSystemPrompt
+} from "@/lib/quests/humanFirstExplanation";
+import { splitQuestAnswer } from "@/lib/quests/questAnswerFormat";
 
-export const MANAGEMENT_QUEST_SYSTEM_PROMPT = `You are a friendly guide helping a beginner judge whether they trust a company's management with their money.
+export const MANAGEMENT_QUEST_SYSTEM_PROMPT = buildPillarSystemPrompt({
+  roleIntro: `You are a friendly guide helping a beginner judge whether they trust a company's management with their money.
 
-Your reader has never read a proxy (DEF 14A) or a 10-K. They care about alignment: do leaders win when shareholders win?
-
-${QUEST_BEGINNER_VOICE}
-
-MANAGEMENT CARDS — SAME 4-SENTENCE CAP
+Your reader has never read a proxy (DEF 14A) or a 10-K. They care about alignment: do leaders win when shareholders win?`,
+  factsBlock: `FACTS
+- Use ONLY facts from the SEC excerpts (proxy or 10-K).
+- For pay, do not invent dollar amounts not in the excerpt.
+- If the filing is silent, say so plainly.`,
+  cardFocusBlock: `- Answer ONLY this card. Do not repeat earlier cards.
 - Sentence 1: why a normal investor should care (trust, pay, control) in one human beat.
 - Sentence 2: one analogy for alignment or oversight.
 - Sentence 3: one filing fact for THIS card only.
-- Skip sentence 4 unless required.
-
-FACTS
-- Use ONLY facts from the SEC excerpts (proxy or 10-K).
-- For pay, do not invent dollar amounts not in the excerpt.
-- If the filing is silent, say so plainly.
-
-${QUEST_ANSWER_FORMAT}
-
-CARD FOCUS
-- Answer ONLY this card. Do not repeat earlier cards on the same quest.
 - Compensation cards: incentives and alignment, not biography.
 - Governance cards: independence and oversight, not product strategy.
-- Capital allocation cards: cash deployment and returns to owners.`;
+- Capital allocation cards: cash deployment and returns to owners.`
+});
 
 export async function buildManagementCardUserPrompt(params: {
   companyName: string;
@@ -76,8 +68,7 @@ export async function buildManagementCardUserPrompt(params: {
     priorBlock,
     "SEC filing excerpts:",
     excerptBlocks,
-    "",
-    "Write the answer: everyday life first, then analogy, then filing facts; then Why investors care."
+    buildHumanFirstUserPromptFooter()
   ].join("\n");
 }
 
