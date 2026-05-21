@@ -177,7 +177,7 @@ const ANALOGY_RE =
   /\bthink of (?:it|them|this|the) like\b|\bit'?s like\b|\bimagine\b|\blike trying to\b|\blike having a\b|\blike the difference\b|\blike a key\b/i;
 
 const SCALE_SIGNAL_RE =
-  /\b(biggest|largest|leading|dominant|major player|market position|market share|well[- ]known|household name|scale|size of|one of the (?:big|top|main)|billions? of (?:users|customers|dollars)|global reach|key (?:name|player|supplier)|behind the .+ boom)\b/i;
+  /\b(biggest|largest|leading|dominant|major player|market position|market share|well[- ]known|household name|scale|size of|one of the (?:big|top|main)|billions? of (?:users|customers|dollars)|global reach|key (?:name|player|supplier)|behind the .+ boom|big name|huge name|top name|powers much of|powering much of|important.{0,25}(?:ai|market|industr)|(?:ai|market).{0,25}important|central to|core of the|heart of the|main supplier|engine supplier|world['']?s)\b/i;
 
 /** Valid market-scale openers — "[Company] is one of the biggest…" is allowed. */
 const SCALE_OPENING_RE =

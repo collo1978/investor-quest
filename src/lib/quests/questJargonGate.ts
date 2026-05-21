@@ -333,9 +333,22 @@ export function buildJargonRewriteUserPrompt(params: {
     cardQuestion: params.cardQuestion
   });
 
+  const scaleRewriteHint =
+    params.gate.humanFirst.intent === "market_scale"
+      ? [
+          "",
+          "MARKET SIZE card (required):",
+          "- Say how BIG or IMPORTANT the company is (biggest, leading, major player, market position, scale).",
+          "- Mention AI market importance if relevant to this company.",
+          "- DELETE all lag, stutter, slow-game, and slow-AI language.",
+          ""
+        ].join("\n")
+      : "";
+
   const problemCardHint = [
     "",
     "Match the QUESTION TYPE below — do not default to customer-pain / lag language unless that is the question.",
+    scaleRewriteHint,
     intentFooter,
     ""
   ].join("\n");
