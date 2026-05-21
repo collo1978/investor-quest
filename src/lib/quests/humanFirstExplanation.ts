@@ -177,7 +177,11 @@ const ANALOGY_RE =
   /\bthink of (?:it|them|this|the) like\b|\bit'?s like\b|\bimagine\b|\blike trying to\b|\blike having a\b|\blike the difference\b|\blike a key\b/i;
 
 const SCALE_SIGNAL_RE =
-  /\b(biggest|largest|leading|dominant|major player|market position|market share|well[- ]known|household name|scale|size of|one of the (?:big|top|main)|billions? of (?:users|customers|dollars)|global reach)\b/i;
+  /\b(biggest|largest|leading|dominant|major player|market position|market share|well[- ]known|household name|scale|size of|one of the (?:big|top|main)|billions? of (?:users|customers|dollars)|global reach|key (?:name|player|supplier)|behind the .+ boom)\b/i;
+
+/** Valid market-scale openers — "[Company] is one of the biggest…" is allowed. */
+const SCALE_OPENING_RE =
+  /\b(is one of the|are one of the|is among the|is a (?:major|dominant|top|key)|is the (?:biggest|largest|leading)|has become one of)\b/i;
 
 /** Customer-pain template wrongly applied to scale / revenue / financials cards. */
 const CUSTOMER_PAIN_DRIFT_RE =
@@ -209,7 +213,8 @@ export function analyzeHumanFirstStructure(
 
   const hasRealLifeOpening =
     REAL_LIFE_OPENING_RE.test(first) ||
-    (intent === "market_scale" && SCALE_SIGNAL_RE.test(first)) ||
+    (intent === "market_scale" &&
+      (SCALE_SIGNAL_RE.test(first) || SCALE_OPENING_RE.test(first))) ||
     (intent === "financials" &&
       /\b(paycheck|bill|price tag|rent|income|budget|small business|wallet)\b/i.test(
         first
@@ -220,7 +225,11 @@ export function analyzeHumanFirstStructure(
     CONSEQUENCE_RE.test(mainStory) || (hasPainOrProblem && /\bwithout\b/i.test(mainStory));
   const hasAnalogy = ANALOGY_RE.test(mainStory);
   const hasScaleSignal = SCALE_SIGNAL_RE.test(mainStory);
-  const hasCorporateOpening = CORPORATE_OPENING_RE.some((re) => re.test(first));
+  const scaleStyleOpening =
+    intent === "market_scale" &&
+    (SCALE_OPENING_RE.test(first) || SCALE_SIGNAL_RE.test(first));
+  const hasCorporateOpening =
+    !scaleStyleOpening && CORPORATE_OPENING_RE.some((re) => re.test(first));
   const tooLong = wordCount > 95 || sentenceCount > 4;
   const missingWhyInvestorsCare =
     !/why investors care:/i.test(plainEnglishAnswer) &&

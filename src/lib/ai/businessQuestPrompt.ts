@@ -63,6 +63,16 @@ export async function buildBusinessCardUserPrompt(params: {
         ].join("\n")
       : "";
 
+  const scaleOnlyGuard =
+    params.questSlug === "snapshot" && params.cardId === "card-3"
+      ? [
+          "CRITICAL: MARKET SIZE / POSITION card only.",
+          "Do NOT mention lag, stutter, slow games, slow AI, or customer pain.",
+          "Lead with how big or important the company is in its market (especially AI if relevant).",
+          ""
+        ].join("\n")
+      : "";
+
   return [
     `Company: ${params.companyName} (${params.ticker})`,
     `Quest: ${params.questTitle}`,
@@ -70,6 +80,7 @@ export async function buildBusinessCardUserPrompt(params: {
     `This card: ${params.cardId}`,
     `Card question: ${params.cardQuestion}`,
     `Focus ONLY on: ${params.cardPromptFocus}`,
+    scaleOnlyGuard,
     priorBlock,
     "SEC filing excerpts (10-K — Business / related sections):",
     excerptBlocks,
