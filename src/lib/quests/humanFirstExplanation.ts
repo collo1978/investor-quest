@@ -181,7 +181,7 @@ const SCALE_SIGNAL_RE =
 
 /** Valid market-scale openers — "[Company] is one of the biggest…" is allowed. */
 const SCALE_OPENING_RE =
-  /\b(is one of the|are one of the|is among the|is a (?:major|dominant|top|key)|is the (?:biggest|largest|leading)|has become one of)\b/i;
+  /\b(is one of the|are one of the|is among the|is a (?:major|dominant|top|key|leading)|is the (?:biggest|largest|leading|world'?s)|has become one of|is a (?:big|huge|giant)|powers much of|behind much of)\b/i;
 
 /** Customer-pain template wrongly applied to scale / revenue / financials cards. */
 const CUSTOMER_PAIN_DRIFT_RE =
@@ -208,13 +208,16 @@ export function analyzeHumanFirstStructure(
 
   const mainStory = extractMainStoryForAnalysis(plainEnglishAnswer);
   const first = splitIntoSentences(mainStory)[0] ?? mainStory.slice(0, 180);
+  const openingTwo = splitIntoSentences(mainStory).slice(0, 2).join(" ");
   const wordCount = mainStory.split(/\s+/).filter(Boolean).length;
   const sentenceCount = splitIntoSentences(mainStory).length;
 
   const hasRealLifeOpening =
     REAL_LIFE_OPENING_RE.test(first) ||
     (intent === "market_scale" &&
-      (SCALE_SIGNAL_RE.test(first) || SCALE_OPENING_RE.test(first))) ||
+      (SCALE_SIGNAL_RE.test(first) ||
+        SCALE_OPENING_RE.test(first) ||
+        SCALE_SIGNAL_RE.test(openingTwo))) ||
     (intent === "financials" &&
       /\b(paycheck|bill|price tag|rent|income|budget|small business|wallet)\b/i.test(
         first
@@ -227,7 +230,9 @@ export function analyzeHumanFirstStructure(
   const hasScaleSignal = SCALE_SIGNAL_RE.test(mainStory);
   const scaleStyleOpening =
     intent === "market_scale" &&
-    (SCALE_OPENING_RE.test(first) || SCALE_SIGNAL_RE.test(first));
+    (SCALE_OPENING_RE.test(first) ||
+      SCALE_SIGNAL_RE.test(first) ||
+      SCALE_SIGNAL_RE.test(openingTwo));
   const hasCorporateOpening =
     !scaleStyleOpening && CORPORATE_OPENING_RE.some((re) => re.test(first));
   const tooLong = wordCount > 95 || sentenceCount > 4;

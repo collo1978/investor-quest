@@ -28,7 +28,7 @@ export async function runDemoRefreshJob(
   const start = Date.now();
   const genOpts = resolveQuestGenerationOptions({
     forceRegenerate: true,
-    maxJargonRewrites: 2
+    maxJargonRewrites: 3
   });
 
   let generated = 0;

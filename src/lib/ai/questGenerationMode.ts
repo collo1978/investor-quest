@@ -33,7 +33,7 @@ export function resolveQuestGenerationOptions(
     forceRegenerate: overrides?.forceRegenerate ?? false,
     fastMode,
     maxJargonRewrites:
-      overrides?.maxJargonRewrites ?? (fastMode ? 0 : 2),
+      overrides?.maxJargonRewrites ?? (fastMode ? 0 : 3),
     acceptJargonOnFail:
       overrides?.acceptJargonOnFail ?? fastMode,
     finalizeTimeoutMs:
