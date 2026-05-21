@@ -68,7 +68,13 @@ export async function buildManagementCardUserPrompt(params: {
     priorBlock,
     "SEC filing excerpts:",
     excerptBlocks,
-    buildHumanFirstUserPromptFooter()
+    buildHumanFirstUserPromptFooter({
+      pillarId: "management",
+      questSlug: params.questSlug,
+      cardId: params.cardId,
+      cardQuestion: params.cardQuestion,
+      promptFocus: params.cardPromptFocus
+    })
   ].join("\n");
 }
 

@@ -1,20 +1,41 @@
 /**
  * Human-First Explanation Architecture — platform-wide voice for Investor Quest.
  * All AI quest answers, rewrites, Prompt Studio scoring, and quiz copy should align here.
+ *
+ * Answers adapt to question intent (see questionIntent.ts) — not one customer-pain template.
  */
 
+import {
+  buildIntentPromptFooter,
+  detectQuestionIntent,
+  INTENT_ADAPTIVE_PRINCIPLE,
+  type QuestionIntent,
+  type QuestionIntentContext
+} from "@/lib/quests/questionIntent";
 import { splitIntoSentences } from "@/lib/quests/scannableAnswer";
+
+export type { QuestionIntent, QuestionIntentContext } from "@/lib/quests/questionIntent";
+export {
+  detectQuestionIntent,
+  buildIntentPromptFooter,
+  QUESTION_INTENT_LABELS
+} from "@/lib/quests/questionIntent";
 
 export const HUMAN_FIRST_MISSION = `MISSION
 Investor Quest should feel like a smart friend showing how companies work in normal life — NOT "AI summaries of financial filings."`;
 
-export const HUMAN_FIRST_SIX_STEPS = `HUMAN-FIRST EXPLANATION ARCHITECTURE (required mental model)
-1. REAL LIFE — Where does the reader already see or feel this? (phone, games, shopping, bills, work, health, travel)
-2. PAIN / PROBLEM — What frustration, risk, or need exists?
-3. CONSEQUENCE — What goes wrong if it stays unsolved? (slow, broken, expensive, confusing, unsafe)
-4. MENTAL PICTURE — One "Think of it like…" analogy only if it helps (skip if the pain is already crystal clear)
-5. WHAT THE COMPANY DOES — Plain everyday language; translate any jargon into what people notice
-6. WHY INVESTORS CARE — One short line: growth, risk, trust, or business strength (after the label only)`;
+export const HUMAN_FIRST_SIX_STEPS = `HUMAN-FIRST EXPLANATION ARCHITECTURE (flexible mental model)
+Match the CARD QUESTION — use the pattern for that question type (see intent footer on each card).
+
+Common patterns (pick ONE that fits the question):
+- What they do: everyday experience → analogy → what they sell/do → investor meaning
+- Customer problem: pain → consequence → how they help → investor meaning
+- Market scale: scale comparison → market importance → analogy → investor meaning
+- How they make money: what people pay for → example → main revenue source → investor meaning
+- Risk/force: real-world risk → what could happen → filing fact → investor meaning
+- Financials: money comparison → what the number shows → consequence → investor meaning
+
+Always end with "Why investors care:" — one short line on growth, risk, trust, or strength.`;
 
 export const HUMAN_FIRST_HARD_RULES = `HARD RULES (auto-rejected before save)
 - No technical-first explanations (never open with what the company builds in engineering terms)
@@ -45,22 +66,20 @@ LENGTH (hard cap)
 - Main story: ~45–75 words total.
 
 REAL-WORLD FIRST
-- Sentence 1 MUST be everyday life — never open with what the company builds technically.
-- Good: "If you've used a popular AI chat app…", "When your paycheck hits the account…"
+- Sentence 1 MUST hook normal life — never open with what the company builds technically.
+- Good: "If you've used a popular AI chat app…", "When your paycheck hits the account…", "They're one of the biggest names in…"
 - Bad: "[Company] develops…", "They provide solutions…", "Their technology is crucial…"
 
 JARGON (zero tolerance — rewrite if found)
 - BANNED: GPU, SDK, infrastructure, analytics, accelerated computing, data center, semiconductor, computing platform, cloud platform, hyperscaler, workload, ecosystem (buzzword), solutions (corporate), industries (vague tour), innovation (filler).
 - Prefer: "chips that keep games smooth", "money left after bills", "rules that protect your data".
 
-CUSTOMER PROBLEM QUESTIONS
-- Lead: pain WITHOUT them → consequence → analogy → benefit WITH them.
-- Good: "without this, games lag, AI feels slow, apps struggle to respond quickly."
+${INTENT_ADAPTIVE_PRINCIPLE}
 
 BANNED IN STORY
 - Section headings, bullets, "Bottom line", "What we know", corporate filler.`;
 
-export const QUEST_ANSWER_FORMAT = `FORMAT (strict — maps to the 6-step architecture)
+export const QUEST_ANSWER_FORMAT = `FORMAT (strict)
 - NO markdown: no **, #, bullets (• - *), or backticks.
 - NO headings inside the main story.
 
@@ -69,26 +88,11 @@ Write at most 4 short sentences, then one blank line and exactly:
 Why investors care:
 (one short sentence — growth, risk, trust, or strength)
 
-Sentence map (flexible but keep this order in spirit):
-1. REAL LIFE + PAIN — familiar moment and what's annoying or risky
-2. CONSEQUENCE — what happens if it stays broken (or ANALOGY if consequence is already obvious)
-3. WHAT THE COMPANY DOES — plain role in everyday life for THIS card only
-4. OPTIONAL — one filing fact you cannot fold into sentence 3
-
-- Answer ONLY this card's question. Do not repeat earlier cards.
-
-STYLE REFERENCE (tone only — use THIS company's facts):
-"If you've used a popular AI chat app or played a sharp-looking game, you've already bumped into NVIDIA's world.
-
-Think of them like the shop that sells the engine inside many smart computers — not the app you tap on.
-
-They make the powerful chips helping AI tools, games, and smart technology run faster and smoother.
-
-Why investors care:
-If AI and gaming keep growing, demand for those engines can keep rising."`;
+- Follow the QUESTION TYPE sentence map in the user message (not a generic pain template).
+- Answer ONLY this card's question. Do not repeat earlier cards.`;
 
 export const HUMAN_FIRST_WRITE_INSTRUCTION =
-  "Write the answer using the 6-step architecture (real life → pain → consequence → [analogy] → what they do); max 4 short sentences; then Why investors care:";
+  "Write using the QUESTION TYPE pattern in the user message; max 4 short sentences; then Why investors care:";
 
 export const QUIZ_EXPLANATION_VOICE = `QUIZ EXPLANATION RULES (post-answer "Why" copy)
 - 1–2 short sentences max.
@@ -126,35 +130,35 @@ export function isCustomerProblemCard(params: {
   questSlug: string;
   cardId: string;
   cardQuestion?: string;
+  pillarId?: string;
 }): boolean {
-  if (params.questSlug === "snapshot" && params.cardId === "card-2") return true;
-  const q = params.cardQuestion?.toLowerCase() ?? "";
-  return q.includes("problem") && q.includes("customer");
+  return (
+    detectQuestionIntent({
+      pillarId: params.pillarId,
+      questSlug: params.questSlug,
+      cardId: params.cardId,
+      cardQuestion: params.cardQuestion
+    }) === "customer_problem"
+  );
 }
 
-export function buildHumanFirstUserPromptFooter(options?: {
-  customerProblem?: boolean;
-}): string {
-  if (options?.customerProblem) {
-    return [
-      "",
-      CUSTOMER_PROBLEM_CARD_PROMPT,
-      "",
-      CUSTOMER_PROBLEM_STYLE_REFERENCE,
-      "",
-      "Write: pain WITHOUT them → consequence → analogy → benefit WITH them (max 4 sentences); then Why investors care:"
-    ].join("\n");
-  }
+export function buildHumanFirstUserPromptFooter(
+  ctx?: QuestionIntentContext
+): string {
+  if (ctx) return buildIntentPromptFooter(ctx);
   return `\n${HUMAN_FIRST_WRITE_INSTRUCTION}`;
 }
 
 export type HumanFirstStructureResult = {
   pass: boolean;
   flags: string[];
+  intent: QuestionIntent;
   hasRealLifeOpening: boolean;
   hasPainOrProblem: boolean;
   hasConsequence: boolean;
   hasAnalogy: boolean;
+  hasScaleSignal: boolean;
+  hasWrongIntentTemplate: boolean;
   hasCorporateOpening: boolean;
   tooLong: boolean;
   missingWhyInvestorsCare: boolean;
@@ -170,7 +174,14 @@ const CONSEQUENCE_RE =
   /\b(so |means |ends up|gets worse|can't |cannot |falls behind|costs more|takes longer|goes wrong|if that|when that)\b/i;
 
 const ANALOGY_RE =
-  /\bthink of (?:it|them|this|the) like\b|\bit'?s like\b|\bimagine\b|\blike trying to\b|\blike having a\b|\blike the difference\b/i;
+  /\bthink of (?:it|them|this|the) like\b|\bit'?s like\b|\bimagine\b|\blike trying to\b|\blike having a\b|\blike the difference\b|\blike a key\b/i;
+
+const SCALE_SIGNAL_RE =
+  /\b(biggest|largest|leading|dominant|major player|market position|market share|well[- ]known|household name|scale|size of|one of the (?:big|top|main)|billions? of (?:users|customers|dollars)|global reach)\b/i;
+
+/** Customer-pain template wrongly applied to scale / revenue / financials cards. */
+const CUSTOMER_PAIN_DRIFT_RE =
+  /\b(lag|stutter|slow down|feels slow|apps? struggle|without (?:this|them)|devices aren'?t fast|running too many apps|AI (?:chat )?takes forever)\b/i;
 
 const CORPORATE_OPENING_RE = [
   /^(?:[A-Z][A-Za-z0-9&.'-]+\s+){0,2}(?:is|provides?|offers?|delivers?|specializes|develops?)\b/i,
@@ -181,46 +192,110 @@ const CORPORATE_OPENING_RE = [
 
 export function analyzeHumanFirstStructure(
   plainEnglishAnswer: string,
-  investorInsight?: string | null
+  investorInsight?: string | null,
+  intentOrContext?: QuestionIntent | QuestionIntentContext
 ): HumanFirstStructureResult {
+  const intent =
+    typeof intentOrContext === "string"
+      ? intentOrContext
+      : intentOrContext
+        ? detectQuestionIntent(intentOrContext)
+        : "general";
+
   const mainStory = extractMainStoryForAnalysis(plainEnglishAnswer);
-  const combined = [mainStory, investorInsight].filter(Boolean).join(" ");
   const first = splitIntoSentences(mainStory)[0] ?? mainStory.slice(0, 180);
   const wordCount = mainStory.split(/\s+/).filter(Boolean).length;
   const sentenceCount = splitIntoSentences(mainStory).length;
 
-  const hasRealLifeOpening = REAL_LIFE_OPENING_RE.test(first);
+  const hasRealLifeOpening =
+    REAL_LIFE_OPENING_RE.test(first) ||
+    (intent === "market_scale" && SCALE_SIGNAL_RE.test(first)) ||
+    (intent === "financials" &&
+      /\b(paycheck|bill|price tag|rent|income|budget|small business|wallet)\b/i.test(
+        first
+      ));
+
   const hasPainOrProblem = PAIN_PROBLEM_RE.test(mainStory);
   const hasConsequence =
     CONSEQUENCE_RE.test(mainStory) || (hasPainOrProblem && /\bwithout\b/i.test(mainStory));
   const hasAnalogy = ANALOGY_RE.test(mainStory);
+  const hasScaleSignal = SCALE_SIGNAL_RE.test(mainStory);
   const hasCorporateOpening = CORPORATE_OPENING_RE.some((re) => re.test(first));
   const tooLong = wordCount > 95 || sentenceCount > 4;
   const missingWhyInvestorsCare =
     !/why investors care:/i.test(plainEnglishAnswer) &&
     !investorInsight?.trim();
 
+  const painDriftIntents: QuestionIntent[] = [
+    "market_scale",
+    "how_they_make_money",
+    "financials",
+    "what_company_does"
+  ];
+  const hasWrongIntentTemplate =
+    painDriftIntents.includes(intent) &&
+    CUSTOMER_PAIN_DRIFT_RE.test(mainStory) &&
+    !(intent === "market_scale" && hasScaleSignal);
+
   const flags: string[] = [];
   if (hasCorporateOpening) flags.push("corporate_opening");
   if (!hasRealLifeOpening) flags.push("weak_real_life_opening");
-  if (!hasAnalogy) flags.push("missing_analogy");
+  if (hasWrongIntentTemplate) flags.push("wrong_question_template");
   if (tooLong) flags.push("too_long");
   if (missingWhyInvestorsCare) flags.push("missing_why_investors_care");
 
+  let needsAnalogy = true;
+  if (intent === "customer_problem") {
+    if (!hasPainOrProblem) flags.push("missing_customer_pain");
+    if (!hasAnalogy && !hasConsequence) flags.push("missing_analogy");
+  } else if (intent === "market_scale") {
+    if (!hasScaleSignal) flags.push("missing_scale_or_market_position");
+    needsAnalogy = true;
+  } else if (intent === "financials") {
+    needsAnalogy = false;
+    if (
+      !/\b(paycheck|bill|price|rent|income|budget|wallet|small business|household|everyday)\b/i.test(
+        mainStory
+      ) &&
+      !/\$|\d+\s*%|\d+\s*(?:billion|million)/i.test(mainStory)
+    ) {
+      flags.push("missing_money_comparison");
+    }
+  } else if (intent === "how_they_make_money") {
+    needsAnalogy = false;
+    if (!/\b(pay|buy|purchase|subscription|revenue|money|earn|sell|customer|region)\b/i.test(mainStory)) {
+      flags.push("missing_revenue_framing");
+    }
+  }
+
+  if (needsAnalogy && !hasAnalogy) flags.push("missing_analogy");
+
   const strictPass =
     hasRealLifeOpening &&
-    hasAnalogy &&
     !hasCorporateOpening &&
     !tooLong &&
-    !missingWhyInvestorsCare;
+    !missingWhyInvestorsCare &&
+    !hasWrongIntentTemplate &&
+    (needsAnalogy ? hasAnalogy : true) &&
+    !flags.some((f) =>
+      [
+        "missing_customer_pain",
+        "missing_scale_or_market_position",
+        "missing_money_comparison",
+        "missing_revenue_framing"
+      ].includes(f)
+    );
 
   return {
     pass: strictPass,
     flags,
+    intent,
     hasRealLifeOpening,
     hasPainOrProblem,
     hasConsequence,
     hasAnalogy,
+    hasScaleSignal,
+    hasWrongIntentTemplate,
     hasCorporateOpening,
     tooLong,
     missingWhyInvestorsCare
@@ -236,9 +311,28 @@ function extractMainStoryForAnalysis(text: string): string {
 
 export function describeHumanFirstFailure(result: HumanFirstStructureResult): string {
   const parts: string[] = [];
+  if (result.hasWrongIntentTemplate) {
+    parts.push(
+      `answered like a customer-pain card but question type is ${result.intent} — match the card question`
+    );
+  }
   if (result.hasCorporateOpening) parts.push("opens like a corporate brochure");
   if (!result.hasRealLifeOpening) parts.push("missing real-life opening");
-  if (!result.hasAnalogy) parts.push('missing "Think of it like…" analogy');
+  if (result.flags.includes("missing_customer_pain")) {
+    parts.push("missing everyday customer pain for this problem card");
+  }
+  if (result.flags.includes("missing_scale_or_market_position")) {
+    parts.push("missing how big / market position — not customer lag");
+  }
+  if (result.flags.includes("missing_money_comparison")) {
+    parts.push("missing everyday money comparison for financials");
+  }
+  if (result.flags.includes("missing_revenue_framing")) {
+    parts.push("missing how/where the company makes money");
+  }
+  if (!result.hasAnalogy && result.flags.includes("missing_analogy")) {
+    parts.push('missing "Think of it like…" analogy');
+  }
   if (result.tooLong) parts.push("too long — max 4 short sentences");
   if (result.missingWhyInvestorsCare) parts.push('missing "Why investors care:" line');
   return parts.join("; ") || "failed human-first structure";

@@ -1,8 +1,7 @@
 import { buildAiPromptFromSectionIds } from "@/lib/sec/aiPromptBuilder";
 import {
   buildHumanFirstUserPromptFooter,
-  buildPillarSystemPrompt,
-  isCustomerProblemCard
+  buildPillarSystemPrompt
 } from "@/lib/quests/humanFirstExplanation";
 import { splitQuestAnswer } from "@/lib/quests/questAnswerFormat";
 
@@ -20,11 +19,11 @@ Your reader has never read a 10-K Item 1 (Business). They want instant clarity, 
 - Use ONLY facts from the SEC excerpts provided.
 - If the excerpt does not include a detail, say the annual report does not spell that out clearly — do not invent competitors, regions, or products.
 - Dollar amounts in Item 1 are rare; if none appear, describe the business qualitatively in one short line.`,
-  cardFocusBlock: `- Answer ONLY the card question. Do not drift into the next card's topic.
-- Snapshot card 1: lightest — one everyday product moment, one analogy, one line on what they help power (never GPU/platform/infrastructure language).
-- Snapshot card 2 (customer problem): pain WITHOUT them → consequence → analogy → benefit WITH them. Never industries/solutions/innovation corporate summary.
-- Snapshot card 3: how well-known/big they feel + one filing fact on scale — max 4 sentences.
-- Revenue cards: one everyday "where money shows up" moment, one analogy, one revenue fact for THIS card only.`,
+  cardFocusBlock: `- Answer ONLY the card question. Match the QUESTION TYPE footer (do not use customer-pain language on scale or revenue cards).
+- Snapshot card 1 — what they do: everyday moment → analogy → products/services.
+- Snapshot card 2 — customer problem ONLY: pain → consequence → how they help.
+- Snapshot card 3 — market scale ONLY: how big/important → market position → analogy (no lag/stutter openings).
+- Revenue cards — how they make money: what people pay for → money example → revenue fact for THIS card.`,
   extraBlock: `VISUAL CARDS
 - If the card is about product mix or geography, keep prose ultra-short — a chart may appear below.`
 });
@@ -64,12 +63,6 @@ export async function buildBusinessCardUserPrompt(params: {
         ].join("\n")
       : "";
 
-  const customerProblem = isCustomerProblemCard({
-    questSlug: params.questSlug,
-    cardId: params.cardId,
-    cardQuestion: params.cardQuestion
-  });
-
   return [
     `Company: ${params.companyName} (${params.ticker})`,
     `Quest: ${params.questTitle}`,
@@ -80,7 +73,13 @@ export async function buildBusinessCardUserPrompt(params: {
     priorBlock,
     "SEC filing excerpts (10-K — Business / related sections):",
     excerptBlocks,
-    buildHumanFirstUserPromptFooter({ customerProblem })
+    buildHumanFirstUserPromptFooter({
+      pillarId: "business",
+      questSlug: params.questSlug,
+      cardId: params.cardId,
+      cardQuestion: params.cardQuestion,
+      promptFocus: params.cardPromptFocus
+    })
   ].join("\n");
 }
 

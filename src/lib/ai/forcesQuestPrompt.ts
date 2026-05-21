@@ -60,7 +60,13 @@ export async function buildForcesTopicUserPrompt(
     "",
     "Item 1A — Risk Factors (filtered excerpt):",
     excerpt || "[no excerpt available]",
-    buildHumanFirstUserPromptFooter()
+    buildHumanFirstUserPromptFooter({
+      pillarId: "forces",
+      questSlug: spec.questSlug,
+      cardId: "main",
+      cardQuestion: params.cardQuestion,
+      promptFocus: spec.promptFocus
+    })
   ].join("\n");
 }
 

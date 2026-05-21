@@ -281,7 +281,7 @@ function analyzeNarrativeFlow(
   const tips: string[] = [];
   if (structureComplianceRate < 100) {
     tips.push(
-      "Every card should follow human-first flow: real life → pain → consequence → analogy → what they do → Why investors care."
+      "Every card should match its question type (human-first pattern per card) and end with Why investors care."
     );
   }
   if (missingStructureCards.length > 0) {

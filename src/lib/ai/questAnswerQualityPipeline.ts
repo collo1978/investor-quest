@@ -14,6 +14,7 @@ import {
 export type FinalizeQuestAnswerInput = {
   companyName: string;
   cardQuestion: string;
+  pillarId?: string;
   questSlug?: string;
   cardId?: string;
   rawAnswer: string;
@@ -80,6 +81,7 @@ export async function finalizeQuestAnswer(
   );
 
   const jargonContext = {
+    pillarId: input.pillarId,
     cardQuestion: input.cardQuestion,
     questSlug: input.questSlug,
     cardId: input.cardId
@@ -125,6 +127,7 @@ export async function finalizeQuestAnswer(
           user: buildJargonRewriteUserPrompt({
             companyName: input.companyName,
             cardQuestion: input.cardQuestion,
+            pillarId: input.pillarId,
             questSlug: input.questSlug,
             cardId: input.cardId,
             plainEnglishAnswer,

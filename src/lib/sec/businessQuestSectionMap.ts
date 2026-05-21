@@ -34,7 +34,7 @@ export const BUSINESS_QUEST_CARD_SPECS: readonly QuestCardSpec[] = [
     formType: "10-K",
     sectionKeys: ["item_1"],
     promptFocus:
-      "ONLY company scale and market position — size, reach, flagship products. Do not repeat the product list from card-1."
+      "ONLY company scale and market position — how big/important, reach, flagship products. Real-world scale comparison → why being a major player matters. Do NOT use customer-pain, lag, or stutter language. Do not repeat the product list from card-1."
   },
   {
     questSlug: "revenue",

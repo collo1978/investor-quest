@@ -2,6 +2,7 @@ import {
   analyzeHumanFirstStructure,
   type HumanFirstStructureResult
 } from "@/lib/quests/humanFirstExplanation";
+import type { QuestionIntentContext } from "@/lib/quests/questionIntent";
 import {
   analyzeQuestJargonGate,
   findJargonHits,
@@ -278,7 +279,10 @@ function analyzeRepetition(
   };
 }
 
-function analyzeTeachingFlow(text: string): PromptQualityAnalysis["teachingFlow"] {
+function analyzeTeachingFlow(
+  text: string,
+  intentCtx?: QuestionIntentContext
+): PromptQualityAnalysis["teachingFlow"] {
   const body = extractVisualNarration(text) ?? text;
   const mainMatch = body.match(/^([\s\S]*?)(?:\n\s*Why investors care:|\n\s*Why it matters:)/i);
   const mainStory = (mainMatch?.[1] ?? body).trim();
@@ -288,21 +292,31 @@ function analyzeTeachingFlow(text: string): PromptQualityAnalysis["teachingFlow"
   const hasWhyInvestorsCare =
     /why investors care:/i.test(body) || /why it matters:/i.test(body);
   const bulletCount = (body.match(/•\s/g) ?? []).length;
-  const humanFirst = analyzeHumanFirstStructure(text);
+  const humanFirst = analyzeHumanFirstStructure(text, null, intentCtx ?? "general");
   const withinTargetLength = wordCount >= 30 && wordCount <= 90;
   const sentenceCount = sentences(mainStory).length;
 
   const tips: string[] = [];
   if (legacyAnalystHeadings) {
-    tips.push("Remove analyst headings — use the human-first 6-step flow in plain sentences.");
+    tips.push("Remove analyst headings — use intent-matched human-first sentences.");
   }
-  if (!humanFirst.hasAnalogy) tips.push('Add one "Think of it like…" analogy line.');
+  if (humanFirst.hasWrongIntentTemplate) {
+    tips.push(
+      "Wrong template — match the card question (e.g. market size, not customer lag)."
+    );
+  }
+  if (!humanFirst.hasAnalogy && humanFirst.flags.includes("missing_analogy")) {
+    tips.push('Add one "Think of it like…" analogy line.');
+  }
   if (!humanFirst.hasRealLifeOpening) {
     tips.push("Open with real life — where the reader already sees or feels this.");
   }
+  if (humanFirst.flags.includes("missing_scale_or_market_position")) {
+    tips.push("Explain how big or important the company is — not customer pain.");
+  }
   if (!hasWhyInvestorsCare) tips.push('End with "Why investors care:" (one sentence).');
   if (wordCount > 90) tips.push("Too long — cap the main story at ~75 words (max 4 sentences).");
-  if (wordCount < 28) tips.push("Too thin — add everyday pain or one filing fact.");
+  if (wordCount < 28) tips.push("Too thin — add one filing fact in plain words.");
   if (sentenceCount > 4) tips.push("Too many sentences before Why investors care — max 4.");
   if (bulletCount > 0) tips.push("Remove bullet points — flowing sentences only.");
   if (humanFirst.hasCorporateOpening) {
@@ -349,8 +363,17 @@ export function analyzePromptAnswerQuality(
 
   const readability = analyzeReadability(text);
   const repetition = analyzeRepetition(text, prior);
-  const teachingFlow = analyzeTeachingFlow(text);
-  const humanFirst = analyzeHumanFirstStructure(text);
+  const intentCtx = options?.jargonContext
+    ? {
+        pillarId: options.jargonContext.pillarId,
+        questSlug: options.jargonContext.questSlug,
+        cardId: options.jargonContext.cardId,
+        cardQuestion: options.jargonContext.cardQuestion
+      }
+    : undefined;
+
+  const teachingFlow = analyzeTeachingFlow(text, intentCtx);
+  const humanFirst = analyzeHumanFirstStructure(text, null, intentCtx);
   const jargonGate = analyzeQuestJargonGate(
     text,
     null,

@@ -81,7 +81,13 @@ export async function buildFinancialCardUserPrompt(params: {
     priorBlock,
     "SEC filing excerpts (10-K):",
     excerptBlocks,
-    buildHumanFirstUserPromptFooter()
+    buildHumanFirstUserPromptFooter({
+      pillarId: "financials",
+      questSlug: params.questSlug,
+      cardId: params.cardId,
+      cardQuestion: params.cardQuestion,
+      promptFocus: params.cardPromptFocus
+    })
   ].join("\n");
 }
 

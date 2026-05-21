@@ -8,14 +8,17 @@ import {
   analyzeHumanFirstStructure,
   describeHumanFirstFailure,
   HUMAN_FIRST_SIX_STEPS,
-  type HumanFirstStructureResult
+  type HumanFirstStructureResult,
+  type QuestionIntentContext
 } from "@/lib/quests/humanFirstExplanation";
+import { buildIntentPromptFooter } from "@/lib/quests/questionIntent";
 import { splitIntoSentences } from "@/lib/quests/scannableAnswer";
 
 export type QuestJargonGateContext = {
   cardQuestion?: string;
   questSlug?: string;
   cardId?: string;
+  pillarId?: string;
 };
 
 export type JargonSeverity = "hard" | "soft";
@@ -210,6 +213,7 @@ export function analyzeQuestJargonGate(
   const technicalOpening = hasTechnicalOpening(mainStory);
   const finalSentenceTooTechnical = isFinalSentenceTooTechnical(mainStory);
   const customerProblem = isCustomerProblemCard({
+    pillarId: context?.pillarId,
     questSlug: context?.questSlug ?? "",
     cardId: context?.cardId ?? "",
     cardQuestion: context?.cardQuestion
@@ -217,9 +221,16 @@ export function analyzeQuestJargonGate(
   const corporateProblemOpening =
     customerProblem && hasCorporateProblemOpening(mainStory);
 
+  const intentCtx: QuestionIntentContext = {
+    pillarId: context?.pillarId,
+    questSlug: context?.questSlug,
+    cardId: context?.cardId,
+    cardQuestion: context?.cardQuestion
+  };
   const humanFirst = analyzeHumanFirstStructure(
     plainEnglishAnswer,
-    investorInsight
+    investorInsight,
+    intentCtx
   );
 
   const flags: string[] = [];
@@ -284,6 +295,8 @@ export const JARGON_REWRITE_SYSTEM_PROMPT = `You are an editor for Investor Ques
 
 ${HUMAN_FIRST_SIX_STEPS}
 
+Match the QUESTION TYPE in the user message — do NOT force customer-pain / lag language on market-size or revenue cards.
+
 HARD BANS (remove or replace):
 GPU, SDK, infrastructure, analytics, semiconductor, computing platform, cloud platform, solutions (corporate), industries (vague), innovation (filler), synergies, landscape, leverages, "technology is crucial", "solutions are essential".
 
@@ -304,6 +317,7 @@ export function buildJargonRewriteUserPrompt(params: {
   plainEnglishAnswer: string;
   investorInsight: string | null;
   gate: QuestJargonGateResult;
+  pillarId?: string;
   questSlug?: string;
   cardId?: string;
 }): string {
@@ -312,24 +326,19 @@ export function buildJargonRewriteUserPrompt(params: {
     ? `\n\nWhy investors care:\n${params.investorInsight}`
     : "";
 
-  const customerProblem = isCustomerProblemCard({
-    questSlug: params.questSlug ?? "",
-    cardId: params.cardId ?? "",
+  const intentFooter = buildIntentPromptFooter({
+    pillarId: params.pillarId,
+    questSlug: params.questSlug,
+    cardId: params.cardId,
     cardQuestion: params.cardQuestion
   });
 
-  const problemCardHint = customerProblem
-    ? [
-        "",
-        "CUSTOMER PROBLEM card: pain WITHOUT them → consequence → analogy → benefit WITH them.",
-        'Good: "without this, games lag, AI feels slow, apps struggle to respond quickly."',
-        ""
-      ].join("\n")
-    : [
-        "",
-        "Use the 6-step architecture: real life → pain → consequence → analogy → what they do.",
-        ""
-      ].join("\n");
+  const problemCardHint = [
+    "",
+    "Match the QUESTION TYPE below — do not default to customer-pain / lag language unless that is the question.",
+    intentFooter,
+    ""
+  ].join("\n");
 
   return [
     `Company: ${params.companyName}`,

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { DemoContentRefreshPanel } from "@/components/platform/DemoContentRefreshPanel";
 import { OpsHealthHero } from "@/components/operations/OpsHealthHero";
 import { OpsIssueCard } from "@/components/operations/OpsIssueCard";
 import { OpsPageShell } from "@/components/operations/OpsPageShell";
@@ -210,6 +211,8 @@ export function GameHealthDashboard() {
         onRunCheck={() => void runCheck()}
         onRefresh={() => void load()}
       />
+
+      <DemoContentRefreshPanel onRefreshMissionControl={() => void load()} />
 
       {historySpark.length > 1 ? (
         <section className={opsPanel}>

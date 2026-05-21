@@ -27,7 +27,7 @@ export function PromptQualityScorecard({
       label: "Human-first flow",
       score: quality.teachingFlow.score,
       hint: quality.teachingFlow.humanFirstPass
-        ? "Real life → pain → analogy → why investors care"
+        ? "Intent-matched human-first + Why investors care"
         : quality.teachingFlow.humanFirstFlags.join(", ") || "Structure needs work"
     }
   ];
