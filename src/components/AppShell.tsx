@@ -17,7 +17,14 @@ import { COMPANIES, companyById } from "@/lib/demoData";
 import { InvestorQuestBrandLogo } from "@/components/InvestorQuestBrandLogo";
 import { LevelUpFx, UnlockFx, QuestCompletionFx } from "@/ui";
 import { pillarById } from "@/data/pillars";
-import { linkActive, linkClass, MOBILE_TAB_NAV, PRIMARY_NAV } from "@/lib/navConfig";
+import {
+  islandLinkActive,
+  ISLAND_NAV,
+  linkActive,
+  linkClass,
+  MOBILE_TAB_NAV,
+  PRIMARY_NAV
+} from "@/lib/navConfig";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -32,12 +39,43 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
-  // The floating top-right `HudOverlay` (Level / XP / Streak / Reading)
-  // has been retired across the entire app. The same information lives
-  // in the left sidebar, so the overlay was duplicate UI clutter that
-  // also covered island artwork (notably the Forces island lightning).
-  // The component file (`@/components/HudOverlay`) is left on disk in
-  // case we ever want it back, but it's no longer imported anywhere.
+
+  const isPlatformSurface =
+    pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
+
+  // Partner admin + analytics dashboards use their own chrome so we do not
+  // stack the learner sidebar / mobile nav on top of multi-tenant tools.
+  if (isPlatformSurface) {
+    return (
+      <div className="pointer-events-auto min-h-screen bg-bg-0">
+        {children}
+        <ToastHost />
+        <ConvictionQueueHost />
+        <LevelUpFx
+          triggerKey={fx.levelUpKey}
+          detail={fx.level ? `Reached Level ${fx.level}` : undefined}
+        />
+        <UnlockFx
+          triggerKey={fx.unlockKey}
+          title={(() => {
+            if (!fx.unlockTitle) return "New island";
+            try {
+              return pillarById(
+                fx.unlockTitle as Parameters<typeof pillarById>[0]
+              ).title;
+            } catch {
+              return fx.unlockTitle;
+            }
+          })()}
+          detail="The bridge is live — continue your expedition on the map."
+        />
+        <QuestCompletionFx
+          triggerKey={fx.completionKey}
+          xpGained={fx.completionXp ?? undefined}
+        />
+      </div>
+    );
+  }
 
   const unlockedPillarTitle = (() => {
     if (!fx.unlockTitle) return undefined;
@@ -60,8 +98,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       }
     >
       {/* Desktop sidebar */}
-      <aside className="pointer-events-auto fixed inset-y-0 left-0 z-[100] hidden w-[280px] overflow-visible border-r border-panel-border bg-[rgba(7,7,18,0.72)] backdrop-blur-xl md:block">
-        <div className="relative z-10 flex h-full flex-col overflow-visible p-5">
+      <aside className="pointer-events-auto fixed inset-y-0 left-0 z-[100] hidden w-[280px] overflow-hidden border-r border-panel-border bg-[rgba(7,7,18,0.72)] backdrop-blur-xl md:block">
+        <div className="relative z-10 flex h-full min-h-0 flex-col overflow-y-auto overscroll-y-contain p-5 [-webkit-overflow-scrolling:touch]">
           <Link
             href="/home"
             className="group relative z-10 inline-flex min-w-0 cursor-pointer items-center gap-3.5"
@@ -151,6 +189,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <nav className="relative z-10 mt-6 grid gap-2" aria-label="Primary">
             <ExploreDesktopFlyout pathname={pathname} />
+            <div className="pt-1">
+              <p className="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-2">
+                Islands
+              </p>
+              <div className="grid gap-2">
+                {ISLAND_NAV.map((item) => {
+                  const active = islandLinkActive(pathname, item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      prefetch
+                      className={linkClass(active)}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
             {PRIMARY_NAV.map((item) => {
               const active = linkActive(pathname, item.href);
               return (
@@ -207,7 +265,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </select>
             </div>
 
-            <div className="grid grid-cols-6 gap-0.5">
+            <div className="grid grid-cols-4 gap-0.5">
               {MOBILE_TAB_NAV.map((item) => {
                 const active = linkActive(pathname, item.href);
                 return (

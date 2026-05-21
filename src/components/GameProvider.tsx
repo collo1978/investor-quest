@@ -43,6 +43,12 @@ import {
   type StreakKind
 } from "@/engine";
 import type { PillarId } from "@/data/pillars";
+import { QuestPrewarmBootstrap } from "@/components/quest/QuestPrewarmBootstrap";
+import { useQuestPrewarm } from "@/hooks/useQuestPrewarm";
+import {
+  markGameSessionTouched,
+  wasGameSessionTouched
+} from "@/lib/gameSession";
 
 type Toast = {
   id: string;
@@ -117,6 +123,12 @@ type GameActions = {
   submitConvictionAndAdvance: () => void;
   /** Center-map 10-K Rookie final challenge — pass 0..1 score fraction (≥0.7 clears). */
   completeTenKRookieChallenge: (scoreFraction: number) => void;
+  /** Dismiss the cinematic quest-map mission brief (per active company). */
+  dismissQuestMapBrief: () => void;
+  /** Dismiss the first-visit Business Island mission brief (per active company). */
+  dismissBusinessIslandBrief: () => void;
+  /** Reset read/completion/quiz work for a pillar (dev testing). */
+  clearPillarProgress: (pillarId: PillarId) => void;
   /** Escape hatch for advanced cases — usually you want a named action above. */
   dispatch: (action: GameAction) => void;
 };
@@ -165,32 +177,38 @@ function eventsToToasts(events: RewardEvent[]): Toast[] {
   const next = () => `evt_${Date.now()}_${(toastSeq += 1)}`;
   for (const e of events) {
     if (e.kind === "xp") {
+      const title =
+        e.reason === "Island mastery bonus"
+          ? `+${e.amount} XP — island mastery secured`
+          : e.reason.startsWith("Section quiz")
+            ? `+${e.amount} XP — quiz mastery`
+            : `+${e.amount} XP`;
       out.push({
         id: next(),
         kind: "xp",
-        title: `${e.reason}: +${e.amount} XP`,
-        detail: "Progress saved locally."
+        title,
+        detail: "Your investor journey advances."
       });
     } else if (e.kind === "level-up") {
       out.push({
         id: next(),
         kind: "level",
-        title: `Level up — you reached Level ${e.level}`,
-        detail: "Keep going — new pillars unlock as you progress."
+        title: `Level ${e.level} unlocked`,
+        detail: "New trails open as your conviction deepens."
       });
     } else if (e.kind === "pillar-unlocked") {
       out.push({
         id: next(),
         kind: "unlock",
-        title: `Island unlocked: ${e.pillarId.toUpperCase()}`,
-        detail: "A new pillar is now playable on the map."
+        title: `Next island unlocked`,
+        detail: `${e.pillarId.charAt(0).toUpperCase()}${e.pillarId.slice(1)} is ready on the map.`
       });
     } else if (e.kind === "pillar-completed") {
       out.push({
         id: next(),
         kind: "unlock",
-        title: `Pillar cleared: ${e.pillarId.toUpperCase()}`,
-        detail: "All quests in this pillar completed."
+        title: `Island conquered`,
+        detail: "Chart your conviction to power up the bridge to the next expedition."
       });
     } else if (e.kind === "all-pillars-complete") {
       out.push({
@@ -247,8 +265,28 @@ export type GameProviderProps = {
    * the resulting state. Use this to stream events to a backend, a
    * telemetry pipeline, or a debug log.
    */
-  onAction?: (input: { action: GameAction; state: GameState }) => void;
+  onAction?: (input: {
+    action: GameAction;
+    state: GameState;
+    events: RewardEvent[];
+  }) => void;
 };
+
+function GameProviderInner({
+  children,
+  activeCompanyId
+}: {
+  children: React.ReactNode;
+  activeCompanyId: string;
+}) {
+  useQuestPrewarm(activeCompanyId);
+  return (
+    <>
+      <QuestPrewarmBootstrap />
+      {children}
+    </>
+  );
+}
 
 export function GameProvider({
   children,
@@ -270,7 +308,7 @@ export function GameProvider({
     let cancelled = false;
     (async () => {
       const loaded = await store.load();
-      if (!cancelled && loaded) {
+      if (!cancelled && loaded && !wasGameSessionTouched()) {
         setState(loaded);
       }
       if (!cancelled) setHydrated(true);
@@ -295,8 +333,16 @@ export function GameProvider({
   // -----------------------------------------------------------------
   const dispatch = useCallback(
     (action: GameAction) => {
+      markGameSessionTouched();
       setState((prev) => {
         const result = applyAction(prev, action);
+
+        if (
+          action.type === "dismiss-quest-map-brief" ||
+          action.type === "dismiss-business-island-brief"
+        ) {
+          void store.save(result.state);
+        }
 
         if (result.events.length > 0) {
           const newToasts = eventsToToasts(result.events);
@@ -345,11 +391,15 @@ export function GameProvider({
           if (nextFx) setFx((prevFx) => ({ ...prevFx, ...nextFx }));
         }
 
-        onAction?.({ action, state: result.state });
+        onAction?.({
+          action,
+          state: result.state,
+          events: result.events
+        });
         return result.state;
       });
     },
-    [onAction]
+    [onAction, store]
   );
 
   const actions = useMemo<GameActions>(
@@ -405,6 +455,12 @@ export function GameProvider({
           type: "complete-ten-k-rookie-challenge",
           scoreFraction
         }),
+      dismissQuestMapBrief: () =>
+        dispatch({ type: "dismiss-quest-map-brief" }),
+      dismissBusinessIslandBrief: () =>
+        dispatch({ type: "dismiss-business-island-brief" }),
+      clearPillarProgress: (pillarId) =>
+        dispatch({ type: "clear-pillar-progress", pillarId }),
       dispatch
     }),
     [dispatch]
@@ -440,7 +496,13 @@ export function GameProvider({
     };
   }, [state, actions, toasts, fx, hydrated, store.id]);
 
-  return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
+  return (
+    <GameContext.Provider value={value}>
+      <GameProviderInner activeCompanyId={state.activeCompanyId}>
+        {children}
+      </GameProviderInner>
+    </GameContext.Provider>
+  );
 }
 
 export function useGame(): GameContextValue {

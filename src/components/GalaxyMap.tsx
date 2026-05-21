@@ -811,11 +811,6 @@ export function OrbNode({
           {node.icon}
         </div>
       </motion.div>
-
-      {/* tiny label on hover only */}
-      <div className="pointer-events-none mt-2 hidden w-[140px] -translate-x-[24px] rounded-xl border border-panel-border bg-[rgba(7,7,18,0.70)] px-2 py-1 text-center text-[11px] text-ink-1 shadow-glow backdrop-blur-xl group-hover:block">
-        <span className="text-ink-0 font-semibold">{node.label}</span>
-      </div>
     </motion.button>
   );
 }

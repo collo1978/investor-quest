@@ -8,6 +8,9 @@
  * Companies without an entry use the template defaults verbatim
  * (typically renders the "awaiting SEC/AI content" placeholder).
  */
+import { BUSINESS_AI_QUEST_SLUGS } from "@/app/business/businessQuestSlugs";
+import { MANAGEMENT_AI_QUEST_SLUGS } from "@/app/management/managementQuestSlugs";
+import { isForcesHubSlug } from "@/lib/sec/forcesTopicSectionMap";
 import type { CompanyId } from "@/data/companies";
 import { APPLE_CONTENT } from "@/data/quests/content/apple";
 import type {
@@ -29,5 +32,27 @@ export function getQuestContentOverride(
   companyId: CompanyId,
   key: string
 ): QuestContentOverride | undefined {
+  // Pillar answers from SEC → OpenAI → Supabase, not static files.
+  if (key.startsWith("financials:")) {
+    return undefined;
+  }
+  if (key.startsWith("business:")) {
+    const slug = key.slice("business:".length);
+    if ((BUSINESS_AI_QUEST_SLUGS as readonly string[]).includes(slug)) {
+      return undefined;
+    }
+  }
+  if (key.startsWith("management:")) {
+    const slug = key.slice("management:".length);
+    if ((MANAGEMENT_AI_QUEST_SLUGS as readonly string[]).includes(slug)) {
+      return undefined;
+    }
+  }
+  if (key.startsWith("forces:")) {
+    const slug = key.slice("forces:".length);
+    if (!isForcesHubSlug(slug)) {
+      return undefined;
+    }
+  }
   return COMPANY_CONTENT_BY_ID[companyId]?.overrides[key];
 }

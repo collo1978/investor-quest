@@ -17,11 +17,9 @@
  */
 
 import { motion, Reorder, useDragControls } from "framer-motion";
-import { useEffect } from "react";
 
 import type {
   BullBearQuestion,
-  ConfidenceQuestion,
   FillBlankQuestion,
   MatchQuestion,
   MultipleChoiceQuestion,
@@ -95,55 +93,43 @@ export type QuizQuestionViewProps = {
 };
 
 export function QuizQuestionView(props: QuizQuestionViewProps) {
-  const { question, mode } = props;
-  const isCorrect = mode === "review" ? isQuizAnswerCorrect(question, props.value) : null;
+  const { question, mode, value } = props;
+  const isReview = mode === "review";
+  const answeredCorrect = isReview && isQuizAnswerCorrect(question, value);
 
   return (
     <fieldset
-      className="rounded-xl border px-4 py-3"
+      className="rounded-xl border px-4 py-3 transition-[border-color,box-shadow] duration-300"
       style={{
-        borderColor:
-          mode === "review"
-            ? isCorrect
-              ? GREEN_BORDER
-              : RED_BORDER
-            : GOLD_BORDER_SOFT,
-        background:
-          mode === "review"
-            ? isCorrect
-              ? "rgba(34,197,139,0.05)"
-              : "rgba(244,120,120,0.05)"
-            : "rgba(255,255,255,0.02)"
+        borderColor: isReview
+          ? answeredCorrect
+            ? GREEN_BORDER
+            : RED_BORDER
+          : GOLD_BORDER_SOFT,
+        background: isReview
+          ? answeredCorrect
+            ? "rgba(34,197,139,0.04)"
+            : "rgba(244,120,120,0.04)"
+          : "rgba(255,255,255,0.02)",
+        boxShadow: isReview
+          ? answeredCorrect
+            ? "0 0 28px -8px rgba(34,197,139,0.55)"
+            : "0 0 28px -8px rgba(244,120,120,0.45)"
+          : "none"
       }}
     >
       <legend
         className="flex items-center gap-2 px-1 text-[10.5px] font-semibold uppercase tracking-[0.22em]"
-        style={{
-          color:
-            mode === "review"
-              ? isCorrect
-                ? GREEN_HI
-                : RED_HI
-              : GOLD_HI
-        }}
+        style={{ color: isReview ? (answeredCorrect ? GREEN_HI : RED_HI) : GOLD_HI }}
       >
         <span>{`Question ${props.index + 1}`}</span>
         <span aria-hidden style={{ opacity: 0.6 }}>·</span>
         <span>{kindLabel(question.kind)}</span>
-        {mode === "review" ? (
-          <span className="ml-auto inline-flex items-center gap-1 text-[10.5px]">
-            {isCorrect ? (
-              <>
-                <CheckGlyph className="h-3 w-3" />
-                <span>Correct</span>
-              </>
-            ) : (
-              <>
-                <CrossGlyph className="h-3 w-3" />
-                <span>Not quite</span>
-              </>
-            )}
-          </span>
+        {isReview ? (
+          <>
+            <span aria-hidden style={{ opacity: 0.6 }}>·</span>
+            <span>{answeredCorrect ? "Correct" : "Not quite"}</span>
+          </>
         ) : null}
       </legend>
 
@@ -153,23 +139,23 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
         <QuestionInput {...props} />
       </div>
 
-      {mode === "review" && question.explain ? (
-        <p
-          className="mt-3 rounded-md border px-3 py-2 text-[12.5px] leading-relaxed"
+      {isReview && question.explain ? (
+        <motion.p
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22, ease: "easeOut" }}
+          className="mt-3 rounded-lg border px-3 py-2 text-[12.5px] leading-relaxed text-ink-0/90"
           style={{
-            borderColor: GOLD_BORDER_SOFT,
-            background: "rgba(245,197,71,0.05)",
-            color: "rgb(220 220 232)"
+            borderColor: answeredCorrect
+              ? "rgba(34,197,139,0.25)"
+              : "rgba(244,120,120,0.25)",
+            background: answeredCorrect
+              ? "rgba(34,197,139,0.06)"
+              : "rgba(244,120,120,0.06)"
           }}
         >
-          <span
-            className="mr-1 text-[10px] font-semibold uppercase tracking-[0.22em]"
-            style={{ color: GOLD_HI }}
-          >
-            Why
-          </span>
           {question.explain}
-        </p>
+        </motion.p>
       ) : null}
     </fieldset>
   );
@@ -263,8 +249,6 @@ function kindLabel(kind: QuizQuestion["kind"]): string {
       return "Match the concept";
     case "order":
       return "Order the steps";
-    case "confidence":
-      return "Confidence check";
     case "bull-bear":
       return "Bull vs bear";
     case "risk-meter":
@@ -272,34 +256,6 @@ function kindLabel(kind: QuizQuestion["kind"]): string {
     case "swipe-cards":
       return "Good sign / warning sign";
   }
-}
-
-/**
- * Per-rating labels for the confidence check, ramping from the low
- * endpoint to the high endpoint. For the typical 1..5 scale we use
- * five descriptive words; for any other scale we fall back to the
- * endpoint labels at the extremes and short fills in between.
- */
-function defaultConfidenceLabels(
-  max: number,
-  endpoints: { low: string; high: string }
-): string[] {
-  if (max === 5) {
-    return [
-      endpoints.low,
-      "Getting there",
-      "Solid",
-      "Strong",
-      endpoints.high
-    ];
-  }
-  const out: string[] = [];
-  for (let i = 0; i < max; i++) {
-    if (i === 0) out.push(endpoints.low);
-    else if (i === max - 1) out.push(endpoints.high);
-    else out.push("");
-  }
-  return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -325,8 +281,6 @@ function QuestionInput(props: QuizQuestionViewProps) {
       return <MatchInput {...props} question={question} />;
     case "order":
       return <OrderInput {...props} question={question} />;
-    case "confidence":
-      return <ConfidenceInput {...props} question={question} />;
     case "bull-bear":
       return <BullBearInput {...props} question={question} />;
     case "risk-meter":
@@ -1017,16 +971,6 @@ function OrderInput({
   // initial display order = deterministically shuffled original indices
   const initialOrder = shuffleIndices(steps.length, question.id, "order");
 
-  // Seed parent state on mount so "Check answer" enables immediately even if
-  // the user submits without touching the steps (they'd just be wrong).
-  useEffect(() => {
-    if (!Array.isArray(value)) {
-      onChange(initialOrder);
-    }
-    // We intentionally only run this on first mount per question.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const current: number[] = Array.isArray(value)
     ? (value as number[])
     : initialOrder;
@@ -1302,93 +1246,6 @@ function SwipeGlyph({
       <path d="M11 5l3 3-3 3" />
       <path d="M2 8h12" />
     </svg>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Confidence — labeled pills with low → high ramp
-// ---------------------------------------------------------------------------
-
-function ConfidenceInput({
-  question,
-  value,
-  onChange,
-  mode
-}: QuizQuestionViewProps & { question: ConfidenceQuestion }) {
-  const max = question.scaleMax ?? 5;
-  const selected = typeof value === "number" ? value : null;
-  const labels = question.scaleLabels ?? {
-    low: "Not confident",
-    high: "Very confident"
-  };
-  const ramp = defaultConfidenceLabels(max, labels);
-  return (
-    <div>
-      <p
-        className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.18em]"
-        style={{ color: "rgba(245,197,71,0.7)" }}
-      >
-        Be honest — this is for you, not a test
-      </p>
-      <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${max}, minmax(0, 1fr))` }}>
-        {ramp.map((labelText, i) => {
-          const rating = i + 1;
-          const isSelected = selected === rating;
-          const tonePct = (i + 0.5) / max; // 0 → 1 ramp
-          // Smoothly ramp from neutral (low confidence) to bright gold (high)
-          const intensity = 0.12 + tonePct * 0.42;
-          return (
-            <motion.button
-              key={rating}
-              type="button"
-              disabled={mode === "review"}
-              onClick={() => onChange(rating)}
-              whileHover={mode === "review" ? undefined : { y: -2 }}
-              whileTap={mode === "review" ? undefined : { scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 320, damping: 22 }}
-              aria-label={`${labelText} — rating ${rating} of ${max}`}
-              className="relative flex min-h-[76px] flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-2 text-center transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65"
-              style={{
-                borderColor: isSelected ? GOLD_BORDER : GOLD_BORDER_SOFT,
-                background: isSelected
-                  ? `rgba(245,197,71,${intensity})`
-                  : "rgba(255,255,255,0.02)",
-                color: isSelected ? "#fff" : "rgba(220,220,232,0.85)",
-                cursor: mode === "review" ? "default" : "pointer",
-                boxShadow: isSelected
-                  ? `0 0 24px -8px rgba(245,197,71,${0.45 + tonePct * 0.3})`
-                  : "none"
-              }}
-            >
-              <span
-                className="text-[15px] font-bold"
-                style={{ color: isSelected ? "#fff" : GOLD_HI }}
-              >
-                {rating}
-              </span>
-              <span
-                className="text-[10px] leading-tight uppercase tracking-[0.12em]"
-                style={{
-                  color: isSelected ? "#fff" : "rgba(220,220,232,0.55)"
-                }}
-              >
-                {labelText}
-              </span>
-            </motion.button>
-          );
-        })}
-      </div>
-      <div className="mt-2 flex justify-between text-[10.5px] uppercase tracking-[0.18em]" style={{ color: "rgba(245,197,71,0.65)" }}>
-        <span>{labels.low}</span>
-        <span>{labels.high}</span>
-      </div>
-      {mode === "review" ? (
-        <p className="mt-2 text-[11.5px]" style={{ color: "rgb(180 180 200)" }}>
-          Self-reflection — there is no wrong answer. Your honest rating helps you
-          track how your conviction grows as you learn more.
-        </p>
-      ) : null}
-    </div>
   );
 }
 
@@ -1883,22 +1740,24 @@ function choiceStyle({
       return {
         borderColor: GREEN_BORDER,
         background: "rgba(34,197,139,0.12)",
-        color: "#fff",
-        cursor: "default"
+        color: "rgb(235 245 240)",
+        cursor: "default",
+        boxShadow: "0 0 20px -4px rgba(34,197,139,0.65)"
       };
     }
     if (isWrongChoice) {
       return {
         borderColor: RED_BORDER,
         background: "rgba(244,120,120,0.12)",
-        color: "#fff",
-        cursor: "default"
+        color: "rgb(225 220 228)",
+        cursor: "default",
+        boxShadow: "0 0 20px -4px rgba(244,120,120,0.55)"
       };
     }
     return {
-      borderColor: GOLD_BORDER_SOFT,
-      background: "rgba(255,255,255,0.015)",
-      color: "rgb(190 190 205)",
+      borderColor: "rgba(255,255,255,0.06)",
+      background: "rgba(255,255,255,0.02)",
+      color: "rgb(170 170 185)",
       cursor: "default"
     };
   }

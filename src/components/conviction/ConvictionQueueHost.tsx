@@ -60,6 +60,11 @@ export function ConvictionQueueHost() {
         <ConvictionFeedbackModal
           key={`${head.completedPillarId}:${head.pillarToUnlock ?? "none"}`}
           pillarTitle={pillarById(head.completedPillarId).title}
+          nextIslandTitle={
+            head.pillarToUnlock
+              ? pillarById(head.pillarToUnlock).title
+              : undefined
+          }
           onConfident={() => void onPick("confident")}
           onCautious={() => void onPick("cautious")}
         />

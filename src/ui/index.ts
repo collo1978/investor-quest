@@ -16,6 +16,10 @@ export {
   QuestCompletionFx,
   type QuestCompletionFxProps
 } from "@/ui/effects/QuestCompletionFx";
+export {
+  ConfettiBurst,
+  type ConfettiBurstProps
+} from "@/ui/effects/ConfettiBurst";
 
 export {
   useImageFrame,

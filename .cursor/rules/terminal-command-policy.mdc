@@ -1,0 +1,71 @@
+---
+description: Terminal allowlist policy — safe reads auto-run; destructive commands need approval
+alwaysApply: true
+---
+
+# Terminal command policy
+
+## Shell invocation (critical — auto-run depends on this)
+
+**Never** chain directory changes into the command string:
+
+```text
+# BAD — prefix is "cd", not allowlisted target; triggers approval
+cd C:\path\to\project && npx tsc --noEmit
+cd path; Get-ChildItem
+Set-Location path; git status
+```
+
+**Always** set directory on the Shell tool and run a **direct** allowlisted command:
+
+```text
+# GOOD — command string starts with allowlisted prefix
+working_directory: C:\Users\collo\.cursor\projects\empty-window\investor-quest
+command: npx tsc --noEmit
+
+working_directory: <repo-root>
+command: Get-ChildItem src
+command: Select-String -Path src\*.ts -Pattern "foo"
+command: git status
+command: npm run dev
+```
+
+The **first token** of `command` must match an entry in `~/.cursor/permissions.json`. Prefix matching is literal from the start of the string.
+
+One Shell call = one command. No `&&`, `;`, or `|` unless every segment is separately allowlisted (avoid chains entirely).
+
+## Enable auto-run (required)
+
+User has **Auto-Run in Sandbox** enabled. `permissions.json` is ignored in **Ask Every Time** mode. Global file: `%USERPROFILE%\.cursor\permissions.json` (template in `.cursor/permissions.json`).
+
+Matching commands run immediately (no View → Run).
+
+## Prefer tools over shell for reads
+
+Use **Read**, **Grep**, and **Glob** for file content and codebase search. They do not require terminal approval.
+
+## Auto-approved prefixes
+
+**Search & read:** `rg`, `grep`, `findstr`, `dir`, `tree`, `ls`, `type`, `cat`, `where.exe`, `Get-ChildItem`, `Get-Content`, `Select-String`, `Select-Object`, `Where-Object`, `Test-Path`
+
+**Git read-only:** `git status`, `git diff`, `git log`, `git show`, `git branch`, `git rev-parse`, `git remote -v`, `git config --get`, `git stash list`
+
+**Typecheck / lint / dev:** `npx tsc`, `npx tsc --noEmit`, `npm run lint`, `npm run dev`
+
+**GitHub CLI read-only:** `gh pr view`, `gh pr list`, `gh pr checks`, `gh pr diff`, `gh issue view`, `gh run view`, `gh api`, `gh status`
+
+Do **not** use bare `git` or `npm` (would auto-approve `git push`, `npm install`, etc.).
+
+`cd` / `Set-Location` alone are allowlisted but **do not use them** for navigation — use `working_directory` instead so the real command auto-runs.
+
+## Always require user approval
+
+- `npm install`, `npm run build`, `npm run dev:fresh`
+- `git add`, `git commit`, `git push`, `git reset`, `git clean`, `git checkout` (with paths)
+- `rm`, `del`, `Remove-Item`, `taskkill`, `rmdir`
+- `node scripts/` that writes files, kills ports, or migrates data
+- Force push, hard reset, or irreversible git operations
+
+## Dev server
+
+Port **3003** only: Shell `command: npm run dev` with `working_directory` set to repo root (or **Ctrl+Shift+B**).

@@ -12,23 +12,29 @@ import {
   type PillarId
 } from "@/data/pillars";
 import type { QuestDefinition, QuestTemplate } from "@/data/quests/types";
+import { mergeQuizConfig } from "@/data/quests/types";
 import {
   contentKey,
   getQuestContentOverride,
   type QuestContentOverride
 } from "@/data/quests/content";
 
-import { BUSINESS_QUEST_TEMPLATES } from "@/data/quests/templates/business";
-import { FORCES_QUEST_TEMPLATES } from "@/data/quests/templates/forces";
-import { FINANCIALS_QUEST_TEMPLATES } from "@/data/quests/templates/financials";
-import { MANAGEMENT_QUEST_TEMPLATES } from "@/data/quests/templates/management";
+import { BUSINESS_AI_QUEST_SLUGS } from "@/app/business/businessQuestSlugs";
+import { MANAGEMENT_AI_QUEST_SLUGS } from "@/app/management/managementQuestSlugs";
+import { isForcesHubSlug } from "@/lib/sec/forcesTopicSectionMap";
+import { getPillarQuestTemplates } from "@/platform/quests/questContentRegistry";
 
-const TEMPLATES_BY_PILLAR: Record<PillarId, readonly QuestTemplate[]> = {
-  business: BUSINESS_QUEST_TEMPLATES,
-  forces: FORCES_QUEST_TEMPLATES,
-  financials: FINANCIALS_QUEST_TEMPLATES,
-  management: MANAGEMENT_QUEST_TEMPLATES
-};
+function usesAiPipelineContent(pillarId: PillarId, slug: string): boolean {
+  if (pillarId === "financials") return true;
+  if (pillarId === "business") {
+    return (BUSINESS_AI_QUEST_SLUGS as readonly string[]).includes(slug);
+  }
+  if (pillarId === "management") {
+    return (MANAGEMENT_AI_QUEST_SLUGS as readonly string[]).includes(slug);
+  }
+  if (pillarId === "forces") return !isForcesHubSlug(slug);
+  return false;
+}
 
 /** Build the globally unique quest id used by the engine. */
 export function buildQuestId(
@@ -64,6 +70,9 @@ function instantiate(
       ? fillTokens(template.plainEnglishAnswer, company)
       : null,
     whyItMatters: fillTokens(template.whyItMatters, company),
+    investorInsight: template.investorInsight
+      ? fillTokens(template.investorInsight, company)
+      : undefined,
     cards: template.cards
       ? template.cards.map((c) => ({
           id: c.id,
@@ -71,16 +80,31 @@ function instantiate(
           plainEnglishAnswer: c.plainEnglishAnswer
             ? fillTokens(c.plainEnglishAnswer, company)
             : null,
-          whyItMatters: fillTokens(c.whyItMatters, company)
+          whyItMatters: fillTokens(c.whyItMatters, company),
+          investorInsight: c.investorInsight
+            ? fillTokens(c.investorInsight, company)
+            : undefined
         }))
       : undefined
   };
+
+  let quest = base;
+  if (usesAiPipelineContent(template.pillarId, template.slug)) {
+    quest = {
+      ...quest,
+      plainEnglishAnswer: null,
+      cards: quest.cards?.map((c) => ({
+        ...c,
+        plainEnglishAnswer: null
+      }))
+    };
+  }
 
   const override = getQuestContentOverride(
     company.id,
     contentKey(template.pillarId, template.slug)
   );
-  return override ? applyContentOverride(base, override) : base;
+  return override ? applyContentOverride(quest, override) : quest;
 }
 
 /**
@@ -98,6 +122,10 @@ function applyContentOverride(
     next = { ...next, plainEnglishAnswer: override.plainEnglishAnswer };
   }
 
+  if (override.investorInsight && !next.investorInsight) {
+    next = { ...next, investorInsight: override.investorInsight };
+  }
+
   if (override.cards && next.cards) {
     next = {
       ...next,
@@ -106,14 +134,16 @@ function applyContentOverride(
         if (!oc) return c;
         return {
           ...c,
-          plainEnglishAnswer: oc.plainEnglishAnswer ?? c.plainEnglishAnswer
+          plainEnglishAnswer: oc.plainEnglishAnswer ?? c.plainEnglishAnswer,
+          investorInsight: oc.investorInsight ?? c.investorInsight
         };
       })
     };
   }
 
-  if (override.quizConfig && !next.quizConfig) {
-    next = { ...next, quizConfig: override.quizConfig };
+  const mergedQuiz = mergeQuizConfig(override.quizConfig, next.quizConfig);
+  if (mergedQuiz) {
+    next = { ...next, quizConfig: mergedQuiz };
   }
 
   return next;
@@ -125,7 +155,7 @@ export function getCompanyPillarQuests(
   pillarId: PillarId
 ): QuestDefinition[] {
   const company = companyById(companyId);
-  const templates = TEMPLATES_BY_PILLAR[pillarId] ?? [];
+  const templates = getPillarQuestTemplates(pillarId);
   return templates.map((t) => instantiate(t, company));
 }
 
@@ -141,16 +171,16 @@ export function findQuestDefinition(
   slug: string
 ): QuestDefinition | null {
   const company = companyById(companyId);
-  const template = TEMPLATES_BY_PILLAR[pillarId]?.find((t) => t.slug === slug);
+  const template = getPillarQuestTemplates(pillarId).find((t) => t.slug === slug);
   return template ? instantiate(template, company) : null;
 }
 
 /** Count of quest templates per pillar — useful for "n quests" labels. */
 export function pillarQuestCount(pillarId: PillarId): number {
-  return TEMPLATES_BY_PILLAR[pillarId]?.length ?? 0;
+  return getPillarQuestTemplates(pillarId).length;
 }
 
-/** Raw template access (no company binding) — used by SEC layer scaffolding. */
+/** Raw template access (no company binding) — Supabase cache with demo fallback. */
 export function getPillarTemplates(pillarId: PillarId): readonly QuestTemplate[] {
-  return TEMPLATES_BY_PILLAR[pillarId] ?? [];
+  return getPillarQuestTemplates(pillarId);
 }

@@ -1,0 +1,64 @@
+import type { PillarId } from "@/data/pillars";
+import type { QuestType, QuizConfig } from "@/data/quests/types";
+import type { SecFilingFormType } from "@/lib/sec/types";
+
+export type QuestContentCardRow = {
+  id: string;
+  slug: string;
+  pillar_id: PillarId;
+  quest_type: QuestType;
+  title: string;
+  objective: string;
+  description: string;
+  investor_question: string;
+  why_this_matters: string;
+  plain_english_answer: string | null;
+  source_filing_type: SecFilingFormType;
+  source_section_key: string;
+  source_section_label: string;
+  ai_prompt_template: string;
+  xp_reward: number;
+  quiz_format: string;
+  quiz_config: QuizConfig | null;
+  display_order: number;
+  hub_icon: string | null;
+  hub_subtitle: string | null;
+  hub_card_count: number | null;
+  hub_route: string | null;
+  hub_locked: boolean | null;
+  forces_category: string | null;
+  partner_ids: string[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type QuestContentCardInput = {
+  slug: string;
+  pillarId: PillarId;
+  questType: QuestType;
+  title: string;
+  objective?: string;
+  description?: string;
+  investorQuestion: string;
+  whyThisMatters: string;
+  plainEnglishAnswer?: string | null;
+  sourceFilingType: SecFilingFormType;
+  sourceSectionKey: string;
+  sourceSectionLabel: string;
+  aiPromptTemplate: string;
+  xpReward: number;
+  quizFormat: string;
+  quizConfig?: QuizConfig | null;
+  displayOrder?: number;
+  hubIcon?: string | null;
+  hubSubtitle?: string | null;
+  hubCardCount?: number | null;
+  hubRoute?: string | null;
+  hubLocked?: boolean | null;
+  forcesCategory?: string | null;
+  partnerIds?: string[];
+  isActive?: boolean;
+};
+
+export type QuestContentCardUpdate = Partial<QuestContentCardInput>;

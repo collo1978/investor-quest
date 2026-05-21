@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
-import { AppShell } from "@/components/AppShell";
-import { GameProvider } from "@/components/GameProvider";
+import { ClientAppRoot } from "@/components/ClientAppRoot";
 
 const grotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -39,9 +38,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="grain font-[var(--font-inter)]" suppressHydrationWarning>
-        <GameProvider>
-          <AppShell>{children}</AppShell>
-        </GameProvider>
+        <ClientAppRoot>{children}</ClientAppRoot>
       </body>
     </html>
   );

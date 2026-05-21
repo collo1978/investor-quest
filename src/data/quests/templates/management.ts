@@ -96,12 +96,11 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
             "Execution is measured against real operating and financial outcomes — not vibes."
         },
         {
-          kind: "confidence",
+          kind: "true-false",
           id: "mgmt1-q4",
           prompt:
-            "How confident are you that you could name the CEO/CFO and one concrete outcome they delivered in the last three years?",
-          scaleMax: 5,
-          scaleLabels: { low: "Not yet", high: "Very confident" },
+            "Investors should judge leadership on whether pay and operating outcomes align over multiple years — not resume polish alone.",
+          correct: true,
           explain:
             "If you cannot connect leadership to outcomes, you are flying blind on execution risk."
         }
@@ -553,6 +552,67 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
           correctIndex: 0,
           explain:
             "Strength shows up in flexible cost structure, liquidity buffers, and disciplined financing choices."
+        }
+      ]
+    }
+  },
+  {
+    slug: "management-summary",
+    type: "snapshot",
+    pillarId: "management",
+    title: "Management Summary",
+    objective:
+      "Synthesize leadership, incentives, capital discipline, and governance into one conviction check.",
+    description:
+      "Recap what you learned across the Management pillar before moving on.",
+    investorQuestion:
+      "Can you explain—in your own words—whether you trust this management team with your capital?",
+    plainEnglishAnswer: null,
+    whyItMatters:
+      "Conviction comes from connecting people, incentives, capital, and oversight—not from reading one section in isolation.",
+    secSection: {
+      form: "DEF 14A",
+      section: "Corporate Governance",
+      hint: "Synthesize themes from the proxy and 10-K MD&A."
+    },
+    aiTask:
+      "Summarize {Company.name}'s management story in plain English: leadership, pay alignment, capital discipline, and governance.",
+    artifactType: "note",
+    rewardXp: 120,
+    unlockRequirements: { pillar: "management", questSlugs: ["mgmt-1"] },
+    completionState: { kind: "quiz", passPct: MGMT_QUIZ_PASS },
+    difficulty: "core",
+    visualStyle: "panel",
+    estimatedTime: 10,
+    tags: ["summary", "management"],
+    displayOrder: 50,
+    cards: [
+      {
+        id: "card-1",
+        investorQuestion:
+          "What is your one-sentence verdict on management quality?",
+        plainEnglishAnswer:
+          "Pull together the board bench, pay alignment, capital track record, and governance protections into a single yes/no/maybe with one reason.",
+        whyItMatters: "Investing is ultimately a bet on people and incentives."
+      }
+    ],
+    quizConfig: {
+      passThreshold: MGMT_QUIZ_PASS,
+      questions: [
+        {
+          kind: "multiple-choice",
+          id: "mgmtsum-q1",
+          prompt:
+            "Which signal best supports a 'yes' on management quality?",
+          choices: [
+            "Pay packages that only reward short-term stock pops",
+            "Capital allocation and incentives aligned with long-term owners",
+            "A charismatic CEO with no disclosed pay metrics",
+            "Frequent unexplained CFO turnover with no explanation"
+          ],
+          correctIndex: 1,
+          explain:
+            "If you cannot explain it simply, keep digging — but the underlying test is alignment between incentives, governance, and outcomes."
         }
       ]
     }

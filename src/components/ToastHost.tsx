@@ -22,9 +22,11 @@ export function ToastHost() {
               ? "text-[rgba(216,180,254,0.95)]"
               : toast.kind === "unlock"
                 ? "text-neon-300"
-                : "text-ink-0";
+                : toast.kind === "xp"
+                  ? "text-emerald-300"
+                  : "text-ink-0";
 
-          const showBurst = toast.kind !== "xp";
+          const showBurst = true;
 
           return (
             <motion.div

@@ -15,7 +15,9 @@ export const APPLE_CONTENT: CompanyContent = {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple makes most of its money from:\n• iPhone\n• Mac\n• iPad\n• Wearables like Apple Watch and AirPods\n\nIt also earns recurring revenue from services such as:\n• App Store\n• Apple Music\n• iCloud\n• Apple TV+\n• Apple Pay\n\nThe iPhone remains Apple's biggest revenue driver."
+            "Apple makes most of its money from:\n• iPhone\n• Mac\n• iPad\n• Wearables like Apple Watch and AirPods\n\nIt also earns recurring revenue from services such as:\n• App Store\n• Apple Music\n• iCloud\n• Apple TV+\n• Apple Pay\n\nThe iPhone remains Apple's biggest revenue driver.\n\nSimple version\nApple sells premium devices, then keeps customers connected through its software and services ecosystem.",
+          investorInsight:
+            "Apple's services business matters because recurring revenue is more stable than hardware cycles — it compounds as the installed base grows."
         },
         "card-2": {
           plainEnglishAnswer:
@@ -282,14 +284,19 @@ export const APPLE_CONTENT: CompanyContent = {
               "Apple sells premium devices, then keeps customers connected through its Services layer. Services has grown into a major *recurring* revenue engine alongside hardware."
           },
           {
-            kind: "confidence",
+            kind: "fill-blank",
             id: "snapshot-q3",
             prompt:
-              "How confident are you that you could explain — in one sentence — what Apple actually sells?",
-            scaleMax: 5,
-            scaleLabels: { low: "Still fuzzy", high: "I could pitch it" },
+              "Apple's core offer is premium devices plus ___ that deepen loyalty and recurring revenue.",
+            options: [
+              "commodity hardware only",
+              "integrated services",
+              "enterprise consulting",
+              "retail store leases"
+            ],
+            correctIndex: 1,
             explain:
-              "There's no wrong answer here. Tracking your confidence as you learn is a habit serious investors build — it helps you spot the moments when your understanding is sharp enough to act on."
+              "Hardware gets customers in the door; Services (App Store, iCloud, Music, TV+, Pay) keep them paying over time — that's the ecosystem investors watch."
           }
         ]
       }
@@ -718,12 +725,17 @@ export const APPLE_CONTENT: CompanyContent = {
               "Engineering improvements are internal execution. FX, antitrust, and supplier fires are external shocks that can move results even when Apple's roadmap is on track."
           },
           {
-            kind: "confidence",
+            kind: "red-flag",
             id: "outside-forces-q3",
             prompt:
-              "How confident are you that you could explain — in one sentence — how competition and regulation differ as risks for Apple?",
-            scaleMax: 5,
-            scaleLabels: { low: "Still fuzzy", high: "Crystal clear" },
+              "Which risk is primarily driven by regulators and courts rather than product rivals?",
+            choices: [
+              "A competitor launching a cheaper phone",
+              "Antitrust rules on App Store fees and payments",
+              "Samsung improving OLED panels",
+              "Apple engineers shipping a faster chip"
+            ],
+            flagIndex: 1,
             explain:
               "Competition mostly threatens demand and pricing power; regulation threatens the rules of the platform itself. Separating the two is a core investor skill."
           }

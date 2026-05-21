@@ -80,6 +80,53 @@ export const ISLAND_PALETTES: Record<PillarId, IslandPalette> = {
   }
 };
 
+/**
+ * Quest-map (`/map`) hover accents — tuned to `quest-map.png` island art.
+ * Differs from {@link ISLAND_PALETTES} (3D island scenes use violet business).
+ */
+export type QuestMapHoverAccent = {
+  hi: string;
+  halo: string;
+  labelBg: string;
+  labelText: string;
+};
+
+/** Particle / bridge flow tint on the cinematic quest map. */
+export function questMapBridgeColor(
+  pillarId: PillarId,
+  completed: boolean
+): string {
+  if (completed) return COMPLETED_PALETTE.hi;
+  return QUEST_MAP_HOVER[pillarId].hi;
+}
+
+export const QUEST_MAP_HOVER: Record<PillarId, QuestMapHoverAccent> = {
+  business: {
+    hi: "#FFE58D",
+    halo: "rgba(245, 197, 71, 0.72)",
+    labelBg: "rgba(12, 10, 4, 0.88)",
+    labelText: "rgba(255, 241, 198, 0.98)"
+  },
+  forces: {
+    hi: "#FCA5A5",
+    halo: "rgba(248, 113, 113, 0.68)",
+    labelBg: "rgba(18, 6, 10, 0.88)",
+    labelText: "rgba(255, 228, 228, 0.98)"
+  },
+  financials: {
+    hi: "#4ADE80",
+    halo: "rgba(74, 222, 128, 0.68)",
+    labelBg: "rgba(6, 20, 14, 0.88)",
+    labelText: "rgba(220, 255, 236, 0.98)"
+  },
+  management: {
+    hi: "#BAE6FD",
+    halo: "rgba(96, 165, 250, 0.62)",
+    labelBg: "rgba(6, 12, 28, 0.88)",
+    labelText: "rgba(232, 244, 255, 0.98)"
+  }
+};
+
 /** Gold accent used when an island is fully completed (overrides pillar palette). */
 export const COMPLETED_PALETTE: IslandPalette = {
   hi: "rgba(255,229,141,1)",

@@ -7,7 +7,15 @@ import { useEffect, useState } from "react";
 import { InvestorQuestBrandLogo } from "@/components/InvestorQuestBrandLogo";
 import { LevelBar } from "@/components/LevelBar";
 import { COMPANIES, companyById } from "@/lib/demoData";
-import { EXPLORE_SUB_LINKS, PRIMARY_NAV, linkActive, linkClass } from "@/lib/navConfig";
+import { ExploreSearchNavItem } from "@/components/explore/ExploreSearchNavItem";
+import {
+  EXPLORE_SUB_LINKS,
+  ISLAND_NAV,
+  PRIMARY_NAV,
+  islandLinkActive,
+  linkActive,
+  linkClass
+} from "@/lib/navConfig";
 import { levelProgress } from "@/lib/gameState";
 
 /** Fields read from `useGame().state` (UI context slice, not full `GameState`). */
@@ -102,6 +110,10 @@ function MobileExploreAccordion({
                   </li>
                 );
               })}
+              <ExploreSearchNavItem
+                variant="mobile"
+                onNavigate={onNavigate}
+              />
             </ul>
           </motion.div>
         ) : null}
@@ -236,6 +248,30 @@ export function MobileNavDrawer({ open, onClose, pathname, state, onCompanyChang
 
               <nav className="mt-6 grid gap-2 pb-6" aria-label="Primary mobile">
                 <MobileExploreAccordion pathname={pathname} onNavigate={onClose} />
+                <div className="pt-1">
+                  <p className="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-2">
+                    Islands
+                  </p>
+                  <div className="grid gap-2">
+                    {ISLAND_NAV.map((item) => {
+                      const active = islandLinkActive(pathname, item.href);
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          prefetch
+                          onClick={onClose}
+                          className={[
+                            linkClass(active),
+                            "flex min-h-[48px] items-center"
+                          ].join(" ")}
+                        >
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
                 {PRIMARY_NAV.map((item) => {
                   const active = linkActive(pathname, item.href);
                   return (

@@ -18,6 +18,13 @@ export type Company = {
   id: CompanyId;
   name: string;
   ticker: string;
+  /** Brand mark under `/public/logos/companies/`. */
+  logoSrc: string;
+  /**
+   * Optional Supabase `company_logo_url` override — when set, hub map and headers
+   * prefer this over `logoSrc`.
+   */
+  companyLogoUrl?: string;
   /** SEC CIK (Central Index Key) — used later for filing fetches. */
   cik: string;
   /** One-line tagline used in island intro screens / cards. */
@@ -31,6 +38,7 @@ export const COMPANIES: readonly Company[] = [
     id: "aapl",
     name: "Apple",
     ticker: "AAPL",
+    logoSrc: "/logos/companies/aapl.svg",
     cik: "0000320193",
     tagline: "The world's most profitable consumer hardware + services ecosystem.",
     sector: "Consumer Tech"
@@ -39,6 +47,7 @@ export const COMPANIES: readonly Company[] = [
     id: "msft",
     name: "Microsoft",
     ticker: "MSFT",
+    logoSrc: "/logos/companies/msft.svg",
     cik: "0000789019",
     tagline: "Cloud, productivity, and AI infrastructure for the global enterprise.",
     sector: "Enterprise Software"
@@ -47,6 +56,7 @@ export const COMPANIES: readonly Company[] = [
     id: "tsla",
     name: "Tesla",
     ticker: "TSLA",
+    logoSrc: "/logos/companies/tsla.svg",
     cik: "0001318605",
     tagline: "Electric vehicles, energy storage, and autonomy at industrial scale.",
     sector: "Auto / Energy"
@@ -55,6 +65,7 @@ export const COMPANIES: readonly Company[] = [
     id: "nvda",
     name: "NVIDIA",
     ticker: "NVDA",
+    logoSrc: "/logos/companies/nvda.svg",
     cik: "0001045810",
     tagline: "The compute layer powering the AI economy.",
     sector: "Semiconductors"
@@ -63,6 +74,7 @@ export const COMPANIES: readonly Company[] = [
     id: "nke",
     name: "Nike",
     ticker: "NKE",
+    logoSrc: "/logos/companies/nke.svg",
     cik: "0000320187",
     tagline: "Iconic athletic brand with global distribution and design leverage.",
     sector: "Consumer"
@@ -71,6 +83,7 @@ export const COMPANIES: readonly Company[] = [
     id: "spot",
     name: "Spotify",
     ticker: "SPOT",
+    logoSrc: "/logos/companies/spot.svg",
     cik: "0001639920",
     tagline: "Audio-first subscription platform with podcasts and creator tooling.",
     sector: "Media / Subscription"
@@ -83,6 +96,11 @@ export function isCompanyId(id: string): id is CompanyId {
 
 export function companyById(id: string | null | undefined): Company {
   return COMPANIES.find((c) => c.id === id) ?? COMPANIES[0];
+}
+
+export function companyByTicker(ticker: string): Company | null {
+  const symbol = ticker.trim().toUpperCase();
+  return COMPANIES.find((c) => c.ticker === symbol) ?? null;
 }
 
 export const DEFAULT_COMPANY_ID: CompanyId = "aapl";

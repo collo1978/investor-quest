@@ -10,9 +10,10 @@ import { COMPANIES, DEFAULT_COMPANY_ID, type CompanyId } from "@/data/companies"
 import { PILLAR_ORDER, type PillarId } from "@/data/pillars";
 import type { BadgeId } from "@/engine/progression/badges";
 import type { CompanyStreaks } from "@/engine/progression/streaks";
+import { isQuestMapDefaultUnlocked } from "@/engine/progression/pillarUnlockPolicy";
 import { emptyStreaks } from "@/engine/progression/streaks";
 
-export const STATE_VERSION = 10;
+export const STATE_VERSION = 11;
 export const STORAGE_KEY = "investor-quest::state";
 
 export type QuizProgress = {
@@ -125,6 +126,10 @@ export type CompanyProgress = {
    * Quiz streak tiers (3 / 7 / 30) that already paid their one-time XP bonus.
    */
   quizStreakMilestoneXpClaimed: readonly (3 | 7 | 30)[];
+  /** Epoch ms when the player dismissed the first-visit `/map` mission brief. */
+  questMapBriefDismissedAt: number | null;
+  /** Epoch ms when the player dismissed the first-visit Business Island brief. */
+  businessIslandBriefDismissedAt: number | null;
 };
 
 export type OnboardingState = {
@@ -152,15 +157,11 @@ export type GameState = {
 };
 
 export function emptyPillarStates(): Record<PillarId, PillarState> {
-  // MVP: every island (pillar) is unlocked from the start so the player can
-  // explore Business / Forces / Financials / Management in any order. The
-  // progression rules in `engine/progression/unlocks.ts` still apply when
-  // we eventually want sequential unlocks — flip this back to `idx === 0`
-  // when that polish step lands.
   return PILLAR_ORDER.reduce((acc, pid) => {
+    const unlocked = isQuestMapDefaultUnlocked(pid);
     acc[pid] = {
-      unlocked: true,
-      unlockedAt: Date.now(),
+      unlocked,
+      unlockedAt: unlocked ? Date.now() : null,
       completedQuestSlugs: [],
       completedAt: {},
       readQuestSlugs: [],
@@ -186,7 +187,9 @@ export function initialCompanyProgress(): CompanyProgress {
     tenKRookieChallenge: null,
     futureArcRevealedAt: null,
     pillarIslandBonusClaimed: [],
-    quizStreakMilestoneXpClaimed: []
+    quizStreakMilestoneXpClaimed: [],
+    questMapBriefDismissedAt: null,
+    businessIslandBriefDismissedAt: null
   };
 }
 

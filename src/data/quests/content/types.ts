@@ -21,6 +21,8 @@ import type { QuizConfig } from "@/data/quests/types";
  */
 export type SubCardContent = {
   plainEnglishAnswer: string;
+  /** Elite one-liner for the reading HUD (optional). */
+  investorInsight?: string;
 };
 
 /**
@@ -30,6 +32,8 @@ export type SubCardContent = {
 export type QuestContentOverride = {
   /** Single-card quests: the plain-English answer for the parent quest. */
   plainEnglishAnswer?: string;
+  /** Single-card: optional investor insight line for the HUD. */
+  investorInsight?: string;
   /**
    * Multi-card quests: per-sub-card overrides keyed by `QuestSubCard.id`.
    * Only the listed cards are overridden; the rest fall back to the

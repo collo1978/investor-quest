@@ -13,6 +13,8 @@
  *         locked overlay) — shared, palette-driven.
  *   • Decorative layers are all `pointer-events: none`; only the Link
  *     wrapper is interactive (`pointer-events-auto`).
+ *   • No hover-only text or glow overlays — islands stay readable; links
+ *     keep motion scale on hover/tap for subtle feedback.
  *
  * State-driven via `IslandVisualState` and the pillar palette from
  * `islandTokens.ts`. Locked islands skip motion and prevent click navigation.
@@ -131,22 +133,6 @@ export function QuestIsland({
               orderIndex={orderIndex}
             />
           </SceneShell>
-
-          {/* Hover lighting wash — fades in on hover/focus. */}
-          <span
-            aria-hidden
-            className={[
-              "pointer-events-none absolute left-1/2 top-1/2 h-[180%] w-[180%] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-0 transition-opacity duration-300 ease-out",
-              locked
-                ? ""
-                : "group-hover:opacity-100 group-focus-visible:opacity-100"
-            ].join(" ")}
-            style={{
-              background: `radial-gradient(circle at 50% 45%, ${pal.halo} 0%, transparent 60%)`,
-              filter: "blur(34px)",
-              mixBlendMode: "screen"
-            }}
-          />
 
           {/* Completion crown — rotating dashed ring for cleared islands. */}
           {completed ? (

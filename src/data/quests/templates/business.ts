@@ -10,8 +10,7 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     type: "snapshot",
     pillarId: "business",
     title: "A Quick Snapshot",
-    objective:
-      "Get a 30-second picture of what {Company.name} sells and to whom.",
+    objective: "Get a quick overview of the business.",
     description:
       "In a tight brief: what does {Company.name} ({Company.ticker}) sell, to whom, and what is the one-line thesis for why it matters?",
     investorQuestion: "What does this company actually do?",
@@ -35,6 +34,10 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     difficulty: "intro",
     visualStyle: "card",
     estimatedTime: 3,
+    displayOrder: 1,
+    hubIcon: "snapshot",
+    hubCardCount: 3,
+    hubLocked: false,
     tags: ["overview", "intro", "thesis"],
     cards: [
       {
@@ -42,7 +45,7 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
         investorQuestion: "What does this company actually do?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "If you can't explain it simply, it's hard to know what you're investing in."
+          "Understanding the business is the first step to investing with confidence."
       },
       {
         id: "card-2",
@@ -88,6 +91,9 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     difficulty: "core",
     visualStyle: "panel",
     estimatedTime: 4,
+    displayOrder: 2,
+    hubIcon: "revenue",
+    hubCardCount: 3,
     tags: ["revenue", "products", "geography", "customers"],
     cards: [
       {
@@ -136,11 +142,14 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
       "Describe {Company.name}'s distribution channels and workforce composition in plain English.",
     artifactType: "note",
     rewardXp: 120,
-    unlockRequirements: { pillar: "business", questSlugs: ["snapshot"] },
+    unlockRequirements: { pillar: "business", questSlugs: ["revenue"] },
     completionState: { kind: "quiz", passPct: 0.66 },
     difficulty: "core",
     visualStyle: "panel",
     estimatedTime: 4,
+    displayOrder: 3,
+    hubIcon: "operations",
+    hubCardCount: 2,
     tags: ["operations", "distribution", "workforce"],
     cards: [
       {
@@ -189,6 +198,9 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     difficulty: "deep",
     visualStyle: "board",
     estimatedTime: 5,
+    displayOrder: 4,
+    hubIcon: "advantage",
+    hubCardCount: 2,
     tags: ["moat", "advantage", "r-and-d"],
     cards: [
       {
@@ -235,6 +247,9 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     difficulty: "deep",
     visualStyle: "panel",
     estimatedTime: 5,
+    displayOrder: 5,
+    hubIcon: "industry",
+    hubCardCount: 3,
     tags: ["industry", "competition", "regulation"],
     cards: [
       {

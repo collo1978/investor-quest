@@ -22,6 +22,7 @@
  *        `futureArcRevealedAt` (center-map final challenge + teaser)
  *   v10 — `quiz` streak key (was `quiz_mastery`), quiz streak milestone XP +
  *        `quizStreakMilestoneXpClaimed`, quiz streak badges
+ *   v11 — sequential pillar unlock (business first), `questMapBriefDismissedAt`
  */
 
 import {
@@ -33,6 +34,7 @@ import {
 import { PILLAR_ORDER, type PillarId } from "@/data/pillars";
 import { getCompanyPillarQuests } from "@/data/quests/library";
 import type { BadgeId } from "@/engine/progression/badges";
+import { isQuestMapDefaultUnlocked } from "@/engine/progression/pillarUnlockPolicy";
 import { isPillarComplete } from "@/engine/progression/unlocks";
 import {
   initialCompanyProgress,
@@ -59,44 +61,50 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 }
 
 function migratePillars(raw: unknown): Record<PillarId, PillarState> {
-  const base = initialCompanyProgress().pillars;
-  if (!isPlainObject(raw)) return base;
-  const out = { ...base };
-  for (const pid of PILLAR_ORDER) {
-    const v = raw[pid];
-    if (!isPlainObject(v)) continue;
-    // Promote to unlocked whenever the current initial-state policy says so.
-    // This lets us widen unlock defaults (e.g. open every island for MVP)
-    // without leaving older saved states locked behind the previous policy.
-    const unlocked = base[pid].unlocked || Boolean(v.unlocked);
+  const out = {} as Record<PillarId, PillarState>;
+  for (let i = 0; i < PILLAR_ORDER.length; i++) {
+    const pid = PILLAR_ORDER[i];
+    const pillarRaw = isPlainObject(raw) ? raw[pid] : undefined;
+    const v = isPlainObject(pillarRaw) ? pillarRaw : undefined;
     const slugsRaw =
-      (v.completedQuestSlugs as unknown) ?? (v.completedQuestIds as unknown);
+      v != null
+        ? (v.completedQuestSlugs as unknown) ?? (v.completedQuestIds as unknown)
+        : undefined;
     const slugs = Array.isArray(slugsRaw)
       ? (slugsRaw as unknown[]).filter((x): x is string => typeof x === "string")
       : [];
-    const unlockedAt =
-      typeof v.unlockedAt === "number" ? (v.unlockedAt as number) : null;
     const completedAt: Record<string, number> = {};
-    if (isPlainObject(v.completedAt)) {
+    if (v != null && isPlainObject(v.completedAt)) {
       for (const [k, ts] of Object.entries(v.completedAt)) {
         if (typeof ts === "number") completedAt[k] = ts;
       }
     }
-    const readSlugsRaw = (v.readQuestSlugs as unknown) ?? [];
+    const readSlugsRaw = v != null ? (v.readQuestSlugs as unknown) : [];
     const readSlugs = Array.isArray(readSlugsRaw)
       ? (readSlugsRaw as unknown[]).filter(
           (x): x is string => typeof x === "string"
         )
       : [];
     const readAt: Record<string, number> = {};
-    if (isPlainObject(v.readAt)) {
+    if (v != null && isPlainObject(v.readAt)) {
       for (const [k, ts] of Object.entries(v.readAt)) {
         if (typeof ts === "number") readAt[k] = ts;
       }
     }
+    const prev = i > 0 ? PILLAR_ORDER[i - 1] : null;
+    const savedUnlocked =
+      isPlainObject(v) && v.unlocked === true;
+    const unlocked =
+      savedUnlocked ||
+      isQuestMapDefaultUnlocked(pid) ||
+      (prev !== null && isPillarComplete(out, prev));
+    const savedUnlockedAt =
+      isPlainObject(v) && typeof v.unlockedAt === "number"
+        ? (v.unlockedAt as number)
+        : null;
     out[pid] = {
       unlocked,
-      unlockedAt: unlocked ? unlockedAt ?? Date.now() : null,
+      unlockedAt: unlocked ? savedUnlockedAt ?? Date.now() : null,
       completedQuestSlugs: slugs,
       completedAt,
       readQuestSlugs: readSlugs,
@@ -306,6 +314,14 @@ function migrateCompanyProgress(
   const quizStreakMilestoneXpClaimed = migrateQuizStreakMilestoneXpClaimed(
     rawObj.quizStreakMilestoneXpClaimed
   );
+  const questMapBriefDismissedAt =
+    typeof rawObj.questMapBriefDismissedAt === "number"
+      ? (rawObj.questMapBriefDismissedAt as number)
+      : null;
+  const businessIslandBriefDismissedAt =
+    typeof rawObj.businessIslandBriefDismissedAt === "number"
+      ? (rawObj.businessIslandBriefDismissedAt as number)
+      : null;
 
   return {
     ...mid,
@@ -313,7 +329,9 @@ function migrateCompanyProgress(
     tenKRookieChallenge,
     futureArcRevealedAt,
     pillarIslandBonusClaimed,
-    quizStreakMilestoneXpClaimed
+    quizStreakMilestoneXpClaimed,
+    questMapBriefDismissedAt,
+    businessIslandBriefDismissedAt
   };
 }
 

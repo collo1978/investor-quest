@@ -147,16 +147,18 @@ export const TEN_K_ROOKIE_FINAL_QUIZ: QuizConfig = {
     },
     {
       id: "tk-m-2",
-      kind: "confidence",
+      kind: "multiple-choice",
       prompt:
-        "Confidence check: how comfortable are you reading incentive tables (grants, targets, clawbacks) without getting lost?",
-      scaleMax: 5,
-      scaleLabels: {
-        low: "Still learning",
-        high: "I can navigate them"
-      },
+        "When reading a proxy incentive table, what should you verify first?",
+      choices: [
+        "Whether the CEO photo is recent",
+        "How pay ties to metrics owners care about (TSR, EBITDA, FCF, etc.)",
+        "The font size of the footnotes",
+        "How many pages the filing has"
+      ],
+      correctIndex: 1,
       explain:
-        "No wrong answer — this is a pulse check. Incentives should line up with the long-term economics you care about as an owner."
+        "Incentives should line up with the long-term economics you care about as an owner — start with what triggers payout, not the formatting."
     },
     {
       id: "tk-m-3",

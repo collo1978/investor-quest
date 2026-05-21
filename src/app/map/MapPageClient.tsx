@@ -12,13 +12,42 @@
 
 import { Component, type ReactNode, useEffect, useState } from "react";
 import { QuestMapScene } from "@/components/map/QuestMapScene";
-import { QUEST_MAP_PATH } from "@/lib/screenAssetUrls";
+import {
+  BUSINESS_HUB_IMG_SRC,
+  FINANCIAL_HUB_IMG_SRC,
+  FORCES_HUB_IMG_SRC,
+  MANAGEMENT_HUB_IMG_SRC,
+  QUEST_MAP_AVIF_PATH,
+  QUEST_MAP_PATH
+} from "@/lib/screenAssetUrls";
+import { preloadImage } from "@/lib/preloadImage";
+
+function QuestMapStaticFallback() {
+  return (
+    <div className="absolute inset-0 grid place-items-center overflow-hidden rounded-3xl bg-[#05050F]">
+      <picture className="pointer-events-none flex max-h-full max-w-full items-center justify-center">
+        <source srcSet={QUEST_MAP_AVIF_PATH} type="image/avif" />
+        <source srcSet={QUEST_MAP_PATH} type="image/webp" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={QUEST_MAP_PATH}
+          alt="Quest Map"
+          className="max-h-full max-w-full select-none object-contain"
+        />
+      </picture>
+    </div>
+  );
+}
 
 export default function MapPageClient() {
   const [hydrationReady, setHydrationReady] = useState(false);
 
   useEffect(() => {
     setHydrationReady(true);
+    preloadImage(BUSINESS_HUB_IMG_SRC);
+    preloadImage(FINANCIAL_HUB_IMG_SRC);
+    preloadImage(MANAGEMENT_HUB_IMG_SRC);
+    preloadImage(FORCES_HUB_IMG_SRC);
   }, []);
 
   return (
@@ -78,17 +107,4 @@ class MapSceneOrFallback extends Component<unknown, { failed: boolean }> {
     }
     return <QuestMapScene />;
   }
-}
-
-function QuestMapStaticFallback() {
-  return (
-    <div className="absolute inset-0 grid place-items-center overflow-hidden rounded-3xl bg-[#05050F]">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={QUEST_MAP_PATH}
-        alt="Quest Map"
-        className="pointer-events-none max-h-full max-w-full select-none object-contain"
-      />
-    </div>
-  );
 }

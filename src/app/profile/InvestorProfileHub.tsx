@@ -496,6 +496,27 @@ export default function InvestorProfileHub() {
               </div>
             </GlassCard>
           </Link>
+
+          <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] text-ink-2">
+            <span className="font-semibold uppercase tracking-[0.14em] text-ink-2/80">
+              Partner platform
+            </span>
+            <Link
+              href="/admin"
+              className="text-violet-300 underline-offset-2 transition hover:text-violet-200 hover:underline"
+            >
+              Admin console
+            </Link>
+            <span className="text-white/20" aria-hidden>
+              ·
+            </span>
+            <Link
+              href="/dashboard"
+              className="text-violet-300 underline-offset-2 transition hover:text-violet-200 hover:underline"
+            >
+              Engagement dashboards
+            </Link>
+          </div>
         </main>
     </div>
   );

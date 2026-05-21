@@ -121,15 +121,6 @@ export type OrderQuestion = QuizQuestionBase & {
   steps: string[];
 };
 
-/** Self-rating (1..scaleMax). Always counts as correct on a non-empty rating. */
-export type ConfidenceQuestion = QuizQuestionBase & {
-  kind: "confidence";
-  /** Defaults to 5. */
-  scaleMax?: number;
-  /** Optional label list overriding the default "Not confident" / "Very confident" endpoints. */
-  scaleLabels?: { low: string; high: string };
-};
-
 // ===========================================================================
 // Investor-specific kinds
 // ===========================================================================
@@ -180,7 +171,6 @@ export type QuizQuestion =
   | TrueFalseQuestion
   | MatchQuestion
   | OrderQuestion
-  | ConfidenceQuestion
   | BullBearQuestion
   | RiskMeterQuestion
   | SwipeCardsQuestion;
@@ -193,11 +183,79 @@ export type QuizConfig = {
   passThreshold: number;
 };
 
+/** True when a quest has at least one runnable quiz question. */
+export function hasPlayableQuizConfig(
+  quiz: QuizConfig | null | undefined
+): quiz is QuizConfig {
+  return Array.isArray(quiz?.questions) && quiz.questions.length > 0;
+}
+
+/** Legacy CMS rows may still ship `kind: "confidence"` — convert to MC. */
+type LegacyConfidenceQuestion = QuizQuestionBase & {
+  kind: "confidence";
+  scaleMax?: number;
+  scaleLabels?: { low: string; high: string };
+};
+
+function isLegacyConfidenceQuestion(
+  q: QuizQuestion | LegacyConfidenceQuestion
+): q is LegacyConfidenceQuestion {
+  return (q as { kind: string }).kind === "confidence";
+}
+
+function migrateLegacyConfidenceQuestion(
+  q: LegacyConfidenceQuestion
+): MultipleChoiceQuestion {
+  return {
+    kind: "multiple-choice",
+    id: q.id,
+    prompt: q.prompt,
+    choices: [
+      "I could not explain this yet",
+      "I could explain the basics with my notes",
+      "I could explain it clearly in one sentence",
+      "I could teach a friend without notes"
+    ],
+    correctIndex: 2,
+    explain:
+      q.explain ??
+      "Keep reviewing until you can explain the idea simply — that is the investor readiness test."
+  };
+}
+
+function normalizeQuizQuestions(
+  questions: readonly (QuizQuestion | LegacyConfidenceQuestion)[]
+): QuizQuestion[] {
+  return questions.map((q) =>
+    isLegacyConfidenceQuestion(q) ? migrateLegacyConfidenceQuestion(q) : q
+  );
+}
+
+/** Drop CMS stubs that only set passThreshold without questions. */
+export function normalizeQuizConfig(
+  raw: QuizConfig | null | undefined
+): QuizConfig | undefined {
+  if (!hasPlayableQuizConfig(raw)) return undefined;
+  return {
+    questions: normalizeQuizQuestions(raw.questions),
+    passThreshold: raw.passThreshold ?? 0.66
+  };
+}
+
+/** First source with real questions wins (left-to-right priority). */
+export function mergeQuizConfig(
+  ...sources: (QuizConfig | null | undefined)[]
+): QuizConfig | undefined {
+  for (const src of sources) {
+    const normalized = normalizeQuizConfig(src);
+    if (normalized) return normalized;
+  }
+  return undefined;
+}
+
 /**
  * Pure scoring helper. Returns `true` when the user's answer is the
- * correct one for the question kind. `confidence` always returns
- * `true` once the user has selected any rating (1..scaleMax) — the
- * goal is reflection, not testing knowledge.
+ * correct one for the question kind.
  */
 export function isQuizAnswerCorrect(q: QuizQuestion, answer: unknown): boolean {
   switch (q.kind) {
@@ -220,10 +278,6 @@ export function isQuizAnswerCorrect(q: QuizQuestion, answer: unknown): boolean {
       if (!Array.isArray(answer)) return false;
       if (answer.length !== q.steps.length) return false;
       return q.steps.every((_, i) => answer[i] === i);
-    case "confidence": {
-      const max = q.scaleMax ?? 5;
-      return typeof answer === "number" && answer >= 1 && answer <= max;
-    }
     case "bull-bear":
       return (answer === "bull" || answer === "bear") && answer === q.correct;
     case "risk-meter": {
@@ -256,7 +310,6 @@ export function isQuizAnswerProvided(
     case "odd-one-out":
     case "red-flag":
     case "fill-blank":
-    case "confidence":
     case "risk-meter":
       return typeof answer === "number";
     case "true-false":
@@ -339,12 +392,6 @@ export const QUIZ_FORMAT_REGISTRY: readonly QuizFormatDescriptor[] = [
     label: "Order the steps",
     category: "core",
     summary: "Drag cards into the correct order. Doubles as ranking / timeline."
-  },
-  {
-    kind: "confidence",
-    label: "Confidence check",
-    category: "core",
-    summary: "Self-rate understanding. Always counts as correct on a rating."
   },
   // Investor-specific — designed for finance content.
   {
@@ -544,7 +591,9 @@ export type CompletionRule =
   | { kind: "manual" }
   | { kind: "checklist"; checklistKeys: string[] }
   | { kind: "quiz"; passPct?: number }
-  | { kind: "minigame"; key: "quiz" | "board" | "terminal" };
+  | { kind: "minigame"; key: "quiz" | "board" | "terminal" }
+  /** Mark-as-read completes the quest (no quiz XP). Used for FORCES topic cards. */
+  | { kind: "read" };
 
 /**
  * One Q/A/Why "facet" inside a multi-card quest.
@@ -563,6 +612,11 @@ export type QuestSubCard = {
   /** Plain-English answer. `null` renders the "awaiting SEC/AI content" placeholder. */
   plainEnglishAnswer: string | null;
   whyItMatters: string;
+  /**
+   * Optional elite insight (one sharp line). When absent, the UI may
+   * derive a short teaser from `whyItMatters`.
+   */
+  investorInsight?: string | null;
 };
 
 /**
@@ -589,6 +643,10 @@ export type QuestTemplate = {
   plainEnglishAnswer: string | null;
   /** One short sentence explaining why the investor should care. */
   whyItMatters: string;
+  /**
+   * Optional elite insight for single-card quests (HUD "Investor insight").
+   */
+  investorInsight?: string | null;
   secSection: SecSectionRef | null;
   aiTask: string;
   artifactType: ArtifactType;
@@ -609,6 +667,27 @@ export type QuestTemplate = {
    * is marked as read once every sub-card has been marked.
    */
   cards?: readonly QuestSubCard[];
+  /** FORCES pillar — groups topic cards into four island categories. */
+  forcesCategory?:
+    | "positive-inside"
+    | "negative-inside"
+    | "positive-outside"
+    | "negative-outside";
+  /** Sort order within pillar (and within `forcesCategory` when set). */
+  displayOrder?: number;
+  /** Business hub map — icon key (see `businessHubIcons`). */
+  hubIcon?: string | null;
+  /** Business hub map — subtitle under title; falls back to `investorQuestion`. */
+  hubSubtitle?: string | null;
+  /** Business hub map — question/card count badge. */
+  hubCardCount?: number | null;
+  /** Business hub map — route override (default `/business/[slug]`). */
+  hubRoute?: string | null;
+  /**
+   * Business hub map — force locked state.
+   * `null` = auto policy (card 1 open; TODO: engine progression).
+   */
+  hubLocked?: boolean | null;
 };
 
 /**

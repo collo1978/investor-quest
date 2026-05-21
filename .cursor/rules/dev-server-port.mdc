@@ -1,0 +1,69 @@
+---
+description: Local dev server must use port 3003 only
+alwaysApply: true
+---
+
+# Dev server — port 3003
+
+**Always use port 3003** for `npm run dev`. Do not switch to 3002 or other ports unless the user explicitly requests it — changing ports breaks existing localhost bookmarks and causes `ERR_CONNECTION_REFUSED`.
+
+## Commands
+
+- Start: `npm run dev` (runs `next dev -H 0.0.0.0 -p 3003` — reachable on your LAN)
+- Fresh cache: `npm run dev:fresh`
+- **Never** run `npm run dev -- -p 3002` or `npm run dev -- -p 3003` (duplicate `-p` flags break startup)
+
+## Canonical URLs
+
+- Quest admin: `http://localhost:3003/admin/quests?partner=demo-riverside-academy`
+- Game health: `http://localhost:3003/admin/game-health`
+- Game map: `http://localhost:3003/map`
+
+## Phone on same Wi‑Fi (Mission Control)
+
+1. Run `npm run dev` — terminal prints **Phone (LAN):** `http://192.168.x.x:3003/admin/game-health`
+2. Phone and PC must be on the **same Wi‑Fi** (not guest network / VPN isolating devices)
+3. Open that URL in the phone browser (replace with your machine’s IPv4 from `ipconfig` if needed)
+4. **Firewall:** if the phone times out, run `scripts/allow-dev-firewall.ps1` as Administrator (allows TCP 3003 on Private networks)
+5. Keep `GAME_HEALTH_BASE_URL=http://localhost:3003` in `.env.local` — health probes run on the PC, not the phone
+
+## Start in Cursor
+
+- **Ctrl+Shift+B** — default build task **Investor Quest: dev server** (dedicated terminal; runs until you stop it with **Ctrl+C**).
+- Or run `npm run dev` in any terminal and leave it open (see project `README.md`).
+
+## Hot reload
+
+Next.js **Fast Refresh** is on by default. Keep `npm run dev` running in the terminal; saving files updates the browser without restarting the server.
+
+## Game health monitoring
+
+- Mission Control (mobile ops): `http://localhost:3003/admin/game-health`
+- Mobile fix panel: `http://localhost:3003/admin/mobile-fix/{issueId}`
+- Regenerate / Prompt Studio: linked from Mission Control quick nav
+- Apply migration: `supabase/migrations/20260601120000_game_health.sql`
+- Optional email alerts: `RESEND_API_KEY`, `GAME_HEALTH_ALERT_EMAIL`, `GAME_HEALTH_EMAIL_FROM`
+- Optional cron secret: `GAME_HEALTH_CRON_SECRET` for `POST /api/admin/game-health/cron`
+- Probes use `GAME_HEALTH_BASE_URL=http://localhost:3003` when checking routes
+- Background cron (dev server must be running): `node scripts/game-health-cron.mjs`
+
+## Fast quest iteration (local)
+
+Add to `.env.local` for near-instant prompt testing:
+
+```env
+QUEST_FAST_DEV=true
+NEXT_PUBLIC_QUEST_FAST_DEV=true
+```
+
+- Skips jargon rewrite loops and session-wide demo prewarm
+- Admin: **Snapshot card-1 only** at `/admin/quest-generation` (Fast mode on by default)
+- In-game cache bypass: `http://localhost:3003/business/snapshot?force=1`
+- Terminal timing: `[quest-pipeline:timing]` per card
+
+## If localhost fails
+
+1. Confirm terminal still shows `✓ Ready` and `Local: http://localhost:3003`
+2. Restart: `npm run dev` (auto-frees port 3003 if another process holds it)
+3. Manual port kill: `npm run dev:kill-port` or `taskkill /PID <pid> /F` (Windows)
+4. Hard refresh browser: **Ctrl + Shift + R**

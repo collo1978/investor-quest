@@ -80,8 +80,12 @@ export type GameAction =
   | { type: "lock-company"; companyId: string }
   | { type: "mark-quest-read"; pillarId: PillarId; slug: string }
   | { type: "mark-quest-unread"; pillarId: PillarId; slug: string }
+  /** Clears read/completion/work for one pillar (testing). Keeps pillar unlocked. */
+  | { type: "clear-pillar-progress"; pillarId: PillarId }
   | { type: "submit-conviction-and-advance" }
-  | { type: "complete-ten-k-rookie-challenge"; scoreFraction: number };
+  | { type: "complete-ten-k-rookie-challenge"; scoreFraction: number }
+  | { type: "dismiss-quest-map-brief" }
+  | { type: "dismiss-business-island-brief" };
 
 // -----------------------------------------------------------------------------
 // RewardEvent — emitted side-effects for the UI layer
@@ -641,7 +645,6 @@ export function reduce(state: GameState, action: GameAction): ReduceResult {
     }
 
     case "mark-quest-read": {
-      // Reading-progress only. No XP, no level change, no pillar unlock.
       const prog0 = getProg(state);
       const pillarState = prog0.pillars[action.pillarId];
       if (!pillarState) return { state, events };
@@ -649,7 +652,7 @@ export function reduce(state: GameState, action: GameAction): ReduceResult {
         return { state, events };
       }
       const now = Date.now();
-      const prog1: CompanyProgress = {
+      let prog1: CompanyProgress = {
         ...prog0,
         pillars: {
           ...prog0.pillars,
@@ -665,7 +668,96 @@ export function reduce(state: GameState, action: GameAction): ReduceResult {
         pillarId: action.pillarId,
         slug: action.slug
       });
+
+      const quest = findQuestDefinition(
+        state.activeCompanyId as CompanyId,
+        action.pillarId,
+        action.slug
+      );
+      const ps1 = prog1.pillars[action.pillarId];
+      if (
+        quest?.completionState?.kind === "read" &&
+        ps1 &&
+        !ps1.completedQuestSlugs.includes(action.slug)
+      ) {
+        prog1 = {
+          ...prog1,
+          pillars: {
+            ...prog1.pillars,
+            [action.pillarId]: {
+              ...ps1,
+              completedQuestSlugs: [...ps1.completedQuestSlugs, action.slug],
+              completedAt: { ...ps1.completedAt, [action.slug]: now }
+            }
+          }
+        };
+
+        let pillarJustCompleted: PillarId | null = null;
+        if (isPillarComplete(prog1.pillars, action.pillarId)) {
+          pillarJustCompleted = action.pillarId;
+          events.push({ kind: "pillar-completed", pillarId: action.pillarId });
+          const newlyUnlocked = nextUnlockablePillar(
+            prog1.pillars,
+            action.pillarId
+          );
+          const queue = prog1.pendingConvictionQueue.filter(
+            (x) => x.completedPillarId !== action.pillarId
+          );
+          prog1 = {
+            ...prog1,
+            pendingConvictionQueue: [
+              ...queue,
+              {
+                completedPillarId: action.pillarId,
+                pillarToUnlock: newlyUnlocked
+              }
+            ]
+          };
+          events.push({
+            kind: "pillar-awaiting-conviction",
+            completedPillarId: action.pillarId,
+            nextPillarId: newlyUnlocked
+          });
+        }
+
+        const allDone = allPillarsComplete(prog1.pillars);
+        if (allDone) events.push({ kind: "all-pillars-complete" });
+
+        prog1 = awardBadgesIfAny(prog1, events, {
+          completedQuestsTotal: countCompletedQuests(prog1),
+          pillarJustCompleted,
+          allPillarsCompleted: allDone,
+          newLevel: prog1.level,
+          newStreak: prog1.streaks.research.streak,
+          newQuizStreak: prog1.streaks.quiz.streak
+        });
+      }
+
       return { state: putProg(state, prog1), events };
+    }
+
+    case "dismiss-quest-map-brief": {
+      const prog = getProg(state);
+      if (prog.questMapBriefDismissedAt != null) return { state, events };
+      return {
+        state: putProg(state, {
+          ...prog,
+          questMapBriefDismissedAt: Date.now()
+        }),
+        events
+      };
+    }
+
+    case "dismiss-business-island-brief": {
+      const prog = getProg(state);
+      if (prog.businessIslandBriefDismissedAt != null) return { state, events };
+      return {
+        state: putProg(state, {
+          ...prog,
+          businessIslandBriefDismissedAt: Date.now()
+        }),
+        events
+      };
     }
 
     case "mark-quest-unread": {
@@ -691,6 +783,33 @@ export function reduce(state: GameState, action: GameAction): ReduceResult {
         }
       };
       return { state: putProg(state, prog1), events };
+    }
+
+    case "clear-pillar-progress": {
+      const prog0 = getProg(state);
+      const pillarState = prog0.pillars[action.pillarId];
+      if (!pillarState) return { state, events };
+      const freshPillar = initialCompanyProgress().pillars[action.pillarId];
+      const prefix = `${action.pillarId}:`;
+      const nextWork = { ...prog0.questWork };
+      for (const key of Object.keys(nextWork)) {
+        if (key.startsWith(prefix)) delete nextWork[key];
+      }
+      return {
+        state: putProg(state, {
+          ...prog0,
+          pillars: {
+            ...prog0.pillars,
+            [action.pillarId]: {
+              ...freshPillar,
+              unlocked: pillarState.unlocked,
+              unlockedAt: pillarState.unlockedAt
+            }
+          },
+          questWork: nextWork
+        }),
+        events
+      };
     }
 
     default:

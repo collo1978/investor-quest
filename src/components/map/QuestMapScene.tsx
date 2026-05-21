@@ -5,7 +5,7 @@
  *
  * The /map experience is intentionally simple at the MVP level:
  *
- *   1) The original cinematic `quest-map.png` artwork is THE visual.
+ *   1) The cinematic `final-quest-map.png` artwork is THE visual.
  *   2) Four invisible Link hotspots are layered over the artwork — one
  *      per pillar island. Hotspots show only a subtle hover glow / ring
  *      and a palette-tinted bloom; they never paint over the artwork.
@@ -22,13 +22,14 @@
  *     simply light up as energy flows through them.
  *   - Central "10K reactor" overlay: breathing bloom, three counter-
  *     rotating dashed rings, orbiting motes.
- *   - Per-island hover bloom + thin glowing ring (palette-tinted).
+ *   - Per-island hover bloom + thin ring (palette); state glows (active,
+ *     completion crown, in-progress).
  *   - Click activation: brief radial flash + bridge flow brightens.
  *   - Subtle pointer-driven parallax across three depth layers.
  *
  * Letterbox-aware alignment
  * -------------------------
- * The artwork is rendered at its natural aspect ratio (1024 × 676) and
+ * The artwork is rendered at its natural aspect ratio (1402 × 1122) and
  * centred inside the stage. A `ResizeObserver` measures the stage and
  * computes the largest letterboxed rectangle that fits — the same box
  * the image renders into. Hotspots, bridge paths, particles, and the
@@ -66,7 +67,10 @@ import {
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGame } from "@/components/GameProvider";
+import { MapForcesRocketEmblem } from "@/components/map/MapForcesRocketEmblem";
+import { companyById, type CompanyId } from "@/data/companies";
 import { PILLAR_META, type PillarId } from "@/data/pillars";
+import { resolveCompanyLogoUrl } from "@/lib/business/buildBusinessHubCards";
 import { pillarQuestCount } from "@/data/quests/library";
 import {
   getPillarReadingProgress,
@@ -75,19 +79,18 @@ import {
 } from "@/engine";
 import {
   COMPLETED_PALETTE,
-  ISLAND_PALETTES,
-  type IslandPalette
+  QUEST_MAP_HOVER,
+  questMapBridgeColor,
+  type QuestMapHoverAccent
 } from "@/components/map/islandTokens";
-import { QUEST_MAP_PATH } from "@/lib/screenAssetUrls";
+import { QUEST_MAP_AVIF_PATH, QUEST_MAP_PATH } from "@/lib/screenAssetUrls";
 
 // ---------------------------------------------------------------------------
 // Hotspot map (percentages of the rendered image bounding box).
 // ---------------------------------------------------------------------------
-// The original quest-map artwork places the four islands in a clean
-// quadrant grid around a central 10K hub. These coordinates are tuned to
-// the visible silhouettes of each island on `quest-map.png` (1024 × 676)
-// and stay glued to them at any viewport because the image box itself
-// is letterboxed by the stage at the same aspect ratio.
+// `final-quest-map.png` places the four islands in a quadrant around
+// the central 10K hub (wider canvas than the legacy map). Percent coords are
+// tuned to the island masses + baked-in hex labels; tweak if art changes.
 //
 // `cx`/`cy` = centre of the hotspot inside the image box (0–100 %)
 // `w`/`h`   = hotspot size as a % of the image box (oval / elliptical)
@@ -100,18 +103,41 @@ type Hotspot = {
   h: number;
 };
 
+/** Ellipses cover island + badge — kept tight so hover glow hugs the art. */
 const HOTSPOTS: ReadonlyArray<Hotspot> = [
-  { id: "business",   cx: 22, cy: 32, w: 24, h: 28 },
-  { id: "forces",     cx: 78, cy: 32, w: 24, h: 28 },
-  { id: "financials", cx: 22, cy: 74, w: 24, h: 28 },
-  { id: "management", cx: 78, cy: 74, w: 24, h: 28 }
+  { id: "business",   cx: 23, cy: 33, w: 23, h: 29 },
+  { id: "forces",     cx: 77, cy: 33, w: 23, h: 29 },
+  { id: "financials", cx: 23, cy: 67, w: 23, h: 28 },
+  { id: "management", cx: 77, cy: 67, w: 23, h: 28 }
 ];
+
+/**
+ * Top-row art has hex titles at the bottom of the island — lift the enter
+ * CTA onto the structure so it does not cover BUSINESS / FORCES signs.
+ */
+function enterCtaLayout(pillarId: PillarId): string {
+  if (pillarId === "business" || pillarId === "forces") {
+    return "top-[28%] -translate-x-1/2";
+  }
+  return "top-1/2 -translate-x-1/2 -translate-y-1/2";
+}
+
+/**
+ * Locked-island lock chip — centred on the rocky mass; top row sits higher
+ * so it does not sit on the baked-in hex “BUSINESS / FORCES” plaques.
+ */
+function lockBadgeLayout(pillarId: PillarId): string {
+  if (pillarId === "business" || pillarId === "forces") {
+    return "left-1/2 top-[33%] -translate-x-1/2 -translate-y-1/2";
+  }
+  return "left-1/2 top-[44%] -translate-x-1/2 -translate-y-1/2";
+}
 
 /** Centre of the artwork — where the 10K reactor sits. */
 const REACTOR_CENTER = { x: 50, y: 50 } as const;
 
-const IMAGE_NATURAL_W = 1024;
-const IMAGE_NATURAL_H = 676;
+const IMAGE_NATURAL_W = 1402;
+const IMAGE_NATURAL_H = 1122;
 const IMAGE_ASPECT = IMAGE_NATURAL_W / IMAGE_NATURAL_H;
 
 // ---------------------------------------------------------------------------
@@ -127,10 +153,10 @@ const IMAGE_ASPECT = IMAGE_NATURAL_W / IMAGE_NATURAL_H;
 // artwork if anything ever drifts.
 // ---------------------------------------------------------------------------
 const BRIDGE_PATHS: Record<PillarId, string> = {
-  business:   "M 22 32 Q 32 40 50 50",
-  forces:     "M 78 32 Q 68 40 50 50",
-  financials: "M 22 74 Q 32 64 50 50",
-  management: "M 78 74 Q 68 64 50 50"
+  business:   "M 23 33 Q 36 42 50 50",
+  forces:     "M 77 33 Q 64 42 50 50",
+  financials: "M 23 67 Q 36 58 50 50",
+  management: "M 77 67 Q 64 58 50 50"
 };
 
 // ---------------------------------------------------------------------------
@@ -205,6 +231,78 @@ type IslandModel = {
   totalQuests: number;
 };
 
+/** Overall campaign progress — top-right inside the letterboxed map artwork. */
+function QuestMapOverallProgressHud({ progressPct }: { progressPct: number }) {
+  const pct = Math.max(0, Math.min(100, Math.round(progressPct)));
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="pointer-events-none absolute right-2 top-2 z-[25] w-[min(9rem,32vw)] sm:right-3 sm:top-3 sm:w-36"
+      role="status"
+      aria-label={`Quest map progress ${pct} percent`}
+    >
+      <motion.div
+        className="rounded-xl border border-[rgba(139,92,246,0.45)] bg-[rgba(8,6,18,0.85)] px-3 py-2.5 shadow-[0_0_24px_rgba(139,92,246,0.22),0_10px_32px_rgba(0,0,0,0.5)] backdrop-blur-md"
+        initial={false}
+        animate={
+          pct >= 100
+            ? {
+                boxShadow: [
+                  "0 0 24px rgba(139,92,246,0.32), 0 10px 32px rgba(0,0,0,0.5)",
+                  "0 0 36px rgba(168,85,247,0.45), 0 10px 32px rgba(0,0,0,0.5)",
+                  "0 0 24px rgba(139,92,246,0.32), 0 10px 32px rgba(0,0,0,0.5)"
+                ]
+              }
+            : undefined
+        }
+        transition={
+          pct >= 100
+            ? { duration: 2.2, repeat: Infinity, ease: "easeInOut", repeatType: "mirror" }
+            : undefined
+        }
+      >
+        <motion.div className="mb-1.5 flex justify-end">
+          <span
+            className="font-[var(--font-grotesk)] text-base font-bold tabular-nums leading-none text-[rgba(216,180,254,0.98)] sm:text-lg"
+            style={{ textShadow: "0 0 14px rgba(168,85,247,0.55)" }}
+          >
+            {pct}%
+          </span>
+        </motion.div>
+        <motion.div
+          className="relative h-2 overflow-hidden rounded-full"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.32) 100%)",
+            boxShadow:
+              "inset 0 1px 2px rgba(0,0,0,0.65), inset 0 -1px 0 rgba(255,255,255,0.06)"
+          }}
+        >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-white/[0.1]"
+          />
+          <motion.div
+            className="relative h-full rounded-full"
+            initial={false}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(109,40,217,0.9) 0%, rgba(168,85,247,1) 48%, rgba(192,132,252,1) 100%)",
+              boxShadow:
+                "0 0 12px rgba(168,85,247,0.5), inset 0 1px 0 rgba(255,255,255,0.35)"
+            }}
+          />
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // ===========================================================================
 // QuestMapScene
 // ===========================================================================
@@ -241,7 +339,11 @@ export function QuestMapScene() {
     compute();
     const ro = new ResizeObserver(compute);
     ro.observe(el);
-    return () => ro.disconnect();
+    const raf = requestAnimationFrame(() => compute());
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
   }, []);
 
   // -------------------------------------------------------------------------
@@ -329,6 +431,8 @@ export function QuestMapScene() {
   const tenKMastered = activeProg?.tenKRookieChallenge != null;
   const futureArcTeaser = activeProg?.futureArcRevealedAt != null;
 
+  const company = companyById(state.activeCompanyId as CompanyId);
+  const companyLogo = resolveCompanyLogoUrl(company, company.companyLogoUrl);
   /** Brief activation flash + beam pulse when a hotspot is clicked. The
    * underlying <Link> still handles navigation; this is purely cinematic.
    * 380ms is short enough to play through the Next.js page transition
@@ -366,6 +470,8 @@ export function QuestMapScene() {
           style={{ width: imageBox.w, height: imageBox.h }}
           data-quest-map-image-box
         >
+          <QuestMapOverallProgressHud progressPct={overallProgressPct} />
+
           {futureArcTeaser ? (
             <div
               aria-hidden
@@ -393,6 +499,13 @@ export function QuestMapScene() {
             className="pointer-events-none absolute inset-0 h-full w-full select-none object-fill"
             style={{ x: imgPx, y: imgPy }}
           />
+
+          {companyLogo ? (
+            <MapForcesRocketEmblem
+              logoUrl={companyLogo}
+              companyName={company.name}
+            />
+          ) : null}
 
           {/* (1) Ambient particle field — drifts gently behind beams. */}
           <AmbientParticles parallaxX={fgPx} parallaxY={fgPy} />
@@ -436,11 +549,14 @@ export function QuestMapScene() {
                 island={island}
                 onActivate={handleHotspotClick}
                 clicked={clickedId === spot.id}
+                parallaxX={imgPx}
+                parallaxY={imgPy}
               />
             );
           })}
         </div>
       ) : null}
+
     </div>
   );
 }
@@ -511,9 +627,9 @@ function AmbientParticles({
 //
 // State-driven appearance per bridge:
 //   • locked      → no flow at all (bridge stays as-painted)
-//   • unlocked    → faint violet flow
-//   • inProgress  → gentle violet flow + shimmer pulses
-//   • active      → brighter violet flow, faster cadence
+//   • unlocked    → faint pillar-tinted flow
+//   • inProgress  → brighter pillar flow + shimmer pulses
+//   • active      → brightest pillar flow, faster cadence
 //   • completed   → gold flow, fastest cadence
 //   • clicked     → group opacity briefly snaps to 1 (activation)
 // ===========================================================================
@@ -528,6 +644,10 @@ function BridgeFlows({
   parallaxX: MotionValue<number>;
   parallaxY: MotionValue<number>;
 }) {
+  // Plain `<svg>` root + `motion.g` was avoided: Framer `motion.*` inside
+  // SVG alongside SMIL (`animateMotion` / `mpath`) has triggered broken
+  // client chunks in dev (`__webpack_modules__[moduleId] is not a function`).
+  // Parallax stays on `motion.svg`; bridge opacity uses CSS on `<g>`.
   return (
     <motion.svg
       aria-hidden
@@ -538,6 +658,7 @@ function BridgeFlows({
         x: parallaxX,
         y: parallaxY,
         mixBlendMode: "screen",
+        pointerEvents: "none",
         // Tiny circles can shave off at the edges otherwise.
         overflow: "visible"
       }}
@@ -582,11 +703,7 @@ function BridgeFlow({
   const active = island.active;
   const inProgress = island.inProgress;
 
-  // Palette: gold once cleared, soft violet everywhere else. Both blend
-  // cleanly with the violet/gold bridges painted into the artwork.
-  const color = completed
-    ? "rgba(255,229,141,1)"
-    : "rgba(216,180,254,1)";
+  const color = questMapBridgeColor(island.id, completed);
 
   // Steady-state opacity for the whole flow group.
   const baseOpacity = completed
@@ -608,10 +725,11 @@ function BridgeFlow({
   const pathHref = `#qm-bridge-${island.id}`;
 
   return (
-    <motion.g
-      initial={false}
-      animate={{ opacity: clicked ? 1 : baseOpacity }}
-      transition={{ duration: clicked ? 0.18 : 0.4, ease: "easeOut" }}
+    <g
+      style={{
+        opacity: clicked ? 1 : baseOpacity,
+        transition: `opacity ${clicked ? 0.18 : 0.4}s ease-out`
+      }}
     >
       {/* Three small bright particles staggered along the bridge.
           Negative `begin` puts each one at a different phase of the
@@ -664,7 +782,7 @@ function BridgeFlow({
           keyTimes="0; 0.18; 0.45; 0.72; 1"
         />
       </circle>
-    </motion.g>
+    </g>
   );
 }
 
@@ -864,7 +982,7 @@ function TenKCenterPortal({
   if (!unlocked) return null;
   return (
     <motion.div
-      className="absolute z-[5]"
+      className="pointer-events-none absolute z-[5]"
       style={{
         left: `${center.x}%`,
         top: `${center.y}%`,
@@ -885,7 +1003,7 @@ function TenKCenterPortal({
             ? "10-K Rookie final challenge — cleared. Enter to replay."
             : "Enter the 10-K Rookie final challenge at the reactor core"
         }
-        className="group relative flex h-full w-full cursor-pointer items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/75"
+        className="group relative flex h-full w-full cursor-pointer items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/75 pointer-events-auto touch-manipulation"
         style={{
           boxShadow: mastered
             ? "0 0 46px rgba(255,229,141,0.55), inset 0 0 0 1px rgba(245,197,71,0.35)"
@@ -910,8 +1028,10 @@ function TenKCenterPortal({
 // ===========================================================================
 // QuestMapHotspot — invisible interactive surface over each island
 // ===========================================================================
-// Default state:   completely invisible.
-// Hover / focus:   palette-tinted radial bloom + thin glowing ring.
+// Default state:   completely invisible (no DOM HUD over the artwork).
+// Bridge flows:    pillar-tinted energy (see BridgeFlow).
+// Center CTA:      large "Enter …" button on each island.
+// Hover / focus:   glow behind CTA.
 // Active pillar:   slow palette pulse (so the player knows where they "are").
 // Completed:       gold dashed crown rotating around the island.
 // In-progress:     very faint persistent halo (whisper-soft signal).
@@ -921,33 +1041,110 @@ function TenKCenterPortal({
 // All decorative layers carry `pointer-events: none`; only the outer
 // Link receives clicks — never blocking taps on adjacent UI.
 // ===========================================================================
+function questMapHoverAccent(
+  pillarId: PillarId,
+  completed: boolean
+): QuestMapHoverAccent {
+  if (completed) {
+    return {
+      hi: COMPLETED_PALETTE.hi,
+      halo: COMPLETED_PALETTE.halo,
+      labelBg: "rgba(12, 10, 4, 0.9)",
+      labelText: "rgba(255, 241, 198, 0.98)"
+    };
+  }
+  return QUEST_MAP_HOVER[pillarId];
+}
+
+/** Lock badge — readable size, pillar-tuned placement on island art. */
+function MapIslandLockGlyph({ pillarId }: { pillarId: PillarId }) {
+  return (
+    <motion.div
+      aria-hidden
+      className={[
+        "pointer-events-none absolute z-[9] inline-flex justify-center",
+        lockBadgeLayout(pillarId)
+      ].join(" ")}
+      initial={false}
+      animate={{ opacity: [0.9, 1, 0.9] }}
+      transition={{
+        duration: 3.2,
+        repeat: Infinity,
+        ease: "easeInOut",
+        repeatType: "mirror"
+      }}
+    >
+      <div
+        className="rounded-xl border border-[rgba(196,181,253,0.42)] bg-[rgba(10,9,22,0.78)] px-2.5 py-2 backdrop-blur-[3px]"
+        style={{
+          boxShadow:
+            "0 0 20px rgba(139,92,246,0.35), 0 10px 28px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.16)"
+        }}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          className="block h-[22px] w-[22px] sm:h-6 sm:w-6"
+          fill="none"
+          stroke="rgba(236,233,252,0.95)"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M7 11V8a5 5 0 0110 0v3" />
+          <rect
+            x="5"
+            y="11"
+            width="14"
+            height="10"
+            rx="2"
+            stroke="rgba(210,195,255,0.98)"
+          />
+          <rect
+            x="11"
+            y="15.5"
+            width="2"
+            height="2.75"
+            rx="0.35"
+            fill="rgba(236,233,252,0.42)"
+            stroke="none"
+          />
+        </svg>
+      </div>
+    </motion.div>
+  );
+}
+
 function QuestMapHotspot({
   spot,
   island,
   onActivate,
-  clicked
+  clicked,
+  parallaxX,
+  parallaxY
 }: {
   spot: Hotspot;
   island: IslandModel;
   onActivate: (id: PillarId) => void;
   clicked: boolean;
+  parallaxX: MotionValue<number>;
+  parallaxY: MotionValue<number>;
 }) {
-  const palette: IslandPalette = island.completed
-    ? COMPLETED_PALETTE
-    : ISLAND_PALETTES[spot.id];
+  const accent = questMapHoverAccent(spot.id, island.completed);
   const locked = !island.unlocked;
   const completed = island.completed;
   const active = island.active;
   const inProgress = island.inProgress;
-
   return (
     <motion.div
-      className="absolute z-[10]"
+      className="pointer-events-none absolute z-[20]"
       style={{
         left: `${spot.cx - spot.w / 2}%`,
         top: `${spot.cy - spot.h / 2}%`,
         width: `${spot.w}%`,
-        height: `${spot.h}%`
+        height: `${spot.h}%`,
+        x: parallaxX,
+        y: parallaxY
       }}
       initial={false}
       animate={{ scale: clicked ? [1, 1.06, 1] : 1 }}
@@ -981,28 +1178,49 @@ function QuestMapHotspot({
           onActivate(spot.id);
         }}
         className={[
-          "group relative block h-full w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/75 focus-visible:ring-offset-0",
+          "group relative block h-full w-full pointer-events-auto touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-[color:var(--map-focus)]",
           locked ? "cursor-not-allowed" : "cursor-pointer"
         ].join(" ")}
-        style={{ borderRadius: "50%" }}
+        style={{
+          borderRadius: "50%",
+          ["--map-focus" as string]: accent.hi
+        }}
       >
-        {/* Active "you are here" pulse — visible whenever active, soft
-            enough to never compete with the artwork. */}
+        {/* Locked — light wash only; island silhouette stays recognizable. */}
+        {locked ? (
+          <>
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(185deg,rgba(8,10,22,0.05)_0%,rgba(6,8,18,0.22)_52%,rgba(5,7,16,0.34)_100%)] mix-blend-multiply"
+            />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 top-[35%] z-[2] bg-[linear-gradient(to_top,rgba(4,6,16,0.42)_0%,transparent_100%)] opacity-70"
+            />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-x-[8%] inset-y-[12%] z-[2] rounded-2xl shadow-[inset_0_10px_40px_rgba(0,0,0,0.28),inset_0_-4px_20px_rgba(0,0,0,0.18)]"
+            />
+            <MapIslandLockGlyph pillarId={spot.id} />
+          </>
+        ) : null}
+
+        {/* Unlocked baseline — no ring; state reads from progress + washes below. */}
+
+        {/* Active pillar — bottom-plane glow */}
         {active ? (
           <motion.span
             aria-hidden
-            className="pointer-events-none absolute inset-[10%] rounded-full"
+            className="pointer-events-none absolute inset-x-[10%] bottom-[6%] top-[52%] z-[1] rounded-2xl"
             style={{
-              border: `1px solid ${palette.hi}`,
-              boxShadow: `0 0 22px ${palette.halo}`
+              background: `linear-gradient(to top, color-mix(in srgb, ${accent.halo} 55%, transparent) 0%, transparent 92%)`,
+              mixBlendMode: "screen",
+              filter: "blur(1px)"
             }}
             initial={false}
-            animate={{
-              opacity: [0.4, 0.9, 0.4],
-              scale: [0.95, 1.05, 0.95]
-            }}
+            animate={{ opacity: [0.42, 0.65, 0.42] }}
             transition={{
-              duration: 2.4,
+              duration: 2.6,
               repeat: Infinity,
               ease: "easeInOut",
               repeatType: "mirror"
@@ -1010,43 +1228,39 @@ function QuestMapHotspot({
           />
         ) : null}
 
-        {/* Completed crown — slow gold dashed ring around the island. */}
+        {/* Completed — gold datum line */}
         {completed ? (
-          <motion.svg
+          <motion.span
             aria-hidden
-            viewBox="0 0 100 100"
-            className="pointer-events-none absolute -inset-[6%]"
+            className="pointer-events-none absolute left-[14%] right-[14%] top-[72%] z-[1] h-px origin-center rounded-full"
             initial={false}
-            animate={{ rotate: 360 }}
-            transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
-          >
-            <circle
-              cx="50"
-              cy="50"
-              r="46"
-              fill="none"
-              stroke="rgba(245,197,71,0.85)"
-              strokeWidth="1.2"
-              strokeDasharray="4 7"
-              strokeLinecap="round"
-            />
-          </motion.svg>
+            animate={{ opacity: [0.5, 0.92, 0.5], scaleX: [0.96, 1, 0.96] }}
+            transition={{
+              duration: 4.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              repeatType: "mirror"
+            }}
+            style={{
+              background:
+                "linear-gradient(90deg, transparent 0%, rgba(245,197,71,0.65) 20%, rgba(255,229,141,1) 50%, rgba(245,197,71,0.65) 80%, transparent 100%)",
+              boxShadow:
+                "0 0 12px rgba(245,197,71,0.45), 0 0 32px rgba(245,197,71,0.25)"
+            }}
+          />
         ) : null}
 
-        {/* In-progress whisper — very faint persistent halo. Drops out
-            for completed (gold crown takes over) and for active (the
-            pulse takes over). */}
+        {/* In-progress — soft bottom wash */}
         {inProgress && !completed && !active ? (
           <motion.span
             aria-hidden
-            className="pointer-events-none absolute inset-[12%] rounded-full"
+            className="pointer-events-none absolute inset-x-[12%] bottom-[8%] top-[48%] z-[1] rounded-2xl"
             style={{
-              background: `radial-gradient(circle at 50% 55%, ${palette.halo} 0%, transparent 70%)`,
-              filter: "blur(14px)",
+              background: `linear-gradient(to top, color-mix(in srgb, ${accent.halo} 35%, transparent) 0%, transparent 100%)`,
               mixBlendMode: "screen"
             }}
             initial={false}
-            animate={{ opacity: [0.25, 0.55, 0.25] }}
+            animate={{ opacity: [0.2, 0.38, 0.2] }}
             transition={{
               duration: 5,
               repeat: Infinity,
@@ -1056,66 +1270,64 @@ function QuestMapHotspot({
           />
         ) : null}
 
-        {/* Hover bloom — soft palette wash, only on hover/focus. */}
+        {/* Hover / focus — edge wash only (no radial disc). */}
         <span
           aria-hidden
           className={[
-            "pointer-events-none absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 ease-out",
+            "pointer-events-none absolute inset-x-[6%] top-[16%] bottom-[6%] rounded-2xl opacity-0 transition-opacity duration-250 ease-out",
             locked
-              ? ""
+              ? "group-hover:opacity-40 group-focus-visible:opacity-40"
               : "group-hover:opacity-100 group-focus-visible:opacity-100"
           ].join(" ")}
           style={{
-            background: `radial-gradient(circle at 50% 55%, ${palette.halo} 0%, transparent 65%)`,
-            filter: "blur(18px)",
+            background: `linear-gradient(180deg, transparent 0%, ${accent.halo}18 55%, color-mix(in srgb, ${accent.hi} 22%, transparent) 100%)`,
             mixBlendMode: "screen"
           }}
         />
-
-        {/* Hover ring — thin glowing outline that scales up on hover. */}
-        <span
-          aria-hidden
-          className={[
-            "pointer-events-none absolute inset-[14%] rounded-full border opacity-0 transition-all duration-300 ease-out",
-            locked
-              ? ""
-              : "group-hover:opacity-100 group-focus-visible:opacity-100 group-hover:scale-[1.06]"
-          ].join(" ")}
-          style={{
-            borderColor: palette.hi,
-            boxShadow: `0 0 28px ${palette.halo}, inset 0 0 22px ${palette.halo}`
-          }}
-        />
-
-        {/* Activation flash — radial burst that fires on click and fades
-            with the page transition. Uses a key so framer-motion remounts
-            it on every click for a clean replay. */}
-        {clicked ? (
-          <motion.span
-            key="activation-flash"
+        {!locked ? (
+          <span
             aria-hidden
-            className="pointer-events-none absolute -inset-[20%] rounded-full"
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: [0, 1, 0], scale: [0.6, 1.15, 1.6] }}
-            transition={{ duration: 0.45, ease: "easeOut" }}
+            className="pointer-events-none absolute inset-x-[8%] bottom-[6%] top-[58%] rounded-2xl opacity-0 transition-opacity duration-250 ease-out group-hover:opacity-55 group-focus-visible:opacity-55"
             style={{
-              background: `radial-gradient(circle, ${palette.hi} 0%, ${palette.halo} 35%, transparent 70%)`,
-              filter: "blur(10px)",
+              boxShadow: `inset 0 -18px 36px color-mix(in srgb, ${accent.hi} 28%, transparent)`,
               mixBlendMode: "screen"
             }}
           />
         ) : null}
 
-        {/* Locked overlay — desaturate the island silhouette so the
-            locked-vs-unlocked affordance reads at a glance. */}
-        {locked ? (
+        {!locked ? (
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-full"
+            className={[
+              "pointer-events-none absolute left-1/2 z-[6] max-w-[92%]",
+              enterCtaLayout(spot.id),
+              "rounded-2xl border-2 px-4 py-2.5 text-center font-[var(--font-grotesk)] text-[11px] font-bold uppercase leading-tight tracking-[0.14em] shadow-xl backdrop-blur-md transition-[opacity,transform,box-shadow] duration-250 ease-out",
+              "sm:px-6 sm:py-3 sm:text-[13px] sm:tracking-[0.16em] md:px-7 md:py-3.5 md:text-[15px]",
+              "opacity-88 group-hover:scale-[1.06] group-hover:opacity-100 group-focus-visible:scale-[1.06] group-focus-visible:opacity-100"
+            ].join(" ")}
             style={{
-              background:
-                "radial-gradient(circle at 50% 55%, rgba(7,7,18,0.55), rgba(7,7,18,0.12) 70%, transparent 100%)",
-              mixBlendMode: "multiply"
+              borderColor: accent.hi,
+              background: accent.labelBg,
+              color: accent.labelText,
+              boxShadow: `0 0 28px ${accent.halo}, 0 6px 20px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12)`
+            }}
+          >
+            {`Enter ${island.title}`}
+          </span>
+        ) : null}
+
+        {/* Activation flash — quick vertical flare on tap */}
+        {clicked ? (
+          <motion.span
+            key="activation-flash"
+            aria-hidden
+            className="pointer-events-none absolute inset-[10%] rounded-3xl"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: [0, 1, 0], scale: [0.98, 1.02, 1.05] }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            style={{
+              background: `linear-gradient(180deg, transparent 10%, ${accent.hi}22 60%, ${accent.halo}18 100%)`,
+              mixBlendMode: "screen"
             }}
           />
         ) : null}

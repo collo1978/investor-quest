@@ -253,6 +253,10 @@ export function getQuestProgressPct(
     return Math.min(100, Math.round(score * 100));
   }
 
+  if (rule.kind === "read") {
+    return view.read ? 100 : 0;
+  }
+
   if (rule.kind === "minigame") {
     if (rule.key === "terminal") {
       return Math.min(100, Math.round(work?.mini?.terminal?.score ?? 0));
