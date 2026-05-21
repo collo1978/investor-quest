@@ -158,20 +158,10 @@ export function QuestQuizPanel({
     metaCompletion?.completed ?? slugTrackedComplete
   );
 
-  if (!hasPlayableQuizConfig(quiz)) {
-    return (
-      <motion.div
-        role="status"
-        className="rounded-2xl border border-white/10 bg-black/30 px-5 py-8 text-center text-sm text-ink-2"
-      >
-        Quiz questions are not available for this quest yet.
-      </motion.div>
-    );
-  }
-
-  const questions = quiz.questions;
+  const playable = hasPlayableQuizConfig(quiz);
+  const questions = playable ? quiz.questions : [];
   const total = questions.length;
-  const threshold = quiz.passThreshold ?? 0.66;
+  const threshold = quiz?.passThreshold ?? 0.66;
   const requiredCorrect = Math.max(1, Math.ceil(total * threshold));
 
   // Identity-stable initial order (questions in their original order).
@@ -337,6 +327,17 @@ export function QuestQuizPanel({
   // -------------------------------------------------------------------------
   // Render
   // -------------------------------------------------------------------------
+
+  if (!playable) {
+    return (
+      <motion.div
+        role="status"
+        className="rounded-2xl border border-white/10 bg-black/30 px-5 py-8 text-center text-sm text-ink-2"
+      >
+        Quiz questions are not available for this quest yet.
+      </motion.div>
+    );
+  }
 
   const baseStyle: React.CSSProperties = {
     borderColor: isPassedDisplay ? GREEN_BORDER : accent.border,

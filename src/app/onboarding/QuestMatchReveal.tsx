@@ -120,9 +120,9 @@ export function QuestMatchReveal({
       setStatusLine(STATUS_SCAN[tick % STATUS_SCAN.length]!);
     }, 90);
 
-    let slow: ReturnType<typeof window.setInterval> | null = null;
-    let lockTimer: ReturnType<typeof window.setTimeout> | null = null;
-    let completeTimer: ReturnType<typeof window.setTimeout> | null = null;
+    let slow: number | null = null;
+    let lockTimer: number | null = null;
+    let completeTimer: number | null = null;
 
     const slowStart = window.setTimeout(() => {
       window.clearInterval(fast);
