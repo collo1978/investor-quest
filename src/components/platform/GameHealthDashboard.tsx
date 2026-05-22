@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { DemoContentRefreshPanel } from "@/components/platform/DemoContentRefreshPanel";
 import { OpsHealthHero } from "@/components/operations/OpsHealthHero";
+import { OpsHealthTrendChart } from "@/components/operations/OpsHealthTrendChart";
 import { OpsIssueCard } from "@/components/operations/OpsIssueCard";
 import { OpsPageShell } from "@/components/operations/OpsPageShell";
 import { OpsTouchButton } from "@/components/operations/OpsTouchButton";
@@ -132,11 +133,6 @@ export function GameHealthDashboard() {
     }
   };
 
-  const historySpark = useMemo(() => {
-    const pts = [...(data?.history ?? [])].reverse().slice(-12);
-    return pts.map((h) => h.score);
-  }, [data?.history]);
-
   if (loading) {
     return (
       <OpsPageShell
@@ -214,27 +210,7 @@ export function GameHealthDashboard() {
 
       <DemoContentRefreshPanel onRefreshMissionControl={() => void load()} />
 
-      {historySpark.length > 1 ? (
-        <section className={opsPanel}>
-          <h2 className="text-sm font-semibold text-white/80">Health trend</h2>
-          <div className="mt-4 flex h-20 items-end gap-1.5">
-            {historySpark.map((s, i) => (
-              <div
-                key={i}
-                className="flex-1 rounded-t bg-[var(--partner-primary)]/80"
-                style={{
-                  height: `${Math.max(12, s)}%`,
-                  opacity: 0.35 + (s / 100) * 0.65
-                }}
-                title={`${s}%`}
-              />
-            ))}
-          </div>
-          <p className="mt-2 text-[12px] text-white/40">
-            Last {historySpark.length} checks
-          </p>
-        </section>
-      ) : null}
+      <OpsHealthTrendChart history={data.history} />
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-white/80">
