@@ -74,6 +74,10 @@ import {
 import type { QuestDefinition, QuestSubCard } from "@/data/quests/types";
 import { hasPlayableQuizConfig } from "@/data/quests/types";
 import {
+  QuestQuizUnlockStatus,
+  useQuestProgressDebug
+} from "@/components/quest/QuestQuizUnlockStatus";
+import {
   islandQuizPassMessage,
   questCompleteHeadline
 } from "@/components/quest/islandQuizPassMessages";
@@ -316,6 +320,7 @@ export function QuestDetailScreen({
   }, [parentRead]);
 
   const isMultiCard = (quest?.cards?.length ?? 0) > 0;
+  const showQuestDebug = useQuestProgressDebug();
   const usePillarQuestCardTemplate = usesPillarQuestCardTemplate(pillarId);
   const pillarQuestTheme =
     usePillarQuestCardTemplate && quest
@@ -618,6 +623,7 @@ export function QuestDetailScreen({
             slug={slug}
             cards={cards}
             cardReadFlags={cardReadFlags}
+            readQuestSlugs={readSlugs}
             allCardsRead={allCardsRead}
             source={source}
             questPipeline={
@@ -659,6 +665,19 @@ export function QuestDetailScreen({
 
             {hasPlayableQuizConfig(quest.quizConfig) ? (
               <div className="mt-5">
+                {!parentRead ? (
+                  <QuestQuizUnlockStatus
+                    parentSlug={slug}
+                    cards={cards}
+                    readQuestSlugs={readSlugs}
+                    quizConfig={quest.quizConfig}
+                    theme={
+                      pillarQuestTheme ?? getPillarQuestTheme(pillarId)
+                    }
+                    showDevDetails={showQuestDebug}
+                    className="mb-4"
+                  />
+                ) : null}
                 <QuestQuizPanel
                   pillarId={pillarId}
                   slug={slug}

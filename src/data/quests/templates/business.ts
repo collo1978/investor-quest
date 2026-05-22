@@ -1,4 +1,5 @@
 import type { QuestTemplate } from "@/data/quests/types";
+import { BUSINESS_QUEST_QUIZZES } from "@/data/quests/businessQuestQuizzes";
 
 /**
  * Business pillar — 5 quests covering the core of "what the company does".
@@ -39,6 +40,7 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     hubCardCount: 3,
     hubLocked: false,
     tags: ["overview", "intro", "thesis"],
+    quizConfig: BUSINESS_QUEST_QUIZZES.snapshot,
     cards: [
       {
         id: "card-1",
@@ -95,6 +97,7 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     hubIcon: "revenue",
     hubCardCount: 3,
     tags: ["revenue", "products", "geography", "customers"],
+    quizConfig: BUSINESS_QUEST_QUIZZES.revenue,
     cards: [
       {
         id: "card-1",
@@ -151,6 +154,7 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     hubIcon: "operations",
     hubCardCount: 2,
     tags: ["operations", "distribution", "workforce"],
+    quizConfig: BUSINESS_QUEST_QUIZZES.operations,
     cards: [
       {
         id: "card-1",
@@ -202,6 +206,7 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     hubIcon: "advantage",
     hubCardCount: 2,
     tags: ["moat", "advantage", "r-and-d"],
+    quizConfig: BUSINESS_QUEST_QUIZZES.advantage,
     cards: [
       {
         id: "card-1",
@@ -251,6 +256,7 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     hubIcon: "industry",
     hubCardCount: 3,
     tags: ["industry", "competition", "regulation"],
+    quizConfig: BUSINESS_QUEST_QUIZZES.industry,
     cards: [
       {
         id: "card-1",

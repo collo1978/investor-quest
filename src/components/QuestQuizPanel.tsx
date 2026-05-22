@@ -596,6 +596,11 @@ function LockedBody({
   cardsRead?: number;
   cardsTotal?: number;
 }) {
+  const cardsRemaining =
+    typeof cardsRead === "number" && typeof cardsTotal === "number"
+      ? Math.max(0, cardsTotal - cardsRead)
+      : null;
+
   if (isTenK) {
     return (
       <>
@@ -621,6 +626,15 @@ function LockedBody({
         from the cards above. Read each card and mark it as read â€” once you
         finish all{cardsTotal ? ` ${cardsTotal}` : ""} cards, the quiz unlocks.
       </p>
+      {cardsRemaining !== null && cardsRemaining > 0 ? (
+        <p
+          className="mt-2 text-[13px] font-semibold leading-snug"
+          style={{ color: "rgba(245,197,71,0.9)" }}
+        >
+          You still need to complete {cardsRemaining} card
+          {cardsRemaining === 1 ? "" : "s"}.
+        </p>
+      ) : null}
       {typeof cardsRead === "number" && typeof cardsTotal === "number" ? (
         <p
           className="mt-3 text-[10.5px] font-semibold uppercase tracking-[0.20em]"

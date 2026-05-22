@@ -45,10 +45,8 @@ import {
 import type { PillarId } from "@/data/pillars";
 import { QuestPrewarmBootstrap } from "@/components/quest/QuestPrewarmBootstrap";
 import { useQuestPrewarm } from "@/hooks/useQuestPrewarm";
-import {
-  markGameSessionTouched,
-  wasGameSessionTouched
-} from "@/lib/gameSession";
+import { markGameSessionTouched } from "@/lib/gameSession";
+import { mergeLoadedGameState } from "@/lib/gameState/mergeLoadedGameState";
 
 type Toast = {
   id: string;
@@ -308,8 +306,8 @@ export function GameProvider({
     let cancelled = false;
     (async () => {
       const loaded = await store.load();
-      if (!cancelled && loaded && !wasGameSessionTouched()) {
-        setState(loaded);
+      if (!cancelled && loaded) {
+        setState((prev) => mergeLoadedGameState(prev, loaded));
       }
       if (!cancelled) setHydrated(true);
     })();

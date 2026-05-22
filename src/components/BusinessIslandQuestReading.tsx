@@ -27,6 +27,11 @@ import { isGeographicRevenueCard } from "@/lib/geographicRevenue/isGeographicRev
 import { filterProductSupportBlocks } from "@/lib/productService/filterSupportBlocks";
 import { isProductServiceCard } from "@/lib/productService/isProductServiceCard";
 import { ContinueToQuizCta } from "@/components/quest/ContinueToQuizCta";
+import {
+  QuestQuizUnlockStatus,
+  useQuestProgressDebug
+} from "@/components/quest/QuestQuizUnlockStatus";
+import { computeQuestCardReadProgress } from "@/lib/quests/questCardReadProgress";
 import { QuestCardAnswerShimmer } from "@/components/quest/QuestCardAnswerShimmer";
 import { PillarQuestPipelineBanner } from "@/components/quest/PillarQuestPipelineBanner";
 import type { PillarQuestPipelineState } from "@/components/QuestDetailScreen";
@@ -611,15 +616,82 @@ function BusinessCardPager({
   total,
   onPrev,
   onNext,
+  onStartQuiz,
+  quizReady,
+  hasQuiz,
+  missingCardCount,
   theme
 }: {
   index: number;
   total: number;
   onPrev: () => void;
   onNext: () => void;
+  onStartQuiz?: () => void;
+  quizReady: boolean;
+  hasQuiz: boolean;
+  missingCardCount: number;
   theme: PillarQuestTheme;
 }) {
   const canPrev = index > 0;
+  const onLastCard = index >= total - 1;
+  const showQuizHandoff = onLastCard && hasQuiz;
+
+  if (showQuizHandoff) {
+    return (
+      <nav
+        className="mx-auto mt-5 flex max-w-2xl flex-col items-stretch gap-2"
+        aria-label="Quest card navigation"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            disabled={!canPrev}
+            onClick={onPrev}
+            className="rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] transition disabled:cursor-not-allowed disabled:opacity-35"
+            style={{
+              borderColor: theme.border,
+              color: theme.hi,
+              background: canPrev ? theme.glowSoft : "transparent"
+            }}
+          >
+            ← Previous
+          </button>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-2">
+            {index + 1} / {total}
+          </span>
+          <button
+            type="button"
+            disabled={!quizReady}
+            onClick={quizReady ? onStartQuiz : undefined}
+            aria-disabled={!quizReady}
+            title={
+              quizReady
+                ? "Open mastery quiz"
+                : missingCardCount > 0
+                  ? `Mark ${missingCardCount} more card(s) as read to unlock the quiz`
+                  : "Complete all cards to unlock the quiz"
+            }
+            className="rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] transition disabled:cursor-not-allowed disabled:opacity-50"
+            style={{
+              borderColor: quizReady ? theme.border : "rgba(255,255,255,0.12)",
+              color: theme.hi,
+              background: quizReady ? theme.glowSoft : "transparent",
+              boxShadow: quizReady ? `0 0 20px -8px ${theme.glow}` : undefined
+            }}
+          >
+            {quizReady ? "Next: Quiz →" : "Next: Quiz"}
+          </button>
+        </div>
+        {!quizReady && missingCardCount > 0 ? (
+          <p className="text-center text-[11.5px] leading-snug text-ink-2">
+            You still need to complete {missingCardCount} card
+            {missingCardCount === 1 ? "" : "s"} — mark each card as read above.
+          </p>
+        ) : null}
+      </nav>
+    );
+  }
+
   const canNext = index < total - 1;
 
   return (
@@ -667,6 +739,8 @@ export type BusinessIslandQuestReadingProps = {
   slug: string;
   cards: readonly QuestSubCard[];
   cardReadFlags: boolean[];
+  /** Engine read slugs for this pillar (includes `slug#card-id` composites). */
+  readQuestSlugs: readonly string[];
   /** True only when every sub-card is marked read (not parent slug alone). */
   allCardsRead: boolean;
   source: string | null;
@@ -691,6 +765,7 @@ export function BusinessIslandQuestReading(
     slug,
     cards,
     cardReadFlags,
+    readQuestSlugs,
     allCardsRead,
     source,
     onMarkRead,
@@ -712,6 +787,19 @@ export function BusinessIslandQuestReading(
     [quest.quizConfig]
   );
   const hasQuiz = hasPlayableQuizConfig(quiz);
+  const showQuestDebug = useQuestProgressDebug();
+  const readProgress = useMemo(
+    () =>
+      computeQuestCardReadProgress({
+        parentSlug: slug,
+        cards,
+        readQuestSlugs,
+        quizConfig: quest.quizConfig
+      }),
+    [slug, cards, readQuestSlugs, quest.quizConfig]
+  );
+  const missingCardCount = readProgress.missingCardIds.length;
+  const quizReady = readProgress.quizUnlocked;
 
   useEffect(() => {
     setCardIndex(0);
@@ -954,10 +1042,25 @@ export function BusinessIslandQuestReading(
           index={cardIndex}
           total={cardView.cardTotal}
           theme={theme}
+          hasQuiz={hasQuiz}
+          quizReady={quizReady}
+          missingCardCount={missingCardCount}
+          onStartQuiz={() => setScreen("quiz")}
           onPrev={() => setCardIndex((i) => Math.max(0, i - 1))}
           onNext={() =>
             setCardIndex((i) => Math.min(cards.length - 1, i + 1))
           }
+        />
+      ) : null}
+
+      {hasQuiz && screen === "cards" && !quizReady ? (
+        <QuestQuizUnlockStatus
+          parentSlug={slug}
+          cards={cards}
+          readQuestSlugs={readQuestSlugs}
+          quizConfig={quest.quizConfig}
+          theme={theme}
+          showDevDetails={showQuestDebug}
         />
       ) : null}
 
