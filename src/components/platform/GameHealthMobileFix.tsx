@@ -9,7 +9,15 @@ import {
   humanizeTechnicalMessage,
   issueSeverityLabel
 } from "@/lib/operations/layman";
-import type { FixActionId, GameHealthIssueRecord } from "@/lib/gameHealth/types";
+import type {
+  FixActionClientRepair,
+  FixActionId,
+  GameHealthIssueRecord
+} from "@/lib/gameHealth/types";
+import { applyQuestProgressClientRepair } from "@/lib/gameHealth/questProgressClientRepair";
+import { isQuestFlowIssue } from "@/lib/operations/fixActions";
+import type { PillarId } from "@/data/pillars";
+import type { CompanyId } from "@/data/companies";
 
 export function GameHealthMobileFix({ issueId }: { issueId: string }) {
   const [issue, setIssue] = useState<GameHealthIssueRecord | null>(null);
@@ -54,11 +62,26 @@ export function GameHealthMobileFix({ issueId }: { issueId: string }) {
         ok?: boolean;
         laymanMessage?: string;
         message?: string;
+        clientRepair?: FixActionClientRepair;
       };
-      const msg =
+      let msg =
         json.laymanMessage ??
         (json.message ? humanizeTechnicalMessage(json.message) : null) ??
         (json.ok ? "Done." : "That fix did not work. Try again.");
+
+      if (json.ok && json.clientRepair?.kind === "quest_progress") {
+        const repair = applyQuestProgressClientRepair({
+          companyId: json.clientRepair.companyId as CompanyId,
+          pillarId: json.clientRepair.pillarId as PillarId,
+          questSlug: json.clientRepair.questSlug,
+          cardIds: json.clientRepair.cardIds,
+          mode: json.clientRepair.mode
+        });
+        if (repair.laymanMessage) {
+          msg = `${msg} ${repair.laymanMessage}`;
+        }
+      }
+
       setResult(msg);
       if (json.ok) {
         await load();
@@ -148,6 +171,31 @@ export function GameHealthMobileFix({ issueId }: { issueId: string }) {
             </p>
             <p className="mt-1 text-white/85">{issue.suggestedFix}</p>
           </div>
+          {isQuestFlowIssue(issue) ? (
+            <div className="rounded-xl border border-violet-500/25 bg-violet-500/10 px-3 py-3 text-[13px] text-white/85">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-200/90">
+                Quest flow debug
+              </p>
+              <ul className="mt-2 space-y-1">
+                <li>
+                  Cards:{" "}
+                  {String(issue.metadata?.completedCards ?? "?")} /{" "}
+                  {String(issue.metadata?.cardsRequired ?? "?")} required
+                </li>
+                <li>
+                  Quiz unlocked (simulated):{" "}
+                  {String(issue.metadata?.quizUnlockedWhenAllRead ?? "?")}
+                </li>
+                <li>
+                  Missing cards:{" "}
+                  {Array.isArray(issue.metadata?.missingCardIds) &&
+                  (issue.metadata.missingCardIds as string[]).length > 0
+                    ? (issue.metadata.missingCardIds as string[]).join(", ")
+                    : "none"}
+                </li>
+              </ul>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -156,6 +204,7 @@ export function GameHealthMobileFix({ issueId }: { issueId: string }) {
           Tap a fix
         </p>
         <OpsFixActionList
+          issue={issue}
           recommendedAction={issue.fixAction}
           busy={busy}
           onRun={(action) => void runFix(action)}

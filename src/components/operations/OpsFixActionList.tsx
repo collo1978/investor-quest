@@ -1,20 +1,22 @@
 "use client";
 
-import { sortFixActionsForIssue } from "@/lib/operations/fixActions";
-import type { FixActionId } from "@/lib/gameHealth/types";
+import { fixActionsForIssue } from "@/lib/operations/fixActions";
+import type { FixActionId, GameHealthIssueRecord } from "@/lib/gameHealth/types";
 
 import { OpsTouchButton } from "./OpsTouchButton";
 
 export function OpsFixActionList({
+  issue,
   recommendedAction,
   busy,
   onRun
 }: {
+  issue?: GameHealthIssueRecord | null;
   recommendedAction: string | null;
   busy: FixActionId | null;
   onRun: (action: FixActionId) => void;
 }) {
-  const actions = sortFixActionsForIssue(recommendedAction);
+  const actions = fixActionsForIssue(issue ?? null, recommendedAction);
 
   return (
     <div className="space-y-3">

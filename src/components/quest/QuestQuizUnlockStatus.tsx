@@ -5,6 +5,7 @@ import type { QuestSubCard } from "@/data/quests/types";
 import type { PillarQuestTheme } from "@/components/quest/pillarQuestTheme";
 import {
   computeQuestCardReadProgress,
+  questQuizButtonDisabledReason,
   questQuizUnlockUserMessage,
   type QuestCardReadProgress
 } from "@/lib/quests/questCardReadProgress";
@@ -44,6 +45,7 @@ export function QuestQuizUnlockStatus({
   });
 
   const userMessage = questQuizUnlockUserMessage(progress, cards);
+  const buttonDisabledReason = questQuizButtonDisabledReason(progress);
 
   useEffect(() => {
     if (!showDevDetails) return;
@@ -52,7 +54,8 @@ export function QuestQuizUnlockStatus({
       cardsCompleted: `${progress.cardsRead}/${progress.cardsRequired}`,
       quizUnlocked: progress.quizUnlocked,
       missingCardIds: progress.missingCardIds,
-      lockReasons: progress.lockReasons
+      lockReasons: progress.lockReasons,
+      buttonDisabledReason
     });
   }, [
     showDevDetails,
@@ -61,7 +64,8 @@ export function QuestQuizUnlockStatus({
     progress.cardsRequired,
     progress.quizUnlocked,
     progress.missingCardIds,
-    progress.lockReasons
+    progress.lockReasons,
+    buttonDisabledReason
   ]);
 
   if (!userMessage && !showDevDetails) return null;
@@ -119,15 +123,22 @@ export function QuestQuizUnlockStatus({
               {formatLockReasons(progress.lockReasons)}
             </dd>
           </div>
+          <div className="flex flex-col gap-0.5">
+            <dt>button disabled reason</dt>
+            <dd className="break-all text-ink-1">
+              {buttonDisabledReason ?? "— (quiz CTA enabled)"}
+            </dd>
+          </div>
         </dl>
       ) : null}
     </div>
   );
 }
 
-/** Client hook: dev build or `?questDebug=1` on the URL. */
+/** Client hook: dev build, `?questDebug=1`, or `?admin=1` on the URL. */
 export function useQuestProgressDebug(): boolean {
   if (process.env.NODE_ENV === "development") return true;
   if (typeof window === "undefined") return false;
-  return new URLSearchParams(window.location.search).get("questDebug") === "1";
+  const q = new URLSearchParams(window.location.search);
+  return q.get("questDebug") === "1" || q.get("admin") === "1";
 }

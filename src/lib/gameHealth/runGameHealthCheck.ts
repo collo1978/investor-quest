@@ -20,6 +20,7 @@ import { passesQuestJargonGate } from "@/lib/quests/questJargonGate";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchQuestCardAnswersForSlug } from "@/lib/supabase/questCardAnswers/storage";
+import { runQuestFlowHealthChecks } from "@/lib/gameHealth/questFlowChecks";
 
 const DEMO_TICKERS = ["NVDA", "AAPL"] as const;
 const PROBE_TICKER = "NVDA";
@@ -125,6 +126,9 @@ function buildIssuesFromChecks(
     if (c.id === "jargon_gate") {
       fixAction = "disable_heavy_checks";
     }
+    if (c.id === "quest_flow_demo") {
+      fixAction = "recheck_quest_flow";
+    }
 
     issues.push({
       issueKey: c.id,
@@ -132,9 +136,11 @@ function buildIssuesFromChecks(
       title: c.laymanSummary ?? c.name,
       problemPlain: c.laymanSummary ?? c.message,
       whatUsersSee:
-        c.status === "fail"
-          ? "Players may see a blank screen, empty card, or stuck loading message."
-          : "Players may notice slowness or incomplete text.",
+        c.id === "quest_flow_demo"
+          ? "Players may get stuck before the quiz."
+          : c.status === "fail"
+            ? "Players may see a blank screen, empty card, or stuck loading message."
+            : "Players may notice slowness or incomplete text.",
       suggestedFix:
         c.id.includes("quest_answer") || c.id.includes("empty_answer")
           ? "Tap Retry answer on the fix panel."
@@ -641,6 +647,9 @@ export async function runGameHealthCheck(options?: {
     }
   }
 
+  const questFlow = runQuestFlowHealthChecks();
+  checks.push(questFlow.summaryCheck);
+
   const score = computeScore(checks);
   const statusLabel = scoreToStatusLabel(score);
   const passed = checks.filter((c) => c.status === "pass");
@@ -658,10 +667,10 @@ export async function runGameHealthCheck(options?: {
     )
   ].slice(0, 8);
 
-  const issueDrafts = buildIssuesFromChecks(
-    failed.concat(warnings),
-    null
-  );
+  const issueDrafts = [
+    ...buildIssuesFromChecks(failed.concat(warnings), null),
+    ...questFlow.issueDrafts
+  ];
 
   const durationMs = Date.now() - started;
 

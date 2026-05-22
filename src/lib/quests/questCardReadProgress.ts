@@ -101,3 +101,22 @@ export function questQuizUnlockUserMessage(
   }
   return `You still need to complete ${n} card${n === 1 ? "" : "s"} before the quiz unlocks.`;
 }
+
+/** Admin/debug: why Next: Quiz or quiz CTA stays inactive. */
+export function questQuizButtonDisabledReason(
+  progress: QuestCardReadProgress
+): string | null {
+  if (progress.quizUnlocked) return null;
+  if (!progress.hasQuiz) {
+    return "No playable quiz configured for this quest.";
+  }
+  if (!progress.allCardsRead) {
+    const n = progress.missingCardIds.length;
+    return n > 0
+      ? `Waiting on ${n} card(s): ${progress.missingCardIds.join(", ")}`
+      : "Not all cards marked as read.";
+  }
+  return progress.lockReasons.length
+    ? progress.lockReasons.join("; ")
+    : "Quiz unlock conditions not met.";
+}

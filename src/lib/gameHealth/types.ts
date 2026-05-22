@@ -71,4 +71,18 @@ export type FixActionId =
   | "clear_and_regenerate"
   | "enable_fast_mode"
   | "disable_heavy_checks"
-  | "mark_resolved";
+  | "mark_resolved"
+  | "repair_quest_progress"
+  | "reset_quest_progress"
+  | "unlock_quest_quiz"
+  | "recheck_quest_flow";
+
+/** Optional client-side repair payload (localStorage on test device). */
+export type FixActionClientRepair = {
+  kind: "quest_progress";
+  mode: "repair" | "reset" | "unlock_quiz";
+  companyId: string;
+  pillarId: string;
+  questSlug: string;
+  cardIds: string[];
+};

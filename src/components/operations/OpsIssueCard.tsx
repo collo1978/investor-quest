@@ -27,9 +27,18 @@ export function OpsIssueCard({ issue }: { issue: GameHealthIssueRecord }) {
       {(issue.companyName || issue.questSlug) && (
         <p className="mt-2 text-[13px] text-white/45">
           {issue.companyName ?? issue.companyTicker}
+          {issue.pillarId ? ` · ${issue.pillarId}` : ""}
           {issue.questSlug ? ` · ${issue.questSlug}` : ""}
         </p>
       )}
+      {issue.metadata?.category === "quest_flow" &&
+      typeof issue.metadata.cardsRequired === "number" ? (
+        <p className="mt-1 text-[12px] text-white/40">
+          Cards {String(issue.metadata.completedCards ?? 0)}/
+          {issue.metadata.cardsRequired} · quiz unlock (simulated):{" "}
+          {String(issue.metadata.quizUnlockedWhenAllRead ?? false)}
+        </p>
+      ) : null}
       <Link
         href={`/admin/mobile-fix/${issue.id}`}
         className="mt-4 flex min-h-[56px] w-full flex-col items-start justify-center rounded-2xl border border-[var(--partner-primary)] bg-[var(--partner-primary)] px-4 py-3.5 text-left touch-manipulation active:scale-[0.99]"

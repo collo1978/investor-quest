@@ -7,7 +7,12 @@ import {
   resolveGameHealthIssue,
   updateGameHealthSettings
 } from "@/lib/gameHealth/storage";
-import type { FixActionId } from "@/lib/gameHealth/types";
+import { runGameHealthCheck } from "@/lib/gameHealth/runGameHealthCheck";
+import type {
+  FixActionClientRepair,
+  FixActionId
+} from "@/lib/gameHealth/types";
+import type { PillarId } from "@/data/pillars";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
@@ -15,6 +20,8 @@ export type FixActionResult = {
   ok: boolean;
   message: string;
   laymanMessage: string;
+  /** Run in the mobile-fix browser after a successful server response. */
+  clientRepair?: FixActionClientRepair;
 };
 
 export async function executeFixAction(
@@ -74,6 +81,18 @@ export async function executeFixAction(
 
     case "retry_generation":
       return retryGeneration(issue);
+
+    case "repair_quest_progress":
+      return questProgressFix(issue, "repair");
+
+    case "reset_quest_progress":
+      return questProgressFix(issue, "reset");
+
+    case "unlock_quest_quiz":
+      return questProgressFix(issue, "unlock_quiz");
+
+    case "recheck_quest_flow":
+      return recheckQuestFlow(issue);
 
     default:
       return {
@@ -160,6 +179,92 @@ async function clearAndRegenerate(
   }
 
   return retryGeneration(issue);
+}
+
+function questProgressFix(
+  issue: NonNullable<Awaited<ReturnType<typeof fetchGameHealthIssue>>>,
+  mode: "repair" | "reset" | "unlock_quiz"
+): FixActionResult {
+  const ticker = issue.companyTicker ?? "NVDA";
+  const company = companyByTicker(ticker);
+  if (!company) {
+    return {
+      ok: false,
+      message: `Unknown ticker ${ticker}`,
+      laymanMessage: "Company not found in the game directory."
+    };
+  }
+
+  const pillarId = (issue.pillarId ?? "business") as PillarId;
+  const questSlug = issue.questSlug ?? "snapshot";
+  const meta = issue.metadata ?? {};
+  const problems = Array.isArray(meta.problems) ? (meta.problems as string[]) : [];
+  const cardIds =
+    Array.isArray(meta.cardIds) && (meta.cardIds as string[]).length > 0
+      ? (meta.cardIds as string[])
+      : ["card-1", "card-2", "card-3"];
+
+  if (
+    meta.category === "quest_flow" &&
+    (problems.includes("missing_quiz_config") ||
+      problems.includes("completion_requires_quiz"))
+  ) {
+    return {
+      ok: true,
+      message: "Quest content must be fixed in app deploy — client repair cannot add quiz config.",
+      laymanMessage:
+        "This needs a new app version with quiz questions on the quest. Deploy latest main, then tap Recheck quest flow.",
+      clientRepair: undefined
+    };
+  }
+
+  const clientRepair: FixActionClientRepair = {
+    kind: "quest_progress",
+    mode,
+    companyId: company.id,
+    pillarId,
+    questSlug,
+    cardIds
+  };
+
+  return {
+    ok: true,
+    message: `Prepared ${mode} for ${ticker} ${questSlug} on this device.`,
+    laymanMessage:
+      mode === "reset"
+        ? "Quest read progress on this device will be cleared. Refresh the quest page."
+        : "Quest read progress on this device will be repaired so the quiz can unlock. Refresh the quest page.",
+    clientRepair
+  };
+}
+
+async function recheckQuestFlow(
+  issue: NonNullable<Awaited<ReturnType<typeof fetchGameHealthIssue>>>
+): Promise<FixActionResult> {
+  try {
+    const check = await runGameHealthCheck({ sendAlerts: false });
+    const key = issue.issueKey;
+    const stillOpen = (check.issues ?? []).some(
+      (i) => i.issueKey === key && i.status === "open"
+    );
+    if (!stillOpen) {
+      await resolveGameHealthIssue(issue.id);
+    }
+    return {
+      ok: true,
+      message: `Health check complete. Score ${check.score}.`,
+      laymanMessage: stillOpen
+        ? "Rechecked — issue may still appear until content is fixed. See Mission Control."
+        : "Rechecked — this quest flow looks healthy now."
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Recheck failed.";
+    return {
+      ok: false,
+      message,
+      laymanMessage: "Could not rerun the health check. Try from Mission Control."
+    };
+  }
 }
 
 /** Merge DB emergency flags into generation options for API routes. */
