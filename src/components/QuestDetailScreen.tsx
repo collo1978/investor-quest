@@ -36,7 +36,6 @@
  * reading content above.
  */
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   Fragment,
@@ -48,15 +47,7 @@ import {
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
-import { BusinessQuestReadingSkeleton } from "@/components/business/BusinessQuestReadingSkeleton";
-
-const BusinessIslandQuestReading = dynamic(
-  () =>
-    import("@/components/BusinessIslandQuestReading").then(
-      (mod) => mod.BusinessIslandQuestReading
-    ),
-  { loading: () => <BusinessQuestReadingSkeleton /> }
-);
+import { BusinessIslandQuestReading } from "@/components/BusinessIslandQuestReading";
 import {
   getPillarQuestTheme,
   usesPillarQuestCardTemplate
@@ -66,26 +57,33 @@ import { trackCardOpened } from "@/lib/analytics/telemetryFromEngine";
 import { useIsQuestRead } from "@/components/gameHooks";
 import { QuestQuizPanel } from "@/components/QuestQuizPanel";
 import { companyById, type Company, type CompanyId } from "@/data/companies";
-import { pillarById, type PillarId } from "@/data/pillars";
+import { type PillarId } from "@/data/pillars";
+import { demoPillarById } from "@/lib/demo/nvidiaDemoVoice";
 import {
   findQuestDefinition,
   getCompanyPillarQuests
 } from "@/data/quests/library";
+import { bindQuestDefinitionToCompany } from "@/lib/quests/fillQuestTokens";
 import type { QuestDefinition, QuestSubCard } from "@/data/quests/types";
 import { hasPlayableQuizConfig } from "@/data/quests/types";
-import {
-  QuestQuizUnlockStatus,
-  useQuestProgressDebug
-} from "@/components/quest/QuestQuizUnlockStatus";
+import { islandQuizSectionTitle } from "@/lib/quests/islandQuizStyle";
+import { QuestQuizUnlockStatus } from "@/components/quest/QuestQuizUnlockStatus";
+import { QuestSourceFooter } from "@/components/quest/QuestSourceFooter";
+import { formatPlayerQuestSourceFromSection } from "@/lib/quests/questSourceLabel";
 import {
   islandQuizPassMessage,
   questCompleteHeadline
 } from "@/components/quest/islandQuizPassMessages";
-import { RelatableQuestAnswer } from "@/components/quest/RelatableQuestAnswer";
+import { CompactFlashcardAnswer } from "@/components/quest/CompactFlashcardAnswer";
 import { parseRelatableQuestAnswer } from "@/lib/quests/questAnswerFormat";
 import { pillarHasQuestPipeline } from "@/lib/quests/pillarQuestPipelineConfig";
 import type { QuestPipelinePhase } from "@/hooks/usePillarQuestGeneratedContent";
 import type { QuestContentStatus } from "@/lib/supabase/questCardAnswers/types";
+import {
+  BACK_TO_ISLAND_LABEL,
+  CONTINUE_LABEL,
+  MARK_AS_READ_LABEL
+} from "@/lib/quests/gameActionCopy";
 
 import type { QuestPipelineProgress } from "@/lib/quests/questPayloadProgress";
 
@@ -144,7 +142,6 @@ function buildSingleReadingStages(
     "orientation",
     "ecosystem",
     "detail",
-    "reflection",
     "done"
   ];
   if (!hasSimpleVersion) return core;
@@ -217,7 +214,7 @@ function ReadingStageProgressRail({
 
 function RevealContinueButton({
   onContinue,
-  label = "Continue"
+  label = CONTINUE_LABEL
 }: {
   onContinue: () => void;
   label?: string;
@@ -260,16 +257,16 @@ export function QuestDetailScreen({
   const { state, actions, raw } = useGame();
   const companyId = state.activeCompanyId as CompanyId;
   const company = companyById(companyId);
-  const pillar = pillarById(pillarId);
+  const pillar = demoPillarById(pillarId);
 
   const quests = useMemo(
     () => getCompanyPillarQuests(companyId, pillarId),
     [companyId, pillarId]
   );
   const quest = useMemo(() => {
-    if (questOverride) return questOverride;
-    return findQuestDefinition(companyId, pillarId, slug);
-  }, [questOverride, companyId, pillarId, slug]);
+    const base = questOverride ?? findQuestDefinition(companyId, pillarId, slug);
+    return base ? bindQuestDefinitionToCompany(base, company) : null;
+  }, [questOverride, companyId, pillarId, slug, company]);
 
   useEffect(() => {
     actions.setActiveQuest(pillarId, slug);
@@ -320,7 +317,6 @@ export function QuestDetailScreen({
   }, [parentRead]);
 
   const isMultiCard = (quest?.cards?.length ?? 0) > 0;
-  const showQuestDebug = useQuestProgressDebug();
   const usePillarQuestCardTemplate = usesPillarQuestCardTemplate(pillarId);
   const pillarQuestTheme =
     usePillarQuestCardTemplate && quest
@@ -396,7 +392,7 @@ export function QuestDetailScreen({
               color: GOLD_HI
             }}
           >
-            ← Back to {pillar.title} Island
+            ← {BACK_TO_ISLAND_LABEL}
           </Link>
         </div>
       </main>
@@ -431,9 +427,7 @@ export function QuestDetailScreen({
   const source =
     pillarHasQuestPipeline(pillarId) && questPipeline?.sourceLabel
       ? questPipeline.sourceLabel
-      : quest.secSection
-        ? `${quest.secSection.form}, ${quest.secSection.section}`
-        : null;
+      : formatPlayerQuestSourceFromSection(quest.secSection, company.name);
 
   return (
     <main className="pointer-events-auto relative mx-auto w-full max-w-4xl px-4 pb-28 pt-6 md:px-6 md:pt-8">
@@ -444,7 +438,7 @@ export function QuestDetailScreen({
           aria-label={
             pillarId === "forces" && quest.forcesCategory
               ? `Back to ${quest.objective}`
-              : `Back to ${pillar.title} Island`
+              : BACK_TO_ISLAND_LABEL
           }
           className="group inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.16em] transition hover:brightness-110"
           style={{
@@ -461,7 +455,7 @@ export function QuestDetailScreen({
           </span>
           {pillarId === "forces" && quest.forcesCategory
             ? "Back to category"
-            : `Back to ${pillar.title} Island`}
+            : BACK_TO_ISLAND_LABEL}
         </Link>
 
         <div className="flex items-center gap-3">
@@ -492,7 +486,7 @@ export function QuestDetailScreen({
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${progressPct}%` }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
           className="h-full rounded-full"
           style={{
             background: pillarQuestTheme
@@ -674,7 +668,6 @@ export function QuestDetailScreen({
                     theme={
                       pillarQuestTheme ?? getPillarQuestTheme(pillarId)
                     }
-                    showDevDetails={showQuestDebug}
                     className="mb-4"
                   />
                 ) : null}
@@ -683,7 +676,7 @@ export function QuestDetailScreen({
                   slug={slug}
                   quiz={quest.quizConfig}
                   unlocked={parentRead}
-                  title={quizTitleFor(quest.type)}
+                  title={islandQuizSectionTitle(pillarId, quest.type)}
                   rewardXp={quest.rewardXp}
                   cardsRead={cardReadFlags.filter(Boolean).length}
                   cardsTotal={cards.length}
@@ -702,14 +695,10 @@ export function QuestDetailScreen({
               </div>
             ) : null}
 
-            {source ? (
-              <p
-                className="mt-7 text-[10.5px] font-semibold uppercase tracking-[0.22em]"
-                style={{ color: "rgba(245,197,71,0.75)" }}
-              >
-                Source: {source}
-              </p>
-            ) : null}
+            <QuestSourceFooter
+              source={source}
+              theme={pillarQuestTheme ?? undefined}
+            />
           </div>
         ) : (
           <div className="relative px-5 pb-3 pt-5 sm:px-6 md:px-9 md:pl-8 md:pr-10 md:pt-7">
@@ -745,7 +734,7 @@ export function QuestDetailScreen({
                   slug={slug}
                   quiz={quest.quizConfig}
                   unlocked={parentRead}
-                  title={quizTitleFor(quest.type)}
+                  title={islandQuizSectionTitle(pillarId, quest.type)}
                   rewardXp={quest.rewardXp}
                   nextQuest={nextQuestCta}
                   islandFinaleCta={islandFinaleCta}
@@ -762,67 +751,49 @@ export function QuestDetailScreen({
               </motion.div>
             ) : null}
 
-            {singleAtDone && source ? (
-              <p
-                className="mt-6 text-[10.5px] font-semibold uppercase tracking-[0.22em]"
-                style={{ color: "rgba(245,197,71,0.75)" }}
-              >
-                Source: {source}
-              </p>
+            {singleAtDone ? (
+              <QuestSourceFooter
+                source={source}
+                theme={pillarQuestTheme ?? undefined}
+              />
             ) : null}
           </div>
         )}
-        {/* Footer row — hidden on BUSINESS quiz screen */}
-        {!(usePillarQuestCardTemplate && pillarOnQuizScreen) ? (
-        <div
-          className="relative mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.08] px-6 py-5 md:px-9"
-        >
-          {usePillarQuestCardTemplate ? (
-            <span className="max-w-[44ch] text-[11.5px] leading-snug text-ink-2">
-              {cards.length > 1
-                ? "Use Previous / Next for each card. When every card is marked read, the quiz opens on its own screen."
-                : "Mark the card as read — the quiz opens on its own screen when you're done."}
-            </span>
-          ) : isMultiCard ? (
-            <ParentReadStatus
-              read={cardReadFlags.filter(Boolean).length}
-              total={cards.length}
-            />
-          ) : singleAtDone ? (
-            <motion.div
-              className="relative rounded-2xl p-[1px]"
-              animate={
-                parentSelfRead
-                  ? { boxShadow: "0 0 0 0 rgba(245,197,71,0)" }
-                  : {
-                      boxShadow: [
-                        "0 0 0 0 rgba(245,197,71,0)",
-                        "0 0 0 5px rgba(245,197,71,0.14)",
-                        "0 0 0 0 rgba(245,197,71,0)"
-                      ]
-                    }
-              }
-              transition={
-                parentSelfRead
-                  ? { duration: 0.3 }
-                  : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }
-              }
-            >
-              <MarkAsReadCheckbox
-                isRead={parentSelfRead}
-                onClick={() => actions.markQuestRead(pillarId, slug)}
+        {/* Footer — legacy non-template quests only; pillar template uses in-flow UI */}
+        {!usePillarQuestCardTemplate ? (
+          <div className="relative mt-3 flex flex-wrap items-center justify-end gap-3 border-t border-white/[0.08] px-6 py-5 md:px-9">
+            {isMultiCard ? (
+              <ParentReadStatus
+                read={cardReadFlags.filter(Boolean).length}
+                total={cards.length}
               />
-            </motion.div>
-          ) : (
-            <span className="max-w-[36ch] text-[11.5px] leading-snug text-ink-2">
-              Reveal each step to unlock mark as read and the quiz.
-            </span>
-          )}
-          <p className="text-[12px] text-ink-2">
-            Reading never awards XP. Earn XP by passing quizzes, finishing island
-            conviction, quiz streak milestones, badges, and special achievements.
-          </p>
-        </div>
+            ) : singleAtDone ? (
+              <motion.div
+                className="relative rounded-2xl p-[1px]"
+                animate={
+                  parentSelfRead
+                    ? { boxShadow: "0 0 0 0 rgba(245,197,71,0)" }
+                    : {
+                        boxShadow: [
+                          "0 0 0 0 rgba(245,197,71,0)",
+                          "0 0 0 5px rgba(245,197,71,0.14)",
+                          "0 0 0 0 rgba(245,197,71,0)"
+                        ]
+                      }
+                }
+                transition={
+                  parentSelfRead
+                    ? { duration: 0.3 }
+                    : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }
+                }
+              >
+                <MarkAsReadCheckbox
+                  isRead={parentSelfRead}
+                  onClick={() => actions.markQuestRead(pillarId, slug)}
+                />
+              </motion.div>
+            ) : null}
+          </div>
         ) : null}
       </motion.article>
     </main>
@@ -832,16 +803,6 @@ export function QuestDetailScreen({
 // ---------------------------------------------------------------------------
 // Internals
 // ---------------------------------------------------------------------------
-
-/**
- * Build the human-readable "X Quiz" label from a quest type. Falls
- * back to plain "Quiz" for unconventional types like "quiz" itself.
- */
-function quizTitleFor(type: string): string {
-  if (!type || type.toLowerCase() === "quiz") return "Quiz";
-  const head = type.charAt(0).toUpperCase() + type.slice(1);
-  return `${head} Quiz`;
-}
 
 // ---------------------------------------------------------------------------
 // Structured answer — bullets, titled blocks, optional "Simple version"
@@ -1938,7 +1899,7 @@ function QuestAnswerSections({
           <RailsHeading label="Answer" accent="gold" />
           <TickerMonospaceChip ticker={deckTicker} />
         </div>
-        <RelatableQuestAnswer sections={relatable} />
+        <CompactFlashcardAnswer paragraphs={relatable.paragraphs} />
       </section>
     );
   }
@@ -2000,7 +1961,7 @@ function SingleCardQuestReading({
   quests,
   questIdx
 }: {
-  pillar: ReturnType<typeof pillarById>;
+  pillar: ReturnType<typeof demoPillarById>;
   company: Company;
   quest: QuestDefinition;
   slug: string;
@@ -2068,20 +2029,6 @@ function SingleCardQuestReading({
                 </div>
               ) : null}
 
-              {stageId === "reflection" ? (
-                <div className="space-y-8">
-                  {quest.investorInsight?.trim() ? (
-                    <div className="space-y-3">
-                      <RailsHeading label="Investor insight" accent="gold" />
-                      <InvestorInsightModule
-                        text={quest.investorInsight.trim()}
-                      />
-                    </div>
-                  ) : null}
-                  <WhyMattersHolo text={quest.whyItMatters} />
-                </div>
-              ) : null}
-
               {stageId === "done" ? (
                 <div className="space-y-3 rounded-xl border border-white/[0.07] bg-black/25 px-4 py-4 sm:px-5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-2/85">
@@ -2119,7 +2066,7 @@ function SingleCardQuestReading({
       </div>
 
       {step < maxStep ? (
-        <RevealContinueButton onContinue={onAdvance} label="Continue" />
+        <RevealContinueButton onContinue={onAdvance} />
       ) : null}
     </div>
   );
@@ -2228,12 +2175,6 @@ function SubCardPanel({
             plainEnglishAnswer={card.plainEnglishAnswer}
             investorInsight={card.investorInsight}
             deckTicker={deckTicker}
-          />
-
-          <WhyMattersHolo
-            text={
-              card.investorInsight?.trim() || card.whyItMatters
-            }
           />
         </div>
 
@@ -2356,7 +2297,7 @@ function MarkAsReadCheckbox({
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.18 }}
           >
-            Mark as read
+            {MARK_AS_READ_LABEL}
           </motion.span>
         ) : (
           <motion.span
@@ -2366,7 +2307,7 @@ function MarkAsReadCheckbox({
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.18 }}
           >
-            Mark as read
+            {MARK_AS_READ_LABEL}
           </motion.span>
         )}
       </AnimatePresence>
@@ -2398,7 +2339,7 @@ function PillarCrest({
   pillarId: PillarId;
   ticker: string;
 }) {
-  const meta = pillarById(pillarId);
+  const meta = demoPillarById(pillarId);
   return (
     <div
       className="relative hidden h-24 w-40 shrink-0 overflow-hidden rounded-2xl md:block"

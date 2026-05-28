@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
 import type { QuestSubCard } from "@/data/quests/types";
 import type { PillarQuestTheme } from "@/components/quest/pillarQuestTheme";
+import { useQuestProgressDebug } from "@/hooks/useQuestProgressDebug";
 import {
   computeQuestCardReadProgress,
   questQuizButtonDisabledReason,
@@ -17,7 +17,7 @@ export type QuestQuizUnlockStatusProps = {
   quizConfig?: import("@/data/quests/types").QuizConfig | null;
   parentSelfRead?: boolean;
   theme: PillarQuestTheme;
-  /** Show cards completed / lock reasons (dev or `?questDebug=1`). */
+  /** Show cards completed / lock reasons (`?questDebug=1`, `?admin=1`, `?dev=1`). */
   showDevDetails?: boolean;
   className?: string;
 };
@@ -33,9 +33,12 @@ export function QuestQuizUnlockStatus({
   quizConfig,
   parentSelfRead,
   theme,
-  showDevDetails = false,
+  showDevDetails: showDevDetailsProp,
   className = ""
 }: QuestQuizUnlockStatusProps) {
+  const devFromUrl = useQuestProgressDebug();
+  const showDevDetails = showDevDetailsProp ?? devFromUrl;
+
   const progress: QuestCardReadProgress = computeQuestCardReadProgress({
     parentSlug,
     cards,
@@ -47,47 +50,40 @@ export function QuestQuizUnlockStatus({
   const userMessage = questQuizUnlockUserMessage(progress, cards);
   const buttonDisabledReason = questQuizButtonDisabledReason(progress);
 
-  useEffect(() => {
-    if (!showDevDetails) return;
-    console.info("[quest-quiz-unlock]", {
-      parentSlug,
-      cardsCompleted: `${progress.cardsRead}/${progress.cardsRequired}`,
-      quizUnlocked: progress.quizUnlocked,
-      missingCardIds: progress.missingCardIds,
-      lockReasons: progress.lockReasons,
-      buttonDisabledReason
-    });
-  }, [
-    showDevDetails,
-    parentSlug,
-    progress.cardsRead,
-    progress.cardsRequired,
-    progress.quizUnlocked,
-    progress.missingCardIds,
-    progress.lockReasons,
-    buttonDisabledReason
-  ]);
-
   if (!userMessage && !showDevDetails) return null;
 
   return (
     <div
-      className={`mx-auto mt-4 max-w-2xl rounded-xl border px-4 py-3 text-center ${className}`}
-      style={{
-        borderColor: progress.quizUnlocked
-          ? "rgba(34,197,139,0.35)"
-          : theme.border,
-        background: progress.quizUnlocked
-          ? "rgba(34,197,139,0.08)"
-          : theme.glowSoft
-      }}
+      className={[
+        "mx-auto mt-4 max-w-2xl text-center",
+        showDevDetails
+          ? "rounded-xl border px-4 py-3"
+          : "px-2 py-2",
+        className
+      ].join(" ")}
+      style={
+        showDevDetails
+          ? {
+              borderColor: progress.quizUnlocked
+                ? "rgba(34,197,139,0.35)"
+                : theme.border,
+              background: progress.quizUnlocked
+                ? "rgba(34,197,139,0.08)"
+                : theme.glowSoft
+            }
+          : undefined
+      }
       role="status"
       aria-live="polite"
     >
       {userMessage ? (
         <p
-          className="text-[13px] font-medium leading-snug"
-          style={{ color: progress.quizUnlocked ? "#22C58B" : theme.hi }}
+          className={
+            showDevDetails
+              ? "text-[13px] font-medium leading-snug"
+              : "text-[13px] leading-relaxed text-ink-1/90"
+          }
+          style={showDevDetails ? { color: theme.hi } : undefined}
         >
           {userMessage}
         </p>
@@ -133,12 +129,4 @@ export function QuestQuizUnlockStatus({
       ) : null}
     </div>
   );
-}
-
-/** Client hook: dev build, `?questDebug=1`, or `?admin=1` on the URL. */
-export function useQuestProgressDebug(): boolean {
-  if (process.env.NODE_ENV === "development") return true;
-  if (typeof window === "undefined") return false;
-  const q = new URLSearchParams(window.location.search);
-  return q.get("questDebug") === "1" || q.get("admin") === "1";
 }

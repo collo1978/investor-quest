@@ -10,6 +10,7 @@ import {
   investorRankFromXp,
   type InvestorRung
 } from "@/data/progression/investorLadder";
+import { formatAnalyticsNumber } from "@/lib/analytics/formatDisplay";
 
 const GOLD = "#F5C547";
 const GOLD_SOFT = "rgba(245, 197, 71, 0.55)";
@@ -386,7 +387,7 @@ export function XpLadderFullPageClient() {
                           </div>
                           <p className="mt-2 text-sm tabular-nums tracking-wide text-ink-2">
                             <span className="xp-gold-shimmer font-semibold" style={{ color: GOLD }}>
-                              {r.xp.toLocaleString()} XP
+                              {formatAnalyticsNumber(r.xp)} XP
                             </span>
                           </p>
                         </div>
@@ -418,7 +419,7 @@ export function XpLadderFullPageClient() {
           <p className="mt-10 text-center text-xs text-ink-2">
             Your XP:{" "}
             <span className="xp-gold-shimmer font-semibold tabular-nums" style={{ color: GOLD }}>
-              {xp.toLocaleString()}
+              {formatAnalyticsNumber(xp)}
             </span>
           </p>
         </div>

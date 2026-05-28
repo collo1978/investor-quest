@@ -2,6 +2,8 @@
 
 import type { SyncPromptFromCodeResult } from "@/lib/supabase/promptTemplates/types";
 
+import { formatAnalyticsDateTime } from "@/lib/analytics/formatDisplay";
+
 import { panelClass } from "./promptStudioTheme";
 
 type Props = {
@@ -12,7 +14,7 @@ type Props = {
 function formatUpdatedAt(iso: string | null): string {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleString();
+    return formatAnalyticsDateTime(iso);
   } catch {
     return iso;
   }

@@ -67,8 +67,10 @@ import {
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGame } from "@/components/GameProvider";
+import { toDemoHref } from "@/lib/demo/demoHref";
 import { MapForcesRocketEmblem } from "@/components/map/MapForcesRocketEmblem";
 import { companyById, type CompanyId } from "@/data/companies";
+import { isPillarComingSoon } from "@/lib/demo/playableDemo";
 import { PILLAR_META, type PillarId } from "@/data/pillars";
 import { resolveCompanyLogoUrl } from "@/lib/business/buildBusinessHubCards";
 import { pillarQuestCount } from "@/data/quests/library";
@@ -222,6 +224,7 @@ type IslandModel = {
   title: string;
   route: (typeof PILLAR_META)[number]["route"];
   unlocked: boolean;
+  comingSoon: boolean;
   completed: boolean;
   active: boolean;
   inProgress: boolean;
@@ -394,13 +397,15 @@ export function QuestMapScene() {
   // Engine-derived island models
   // -------------------------------------------------------------------------
   const islands = useMemo<IslandModel[]>(() => {
+    const companyId = state.activeCompanyId as CompanyId;
     return PILLAR_META.map((meta) => {
       const ps = state.pillars[meta.id];
       const total = pillarQuestCount(meta.id);
       const completedCount = ps?.completedQuestSlugs.length ?? 0;
       const progressPct = total > 0 ? (completedCount / total) * 100 : 0;
       const reading = getPillarReadingProgress(raw, meta.id);
-      const unlocked = !!ps?.unlocked;
+      const comingSoon = isPillarComingSoon(companyId, meta.id);
+      const unlocked = !!ps?.unlocked && !comingSoon;
       const completed = isPillarComplete(state.pillars, meta.id);
       const active = state.activePillarId === meta.id && unlocked;
       const inProgress =
@@ -410,6 +415,7 @@ export function QuestMapScene() {
         title: meta.title,
         route: meta.route,
         unlocked,
+        comingSoon,
         completed,
         active,
         inProgress,
@@ -419,7 +425,7 @@ export function QuestMapScene() {
         totalQuests: total
       };
     });
-  }, [state.pillars, state.activePillarId, raw]);
+  }, [state.pillars, state.activePillarId, state.activeCompanyId, raw]);
 
   const overallProgressPct = useMemo(() => {
     if (islands.length === 0) return 0;
@@ -1132,6 +1138,7 @@ function QuestMapHotspot({
 }) {
   const accent = questMapHoverAccent(spot.id, island.completed);
   const locked = !island.unlocked;
+  const comingSoon = island.comingSoon;
   const completed = island.completed;
   const active = island.active;
   const inProgress = island.inProgress;
@@ -1154,7 +1161,7 @@ function QuestMapHotspot({
       }}
     >
       <Link
-        href={locked ? "#" : island.route}
+        href={locked ? "#" : toDemoHref(island.route)}
         aria-disabled={locked}
         aria-label={`${island.title} island${
           locked
@@ -1201,7 +1208,18 @@ function QuestMapHotspot({
               aria-hidden
               className="pointer-events-none absolute inset-x-[8%] inset-y-[12%] z-[2] rounded-2xl shadow-[inset_0_10px_40px_rgba(0,0,0,0.28),inset_0_-4px_20px_rgba(0,0,0,0.18)]"
             />
-            <MapIslandLockGlyph pillarId={spot.id} />
+            {comingSoon ? (
+              <span
+                className={[
+                  "pointer-events-none absolute left-1/2 z-[9] -translate-x-1/2 rounded-xl border border-[rgba(196,181,253,0.35)] bg-[rgba(10,9,22,0.82)] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-violet-200/90 backdrop-blur-sm",
+                  lockBadgeLayout(spot.id)
+                ].join(" ")}
+              >
+                Coming soon
+              </span>
+            ) : (
+              <MapIslandLockGlyph pillarId={spot.id} />
+            )}
           </>
         ) : null}
 
@@ -1312,7 +1330,7 @@ function QuestMapHotspot({
               boxShadow: `0 0 28px ${accent.halo}, 0 6px 20px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12)`
             }}
           >
-            {`Enter ${island.title}`}
+            {comingSoon ? "Coming soon" : `Enter ${island.title}`}
           </span>
         ) : null}
 

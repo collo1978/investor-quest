@@ -6,14 +6,19 @@
  * Mutated only via reducer actions — never edited directly from the UI.
  */
 
-import { COMPANIES, DEFAULT_COMPANY_ID, type CompanyId } from "@/data/companies";
+import { DEFAULT_COMPANY_ID, type CompanyId } from "@/data/companies";
+import {
+  CONTROLLED_DEMO_MODE,
+  getControlledDemoDefaultCompanyId
+} from "@/lib/demo/controlledDemo";
+import { PLAYABLE_DEMO_COMPANY_IDS } from "@/lib/demo/playableDemo";
 import { PILLAR_ORDER, type PillarId } from "@/data/pillars";
 import type { BadgeId } from "@/engine/progression/badges";
 import type { CompanyStreaks } from "@/engine/progression/streaks";
 import { isQuestMapDefaultUnlocked } from "@/engine/progression/pillarUnlockPolicy";
 import { emptyStreaks } from "@/engine/progression/streaks";
 
-export const STATE_VERSION = 11;
+export const STATE_VERSION = 13;
 export const STORAGE_KEY = "investor-quest::state";
 
 export type QuizProgress = {
@@ -130,6 +135,11 @@ export type CompanyProgress = {
   questMapBriefDismissedAt: number | null;
   /** Epoch ms when the player dismissed the first-visit Business Island brief. */
   businessIslandBriefDismissedAt: number | null;
+  /**
+   * Bumped on destructive progress edits (pillar clear, quest reset).
+   * Merge prefers the side with the higher revision for pillar/questWork state.
+   */
+  progressRevision: number;
 };
 
 export type OnboardingState = {
@@ -137,6 +147,10 @@ export type OnboardingState = {
   step: number;
   /** Epoch ms when onboarding was completed; `null` until then. */
   completedAt: number | null;
+  /** Epoch ms when the cinematic opening was dismissed; `null` until then. */
+  openingScreenSeenAt: number | null;
+  /** Epoch ms when the welcome landing CTA was tapped; `null` until then. */
+  welcomeScreenSeenAt: number | null;
 };
 
 export type GameState = {
@@ -189,23 +203,34 @@ export function initialCompanyProgress(): CompanyProgress {
     pillarIslandBonusClaimed: [],
     quizStreakMilestoneXpClaimed: [],
     questMapBriefDismissedAt: null,
-    businessIslandBriefDismissedAt: null
+    businessIslandBriefDismissedAt: null,
+    progressRevision: 0
   };
 }
 
 export function initialState(): GameState {
+  const defaultCompanyId = CONTROLLED_DEMO_MODE
+    ? getControlledDemoDefaultCompanyId()
+    : DEFAULT_COMPANY_ID;
   return {
     version: STATE_VERSION,
     playerName: null,
     goal: null,
-    activeCompanyId: DEFAULT_COMPANY_ID,
+    activeCompanyId: defaultCompanyId,
     companies: {
-      [DEFAULT_COMPANY_ID]: initialCompanyProgress()
+      [defaultCompanyId]: initialCompanyProgress()
     },
     // Default: every company is an unlocked island. Future progression
     // may gate some behind clearing pillars in the previous campaign.
-    unlockedCompanyIds: COMPANIES.map((c) => c.id),
-    onboarding: { step: 0, completedAt: null },
+    unlockedCompanyIds: CONTROLLED_DEMO_MODE
+      ? [defaultCompanyId]
+      : [...PLAYABLE_DEMO_COMPANY_IDS],
+    onboarding: {
+      step: 0,
+      completedAt: null,
+      openingScreenSeenAt: null,
+      welcomeScreenSeenAt: null
+    },
     lastActivityAt: null
   };
 }

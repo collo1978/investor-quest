@@ -1,6 +1,7 @@
 import type { PillarId } from "@/data/pillars";
 import { sortForcesQuestTemplates } from "@/data/quests/forcesCategories";
 import type { QuestTemplate } from "@/data/quests/types";
+import { filterPlayableForcesTemplates } from "@/lib/forces/forcesQuestRoutes";
 import { mergePillarTemplatesWithDemo } from "@/lib/quests/mergeQuestTemplateWithDemo";
 import { BUSINESS_QUEST_TEMPLATES } from "@/data/quests/templates/business";
 import { FORCES_QUEST_TEMPLATES } from "@/data/quests/templates/forces";
@@ -54,7 +55,9 @@ export function getPillarQuestTemplates(pillarId: PillarId): readonly QuestTempl
     raw = fromCache;
   }
 
-  if (pillarId === "forces") return sortForcesQuestTemplates(raw);
+  if (pillarId === "forces") {
+    return sortForcesQuestTemplates(filterPlayableForcesTemplates(raw));
+  }
   return raw;
 }
 

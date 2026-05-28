@@ -14,6 +14,7 @@ import type { PillarId } from "@/data/pillars";
 export const QUEST_TYPES = [
   "snapshot",
   "revenue",
+  "everyday",
   "operations",
   "advantage",
   "industry",

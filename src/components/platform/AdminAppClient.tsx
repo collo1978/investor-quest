@@ -19,10 +19,13 @@ const ADMIN_NAV: ReadonlyArray<{
   mobileLabel?: string;
 }> = [
   { href: "/admin/game-health", label: "Mission Control", mobileLabel: "Control" },
+  { href: "/admin/demo-control", label: "Demo control", mobileLabel: "Demo" },
   { href: "/admin/branding", label: "Branding" },
   { href: "/admin/quests", label: "Quest content" },
   { href: "/admin/prompts", label: "Prompt Studio", mobileLabel: "Prompts" },
   { href: "/admin/quest-generation", label: "AI regeneration", mobileLabel: "Regen" },
+  { href: "/admin/stabilization", label: "Stabilization", mobileLabel: "Stab" },
+  { href: "/admin/copy-quality", label: "Copy quality", mobileLabel: "Copy" },
   { href: "/admin/modules", label: "Modules" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/rewards", label: "Rewards" },

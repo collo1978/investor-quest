@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { formatAnalyticsDateTimeShort } from "@/lib/analytics/formatDisplay";
 import type { GameHealthCheckRecord } from "@/lib/gameHealth/types";
 import {
   checksToTrendPoints,
@@ -215,12 +216,7 @@ export function OpsHealthTrendChart({
           {trendTooltipLine(activePoint)}
         </p>
         <p className="mt-1 text-[12px] text-white/50">
-          {new Date(activePoint.createdAt).toLocaleString(undefined, {
-            month: "short",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit"
-          })}
+          {formatAnalyticsDateTimeShort(activePoint.createdAt)}
           {activePoint.warningCount > 0 || activePoint.failCount > 0 ? (
             <>
               {" "}

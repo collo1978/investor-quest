@@ -6,9 +6,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 
 
+import { companyByTicker } from "@/data/companies";
 import type { PillarId } from "@/data/pillars";
+import {
+  CONTROLLED_DEMO_COMPANY_ID,
+  CONTROLLED_DEMO_MODE
+} from "@/lib/demo/controlledDemo";
+import { isDemoQuestPlayable } from "@/lib/demo/playableDemo";
 
 import {
+
+  describeIncompleteQuestPayload,
 
   isPillarQuestPayloadReady,
 
@@ -46,9 +54,7 @@ import {
 
   fetchQuestAnswersPayload,
 
-  postQuestGenerate,
-
-  postSecExtract
+  postQuestGenerate
 
 } from "@/lib/quests/runQuestGenerationClient";
 
@@ -84,7 +90,19 @@ type State = {
 
 };
 
-
+function pipelineErrorMessage(err: unknown): string {
+  if (CONTROLLED_DEMO_MODE) {
+    return "One sec — lining up examples you'll actually recognize.";
+  }
+  if (err instanceof Error && err.message.trim()) return err.message;
+  if (typeof err === "string" && err.trim()) return err;
+  if (err && typeof err === "object") {
+    const o = err as { error?: string; detail?: string; message?: string };
+    const parts = [o.message, o.error, o.detail].filter(Boolean);
+    if (parts.length) return parts.join(" — ");
+  }
+  return "Generation failed. Try again or use Admin → Quest copy & regeneration.";
+}
 
 export function usePillarQuestGeneratedContent(
 
@@ -110,7 +128,7 @@ export function usePillarQuestGeneratedContent(
 
     generating: false,
 
-    pipelinePhase: "loading",
+    pipelinePhase: "idle",
 
     progress: null,
 
@@ -316,9 +334,7 @@ export function usePillarQuestGeneratedContent(
 
           generating: true,
 
-          pipelinePhase:
-
-            payload.status === "missing_extract" ? "extracting" : "generating",
+          pipelinePhase: "generating",
 
           progress: buildQuestProgress(payload),
 
@@ -333,34 +349,16 @@ export function usePillarQuestGeneratedContent(
       try {
 
         if (payload.status === "missing_extract") {
-
-          await postSecExtract(ticker);
-
-          payload = await refreshPayload();
-
-          if (isPriorityReady(payload)) {
-
-            applyPayload(payload, { generating: true, phase: "generating" });
-
-          } else {
-
-            setState((s) => ({
-
-              ...s,
-
-              payload,
-
-              pipelinePhase: "generating",
-
-              progress: buildQuestProgress(payload)
-
-            }));
-
-          }
-
+          stopPolling();
+          setState({
+            payload,
+            generating: false,
+            pipelinePhase: "idle",
+            progress: null,
+            error: describeIncompleteQuestPayload(payload)
+          });
+          return;
         }
-
-
 
         let missing = getMissingCardIds(payload);
 
@@ -412,11 +410,14 @@ export function usePillarQuestGeneratedContent(
 
       } catch (err) {
 
-        const message =
+        const message = pipelineErrorMessage(err);
 
-          err instanceof Error ? err.message : "Generation failed.";
-
-        console.error("[quest-pipeline]", { pillarId, ticker, questSlug, message });
+        console.error(
+          "[quest-pipeline]",
+          `${pillarId}/${ticker}/${questSlug}:`,
+          message,
+          err
+        );
 
         stopPolling();
 
@@ -474,6 +475,25 @@ export function usePillarQuestGeneratedContent(
 
     stopPolling();
 
+    const demoCompany = companyByTicker(ticker);
+    if (
+      CONTROLLED_DEMO_MODE &&
+      demoCompany?.id === CONTROLLED_DEMO_COMPANY_ID &&
+      isDemoQuestPlayable(demoCompany.id, pillarId, questSlug)
+    ) {
+      setState({
+        payload: null,
+        generating: false,
+        pipelinePhase: "idle",
+        progress: null,
+        error: null
+      });
+      return () => {
+        cancelled = true;
+        stopPolling();
+      };
+    }
+
 
 
     (async () => {
@@ -526,7 +546,7 @@ export function usePillarQuestGeneratedContent(
 
         const message =
 
-          err instanceof Error ? err.message : "Failed to load answers.";
+          pipelineErrorMessage(err) || "Failed to load answers.";
 
         setState({
 

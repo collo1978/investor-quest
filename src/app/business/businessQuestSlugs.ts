@@ -1,29 +1,33 @@
-/** Business pillar quest slugs — match `/business/[questSlug]` routes. */
-export const BUSINESS_QUEST_SLUGS = [
-  "snapshot",
-  "revenue",
-  "operations",
-  "advantage",
-  "industry"
-] as const;
+/**
+ * Business pillar quest slugs — match `/business/[questSlug]` routes.
+ */
+export {
+  BUSINESS_QUEST_SLUGS,
+  LEGACY_BUSINESS_SLUGS,
+  BUSINESS_SLUG_FROM_LEGACY,
+  canonicalBusinessQuestSlug,
+  isBusinessQuestSlug,
+  isLegacyBusinessSlug,
+  migrateBusinessProgressSlug,
+  type BusinessQuestSlug,
+  type LegacyBusinessQuestSlug
+} from "@/lib/business/businessSlugMigration";
 
-export type BusinessQuestSlug = (typeof BUSINESS_QUEST_SLUGS)[number];
+import {
+  BUSINESS_QUEST_SLUGS,
+  type BusinessQuestSlug
+} from "@/lib/business/businessSlugMigration";
 
 /** Quests wired to SEC → AI → DB pipeline. */
-export const BUSINESS_AI_QUEST_SLUGS = [
-  "snapshot",
-  "revenue",
-  "operations",
-  "advantage",
-  "industry"
-] as const;
+export const BUSINESS_AI_QUEST_SLUGS = BUSINESS_QUEST_SLUGS;
 
-export type BusinessAiQuestSlug = (typeof BUSINESS_AI_QUEST_SLUGS)[number];
+export type BusinessAiQuestSlug = BusinessQuestSlug;
 
-export function isBusinessQuestSlug(value: string): value is BusinessQuestSlug {
-  return (BUSINESS_QUEST_SLUGS as readonly string[]).includes(value);
-}
-
-export function isBusinessAiQuestSlug(value: string): value is BusinessAiQuestSlug {
+export function isBusinessAiQuestSlug(
+  value: string
+): value is BusinessAiQuestSlug {
   return (BUSINESS_AI_QUEST_SLUGS as readonly string[]).includes(value);
 }
+
+/** @deprecated Use {@link isBusinessAiQuestSlug} */
+export const isBusinessAiQuestSlugValue = isBusinessAiQuestSlug;

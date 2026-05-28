@@ -1,11 +1,18 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
+import { platformReportFromCheckRecord } from "@/lib/gameHealth/buildPlatformReport";
+import {
+  enrichIssueDraft,
+  readResolutionIntelligence
+} from "@/lib/gameHealth/resolutionIntelligence/enrichIssue";
+import { RESOLUTION_METADATA_KEY } from "@/lib/gameHealth/resolutionIntelligence/types";
 import type {
   GameHealthCheckRecord,
   GameHealthIssueRecord,
   GameHealthSettings,
-  HealthCheckItem
+  HealthCheckItem,
+  PlatformHealthReport
 } from "@/lib/gameHealth/types";
 
 type CheckRow = {
@@ -19,6 +26,7 @@ type CheckRow = {
   slowest_route: string | null;
   duration_ms: number | null;
   created_at: string;
+  platform_report?: PlatformHealthReport | null;
 };
 
 type IssueRow = {
@@ -66,18 +74,30 @@ function mapIssue(row: IssueRow): GameHealthIssueRecord {
 }
 
 function mapCheck(row: CheckRow, issues?: GameHealthIssueRecord[]): GameHealthCheckRecord {
+  const passedChecks = row.passed_checks ?? [];
+  const warnings = row.warnings ?? [];
+  const failedChecks = row.failed_checks ?? [];
+  const platformReport = platformReportFromCheckRecord({
+    passedChecks,
+    warnings,
+    failedChecks,
+    platformReport: row.platform_report ?? null,
+    score: row.score
+  });
+
   return {
     id: row.id,
     score: row.score,
-    statusLabel: row.status_label as GameHealthCheckRecord["statusLabel"],
-    passedChecks: row.passed_checks ?? [],
-    warnings: row.warnings ?? [],
-    failedChecks: row.failed_checks ?? [],
+    statusLabel: platformReport.demoReadiness.status,
+    passedChecks,
+    warnings,
+    failedChecks,
     suggestedFixes: row.suggested_fixes ?? [],
     slowestRoute: row.slowest_route,
     durationMs: row.duration_ms,
     createdAt: row.created_at,
-    issues
+    issues,
+    platformReport
   };
 }
 
@@ -162,6 +182,7 @@ export async function insertGameHealthCheck(input: {
   slowestRoute: string | null;
   durationMs: number;
   issues: Omit<GameHealthIssueRecord, "id" | "checkId" | "createdAt" | "updatedAt" | "status">[];
+  platformReport?: PlatformHealthReport;
 }): Promise<GameHealthCheckRecord> {
   if (!isSupabaseConfigured()) {
     throw new Error("Supabase is not configured.");
@@ -169,20 +190,53 @@ export async function insertGameHealthCheck(input: {
 
   const supabase = await createSupabaseServerClient();
 
+  const insertPayload: Record<string, unknown> = {
+    score: input.score,
+    status_label: input.statusLabel,
+    passed_checks: input.passedChecks,
+    warnings: input.warnings,
+    failed_checks: input.failedChecks,
+    suggested_fixes: input.suggestedFixes,
+    slowest_route: input.slowestRoute,
+    duration_ms: input.durationMs
+  };
+
+  if (input.platformReport) {
+    insertPayload.platform_report = input.platformReport;
+  }
+
   const { data: checkRow, error: checkErr } = await supabase
     .from("game_health_checks")
-    .insert({
-      score: input.score,
-      status_label: input.statusLabel,
-      passed_checks: input.passedChecks,
-      warnings: input.warnings,
-      failed_checks: input.failedChecks,
-      suggested_fixes: input.suggestedFixes,
-      slowest_route: input.slowestRoute,
-      duration_ms: input.durationMs
-    })
+    .insert(insertPayload)
     .select()
     .single();
+
+  if (checkErr?.message?.includes("platform_report")) {
+    const { data: fallbackRow, error: fallbackErr } = await supabase
+      .from("game_health_checks")
+      .insert({
+        score: input.score,
+        status_label: input.statusLabel,
+        passed_checks: input.passedChecks,
+        warnings: input.warnings,
+        failed_checks: input.failedChecks,
+        suggested_fixes: input.suggestedFixes,
+        slowest_route: input.slowestRoute,
+        duration_ms: input.durationMs
+      })
+      .select()
+      .single();
+
+    if (fallbackErr || !fallbackRow) {
+      throw new Error(fallbackErr?.message ?? "Failed to save health check.");
+    }
+
+    const checkId = (fallbackRow as CheckRow).id;
+    const issueRecords = await syncIssuesForCheck(checkId, input.issues);
+    const mapped = mapCheck(fallbackRow as CheckRow, issueRecords);
+    await pruneGameHealthChecks(20);
+    return { ...mapped, platformReport: input.platformReport ?? mapped.platformReport };
+  }
 
   if (checkErr || !checkRow) {
     throw new Error(checkErr?.message ?? "Failed to save health check.");
@@ -215,14 +269,41 @@ async function syncIssuesForCheck(
 
   for (const open of openIssues) {
     if (!activeKeys.has(open.issueKey)) {
-      await supabase
-        .from("game_health_issues")
-        .update({
-          status: "resolved",
-          resolved_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", open.id);
+      const resolution = readResolutionIntelligence(open.metadata);
+      const canAutoClose =
+        !resolution ||
+        resolution.verification?.passed === true ||
+        resolution.resolutionStatus === "resolved" ||
+        resolution.resolutionStatus === "manually_reviewed" ||
+        resolution.resolutionStatus === "auto_fixed";
+
+      if (canAutoClose) {
+        await supabase
+          .from("game_health_issues")
+          .update({
+            status: "resolved",
+            resolved_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            metadata: {
+              ...open.metadata,
+              [RESOLUTION_METADATA_KEY]: resolution
+                ? {
+                    ...resolution,
+                    resolutionStatus: "resolved",
+                    resolutionHistory: [
+                      ...resolution.resolutionHistory,
+                      {
+                        status: "resolved",
+                        at: new Date().toISOString(),
+                        note: "Condition no longer detected on latest audit"
+                      }
+                    ]
+                  }
+                : open.metadata[RESOLUTION_METADATA_KEY]
+            }
+          })
+          .eq("id", open.id);
+      }
     }
   }
 
@@ -230,22 +311,23 @@ async function syncIssuesForCheck(
 
   for (const draft of drafts) {
     const existing = openIssues.find((o) => o.issueKey === draft.issueKey);
+    const enrichedDraft = enrichIssueDraft(draft, existing ?? null);
     const rowPayload = {
       check_id: checkId,
-      issue_key: draft.issueKey,
-      severity: draft.severity,
-      title: draft.title,
-      problem_plain: draft.problemPlain,
-      what_users_see: draft.whatUsersSee,
-      suggested_fix: draft.suggestedFix,
-      fix_action: draft.fixAction,
-      company_ticker: draft.companyTicker,
-      company_name: draft.companyName,
-      pillar_id: draft.pillarId,
-      quest_slug: draft.questSlug,
-      card_id: draft.cardId,
+      issue_key: enrichedDraft.issueKey,
+      severity: enrichedDraft.severity,
+      title: enrichedDraft.title,
+      problem_plain: enrichedDraft.problemPlain,
+      what_users_see: enrichedDraft.whatUsersSee,
+      suggested_fix: enrichedDraft.suggestedFix,
+      fix_action: enrichedDraft.fixAction,
+      company_ticker: enrichedDraft.companyTicker,
+      company_name: enrichedDraft.companyName,
+      pillar_id: enrichedDraft.pillarId,
+      quest_slug: enrichedDraft.questSlug,
+      card_id: enrichedDraft.cardId,
       status: "open",
-      metadata: draft.metadata,
+      metadata: enrichedDraft.metadata,
       updated_at: new Date().toISOString()
     };
 
@@ -370,12 +452,57 @@ export async function fetchGameHealthIssue(
 export async function resolveGameHealthIssue(issueId: string): Promise<void> {
   if (!isSupabaseConfigured()) return;
 
+  const issue = await fetchGameHealthIssue(issueId);
   const supabase = await createSupabaseServerClient();
+
+  const resolution = issue ? readResolutionIntelligence(issue.metadata) : null;
+  const nextResolution = resolution
+    ? {
+        ...resolution,
+        resolutionStatus: "resolved" as const,
+        resolutionHistory: [
+          ...resolution.resolutionHistory,
+          {
+            status: "resolved" as const,
+            at: new Date().toISOString(),
+            note: "Marked resolved manually"
+          }
+        ]
+      }
+    : undefined;
+
   await supabase
     .from("game_health_issues")
     .update({
       status: "resolved",
       resolved_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      ...(nextResolution
+        ? {
+            metadata: {
+              ...(issue?.metadata ?? {}),
+              [RESOLUTION_METADATA_KEY]: nextResolution
+            }
+          }
+        : {})
+    })
+    .eq("id", issueId);
+}
+
+export async function updateGameHealthIssueMetadata(
+  issueId: string,
+  metadataPatch: Record<string, unknown>
+): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+
+  const issue = await fetchGameHealthIssue(issueId);
+  if (!issue) return;
+
+  const supabase = await createSupabaseServerClient();
+  await supabase
+    .from("game_health_issues")
+    .update({
+      metadata: { ...issue.metadata, ...metadataPatch },
       updated_at: new Date().toISOString()
     })
     .eq("id", issueId);

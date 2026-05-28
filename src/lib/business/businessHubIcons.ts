@@ -2,6 +2,12 @@ import type { QuestType } from "@/data/quests/types";
 
 /** Map icon keys (Supabase `hub_icon`) to display glyphs. */
 export const BUSINESS_HUB_ICON_GLYPHS: Record<string, string> = {
+  "what-they-do": "◆",
+  "why-buying": "◎",
+  "everyday-life": "◇",
+  "how-it-works": "⚙",
+  "why-they-stay": "★",
+  competition: "▣",
   snapshot: "◆",
   revenue: "◎",
   operations: "⚙",

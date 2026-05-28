@@ -2,6 +2,7 @@ import type { FinancialsQuestSlug } from "@/app/financials/financialsQuestSlugs"
 import { getFinancialCardSpecs } from "@/lib/sec/financialQuestSectionMap";
 import { getFinancialExtractReadiness } from "@/lib/sec/resolveFinancialSectionIds";
 import { fetchQuestCardAnswersForSlug } from "@/lib/supabase/questCardAnswers/storage";
+import { formatPlayerQuestSourceLabel } from "@/lib/quests/questSourceLabel";
 import type { FinancialQuestAnswersPayload } from "@/lib/supabase/questCardAnswers/types";
 
 export async function loadFinancialQuestAnswersPayload(params: {
@@ -33,11 +34,10 @@ export async function loadFinancialQuestAnswersPayload(params: {
 
   const hasAll = expectedCardIds.every((id) => cards[id]?.plainEnglishAnswer);
   const first = Object.values(cards)[0];
-  const sourceLabel = first?.sourceAccession
-    ? `SEC ${first.sourceForm} · ${first.sourceAccession}`
-    : first
-      ? `SEC ${first.sourceForm}`
-      : null;
+  const sourceLabel = formatPlayerQuestSourceLabel(
+    first?.sourceForm,
+    first?.sourceAccession
+  );
 
   return {
     pillarId: "financials" as const,

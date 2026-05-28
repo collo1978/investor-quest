@@ -69,6 +69,12 @@ export function GeographicRevenueMap({ report, theme }: Props) {
         }}
       />
 
+      {report.headline ? (
+        <p className="relative z-[1] px-4 pt-4 text-center text-[13px] font-medium leading-snug text-ink-0/92">
+          {report.headline}
+        </p>
+      ) : null}
+
       <motion.div
         className="relative z-[1] w-full px-2 pt-3 pb-2"
         initial={{ opacity: 0 }}
@@ -296,27 +302,6 @@ export function GeographicRevenueMap({ report, theme }: Props) {
         })}
       </ul>
 
-      {report.investorInsight ? (
-        <p
-          className="relative z-[1] border-t border-white/[0.06] px-4 py-3 text-[12.5px] leading-[1.65] text-ink-0/90 sm:text-[13px]"
-          style={{ borderLeftColor: theme.border, borderLeftWidth: 3 }}
-        >
-          <span
-            className="mb-1 block text-[9px] font-bold uppercase tracking-[0.18em]"
-            style={{ color: theme.hi }}
-          >
-            Investor insight
-          </span>
-          {report.investorInsight}
-        </p>
-      ) : null}
-
-      {report.sourceSectionLabel ? (
-        <p className="px-4 pb-3 text-[9px] uppercase tracking-[0.14em] text-ink-2/70">
-          Source: {report.sourceForm} — {report.sourceSectionLabel}
-          {report.fiscalYear ? ` · FY${report.fiscalYear}` : ""}
-        </p>
-      ) : null}
     </motion.div>
   );
 }

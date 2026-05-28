@@ -12,7 +12,30 @@ import {
   type QuestionIntent,
   type QuestionIntentContext
 } from "@/lib/quests/questionIntent";
+import {
+  answerDriftsFromQuestion,
+  CUSTOMER_PROBLEM_FOCUS_RE,
+  hasCustomerProblemMetaOpening,
+  hasInvestorDriftInMainStory,
+  QUEST_CARD_FOCUS_RULES
+} from "@/lib/quests/questionFocusGate";
 import { splitIntoSentences } from "@/lib/quests/scannableAnswer";
+import {
+  CUSTOMER_AUDIENCE_HARD_RULES,
+  hasGenericCustomerAudiencePhrasing,
+  hasTargetCustomerFocus
+} from "@/lib/quests/customerAudienceCopy";
+import {
+  INNOVATION_RD_HARD_RULES,
+  hasInnovationRdFocus,
+  hasInnovationRdQualityIssue
+} from "@/lib/quests/innovationRdCopy";
+import { QUEST_COPY_GLOBAL_RULES_TEXT } from "@/lib/quests/questCopyRules";
+import {
+  DIRECT_PROSE_VOICE_RULES,
+  DRAMATIC_NARRATION_RE,
+  EM_DASH_IN_COPY_RE
+} from "@/lib/quests/directProseCopy";
 
 export type { QuestionIntent, QuestionIntentContext } from "@/lib/quests/questionIntent";
 export {
@@ -22,16 +45,39 @@ export {
 } from "@/lib/quests/questionIntent";
 
 export const HUMAN_FIRST_MISSION = `MISSION
-Investor Quest should feel like a smart friend showing how companies work in normal life — NOT "AI summaries of financial filings."`;
+Investor Quest should feel like a smart friend explaining what matters to investors — NOT a cleaned-up SEC filing, Wikipedia, or textbook.
+
+Target reaction: "Ohhh, now I get why investors care about this company."`;
+
+export const INSIGHT_DRIVEN_STYLE_ANCHOR = `INSIGHT-DRIVEN STYLE (match this rhythm on visible cards)
+"Apple makes tech products people use every day, like iPhones, Macs, iPads, AirPods, and Apple Watches.
+
+Apple also earns recurring revenue from services like the App Store, iCloud, and Apple Music after the device is sold.
+
+Why investors care:
+Repeat spending from the same customers is steadier than one-off hardware sales."
+
+Every supporting sentence must TEACH something concrete (money, habit, risk, scale). Not dramatic pivots.
+
+Good sentence 2 examples:
+- "Apple also earns recurring revenue from services."
+- "Services help Apple make money after the device is sold."
+- "The ecosystem encourages customers to stay with Apple products."
+- "Recurring subscriptions create more stable revenue."
+
+Banned cinematic filler (auto-rejected):
+- "But the real story is bigger than the devices."
+- "The twist:" / "There's more beneath the surface." / "The deeper story matters."
+- Any line that sounds mysterious but teaches nothing.`;
 
 export const HUMAN_FIRST_SIX_STEPS = `HUMAN-FIRST EXPLANATION ARCHITECTURE (flexible mental model)
 Match the CARD QUESTION — use the pattern for that question type (see intent footer on each card).
 
 Common patterns (pick ONE that fits the question):
-- What they do: everyday experience → analogy → what they sell/do → investor meaning
-- Customer problem: pain → consequence → how they help → investor meaning
-- Market scale: scale comparison → market importance → analogy → investor meaning
-- How they make money: what people pay for → example → main revenue source → investor meaning
+- What they do: what people actually use/buy → where money comes from → investor meaning (no forced analogy)
+- Customer problem: what life feels like → what gets easier → everyday benefit (no investor analysis in the main story)
+- Market scale: how big it feels in real life → why that position matters → investor meaning
+- How they make money: what people pay for → main revenue source → investor meaning
 - Risk/force: real-world risk → what could happen → filing fact → investor meaning
 - Financials: money comparison → what the number shows → consequence → investor meaning
 
@@ -39,22 +85,38 @@ Always end with "Why investors care:" — one short line on growth, risk, trust,
 
 export const HUMAN_FIRST_HARD_RULES = `HARD RULES (auto-rejected before save)
 - No technical-first explanations (never open with what the company builds in engineering terms)
-- No corporate / MBA language ("solutions are essential", "landscape", "leverages", "synergies", "strategic")
+- No corporate / MBA / textbook tone ("designs and sells", "provides solutions", "landscape", "leverages", "ecosystem" as filler, "depends heavily on", "consumer demand")
+- No SEC/Wikipedia voice — write like a smart friend, not a simplified annual report
+- No "In simple terms", "Simple version", or teacher wrap-ups — say it clearly once
+- No forced analogies ("Think of it like…", "Picture it like…", "It's like trying to…") — say it plainly instead
+- No em dashes (—), en dashes (–), or double hyphens (--) in player copy. Use periods or commas instead.
+- No dramatic narration ("that makes every judgment sharper", "the deeper story matters", "beneath the surface")
 - No jargon unless translated into normal life in the same breath
 - No long article-style answers (max 4 short sentences before "Why investors care:")
 - No vague "innovation" unless you show a concrete everyday result
+- R&D / moat cards: ${INNOVATION_RD_HARD_RULES.replace(/\n/g, " ")}
+- Global card structure: ${QUEST_COPY_GLOBAL_RULES_TEXT.replace(/\n/g, " ").slice(0, 400)}…
+- No cinematic filler: "the real story", "the twist", "bigger than the devices", "beneath the surface", "deeper story", or other dramatic lines that teach nothing
+- Sentence 2+ must state a fact (revenue, habit, risk, scale) — smart, simple, educational — not marketing mystery
+- Answer ONLY the card question; do not drift to investor takeaways, loyalty, or spec comparisons in the main story (exception: customer/audience cards may explain loyalty, ecosystem, and switching costs when the question asks who buys)
+- No "spec sheets", "stickiness", or clever meta openings that skip the real customer problem
 - Teenager picture test: if they cannot instantly picture it → rewrite`;
 
 export const QUEST_BEGINNER_VOICE = `${HUMAN_FIRST_MISSION}
+
+${INSIGHT_DRIVEN_STYLE_ANCHOR}
 
 ${HUMAN_FIRST_SIX_STEPS}
 
 ${HUMAN_FIRST_HARD_RULES}
 
+${DIRECT_PROSE_VOICE_RULES}
+
 VOICE
-- TikTok clarity + Apple simplicity: one beat per sentence, spoken aloud in your head.
-- Goal: "Ohhh… I get what this company does now."
-- Conversational, light, fast — one idea per card.
+- Smart friend explaining investing — not a textbook, not a filing summary.
+- TikTok clarity: one beat per sentence; read it aloud; if it sounds stiff, rewrite.
+- Goal: "Ohhh… I get it now."
+- Name real products, places, and money moves people already know.
 
 TEENAGER PICTURE TEST (enforced before save)
 - A normal teenager must instantly picture where this shows up in real life.
@@ -98,33 +160,38 @@ export const QUIZ_EXPLANATION_VOICE = `QUIZ EXPLANATION RULES (post-answer "Why"
 - 1–2 short sentences max.
 - Start with what the player should picture in real life, then the one fact they missed.
 - No filing jargon, no "incorrect", no lecture.
-- Good: "Apple earns most from iPhone — services add recurring revenue on top."
-- Bad: "The company's diversified revenue streams across multiple product categories…"`;
+- Good: "Apple earns most from iPhone. Services add recurring revenue on top."
+- Bad: "The company's diversified revenue streams across multiple product categories…"
+- R&D / moat quizzes: state what they invest in and the business impact — no buzzword stacks or "whatever's next."`;
 
-export const WHY_IT_MATTERS_UI_VOICE = `WHY IT MATTERS (template labels on cards — keep under 20 words)
-- Tie to a human stake: trust, money, time, safety, or staying competitive.
-- Not: abstract strategy or industry overview.`;
+export const WHY_IT_MATTERS_UI_VOICE = `WHY IT MATTERS (template labels on cards — keep under 22 words)
+- One punchy line: what changes for people's wallets, habits, or risk if this is true.
+- Good: "If people keep buying, the same customers keep paying."
+- Bad: "Understanding X helps investors see where the company can grow."`;
 
 export const VALUATION_EXPLANATION_VOICE = `VALUATION / PRICE CARDS (when applicable)
 - Anchor price to something familiar: "costs about X movie tickets" or "one month of streaming."
 - Pain: paying too much vs what you get; consequence: overpaying for hype.
 - Never lead with P/E, EV/EBITDA, or multiples without translating what they mean in plain life.`;
 
-/** Snapshot card-2 — customer problem (hardest test). */
+/** Snapshot card-2 — "What problem does it solve for customers?" */
+export const TARGET_CUSTOMER_CARD_PROMPT = CUSTOMER_AUDIENCE_HARD_RULES;
+
 export const CUSTOMER_PROBLEM_CARD_PROMPT = `CUSTOMER PROBLEM CARD
-The reader must feel: "What pain disappears because this company exists?"
-Arc: everyday frustration WITHOUT them → consequence → one analogy → benefit WITH them.
+The reader must instantly feel the real-world customer problem this company solves.
+Pattern: what life feels like with them → concrete everyday example → how that helps (time, frustration, simplicity).
+Stay on the problem the question asks. No investor analysis, spec sheets, stickiness, or loyalty economics in the main story.
 Never: industries tour, solutions, innovation hype, "technology is crucial."`;
 
 export const CUSTOMER_PROBLEM_STYLE_REFERENCE = `STYLE REFERENCE (customer problem — tone only):
-"When a game stutters or an AI chat takes forever to reply, devices aren't fast enough.
+"Apple makes technology feel simple and connected.
 
-Think of it like a phone running too many apps — everything slows down.
+People can move photos, messages, apps, and files easily between devices without needing to think about it too much.
 
-This company makes the parts inside devices so games and apps feel quick again.
+For many customers, Apple products save time, reduce frustration, and work smoothly together in everyday life.
 
 Why investors care:
-If people keep demanding faster tech, demand for those parts can keep growing."`;
+When daily life feels easier, people tend to stay with the same brand."`;
 
 export function isCustomerProblemCard(params: {
   questSlug: string;
@@ -160,12 +227,29 @@ export type HumanFirstStructureResult = {
   hasScaleSignal: boolean;
   hasWrongIntentTemplate: boolean;
   hasCorporateOpening: boolean;
+  hasInvestorDriftInMain: boolean;
+  hasQuestionDrift: boolean;
+  hasCinematicFiller: boolean;
+  hasEmDash: boolean;
+  hasGenericCustomerAudience: boolean;
+  hasInnovationRdIssue: boolean;
+  missingInnovationRdFocus: boolean;
   tooLong: boolean;
   missingWhyInvestorsCare: boolean;
 };
 
+/** Dramatic pivot lines that teach nothing — reject in player copy. */
+export const CINEMATIC_FILLER_RE = DRAMATIC_NARRATION_RE;
+
 const REAL_LIFE_OPENING_RE =
-  /\b(when you|if you'?ve|you might|you've|you already|everyday|at home|on your phone|while |when a |if a |before you|after you|most people|anyone who)\b/i;
+  /\b(when you|if you'?ve|you might|you've|you already|everyday|at home|on your phone|while |when a |if a |before you|after you|most people|anyone who|makes tech|makes everyday|makes technology|people use every|use every day|use constantly|people can move|for many customers)\b/i;
+
+/** Forced analogy patterns — banned on all player-facing cards. */
+export const FORCED_ANALOGY_RE =
+  /\bthink of [\w']+ (?:like|as)\b|\bit'?s like trying to\b|\bpicture it like\b|\bcompare it to\b/i;
+
+const CORPORATE_PHRASE_RE =
+  /\b(designs and sells|operates across|provides solutions|offers a range of|delivers value|depends heavily on|consumer demand|in simple terms|simple version|a range of popular)\b/i;
 
 const PAIN_PROBLEM_RE =
   /\b(without|frustrat|annoy|slow|lag|stutter|broken|expensive|confus|risk|struggle|hard to|can't|cannot|waiting|stuck|worry|lose|miss|fail|hurt)\b/i;
@@ -214,14 +298,32 @@ export function analyzeHumanFirstStructure(
 
   const hasRealLifeOpening =
     REAL_LIFE_OPENING_RE.test(first) ||
+    /\b(investors?|customers?|people|users|shoppers|drivers|listeners)\b/i.test(
+      first
+    ) ||
     (intent === "market_scale" &&
       (SCALE_SIGNAL_RE.test(first) ||
         SCALE_OPENING_RE.test(first) ||
         SCALE_SIGNAL_RE.test(openingTwo))) ||
     (intent === "financials" &&
-      /\b(paycheck|bill|price tag|rent|income|budget|small business|wallet)\b/i.test(
+      /\b(paycheck|bill|price tag|rent|income|budget|small business|wallet|investor|stock|margin|profit|cash|growth|revenue|earn)\b/i.test(
         first
-      ));
+      )) ||
+    (intent === "risk_force" || intent === "force_positive"
+      ? /\b(if |when |prices?|rules?|regulat|demand|supply|compet|delay|cost)\b/i.test(
+          first
+        )
+      : false) ||
+    (intent === "target_customer" &&
+      (hasTargetCustomerFocus(first) ||
+        /\b(mainly sells|sells to|buyers?|customers? who|target|segment|enterprise|developers?)\b/i.test(
+          first
+        ))) ||
+    (intent === "innovation_advantage" &&
+      (/\b(invest|R&D|research|develop|improve|edge|moat|protect|proprietary|chips?|software|hardware|ecosystem)\b/i.test(
+        first
+      ) ||
+        hasInnovationRdFocus(first)));
 
   const hasPainOrProblem = PAIN_PROBLEM_RE.test(mainStory);
   const hasConsequence =
@@ -233,8 +335,11 @@ export function analyzeHumanFirstStructure(
     (SCALE_OPENING_RE.test(first) ||
       SCALE_SIGNAL_RE.test(first) ||
       SCALE_SIGNAL_RE.test(openingTwo));
+  const hasForcedAnalogy = FORCED_ANALOGY_RE.test(mainStory);
   const hasCorporateOpening =
-    !scaleStyleOpening && CORPORATE_OPENING_RE.some((re) => re.test(first));
+    !scaleStyleOpening &&
+    (CORPORATE_PHRASE_RE.test(mainStory) ||
+      CORPORATE_OPENING_RE.some((re) => re.test(first)));
   const tooLong = wordCount > 95 || sentenceCount > 4;
   const missingWhyInvestorsCare =
     !/why investors care:/i.test(plainEnglishAnswer) &&
@@ -251,56 +356,110 @@ export function analyzeHumanFirstStructure(
     CUSTOMER_PAIN_DRIFT_RE.test(mainStory) &&
     !(intent === "market_scale" && hasScaleSignal);
 
+  const intentCtx: QuestionIntentContext =
+    typeof intentOrContext === "object" && intentOrContext
+      ? intentOrContext
+      : {};
+
+  const hasInvestorDriftInMain =
+    intent !== "financials" &&
+    intent !== "target_customer" &&
+    intent !== "innovation_advantage" &&
+    hasInvestorDriftInMainStory(mainStory);
+
+  const hasGenericCustomerAudience =
+    intent === "target_customer" && hasGenericCustomerAudiencePhrasing(mainStory);
+
+  const hasQuestionDrift =
+    (intent === "customer_problem" &&
+      (!CUSTOMER_PROBLEM_FOCUS_RE.test(mainStory) ||
+        hasCustomerProblemMetaOpening(mainStory))) ||
+    (intent === "target_customer" &&
+      (hasGenericCustomerAudience || !hasTargetCustomerFocus(mainStory))) ||
+    answerDriftsFromQuestion({
+      intent,
+      cardQuestion: intentCtx.cardQuestion,
+      mainStory
+    });
+
+  const hasCinematicFiller = CINEMATIC_FILLER_RE.test(mainStory);
+  const hasEmDash = EM_DASH_IN_COPY_RE.test(plainEnglishAnswer);
+  const hasInnovationRdIssue =
+    intent === "innovation_advantage" && hasInnovationRdQualityIssue(mainStory);
+  const missingInnovationRdFocus =
+    intent === "innovation_advantage" && !hasInnovationRdFocus(mainStory);
+
   const flags: string[] = [];
   if (hasCorporateOpening) flags.push("corporate_opening");
+  if (hasForcedAnalogy) flags.push("forced_analogy");
   if (!hasRealLifeOpening) flags.push("weak_real_life_opening");
   if (hasWrongIntentTemplate) flags.push("wrong_question_template");
+  if (hasInvestorDriftInMain) flags.push("investor_drift_in_main");
+  if (hasQuestionDrift) flags.push("question_drift");
+  if (hasCinematicFiller) flags.push("cinematic_filler");
+  if (hasEmDash) flags.push("em_dash");
+  if (hasGenericCustomerAudience) flags.push("generic_customer_audience");
+  if (hasInnovationRdIssue) flags.push("innovation_rd_buzzword_or_hype");
+  if (missingInnovationRdFocus) flags.push("missing_innovation_rd_focus");
   if (tooLong) flags.push("too_long");
   if (missingWhyInvestorsCare) flags.push("missing_why_investors_care");
 
-  let needsAnalogy = true;
-  if (intent === "customer_problem") {
-    if (!hasPainOrProblem) flags.push("missing_customer_pain");
-    if (!hasAnalogy && !hasConsequence) flags.push("missing_analogy");
+  if (intent === "target_customer") {
+    if (!hasTargetCustomerFocus(mainStory)) {
+      flags.push("missing_target_customer_focus");
+    }
+  } else if (intent === "how_they_make_money") {
+    if (
+      !/\b(pay|buy|purchase|subscription|revenue|money|earn|sell|customer|region)\b/i.test(
+        mainStory
+      )
+    ) {
+      flags.push("missing_revenue_framing");
+    }
+  } else if (intent === "customer_problem") {
+    if (!CUSTOMER_PROBLEM_FOCUS_RE.test(mainStory)) {
+      flags.push("missing_problem_focus");
+    }
   } else if (intent === "market_scale") {
     if (!hasScaleSignal) flags.push("missing_scale_or_market_position");
-    needsAnalogy = true;
+  } else if (intent === "innovation_advantage") {
+    if (missingInnovationRdFocus) {
+      flags.push("missing_innovation_rd_focus");
+    }
   } else if (intent === "financials") {
-    needsAnalogy = false;
     if (
-      !/\b(paycheck|bill|price|rent|income|budget|wallet|small business|household|everyday)\b/i.test(
+      !/\b(paycheck|bill|price|rent|income|budget|wallet|small business|household|everyday|investor|margin|profit|cash|growth|revenue|earn|stock)\b/i.test(
         mainStory
       ) &&
       !/\$|\d+\s*%|\d+\s*(?:billion|million)/i.test(mainStory)
     ) {
       flags.push("missing_money_comparison");
     }
-  } else if (intent === "how_they_make_money") {
-    needsAnalogy = false;
-    if (!/\b(pay|buy|purchase|subscription|revenue|money|earn|sell|customer|region)\b/i.test(mainStory)) {
-      flags.push("missing_revenue_framing");
-    }
   }
-
-  if (needsAnalogy && !hasAnalogy) flags.push("missing_analogy");
-
-  const analogyOk =
-    hasAnalogy ||
-    (intent === "market_scale" && hasScaleSignal && hasRealLifeOpening);
 
   const strictPass =
     hasRealLifeOpening &&
     !hasCorporateOpening &&
+    !hasForcedAnalogy &&
+    !hasCinematicFiller &&
+    !hasEmDash &&
+    !hasGenericCustomerAudience &&
     !tooLong &&
     !missingWhyInvestorsCare &&
     !hasWrongIntentTemplate &&
-    (needsAnalogy ? analogyOk : true) &&
+    !hasInvestorDriftInMain &&
+    !hasQuestionDrift &&
     !flags.some((f) =>
       [
+        "missing_problem_focus",
         "missing_customer_pain",
+        "missing_target_customer_focus",
+        "generic_customer_audience",
         "missing_scale_or_market_position",
         "missing_money_comparison",
-        "missing_revenue_framing"
+        "missing_revenue_framing",
+        "missing_innovation_rd_focus",
+        "innovation_rd_buzzword_or_hype"
       ].includes(f)
     );
 
@@ -315,6 +474,13 @@ export function analyzeHumanFirstStructure(
     hasScaleSignal,
     hasWrongIntentTemplate,
     hasCorporateOpening,
+    hasInvestorDriftInMain,
+    hasQuestionDrift,
+    hasCinematicFiller,
+    hasEmDash,
+    hasGenericCustomerAudience,
+    hasInnovationRdIssue,
+    missingInnovationRdFocus,
     tooLong,
     missingWhyInvestorsCare
   };
@@ -334,8 +500,28 @@ export function describeHumanFirstFailure(result: HumanFirstStructureResult): st
       `answered like a customer-pain card but question type is ${result.intent} — match the card question`
     );
   }
-  if (result.hasCorporateOpening) parts.push("opens like a corporate brochure");
+  if (result.hasInvestorDriftInMain) {
+    parts.push("main story drifted into investor/analysis language too early");
+  }
+  if (result.hasQuestionDrift || result.flags.includes("question_drift")) {
+    parts.push("answer does not stay focused on the card question");
+  }
+  if (result.hasCinematicFiller || result.flags.includes("cinematic_filler")) {
+    parts.push(
+      'cinematic filler ("the real story", "the twist", etc.). Use a direct educational fact instead'
+    );
+  }
+  if (result.hasEmDash || result.flags.includes("em_dash")) {
+    parts.push("em dash or double hyphen. Use periods or commas instead");
+  }
+  if (result.hasCorporateOpening) parts.push("corporate or SEC-style phrasing");
+  if (result.flags.includes("forced_analogy")) {
+    parts.push('forced analogy ("Think of it like…") — rewrite in plain language');
+  }
   if (!result.hasRealLifeOpening) parts.push("missing real-life opening");
+  if (result.flags.includes("missing_problem_focus")) {
+    parts.push("missing the everyday customer problem this card asks about");
+  }
   if (result.flags.includes("missing_customer_pain")) {
     parts.push("missing everyday customer pain for this problem card");
   }
@@ -348,8 +534,15 @@ export function describeHumanFirstFailure(result: HumanFirstStructureResult): st
   if (result.flags.includes("missing_revenue_framing")) {
     parts.push("missing how/where the company makes money");
   }
-  if (!result.hasAnalogy && result.flags.includes("missing_analogy")) {
-    parts.push('missing "Think of it like…" analogy');
+  if (result.hasGenericCustomerAudience) {
+    parts.push(
+      'vague customer language ("regular people", "everyone", "upgrading phones") — name WHO buys and WHY'
+    );
+  }
+  if (result.flags.includes("missing_target_customer_focus")) {
+    parts.push(
+      "missing target customer, value proposition, or business-model strength (loyalty, ecosystem, switching costs)"
+    );
   }
   if (result.tooLong) parts.push("too long — max 4 short sentences");
   if (result.missingWhyInvestorsCare) parts.push('missing "Why investors care:" line');

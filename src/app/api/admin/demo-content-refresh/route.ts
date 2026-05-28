@@ -4,6 +4,7 @@ import {
   findDemoRefreshJob,
   getDemoRefreshPlan
 } from "@/lib/demoContentRefresh/config";
+import { regenerateAllDemoQuests } from "@/lib/demoContentRefresh/regenerateAllDemoQuests";
 import { runDemoRefreshJob } from "@/lib/demoContentRefresh/runDemoRefreshJob";
 import { verifyAllDemoContent } from "@/lib/demoContentRefresh/verifyDemoContent";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -48,11 +49,23 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: { action?: string; jobId?: string } = {};
+  let body: { action?: string; jobId?: string; runExtractIfMissing?: boolean } =
+    {};
   try {
     body = (await request.json()) as typeof body;
   } catch {
     body = {};
+  }
+
+  if (body.action === "regenerate-all-demo") {
+    const refresh = await regenerateAllDemoQuests({
+      runExtractIfMissing: body.runExtractIfMissing !== false
+    });
+    const readiness = await verifyAllDemoContent();
+    return NextResponse.json(
+      { refresh, readiness },
+      { headers: { "Cache-Control": "no-store" } }
+    );
   }
 
   if (body.action === "verify") {

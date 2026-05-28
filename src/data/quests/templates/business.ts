@@ -2,282 +2,364 @@ import type { QuestTemplate } from "@/data/quests/types";
 import { BUSINESS_QUEST_QUIZZES } from "@/data/quests/businessQuestQuizzes";
 
 /**
- * Business pillar — 5 quests covering the core of "what the company does".
- * Slugs match the `/business/[questSlug]` routes (snapshot/revenue/operations/advantage/industry).
+ * Business pillar — six adaptive-learning sections (Item 1 Business / 10-K).
+ * Each section: three insight cards → section checkpoint quiz.
  */
 export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
   {
-    slug: "snapshot",
+    slug: "what-they-do",
     type: "snapshot",
     pillarId: "business",
-    title: "A Quick Snapshot",
-    objective: "Get a quick overview of the business.",
+    title: "WHAT {Company.name} ACTUALLY DOES",
+    objective: "Explain what the company does in normal language.",
     description:
-      "In a tight brief: what does {Company.name} ({Company.ticker}) sell, to whom, and what is the one-line thesis for why it matters?",
-    investorQuestion: "What does this company actually do?",
+      "Three quick cards: what they make, the problem they fix, and why they matter in AI today — grounded in Item 1 Business.",
+    investorQuestion: "What does {Company.name} actually make?",
     plainEnglishAnswer: null,
     whyItMatters:
-      "If you can't say what a company sells in one sentence, you can't judge whether it can grow.",
+      "If you cannot explain what they sell in everyday words, every later judgment is guesswork.",
     secSection: {
       form: "10-K",
-      section: "Item 1 — Business",
-      hint: "Use the opening overview and product/services subsections."
+      section: "Item 1 Business",
+      hint: "Products, services, and business overview."
     },
     aiTask:
-      "Summarize {Company.name}'s business model in 3-5 plain-English sentences: products, customers, and the one-line thesis.",
+      "Explain what {Company.name} sells and why it matters in plain English — products, customer pain, and market role.",
     artifactType: "one-pager",
     rewardXp: 100,
     unlockRequirements: { pillar: "business" },
-    completionState: {
-      kind: "checklist",
-      checklistKeys: ["evidence", "numbers", "risk"]
-    },
+    completionState: { kind: "quiz", passPct: 0.66 },
     difficulty: "intro",
     visualStyle: "card",
-    estimatedTime: 3,
+    estimatedTime: 4,
     displayOrder: 1,
-    hubIcon: "snapshot",
+    hubIcon: "what-they-do",
     hubCardCount: 3,
     hubLocked: false,
-    tags: ["overview", "intro", "thesis"],
-    quizConfig: BUSINESS_QUEST_QUIZZES.snapshot,
+    tags: ["overview", "intro", "company"],
+    quizConfig: BUSINESS_QUEST_QUIZZES["what-they-do"],
     cards: [
       {
         id: "card-1",
-        investorQuestion: "What does this company actually do?",
+        investorQuestion: "What does {Company.name} actually make?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Understanding the business is the first step to investing with confidence."
+          "You cannot judge growth if you cannot say what people actually buy."
       },
       {
         id: "card-2",
-        investorQuestion: "What problem does it solve for customers?",
+        investorQuestion: "What problem does {Company.name} solve?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Companies that solve real problems tend to last longer and grow stronger."
+          "Fix a real annoyance and people keep paying — that is sticky revenue."
       },
       {
         id: "card-3",
         investorQuestion:
-          "How big is the company or its position in the market?",
+          "How important is {Company.name} in today's AI world?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Bigger or leading companies often have advantages like brand, scale, and trust."
+          "Market role tells you whether hype or real demand is driving the story."
       }
     ]
   },
   {
-    slug: "revenue",
+    slug: "why-buying",
     type: "revenue",
     pillarId: "business",
-    title: "Revenue",
-    objective:
-      "See where {Company.name} earns its money — by product, region, and customer.",
+    title: "WHY THE WORLD IS BUYING {Company.name}",
+    objective: "See where the money comes from and who pays the biggest bills.",
     description:
-      "Trace {Company.name}'s revenue mix: products and services, geographic markets, and customer base.",
-    investorQuestion: "Where does the company actually make its money?",
+      "Who spends the most, which products print money, and why the AI chip rush is happening — Item 1 and segment disclosures.",
+    investorQuestion: "Who spends the most money with {Company.name}?",
     plainEnglishAnswer: null,
     whyItMatters:
-      "Knowing the revenue mix tells you which parts of the business actually matter to the bottom line.",
+      "When a few big customers pay most of the bills, one pause in orders can hurt fast.",
     secSection: {
       form: "10-K",
-      section: "Item 1 — Business",
-      hint: "Use the products/services, markets, and customer subsections."
+      section: "Revenue Segments",
+      hint: "Products, services, markets, and major customers."
     },
     aiTask:
-      "Explain {Company.name}'s revenue split by product/service, geographic region, and customer type in plain English.",
+      "Explain {Company.name}'s demand drivers: top customers, biggest product lines, and why buyers are rushing in now.",
     artifactType: "map",
     rewardXp: 120,
-    unlockRequirements: { pillar: "business", questSlugs: ["snapshot"] },
+    unlockRequirements: {
+      pillar: "business",
+      questSlugs: ["what-they-do"]
+    },
     completionState: { kind: "quiz", passPct: 0.66 },
     difficulty: "core",
     visualStyle: "panel",
     estimatedTime: 4,
     displayOrder: 2,
-    hubIcon: "revenue",
+    hubIcon: "why-buying",
     hubCardCount: 3,
-    tags: ["revenue", "products", "geography", "customers"],
-    quizConfig: BUSINESS_QUEST_QUIZZES.revenue,
+    tags: ["revenue", "customers", "demand"],
+    quizConfig: BUSINESS_QUEST_QUIZZES["why-buying"],
+    cards: [
+      {
+        id: "card-1",
+        investorQuestion: "Who spends the most money with {Company.name}?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "A handful of giants can move the whole company up or down."
+      },
+      {
+        id: "card-2",
+        investorQuestion:
+          "What products make {Company.name} the most money?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "If one product carries the company, a bad cycle hits hard."
+      },
+      {
+        id: "card-3",
+        investorQuestion:
+          "Why are companies rushing to buy AI chips?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "Demand waves explain both the hype and the risk of a slowdown."
+      }
+    ]
+  },
+  {
+    slug: "everyday-life",
+    type: "everyday",
+    pillarId: "business",
+    title: "HOW {Company.name} FITS INTO EVERYDAY LIFE",
+    objective: "Connect the company to apps, games, and AI you already touch.",
+    description:
+      "Where you meet their tech, how gaming and AI apps feel different, and why builders rely on them — still grounded in Item 1.",
+    investorQuestion:
+      "Where do people interact with {Company.name} technology?",
+    plainEnglishAnswer: null,
+    whyItMatters:
+      "When you can point to real life, the company stops feeling like a ticker symbol.",
+    secSection: {
+      form: "10-K",
+      section: "Item 1 Business",
+      hint: "Products, end markets, and how customers use the technology."
+    },
+    aiTask:
+      "Connect {Company.name} to everyday life: consumer touchpoints, gaming, AI apps, and why developers standardize on them.",
+    artifactType: "map",
+    rewardXp: 120,
+    unlockRequirements: {
+      pillar: "business",
+      questSlugs: ["why-buying"]
+    },
+    completionState: { kind: "quiz", passPct: 0.66 },
+    difficulty: "core",
+    visualStyle: "card",
+    estimatedTime: 4,
+    displayOrder: 3,
+    hubIcon: "everyday-life",
+    hubCardCount: 3,
+    tags: ["everyday", "relatable", "ecosystem"],
+    quizConfig: BUSINESS_QUEST_QUIZZES["everyday-life"],
     cards: [
       {
         id: "card-1",
         investorQuestion:
-          "What products or services does the company sell?",
+          "Where do people interact with {Company.name} technology?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "If most money comes from one thing, the business may be risky if demand drops."
+          "Touchpoints turn abstract chips into something you can picture."
       },
       {
         id: "card-2",
-        investorQuestion: "Which geographic regions do they sell to?",
+        investorQuestion:
+          "How does {Company.name} affect gaming and AI apps?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Relying on one region can be risky if that market slows down."
+          "Speed and graphics are how most people feel the business in real life."
       },
       {
         id: "card-3",
-        investorQuestion: "Who are the customers?",
+        investorQuestion: "Why do AI companies rely on {Company.name}?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Knowing who pays helps you judge how stable and predictable the business is."
+          "When builders depend on you, demand can stick even when headlines shift."
       }
     ]
   },
   {
-    slug: "operations",
+    slug: "how-it-works",
     type: "operations",
     pillarId: "business",
-    title: "Operations",
-    objective:
-      "See how {Company.name} actually runs day-to-day — distribution and workforce.",
+    title: "HOW THE BUSINESS REALLY WORKS",
+    objective: "Follow design → factory → delivery in plain steps.",
     description:
-      "Outline how {Company.name}'s products reach customers and what kind of workforce executes the business.",
-    investorQuestion: "How does the business actually run day-to-day?",
+      "How chips are designed and built, who manufactures them, and how tech reaches the world — supply chain and human capital in Item 1.",
+    investorQuestion: "How are {Company.name} chips designed and built?",
     plainEnglishAnswer: null,
     whyItMatters:
-      "Operations decide whether growing the business cheaply is even possible.",
+      "Late chips feel like a delayed preorder — customers notice when shipments slip.",
     secSection: {
       form: "10-K",
-      section: "Item 1 — Business",
-      hint: "Combine the distribution, supply chain, and human-capital subsections."
+      section: "Supply Chain",
+      hint: "Manufacturing, partners, distribution, and workforce."
     },
     aiTask:
-      "Describe {Company.name}'s distribution channels and workforce composition in plain English.",
+      "Explain how {Company.name} designs chips, who builds them, and how products reach customers worldwide.",
     artifactType: "note",
     rewardXp: 120,
-    unlockRequirements: { pillar: "business", questSlugs: ["revenue"] },
+    unlockRequirements: {
+      pillar: "business",
+      questSlugs: ["everyday-life"]
+    },
     completionState: { kind: "quiz", passPct: 0.66 },
     difficulty: "core",
     visualStyle: "panel",
     estimatedTime: 4,
-    displayOrder: 3,
-    hubIcon: "operations",
-    hubCardCount: 2,
-    tags: ["operations", "distribution", "workforce"],
-    quizConfig: BUSINESS_QUEST_QUIZZES.operations,
+    displayOrder: 4,
+    hubIcon: "how-it-works",
+    hubCardCount: 3,
+    tags: ["operations", "supply-chain", "delivery"],
+    quizConfig: BUSINESS_QUEST_QUIZZES["how-it-works"],
     cards: [
       {
         id: "card-1",
-        investorQuestion: "How do their products reach customers?",
+        investorQuestion: "How are {Company.name} chips designed and built?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Shows how complex or expensive it is to deliver — which affects profits."
+          "Design plus manufacturing partners decide whether launches land on time."
       },
       {
         id: "card-2",
-        investorQuestion: "What kind of workforce runs the business?",
+        investorQuestion: "Who helps manufacture {Company.name} products?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Strong teams and leadership help the company execute and grow."
+          "Depending on a few factories can be a strength or a bottleneck."
+      },
+      {
+        id: "card-3",
+        investorQuestion:
+          "How does {Company.name} deliver its technology worldwide?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "More steps to reach customers usually mean more cost and more delay risk."
       }
     ]
   },
   {
-    slug: "advantage",
+    slug: "why-they-stay",
     type: "advantage",
     pillarId: "business",
-    title: "Advantage",
-    objective:
-      "Find what gives {Company.name} an edge — R&D investment and what protects the business.",
+    title: "WHY CUSTOMERS KEEP CHOOSING {Company.name}",
+    objective: "Trust, habit, and speed — not hype.",
     description:
-      "Identify {Company.name}'s edge: how much it invests in R&D and what protects it (brand, IP, ecosystem, loyalty).",
-    investorQuestion: "What gives this company an edge?",
+      "Why they are hard to replace, what makes them different, and why developers keep building on them — R&D and competition subsections.",
+    investorQuestion: "Why is {Company.name} hard to replace?",
     plainEnglishAnswer: null,
     whyItMatters:
-      "Companies that are easy to copy lose pricing power. Durable advantages protect long-term returns.",
+      "A real edge beats one hot year — customers stick when switching is painful.",
     secSection: {
       form: "10-K",
-      section: "Item 1 — Business",
-      hint: "Use the R&D and competition / intellectual-property subsections."
+      section: "Item 1. Business",
+      hint: "R&D, intellectual property, ecosystem, and competition."
     },
     aiTask:
-      "Explain {Company.name}'s R&D investment focus and what protects it (brand, IP, proprietary tech, ecosystem, loyalty) in plain English.",
+      "Explain why customers stay with {Company.name}: switching costs, trust, product lead, and developer habit.",
     artifactType: "scorecard",
     rewardXp: 140,
     unlockRequirements: {
       pillar: "business",
-      questSlugs: ["revenue", "operations"]
+      questSlugs: ["how-it-works"]
     },
     completionState: { kind: "quiz", passPct: 0.66 },
     difficulty: "deep",
     visualStyle: "board",
     estimatedTime: 5,
-    displayOrder: 4,
-    hubIcon: "advantage",
-    hubCardCount: 2,
-    tags: ["moat", "advantage", "r-and-d"],
-    quizConfig: BUSINESS_QUEST_QUIZZES.advantage,
+    displayOrder: 5,
+    hubIcon: "why-they-stay",
+    hubCardCount: 3,
+    tags: ["moat", "advantage", "loyalty"],
+    quizConfig: BUSINESS_QUEST_QUIZZES["why-they-stay"],
     cards: [
       {
         id: "card-1",
-        investorQuestion: "Do they invest in research and development (R&D)?",
+        investorQuestion: "Why is {Company.name} hard to replace?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Investing in new ideas helps the company stay competitive over time."
+          "Harder to copy means they can charge more without losing customers."
       },
       {
         id: "card-2",
         investorQuestion:
-          "What protects the business (patents, brand, technology)?",
+          "What makes {Company.name} different from competitors?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Strong protection makes it harder for competitors to copy them."
+          "Difference only matters if buyers feel it when they place orders."
+      },
+      {
+        id: "card-3",
+        investorQuestion:
+          "Why do developers keep building around {Company.name}?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "Developer habit is a quiet moat — tools and code outlast one product cycle."
       }
     ]
   },
   {
-    slug: "industry",
+    slug: "competition",
     type: "industry",
     pillarId: "business",
-    title: "Industry",
-    objective:
-      "Gauge how tough {Company.name}'s industry is — competitors, intensity, and regulation.",
+    title: "THE COMPETITION {Company.name} FACES",
+    objective: "Name rivals, tailwinds, and what could slow them down.",
     description:
-      "Place {Company.name} in its industry: main rivals, competitive intensity, and the regulatory backdrop.",
-    investorQuestion: "How tough is the industry?",
+      "Who is competing, trends that could accelerate growth, and risks ahead — competition and regulation in Item 1.",
+    investorQuestion: "Who is trying to compete with {Company.name}?",
     plainEnglishAnswer: null,
     whyItMatters:
-      "Even a great company can struggle in a shrinking or hostile industry. Context is half the thesis.",
+      "You need the competitive picture before you judge if the lead can last.",
     secSection: {
       form: "10-K",
-      section: "Item 1 — Business",
-      hint: "Use the competition and regulatory subsections; cross-check peers."
+      section: "Competition",
+      hint: "Competition, industry trends, and regulatory risks."
     },
     aiTask:
-      "Profile {Company.name}'s industry in plain English: main competitors, how competitive it is, and key regulations.",
+      "Profile rivals, industry tailwinds, and strategic risks for {Company.name} in plain English.",
     artifactType: "memo",
     rewardXp: 140,
-    unlockRequirements: { pillar: "business", questSlugs: ["advantage"] },
+    unlockRequirements: {
+      pillar: "business",
+      questSlugs: ["why-they-stay"]
+    },
     completionState: { kind: "quiz", passPct: 0.66 },
     difficulty: "deep",
     visualStyle: "panel",
     estimatedTime: 5,
-    displayOrder: 5,
-    hubIcon: "industry",
+    displayOrder: 6,
+    hubIcon: "competition",
     hubCardCount: 3,
-    tags: ["industry", "competition", "regulation"],
-    quizConfig: BUSINESS_QUEST_QUIZZES.industry,
+    tags: ["competition", "strategy", "regulation"],
+    quizConfig: BUSINESS_QUEST_QUIZZES.competition,
     cards: [
       {
         id: "card-1",
-        investorQuestion: "Who are the main competitors?",
+        investorQuestion: "Who is trying to compete with {Company.name}?",
         plainEnglishAnswer: null,
         whyItMatters:
           "Strong competitors can limit growth and reduce profits."
       },
       {
         id: "card-2",
-        investorQuestion: "How competitive is the industry?",
+        investorQuestion:
+          "What trends could help {Company.name} grow even faster?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Highly competitive markets often mean lower margins."
+          "Tailwinds can lift everyone — you want to know which ones are real."
       },
       {
         id: "card-3",
-        investorQuestion: "Are there regulations that affect the business?",
+        investorQuestion:
+          "What could slow {Company.name} down in the future?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Rules and laws can increase costs or limit how the company operates."
+          "Headwinds show up in orders and mood long before the story resets."
       }
     ]
   }

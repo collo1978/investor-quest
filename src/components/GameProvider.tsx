@@ -23,6 +23,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState
@@ -44,9 +45,29 @@ import {
 } from "@/engine";
 import type { PillarId } from "@/data/pillars";
 import { QuestPrewarmBootstrap } from "@/components/quest/QuestPrewarmBootstrap";
+import { StartupPrefetchBootstrap } from "@/components/startup/StartupPrefetchBootstrap";
+import { CorruptSaveRecoveryOverlay } from "@/components/CorruptSaveRecoveryOverlay";
 import { useQuestPrewarm } from "@/hooks/useQuestPrewarm";
 import { markGameSessionTouched } from "@/lib/gameSession";
+import {
+  clearPersistedSnapshots,
+  probePersistLoadStatus,
+  savePersistedSnapshot
+} from "@/engine/progression/persistence";
+import { isProgressPersistAction } from "@/lib/gameState/persistenceGate";
 import { mergeLoadedGameState } from "@/lib/gameState/mergeLoadedGameState";
+import {
+  logQuestProgress,
+  readClientGameState,
+  summarizeReadProgress
+} from "@/lib/gameState/progressionPersistence";
+import type { QuestProgressClientRepairParams } from "@/lib/gameHealth/questProgressClientRepair";
+import { buildRepairQuestProgressAction } from "@/lib/gameHealth/questProgressClientRepair";
+import {
+  CONTROLLED_DEMO_COMPANY_ID,
+  CONTROLLED_DEMO_MODE
+} from "@/lib/demo/controlledDemo";
+import { isDemoStoryModeActive } from "@/lib/demo/demoStoryMode";
 
 type Toast = {
   id: string;
@@ -56,16 +77,11 @@ type Toast = {
 };
 
 export type FxState = {
-  /** Triggers a one-shot level-up effect when its key changes. */
   levelUpKey: number | null;
-  /** Last achieved level, for FX caption. */
   level: number | null;
-  /** Triggers a one-shot unlock effect when its key changes. */
   unlockKey: string | null;
   unlockTitle: string | null;
-  /** Triggers quest-completion FX. */
   completionKey: string | null;
-  /** XP gained in the most recent completion (for FX caption). */
   completionXp: number | null;
 };
 
@@ -88,17 +104,10 @@ type GameActions = {
     slug: string,
     opts?: { quizPerfect?: boolean }
   ) => void;
-  /**
-   * Mark a quest's content card as read.
-   * Reading progress only — does NOT award XP. XP is reserved for
-   * quiz passes via `completeQuest`.
-   */
   markQuestRead: (pillarId: PillarId, slug: string) => void;
   markQuestUnread: (pillarId: PillarId, slug: string) => void;
   awardBonusXp: (amount: number, reason: string) => void;
-  /** Advance research consistency streak only (`quiz` advances on quiz passes). */
   touchDailyStreak: () => void;
-  /** Research-only; quiz streak is advanced by the engine when you pass quizzes. */
   touchStreak: (kind: StreakKind) => void;
   updateQuestNotes: (pillarId: PillarId, slug: string, notes: string) => void;
   toggleQuestChecklist: (
@@ -115,19 +124,18 @@ type GameActions = {
   lockCompany: (companyId: string) => void;
   setOnboardingStep: (step: number) => void;
   completeOnboarding: () => void;
+  completeOpeningScreen: () => void;
+  completeWelcomeScreen: () => void;
   reset: () => void;
+  /** Replace entire save (demo profiles) — writes disk without stale-tab merge. */
+  replaceGameState: (next: GameState) => void;
   dismissToast: (id: string) => void;
-  /** After island conviction modal — applies deferred pillar unlock when applicable. */
   submitConvictionAndAdvance: () => void;
-  /** Center-map 10-K Rookie final challenge — pass 0..1 score fraction (≥0.7 clears). */
   completeTenKRookieChallenge: (scoreFraction: number) => void;
-  /** Dismiss the cinematic quest-map mission brief (per active company). */
   dismissQuestMapBrief: () => void;
-  /** Dismiss the first-visit Business Island mission brief (per active company). */
   dismissBusinessIslandBrief: () => void;
-  /** Reset read/completion/quiz work for a pillar (dev testing). */
   clearPillarProgress: (pillarId: PillarId) => void;
-  /** Escape hatch for advanced cases — usually you want a named action above. */
+  repairQuestProgress: (params: QuestProgressClientRepairParams) => void;
   dispatch: (action: GameAction) => void;
 };
 
@@ -151,23 +159,21 @@ type ContextState = {
 
 type GameContextValue = {
   state: ContextState;
-  /** Full canonical engine state, for selectors. */
   raw: GameState;
   actions: GameActions;
   toasts: Toast[];
   fx: FxState;
+  /** True after async hydrate merge has committed — safe to persist. */
   hydrated: boolean;
-  /** Engine version (useful for diagnostics / compat checks). */
+  /** True when progress reads/writes are safe (hydrated and save not corrupt). */
+  persistenceReady: boolean;
+  /** True when local save is corrupt and progress actions are blocked. */
+  corruptSaveBlocked: boolean;
   storeId: string;
 };
 
 const GameContext = createContext<GameContextValue | null>(null);
 
-/**
- * Module-level toast-id counter — monotonic across the session.
- * Local-only counters reset every call, which causes duplicate ids when two
- * batches of events fire in the same millisecond (e.g. read → unlock + xp).
- */
 let toastSeq = 0;
 
 function eventsToToasts(events: RewardEvent[]): Toast[] {
@@ -177,9 +183,9 @@ function eventsToToasts(events: RewardEvent[]): Toast[] {
     if (e.kind === "xp") {
       const title =
         e.reason === "Island mastery bonus"
-          ? `+${e.amount} XP — island mastery secured`
+          ? `+${e.amount} XP. Island mastery secured.`
           : e.reason.startsWith("Section quiz")
-            ? `+${e.amount} XP — quiz mastery`
+            ? `+${e.amount} XP. Quiz passed.`
             : `+${e.amount} XP`;
       out.push({
         id: next(),
@@ -252,17 +258,7 @@ function eventsToToasts(events: RewardEvent[]): Toast[] {
 
 export type GameProviderProps = {
   children: React.ReactNode;
-  /**
-   * Backing store. Defaults to `localStorage` in the browser and an
-   * in-memory store on the server. Pass a custom store to wire up a
-   * remote database or any other persistence backend.
-   */
   store?: ProgressionStore;
-  /**
-   * Middleware invoked after every reducer action with the action and
-   * the resulting state. Use this to stream events to a backend, a
-   * telemetry pipeline, or a debug log.
-   */
   onAction?: (input: {
     action: GameAction;
     state: GameState;
@@ -280,6 +276,7 @@ function GameProviderInner({
   useQuestPrewarm(activeCompanyId);
   return (
     <>
+      <StartupPrefetchBootstrap />
       <QuestPrewarmBootstrap />
       {children}
     </>
@@ -293,54 +290,118 @@ export function GameProvider({
 }: GameProviderProps) {
   const store = useMemo(() => storeProp ?? defaultStore(), [storeProp]);
 
-  const [state, setState] = useState<GameState>(() => initialState());
+  const [corruptSaveBlocked, setCorruptSaveBlocked] = useState(false);
+  /** SSR + first client paint must match — load local save after hydration. */
+  const [state, setState] = useState<GameState>(initialState);
   const [hydrated, setHydrated] = useState(false);
+  const persistReadyRef = useRef(false);
+  /** Blocks stale async store.load merges right after demo reset / replaceGameState. */
+  const bootstrapLockUntilRef = useRef(0);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [fx, setFx] = useState<FxState>(initialFx);
   const fxSeq = useRef(0);
 
-  // -----------------------------------------------------------------
-  // Hydrate from the store, then subscribe to remote updates (if any).
-  // -----------------------------------------------------------------
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const loaded = await store.load();
-      if (!cancelled && loaded) {
-        setState((prev) => mergeLoadedGameState(prev, loaded));
+  useLayoutEffect(() => {
+    const status = probePersistLoadStatus();
+    if (status.kind === "corrupt_unrecoverable") {
+      setCorruptSaveBlocked(true);
+      return;
+    }
+    setState(readClientGameState());
+    persistReadyRef.current = true;
+    setHydrated(true);
+  }, []);
+
+  const handleCorruptRecovery = useCallback((mode: "backup" | "fresh") => {
+    setCorruptSaveBlocked(false);
+    if (mode === "fresh") {
+      setState(initialState());
+    } else {
+      const status = probePersistLoadStatus();
+      if (status.kind === "loaded") {
+        setState(status.state);
       }
-      if (!cancelled) setHydrated(true);
-    })();
-    const unsub = store.subscribe?.((next) => setState(next));
+    }
+    persistReadyRef.current = true;
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (corruptSaveBlocked) return;
+    let cancelled = false;
+
+    const reconcileFromStore = async () => {
+      if (isDemoStoryModeActive()) return;
+      const loaded = await store.load();
+      if (cancelled) return;
+      setState((prev) => {
+        if (!loaded) {
+          logQuestProgress("hydrate.empty", summarizeReadProgress(prev));
+          return prev;
+        }
+        if (isDemoStoryModeActive() || Date.now() < bootstrapLockUntilRef.current) {
+          return prev;
+        }
+        const merged = mergeLoadedGameState(prev, loaded);
+        const onboardingUnchanged =
+          merged.onboarding.openingScreenSeenAt ===
+            prev.onboarding.openingScreenSeenAt &&
+          merged.onboarding.welcomeScreenSeenAt ===
+            prev.onboarding.welcomeScreenSeenAt &&
+          merged.onboarding.completedAt === prev.onboarding.completedAt;
+        if (onboardingUnchanged && merged.activeCompanyId === prev.activeCompanyId) {
+          return prev;
+        }
+        logQuestProgress("hydrate.merged", summarizeReadProgress(merged));
+        return merged;
+      });
+    };
+
+    const useIdle = typeof requestIdleCallback !== "undefined";
+    const idleId = useIdle
+      ? requestIdleCallback(() => void reconcileFromStore(), { timeout: 2500 })
+      : window.setTimeout(() => void reconcileFromStore(), 50);
+
+    const unsub = store.subscribe?.((next) => {
+      if (isDemoStoryModeActive() || Date.now() < bootstrapLockUntilRef.current) {
+        return;
+      }
+      logQuestProgress("hydrate.subscribe", summarizeReadProgress(next));
+      setState((prev) => mergeLoadedGameState(prev, next));
+    });
     return () => {
       cancelled = true;
+      if (useIdle) {
+        cancelIdleCallback(idleId as number);
+      } else {
+        window.clearTimeout(idleId as number);
+      }
       unsub?.();
     };
-  }, [store]);
+  }, [store, corruptSaveBlocked]);
 
-  // -----------------------------------------------------------------
-  // Persist on change (after hydration so we don't overwrite the load).
-  // -----------------------------------------------------------------
   useEffect(() => {
-    if (!hydrated) return;
-    void store.save(state);
-  }, [hydrated, state, store]);
+    if (isDemoStoryModeActive()) return;
+    if (!persistReadyRef.current || corruptSaveBlocked) return;
+    void store.save(state).then(() => {
+      logQuestProgress("persist.saved", summarizeReadProgress(state));
+    });
+  }, [hydrated, state, store, corruptSaveBlocked]);
 
-  // -----------------------------------------------------------------
-  // Single dispatch funnel: applyAction → state, toasts, FX, middleware.
-  // -----------------------------------------------------------------
   const dispatch = useCallback(
     (action: GameAction) => {
+      if (corruptSaveBlocked) return;
+      if (
+        !hydrated &&
+        isProgressPersistAction(action.type) &&
+        !isDemoStoryModeActive()
+      ) {
+        logQuestProgress("persist.gated", { type: action.type });
+        return;
+      }
       markGameSessionTouched();
       setState((prev) => {
         const result = applyAction(prev, action);
-
-        if (
-          action.type === "dismiss-quest-map-brief" ||
-          action.type === "dismiss-business-island-brief"
-        ) {
-          void store.save(result.state);
-        }
 
         if (result.events.length > 0) {
           const newToasts = eventsToToasts(result.events);
@@ -397,7 +458,7 @@ export function GameProvider({
         return result.state;
       });
     },
-    [onAction, store]
+    [onAction, corruptSaveBlocked, hydrated]
   );
 
   const actions = useMemo<GameActions>(
@@ -405,7 +466,12 @@ export function GameProvider({
       setProfile: ({ playerName, goal }) =>
         dispatch({ type: "set-profile", playerName, goal }),
       setActiveCompany: (companyId) =>
-        dispatch({ type: "set-active-company", companyId }),
+        dispatch({
+          type: "set-active-company",
+          companyId: CONTROLLED_DEMO_MODE
+            ? CONTROLLED_DEMO_COMPANY_ID
+            : companyId
+        }),
       setActivePillar: (pillarId) =>
         dispatch({ type: "set-active-pillar", pillarId }),
       setActiveQuest: (pillarId, slug) =>
@@ -439,10 +505,32 @@ export function GameProvider({
       setOnboardingStep: (step) =>
         dispatch({ type: "set-onboarding-step", step }),
       completeOnboarding: () => dispatch({ type: "complete-onboarding" }),
+      completeOpeningScreen: () =>
+        dispatch({ type: "complete-opening-screen" }),
+      completeWelcomeScreen: () =>
+        dispatch({ type: "complete-welcome-screen" }),
       reset: () => {
         dispatch({ type: "reset" });
         setToasts([]);
         setFx(initialFx);
+      },
+      replaceGameState: (next) => {
+        const stamped: GameState = {
+          ...next,
+          version: next.version,
+          lastActivityAt: Date.now()
+        };
+        bootstrapLockUntilRef.current = Date.now() + 4000;
+        if (!isDemoStoryModeActive()) {
+          clearPersistedSnapshots();
+          savePersistedSnapshot(stamped, { mergeIfDiskNewer: false });
+        }
+        setState(stamped);
+        persistReadyRef.current = true;
+        setHydrated(true);
+        setToasts([]);
+        setFx(initialFx);
+        logQuestProgress("demo.replace", summarizeReadProgress(stamped));
       },
       dismissToast: (id) =>
         setToasts((prev) => prev.filter((t) => t.id !== id)),
@@ -459,6 +547,8 @@ export function GameProvider({
         dispatch({ type: "dismiss-business-island-brief" }),
       clearPillarProgress: (pillarId) =>
         dispatch({ type: "clear-pillar-progress", pillarId }),
+      repairQuestProgress: (params) =>
+        dispatch(buildRepairQuestProgressAction(params)),
       dispatch
     }),
     [dispatch]
@@ -490,15 +580,20 @@ export function GameProvider({
       toasts,
       fx,
       hydrated,
+      persistenceReady: hydrated && !corruptSaveBlocked,
+      corruptSaveBlocked,
       storeId: store.id
     };
-  }, [state, actions, toasts, fx, hydrated, store.id]);
+  }, [state, actions, toasts, fx, hydrated, corruptSaveBlocked, store.id]);
 
   return (
     <GameContext.Provider value={value}>
       <GameProviderInner activeCompanyId={state.activeCompanyId}>
         {children}
       </GameProviderInner>
+      {corruptSaveBlocked ? (
+        <CorruptSaveRecoveryOverlay onRestored={handleCorruptRecovery} />
+      ) : null}
     </GameContext.Provider>
   );
 }

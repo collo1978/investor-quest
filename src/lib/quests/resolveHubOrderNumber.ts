@@ -1,21 +1,23 @@
 import type { QuestDefinition } from "@/data/quests/types";
 
 /**
- * Map `display_order` from Supabase (often 10, 20, … or 1–5) to hub slot 1–5.
+ * Map `display_order` from Supabase (often 10, 20, … or 1–6) to hub slot 1–6.
  */
 export function resolveHubOrderNumber(
   displayOrder: number | null | undefined,
   slug: string,
   slugFallbackOrder: Readonly<Record<string, number>>
 ): number {
+  const maxSlot = Math.max(0, ...Object.values(slugFallbackOrder));
+  const cap = maxSlot > 0 ? maxSlot : 6;
   const d = displayOrder ?? 0;
-  if (d >= 1 && d <= 5) return d;
-  if (d > 5) return Math.min(5, Math.max(1, Math.round(d / 10)));
+  if (d >= 1 && d <= cap) return d;
+  if (d > cap) return Math.min(cap, Math.max(1, Math.round(d / 10)));
   return slugFallbackOrder[slug] ?? 0;
 }
 
 /**
- * Assign hub map slots (1–5). Canonical slugs from `slugFallbackOrder` always
+ * Assign hub map slots (1–6 for Business). Canonical slugs from `slugFallbackOrder` always
  * keep their slot so completed quests never vanish when CMS adds extra rows.
  */
 export function assignHubSlotQuests(

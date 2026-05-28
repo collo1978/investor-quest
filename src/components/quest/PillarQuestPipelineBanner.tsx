@@ -34,7 +34,7 @@ function phaseHeadline(
   if (compact) return "Finishing the rest of this quest…";
   switch (phase) {
     case "loading":
-      return "Checking quest intel…";
+      return "Checking quest content…";
     case "extracting":
       return "Pulling SEC filing sections";
     case "generating":
@@ -42,7 +42,7 @@ function phaseHeadline(
     case "refreshing":
       return "Loading your quest cards";
     default:
-      return "Building your intel dossier";
+      return "Building your quest answers";
   }
 }
 
@@ -229,16 +229,15 @@ export function PillarQuestPipelineBanner({
         className="mx-auto mb-4 max-w-2xl rounded-xl border border-red-400/35 bg-red-500/10 px-4 py-3 text-[13px] leading-relaxed text-red-200/90"
         role="alert"
       >
-        <p className="font-semibold text-red-100">Intel pipeline failed</p>
+        <p className="font-semibold text-red-100">Quest content could not load</p>
         <p className="mt-1">{playerFacingPipelineError(error)}</p>
-        <p className="mt-2 text-[11px] text-red-200/70">{error}</p>
         {onRetry ? (
           <button
             type="button"
             onClick={() => void onRetry()}
             className="mt-3 rounded-lg border border-red-300/40 bg-red-500/15 px-3 py-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-red-50 transition hover:bg-red-500/25"
           >
-            Retry intel pull
+            Try again
           </button>
         ) : null}
       </motion.div>
@@ -262,9 +261,9 @@ export function PillarQuestPipelineBanner({
         }}
         role="status"
       >
-        <span className="font-semibold">Filing intel not loaded yet.</span>{" "}
+        <span className="font-semibold">SEC filing sections not loaded yet.</span>{" "}
         <span className="text-ink-2">
-          We need the latest SEC extract before answers can be generated.
+          Pull the company&apos;s filings first, then we can write quest answers.
         </span>
         {onRetry ? (
           <button

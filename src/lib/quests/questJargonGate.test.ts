@@ -8,8 +8,6 @@ import {
 
 const GOOD = `If you've used a popular AI chat app or played a sharp-looking game, you've already bumped into NVIDIA's world.
 
-Think of them like the shop that sells the engine inside many smart computers — not the app you tap on.
-
 They make the powerful chips helping AI tools, games, and smart technology run faster and smoother.
 
 Why investors care:
@@ -54,8 +52,6 @@ Growth depends on technology adoption.`;
 
 const GOOD_CUSTOMER_PROBLEM = `When a game stutters or an AI chat takes forever to reply, you're feeling what happens when devices aren't fast enough.
 
-Think of it like a phone trying to run too many apps at once — everything slows down.
-
 They make the powerful parts inside those devices so games, apps, and smart tools feel quick again.
 
 Why investors care:
@@ -80,4 +76,12 @@ test("passes relatable customer-problem answer", () => {
     }),
     true
   );
+});
+
+test("rejects forced analogy phrasing", () => {
+  const gate = analyzeQuestJargonGate(
+    "When you shop for sneakers, Nike is everywhere.\n\nThink of it like a crowded race where everyone wants your attention.\n\nWhy investors care:\nCompetition matters."
+  );
+  assert.equal(gate.pass, false);
+  assert.ok(gate.hits.some((h) => h.label === "forced analogy"));
 });

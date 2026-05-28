@@ -18,7 +18,7 @@ import type { PillarQuestAnswersPayload } from "@/lib/supabase/questCardAnswers/
 export const QUEST_PREWARM_TARGETS: ReadonlyArray<{
   pillarId: PillarId;
   questSlug: string;
-}> = [{ pillarId: "business", questSlug: "snapshot" }];
+}> = [{ pillarId: "business", questSlug: "what-they-do" }];
 
 const inflight = new Set<string>();
 

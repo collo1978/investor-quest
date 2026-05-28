@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useGame } from "@/components/GameProvider";
+import { BusinessQuestRouteLoading } from "@/components/business/BusinessQuestRouteLoading";
 import { FinancialsQuestMap } from "@/components/financials/FinancialsQuestMap";
 import { useHubRoutePrefetch } from "@/hooks/useHubRoutePrefetch";
 import { usePillarHubQuestData } from "@/hooks/usePillarHubQuestData";
@@ -12,7 +13,7 @@ import { FINANCIAL_HUB_IMG_SRC } from "@/lib/screenAssetUrls";
 import { preloadImage } from "@/lib/preloadImage";
 
 export default function FinancialsPageClient() {
-  const { state, actions } = useGame();
+  const { state, actions, hydrated } = useGame();
   const [hydrationReady, setHydrationReady] = useState(false);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export default function FinancialsPageClient() {
     [quests, questViewBySlug, readSet, contentVersion]
   );
 
-  useHubRoutePrefetch(hubCards);
+  useHubRoutePrefetch(hydrated ? hubCards : []);
 
   return (
     <main
@@ -49,14 +50,18 @@ export default function FinancialsPageClient() {
       ].join(" ")}
     >
       <div className="flex items-center justify-center px-1 py-3 sm:px-3 sm:py-5 md:py-6">
-        <FinancialsQuestMap
-          cards={hubCards}
-          company={company}
-          companyLogoUrl={company.companyLogoUrl}
-          hubProgressPct={hubProgressPct}
-          partnerId={partnerId}
-          userId={userId}
-        />
+        {!hydrated ? (
+          <BusinessQuestRouteLoading />
+        ) : (
+          <FinancialsQuestMap
+            cards={hubCards}
+            company={company}
+            companyLogoUrl={company.companyLogoUrl}
+            hubProgressPct={hubProgressPct}
+            partnerId={partnerId}
+            userId={userId}
+          />
+        )}
       </div>
     </main>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Premium pillar quest card — Q/A/Why layout (React/CSS).
+ * Premium pillar quest card — Q/A + mark-as-read layout (React/CSS).
  * Business = gold/violet; Forces = storm red/orange; Financials = emerald;
  * Management = executive violet.
  */
@@ -34,7 +34,6 @@ export type PillarQuestTemplateFrameProps = {
   pillarId: PillarId;
   questionText: string;
   answerSlot: ReactNode;
-  whySlot: ReactNode;
   companyName: string;
   cardIndex: number;
   cardTotal: number;
@@ -95,7 +94,6 @@ export function PillarQuestTemplateFrame({
   pillarId,
   questionText,
   answerSlot,
-  whySlot,
   companyName,
   cardIndex,
   cardTotal,
@@ -227,17 +225,12 @@ export function PillarQuestTemplateFrame({
             </motion.div>
           </section>
 
-          <section className="relative z-[1] border-b border-white/[0.08]">
+          <section className="relative z-[1]">
             <h2 className="sr-only">Answer</h2>
             <motion.div className="flex gap-4 px-4 py-4 sm:gap-5 sm:px-5 sm:py-5">
               <CircleBadge label="A" theme={theme} className="mt-0.5 shrink-0" />
               <motion.div className="min-w-0 flex-1">{answerSlot}</motion.div>
             </motion.div>
-          </section>
-
-          <section className="relative z-[1] border-t border-white/[0.06] bg-black/20 px-4 py-4 sm:px-5 sm:py-4">
-            <h2 className="sr-only">Why investors care</h2>
-            <motion.div className="w-full pl-20 sm:pl-[5.25rem]">{whySlot}</motion.div>
           </section>
 
           <footer
@@ -254,4 +247,4 @@ export function PillarQuestTemplateFrame({
 
 export const BusinessQuestTemplateFrame = PillarQuestTemplateFrame;
 
-export const BUSINESS_QUEST_TEMPLATE_SRC = "/screens/business-quest-template.png";
+export const BUSINESS_QUEST_TEMPLATE_SRC = "/screens/business-quest-template.webp";

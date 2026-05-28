@@ -12,6 +12,7 @@ import {
   TEN_K_ROOKIE_CHALLENGE_XP,
   TEN_K_ROOKIE_FINAL_QUIZ
 } from "@/data/quests/tenKRookieFinalChallenge";
+import { fillQuizConfigTokens } from "@/lib/quests/fillQuestTokens";
 import {
   getTenKFinalChallengeGateRows,
   isTenKFinalChallengeUnlocked
@@ -45,6 +46,11 @@ export default function FinalChallengeClient() {
     const t = window.setTimeout(() => setCelebrateBadge(false), 2400);
     return () => window.clearTimeout(t);
   }, [celebrateBadge]);
+
+  const finalQuiz = useMemo(
+    () => fillQuizConfigTokens(TEN_K_ROOKIE_FINAL_QUIZ, company),
+    [company]
+  );
 
   const convictionLines = useMemo(() => {
     const rows = loadConvictionRecords().filter(
@@ -215,7 +221,7 @@ export default function FinalChallengeClient() {
         <QuestQuizPanel
           pillarId="business"
           slug="__meta_ten_k_rookie__"
-          quiz={TEN_K_ROOKIE_FINAL_QUIZ}
+          quiz={finalQuiz}
           unlocked
           title="10-K Rookie finale"
           rewardXp={record ? 0 : TEN_K_ROOKIE_CHALLENGE_XP}

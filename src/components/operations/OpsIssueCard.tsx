@@ -1,50 +1,60 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
 
-import { issueSeverityLabel } from "@/lib/operations/layman";
+import { OpsInlineIssueRepair } from "@/components/operations/OpsInlineIssueRepair";
+import { buildOperatorRepairGuide } from "@/lib/operations/operatorRepairGuide";
 import type { GameHealthIssueRecord } from "@/lib/gameHealth/types";
 
 import { opsPanel } from "./opsTheme";
 
-export function OpsIssueCard({ issue }: { issue: GameHealthIssueRecord }) {
-  const severityClass =
-    issue.severity === "critical" ? "text-red-400" : "text-amber-300";
+export function OpsIssueCard({
+  issue,
+  domainScores,
+  onIssueUpdated
+}: {
+  issue: GameHealthIssueRecord;
+  domainScores?: Record<string, number>;
+  onIssueUpdated?: () => void | Promise<void>;
+}) {
+  const [expanded, setExpanded] = useState(true);
+  const guide = useMemo(() => buildOperatorRepairGuide(issue), [issue]);
 
   return (
     <li className={`${opsPanel} list-none`}>
-      <span
-        className={`text-[10px] font-bold uppercase tracking-wider ${severityClass}`}
+      <button
+        type="button"
+        className="flex w-full min-h-[44px] items-center justify-between gap-3 text-left touch-manipulation"
+        onClick={() => setExpanded((v) => !v)}
       >
-        {issueSeverityLabel(issue.severity)}
-      </span>
-      <p className="mt-2 text-[17px] font-semibold leading-snug text-white/95">
-        {issue.problemPlain}
-      </p>
-      <p className="mt-2 text-[14px] leading-relaxed text-white/55">
-        {issue.whatUsersSee}
-      </p>
-      {(issue.companyName || issue.questSlug) && (
-        <p className="mt-2 text-[13px] text-white/45">
-          {issue.companyName ?? issue.companyTicker}
-          {issue.pillarId ? ` · ${issue.pillarId}` : ""}
-          {issue.questSlug ? ` · ${issue.questSlug}` : ""}
-        </p>
-      )}
-      {issue.metadata?.category === "quest_flow" &&
-      typeof issue.metadata.cardsRequired === "number" ? (
-        <p className="mt-1 text-[12px] text-white/40">
-          Cards {String(issue.metadata.completedCards ?? 0)}/
-          {issue.metadata.cardsRequired} · quiz unlock (simulated):{" "}
-          {String(issue.metadata.quizUnlockedWhenAllRead ?? false)}
-        </p>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-violet-300/80">
+            {guide.domainLabel} · {guide.fixTypeLabel}
+          </p>
+          <p className="mt-1 text-[16px] font-semibold leading-snug text-white/95">
+            {guide.problem}
+          </p>
+          <p className="mt-1 text-[13px] text-white/45">{guide.scoreImpactLabel}</p>
+        </div>
+        <span className="shrink-0 text-white/40">{expanded ? "▲" : "▼"}</span>
+      </button>
+
+      {expanded ? (
+        <div className="mt-4 border-t border-white/10 pt-4">
+          <OpsInlineIssueRepair
+            issue={issue}
+            domainScores={domainScores}
+            onIssueUpdated={onIssueUpdated}
+          />
+        </div>
       ) : null}
+
       <Link
         href={`/admin/mobile-fix/${issue.id}`}
-        className="mt-4 flex min-h-[56px] w-full flex-col items-start justify-center rounded-2xl border border-[var(--partner-primary)] bg-[var(--partner-primary)] px-4 py-3.5 text-left touch-manipulation active:scale-[0.99]"
+        className="mt-3 flex min-h-[40px] items-center justify-center rounded-xl border border-white/12 bg-white/5 text-[13px] font-semibold text-white/55 touch-manipulation lg:hidden"
       >
-        <span className="text-[17px] font-bold text-black">Fix on phone</span>
-        <span className="mt-1 text-[14px] text-black/65">One-tap fixes for this issue</span>
+        Open on phone
       </Link>
     </li>
   );

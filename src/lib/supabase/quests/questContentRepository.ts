@@ -12,6 +12,7 @@ import type {
 } from "@/lib/supabase/quests/types";
 import type { PillarId } from "@/data/pillars";
 import type { QuestTemplate } from "@/data/quests/types";
+import { FORCES_LEGACY_TOPIC_SLUGS } from "@/lib/forces/forcesQuestRoutes";
 
 function partnerFilter(partnerId?: string | null) {
   if (!partnerId) return () => true;
@@ -189,5 +190,10 @@ export async function loadQuestTemplatesFromSupabase(options?: {
   partnerId?: string;
 }): Promise<QuestTemplate[]> {
   const rows = await listQuestContentCards(options);
-  return rows.map(mapRowToQuestTemplate);
+  return rows
+    .filter(
+      (row) =>
+        row.pillar_id !== "forces" || !FORCES_LEGACY_TOPIC_SLUGS.has(row.slug)
+    )
+    .map(mapRowToQuestTemplate);
 }

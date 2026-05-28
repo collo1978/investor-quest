@@ -13,7 +13,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "optimize:screens": "node scripts/optimize-screen-images.mjs"
+    "optimize:screens": "node scripts/optimize-screen-images.mjs",
+    "regenerate:demo-quests": "node scripts/regenerate-all-demo-quests.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

@@ -43,7 +43,7 @@ export const DEMO_COMPANIES: readonly OnboardingCompanyRecord[] = [
     cik: "0000789019",
     sicCode: "7372",
     sector: "Technology",
-    industry: "Software—Prepackaged Software",
+    industry: "Software. Prepackaged Software",
     logoUrl: "/logos/companies/msft.svg",
     item1BusinessHints: ["cloud computing", "productivity software", "AI copilots"]
   },
@@ -54,7 +54,7 @@ export const DEMO_COMPANIES: readonly OnboardingCompanyRecord[] = [
     cik: "0001321655",
     sicCode: "7372",
     sector: "Technology",
-    industry: "Software—Applications",
+    industry: "Software. Applications",
     logoUrl: "/logos/companies/pltr.svg",
     item1BusinessHints: [
       "government analytics",
@@ -91,7 +91,7 @@ export const DEMO_COMPANIES: readonly OnboardingCompanyRecord[] = [
     cik: "0001315098",
     sicCode: "7372",
     sector: "Communication Services",
-    industry: "Services—Computer Programming",
+    industry: "Services. Computer Programming",
     logoUrl: "/logos/companies/rblx.svg",
     item1BusinessHints: [
       "user-generated games",
@@ -106,7 +106,7 @@ export const DEMO_COMPANIES: readonly OnboardingCompanyRecord[] = [
     cik: "0000712515",
     sicCode: "7372",
     sector: "Communication Services",
-    industry: "Services—Prepackaged Software",
+    industry: "Services. Prepackaged Software",
     logoUrl: "/logos/companies/ea.svg",
     item1BusinessHints: ["sports franchises", "live services", "interactive entertainment"]
   },
@@ -128,7 +128,7 @@ export const DEMO_COMPANIES: readonly OnboardingCompanyRecord[] = [
     cik: "0001397187",
     sicCode: "5651",
     sector: "Consumer Cyclical",
-    industry: "Retail—Apparel & Accessories",
+    industry: "Retail. Apparel & Accessories",
     logoUrl: "/logos/companies/lulu.svg",
     item1BusinessHints: ["technical apparel", "wellness lifestyle", "omni-channel retail"]
   },
@@ -139,7 +139,7 @@ export const DEMO_COMPANIES: readonly OnboardingCompanyRecord[] = [
     cik: "0001001039",
     sicCode: "7990",
     sector: "Communication Services",
-    industry: "Services—Miscellaneous Amusement",
+    industry: "Services. Miscellaneous Amusement",
     logoUrl: "/logos/companies/dis.svg",
     item1BusinessHints: ["streaming", "parks and experiences", "sports media rights"]
   },
@@ -150,7 +150,7 @@ export const DEMO_COMPANIES: readonly OnboardingCompanyRecord[] = [
     cik: "0001883685",
     sicCode: "7990",
     sector: "Consumer Cyclical",
-    industry: "Services—Miscellaneous Amusement",
+    industry: "Services. Miscellaneous Amusement",
     logoUrl: "/logos/companies/dkng.svg",
     item1BusinessHints: ["sports betting", "iGaming", "daily fantasy sports"]
   },
@@ -172,7 +172,7 @@ export const DEMO_COMPANIES: readonly OnboardingCompanyRecord[] = [
     cik: "0001639920",
     sicCode: "7370",
     sector: "Communication Services",
-    industry: "Services—Computer Programming",
+    industry: "Services. Computer Programming",
     logoUrl: "/logos/companies/spot.svg",
     item1BusinessHints: ["audio streaming", "podcasts", "creator tools"]
   }

@@ -24,7 +24,12 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useGame } from "@/components/GameProvider";
 import { companyById, type CompanyId } from "@/data/companies";
-import { pillarById, type PillarId } from "@/data/pillars";
+import { type PillarId } from "@/data/pillars";
+import { CONTROLLED_DEMO_MODE } from "@/lib/demo/controlledDemo";
+import {
+  demoPillarById,
+  NVDA_ISLAND_BANNER
+} from "@/lib/demo/nvidiaDemoVoice";
 import { getCompanyPillarQuests } from "@/data/quests/library";
 
 export type IslandQuestScreenProps = {
@@ -40,7 +45,7 @@ export function IslandQuestScreen({ pillarId }: IslandQuestScreenProps) {
     actions.setActivePillar(pillarId);
   }, [actions, pillarId]);
 
-  const meta = pillarById(pillarId);
+  const meta = demoPillarById(pillarId);
   const company = companyById(state.activeCompanyId);
   const companyId = state.activeCompanyId as CompanyId;
   const quests = useMemo(
@@ -71,7 +76,9 @@ export function IslandQuestScreen({ pillarId }: IslandQuestScreenProps) {
       <div className="pointer-events-none mx-auto mb-4 max-w-xl px-4 pt-4 text-center">
         <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-[rgba(139,92,246,0.22)] bg-[rgba(7,7,18,0.55)] px-4 py-2 text-[11px] text-ink-2 shadow-glow backdrop-blur-xl">
           <span>
-            {company.name} · {meta.title} island — pick a quest below.
+            {CONTROLLED_DEMO_MODE
+              ? NVDA_ISLAND_BANNER(company.name, meta.title)
+              : `${company.name} · ${meta.title} island — pick a quest below.`}
           </span>
           <span
             aria-label={`${readCount} of ${totalCount} cards read on this island`}

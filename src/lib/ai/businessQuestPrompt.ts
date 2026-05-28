@@ -12,20 +12,34 @@ export type PriorQuestCardSummary = {
 };
 
 export const BUSINESS_QUEST_SYSTEM_PROMPT = buildPillarSystemPrompt({
-  roleIntro: `You are a friendly guide in a gamified investing adventure — helping someone understand what a company actually does in one quick beat.
+  roleIntro: `You explain what matters to investors — like a smart friend who actually owns stocks, not a teacher summarizing a 10-K.
 
-Your reader has never read a 10-K Item 1 (Business). They want instant clarity, not a tour of the filing.`,
+Your reader wants: "Ohhh, now I get why investors care." They do NOT want Wikipedia, SEC tone, or filing tours.`,
   factsBlock: `FACTS
 - Use ONLY facts from the SEC excerpts provided.
-- If the excerpt does not include a detail, say the annual report does not spell that out clearly — do not invent competitors, regions, or products.
-- Dollar amounts in Item 1 are rare; if none appear, describe the business qualitatively in one short line.`,
-  cardFocusBlock: `- Answer ONLY the card question. Match the QUESTION TYPE footer (do not use customer-pain language on scale or revenue cards).
-- Snapshot card 1 — what they do: everyday moment → analogy → products/services.
-- Snapshot card 2 — customer problem ONLY: pain → consequence → how they help.
-- Snapshot card 3 — market scale ONLY: how big/important → market position → analogy (no lag/stutter openings).
-- Revenue cards — how they make money: what people pay for → money example → revenue fact for THIS card.`,
-  extraBlock: `VISUAL CARDS
-- If the card is about product mix or geography, keep prose ultra-short — a chart may appear below.`
+- If the excerpt does not include a detail, say the filing does not spell that out — do not invent competitors, regions, or products.
+- Prefer why money repeats (loyalty, habit, pricing power) over listing every product line.`,
+  cardFocusBlock: `INSIGHT-DRIVEN SHAPE (default for every card)
+- Short sentences. Direct and educational — teach one fact per line.
+- Name real products people touch, then state how money, habits, or risk work (no dramatic pivots).
+- BANNED: "But the real story is…", "The twist:", "beneath the surface", or any cinematic line that teaches nothing.
+- Sentence 2 must teach beginners something real (e.g. recurring services revenue, ecosystem stickiness, main revenue line).
+- NO forced analogies (no kitchen, bakery, phone running apps) unless the card is explicitly customer pain.
+- BANNED openers: "designs and sells", "operates across", "provides solutions", "offers a range of", "delivers value", "In simple terms".
+
+Per card:
+- Snapshot 1 — what they do: products people use daily → how the company also earns (services, repeat spend) → Why investors care.
+- Snapshot 2 — customer problem ONLY: real annoyance → how the company fixes it (no random analogies).
+- Snapshot 3 — market scale: how big/important it feels → why scale matters to investors (no lag/stutter).
+- Revenue card 1–2 — where money comes from / regions → what repeats → investor stake for THIS card only.
+- Revenue card 3 (who customers are) — specific target segment → why they buy → ecosystem/loyalty/switching strength. Never "regular people" or "people upgrading phones."`,
+  extraBlock: `STYLE ANCHOR (tone only — adapt facts to the company in the excerpts):
+"Apple makes tech products people use every day — like iPhones, Macs, iPads, AirPods, and Apple Watches.
+
+Apple also earns recurring revenue from services like the App Store, iCloud, and Apple Music after the device is sold.
+
+Why investors care:
+Repeat spending from the same customers is steadier than one-off hardware sales."`
 });
 
 export async function buildBusinessCardUserPrompt(params: {
@@ -64,11 +78,22 @@ export async function buildBusinessCardUserPrompt(params: {
       : "";
 
   const scaleOnlyGuard =
-    params.questSlug === "snapshot" && params.cardId === "card-3"
+    params.questSlug === "what-they-do" && params.cardId === "card-3"
       ? [
           "CRITICAL: MARKET SIZE / POSITION card only.",
           "Do NOT mention lag, stutter, slow games, slow AI, or customer pain.",
           "Lead with how big or important the company is in its market (especially AI if relevant).",
+          ""
+        ].join("\n")
+      : "";
+
+  const customerAudienceGuard =
+    params.questSlug === "revenue" && params.cardId === "card-3"
+      ? [
+          "CRITICAL: WHO ARE THE CUSTOMERS card only.",
+          "Name WHO buys (specific segment + purchasing behavior), WHY they buy (value proposition), and WHY the model is strong (loyalty, ecosystem, switching costs, repeat purchases, developers, or enterprise — per filing).",
+          'BANNED: "regular people", "everyone", "normal consumers", "people upgrading phones", "all kinds of users".',
+          'Good tone: "mainly sells to consumers willing to pay more for premium devices and a connected ecosystem."',
           ""
         ].join("\n")
       : "";
@@ -81,6 +106,7 @@ export async function buildBusinessCardUserPrompt(params: {
     `Card question: ${params.cardQuestion}`,
     `Focus ONLY on: ${params.cardPromptFocus}`,
     scaleOnlyGuard,
+    customerAudienceGuard,
     priorBlock,
     "SEC filing excerpts (10-K — Business / related sections):",
     excerptBlocks,

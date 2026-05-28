@@ -35,8 +35,13 @@ export const BUSINESS_MAP_CARD_POSITIONS: Record<number, CSSProperties> = {
     left: "8%"
   },
   5: {
-    top: "62%",
+    top: "58%",
     right: "8%"
+  },
+  6: {
+    top: "78%",
+    left: "50%",
+    transform: "translateX(-50%)"
   }
 };
 

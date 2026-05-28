@@ -15,6 +15,9 @@ function isProductListLine(text: string): boolean {
   if (PRODUCT_MIX_LINE.test(t)) return true;
   if (/^it also earns recurring revenue/i.test(t)) return true;
   if (/^apple makes most of its money/i.test(t)) return true;
+  if (/^most of apple'?s money still comes from iphone/i.test(t)) return true;
+  if (/^the twist:/i.test(t)) return true;
+  if (/^repeat spend from the same customers/i.test(t)) return true;
   return false;
 }
 

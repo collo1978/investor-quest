@@ -10,8 +10,12 @@
  * boundary) and delegates the actual scene to `QuestMapScene`.
  */
 
-import { Component, type ReactNode, useEffect, useState } from "react";
+import { Component, type ReactNode, useCallback, useEffect, useState } from "react";
+import { useGame } from "@/components/GameProvider";
+import { MapQuestMissionBriefOverlay } from "@/components/map/MapQuestMissionBriefOverlay";
 import { QuestMapScene } from "@/components/map/QuestMapScene";
+import { useDemoStory } from "@/components/demo/DemoStoryProvider";
+import { shouldShowQuestMapBrief } from "@/lib/map/shouldShowQuestMapBrief";
 import {
   BUSINESS_HUB_IMG_SRC,
   FINANCIAL_HUB_IMG_SRC,
@@ -28,7 +32,6 @@ function QuestMapStaticFallback() {
       <picture className="pointer-events-none flex max-h-full max-w-full items-center justify-center">
         <source srcSet={QUEST_MAP_AVIF_PATH} type="image/avif" />
         <source srcSet={QUEST_MAP_PATH} type="image/webp" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={QUEST_MAP_PATH}
           alt="Quest Map"
@@ -41,6 +44,19 @@ function QuestMapStaticFallback() {
 
 export default function MapPageClient() {
   const [hydrationReady, setHydrationReady] = useState(false);
+  const { raw, persistenceReady, actions } = useGame();
+  const demoStory = useDemoStory();
+  const showMissionBrief = demoStory.active
+    ? demoStory.step === "map-brief"
+    : persistenceReady && shouldShowQuestMapBrief(raw);
+
+  const dismissMissionBrief = useCallback(() => {
+    if (demoStory.active) {
+      demoStory.advance("map");
+      return;
+    }
+    actions.dismissQuestMapBrief();
+  }, [actions, demoStory]);
 
   useEffect(() => {
     setHydrationReady(true);
@@ -66,14 +82,21 @@ export default function MapPageClient() {
           `var(--name, fallback)` — the comma breaks its parser. */}
       <div
         className={[
-          "pointer-events-auto relative z-[1] mx-auto w-full overflow-hidden",
+          "relative z-[1] mx-auto w-full overflow-hidden",
           "quest-map-stage-height",
-          "px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-2.5 md:py-2"
+          "px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-2.5 md:py-2",
+          showMissionBrief ? "pointer-events-none" : "pointer-events-auto"
         ].join(" ")}
         data-map-stage
+        aria-hidden={showMissionBrief}
       >
         <MapSceneOrFallback />
       </div>
+
+      <MapQuestMissionBriefOverlay
+        open={showMissionBrief}
+        onDismiss={dismissMissionBrief}
+      />
     </main>
   );
 }

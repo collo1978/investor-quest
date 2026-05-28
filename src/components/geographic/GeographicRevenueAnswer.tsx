@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 
-import { VisualAnswerNarration } from "@/components/financial/VisualAnswerNarration";
 import { GeographicRevenueMap } from "@/components/geographic/GeographicRevenueMap";
 import type { PillarQuestTheme } from "@/components/quest/pillarQuestTheme";
 import { getDemoGeographicRevenueReport } from "@/lib/geographicRevenue/demoGeographicRevenue";
@@ -15,11 +14,8 @@ const NO_DISCLOSURE =
 type Props = {
   ticker: string;
   theme: PillarQuestTheme;
-  /** Filing text fallback — only shown when map data is unavailable. */
+  /** Filing text fallback — only when map data is unavailable. */
   supportBody: ReactNode | null;
-  /** Short guide copy shown under the map (from AI answer). */
-  narrationText?: string | null;
-  /** When provided (e.g. server-fetched), skips client fetch. */
   initialReport?: GeographicRevenueReport | null;
 };
 
@@ -27,7 +23,6 @@ export function GeographicRevenueAnswer({
   ticker,
   theme,
   supportBody,
-  narrationText,
   initialReport
 }: Props) {
   const placeholder = useMemo(
@@ -81,39 +76,17 @@ export function GeographicRevenueAnswer({
   }
 
   if (!report) {
+    if (supportBody) {
+      return <motion.div className="space-y-3.5">{supportBody}</motion.div>;
+    }
     return (
       <motion.div className="space-y-3.5">
         <p className="rounded-lg border border-white/[0.08] bg-black/25 px-3.5 py-3 text-[13px] leading-relaxed text-ink-0/88 sm:text-[13.5px]">
           {NO_DISCLOSURE}
         </p>
-        {supportBody ? (
-          <motion.div className="space-y-3 border-t border-white/[0.06] pt-3">
-            <p
-              className="text-[9px] font-bold uppercase tracking-[0.16em]"
-              style={{ color: theme.hi }}
-            >
-              Context
-            </p>
-            {supportBody}
-          </motion.div>
-        ) : null}
       </motion.div>
     );
   }
 
-  return (
-    <div className="space-y-3.5">
-      <GeographicRevenueMap report={report} theme={theme} />
-      {narrationText ? (
-        <VisualAnswerNarration
-          text={narrationText}
-          theme={theme}
-          label="How to read this map"
-        />
-      ) : null}
-      {supportBody ? (
-        <div className="border-t border-white/[0.06] pt-3">{supportBody}</div>
-      ) : null}
-    </div>
-  );
+  return <GeographicRevenueMap report={report} theme={theme} />;
 }

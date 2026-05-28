@@ -27,18 +27,26 @@ import { isGeographicRevenueCard } from "@/lib/geographicRevenue/isGeographicRev
 import { filterProductSupportBlocks } from "@/lib/productService/filterSupportBlocks";
 import { isProductServiceCard } from "@/lib/productService/isProductServiceCard";
 import { ContinueToQuizCta } from "@/components/quest/ContinueToQuizCta";
-import {
-  QuestQuizUnlockStatus,
-  useQuestProgressDebug
-} from "@/components/quest/QuestQuizUnlockStatus";
+import { InvestorMasteryScreen } from "@/components/quest/InvestorMasteryScreen";
+import { QuestQuizUnlockStatus } from "@/components/quest/QuestQuizUnlockStatus";
+import { QuestSourceFooter } from "@/components/quest/QuestSourceFooter";
 import { computeQuestCardReadProgress } from "@/lib/quests/questCardReadProgress";
+import {
+  QUIZ_PAGER_READY_LABEL,
+  QUIZ_PAGER_READY_TOOLTIP,
+  quizPagerLockTooltip
+} from "@/lib/quests/quizFlowCopy";
 import { QuestCardAnswerShimmer } from "@/components/quest/QuestCardAnswerShimmer";
 import { PillarQuestPipelineBanner } from "@/components/quest/PillarQuestPipelineBanner";
 import type { PillarQuestPipelineState } from "@/components/QuestDetailScreen";
-import { QuestInvestorTakeaway } from "@/components/quest/QuestInvestorTakeaway";
-import { RelatableQuestAnswer } from "@/components/quest/RelatableQuestAnswer";
+import { CompactFlashcardAnswer } from "@/components/quest/CompactFlashcardAnswer";
+import { MARK_AS_READ_LABEL } from "@/lib/quests/gameActionCopy";
+import {
+  CONTROLLED_DEMO_MODE,
+  useControlledDemoFastQuizHandoff
+} from "@/lib/demo/controlledDemo";
 import { parseRelatableQuestAnswer } from "@/lib/quests/questAnswerFormat";
-import { extractVisualNarration } from "@/lib/quests/sanitizeQuestAnswer";
+import { islandQuizSectionTitle } from "@/lib/quests/islandQuizStyle";
 
 type AnswerBlock =
   | { kind: "prose"; text: string }
@@ -162,6 +170,18 @@ function trimAnswerToShortSentences(text: string, maxSentences: number): string 
   return s.slice(0, n).join(" ");
 }
 
+function compactParagraphsFromBlocks(blocks: AnswerBlock[]): string[] {
+  const parts: string[] = [];
+  for (const b of blocks) {
+    if (b.kind === "prose") parts.push(b.text);
+    else if (b.kind === "bulletsOnly") parts.push(b.bullets.join(". "));
+    else parts.push(`${b.title.replace(/\s*:\s*$/, "")}: ${b.bullets.join(". ")}`);
+  }
+  const combined = parts.join(" ").replace(/\s+/g, " ").trim();
+  if (!combined) return [];
+  return splitIntoSentences(combined).slice(0, 2);
+}
+
 function flattenAnswerBlocksToPlain(blocks: AnswerBlock[]): string {
   const parts: string[] = [];
   for (const b of blocks) {
@@ -186,21 +206,15 @@ function businessPixelAnswerSentences(
   );
   if (relatable?.paragraphs.length) {
     const combined = relatable.paragraphs.join(" ");
-    return splitIntoSentences(trimAnswerToShortSentences(combined, 4));
+    return splitIntoSentences(trimAnswerToShortSentences(combined, 2));
   }
   if (parsed) {
     const fromBlocks = flattenAnswerBlocksToPlain(parsed.blocks);
-    if (fromBlocks) return splitIntoSentences(trimAnswerToShortSentences(fromBlocks, 4));
+    if (fromBlocks) return splitIntoSentences(trimAnswerToShortSentences(fromBlocks, 2));
     const sim = parsed.simple?.trim();
-    if (sim) return splitIntoSentences(trimAnswerToShortSentences(sim, 4));
+    if (sim) return splitIntoSentences(trimAnswerToShortSentences(sim, 2));
   }
   return [];
-}
-
-function splitSimpleHeroLines(text: string): string[] {
-  const m = text.match(/^(.+?),\s+(.+)$/);
-  if (m) return [m[1].trim(), m[2].trim()];
-  return [text.trim()];
 }
 
 function displaySectionTitle(raw: string): string {
@@ -218,108 +232,6 @@ function whyParagraphs(whyItMatters: string): string[] {
   return splitIntoSentences(one);
 }
 
-function quizTitleFor(type: string): string {
-  if (!type || type.toLowerCase() === "quiz") return "Quiz";
-  const head = type.charAt(0).toUpperCase() + type.slice(1);
-  return `${head} Quiz`;
-}
-
-function TemplateSimplePull({ text }: { text: string }) {
-  const lines = useMemo(() => splitSimpleHeroLines(text), [text]);
-  return (
-    <motion.div
-      className="space-y-1.5 rounded-lg border border-white/[0.06] bg-black/22 px-3 py-2.5 sm:px-3.5 sm:py-3"
-      aria-label="Simple version"
-    >
-      {lines.map((line, i) => (
-        <p
-          key={i}
-          className={
-            i === 0
-              ? "font-[var(--font-grotesk)] text-[13px] font-semibold leading-snug text-ink-0 sm:text-[13.5px]"
-              : "text-[12.5px] leading-relaxed text-ink-0/86 sm:text-[13px]"
-          }
-        >
-          {line}
-        </p>
-      ))}
-    </motion.div>
-  );
-}
-
-function BusinessPixelAnswerBlock({
-  block,
-  theme
-}: {
-  block: AnswerBlock;
-  theme: PillarQuestTheme;
-}) {
-  if (block.kind === "prose") {
-    const sentences = splitIntoSentences(block.text);
-    return (
-      <motion.div className="space-y-2.5">
-        {sentences.map((s, i) => (
-          <p key={i} className="text-[13px] leading-[1.72] text-ink-0/93 sm:text-[14px]">
-            {s}
-          </p>
-        ))}
-      </motion.div>
-    );
-  }
-
-  const bullets = block.kind === "bulletsOnly" ? block.bullets : block.bullets;
-  const title =
-    block.kind === "titledBullets"
-      ? displaySectionTitle(block.title.replace(/\s*:\s*$/, ""))
-      : null;
-
-  return (
-    <motion.div className="rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2.5 sm:px-3.5 sm:py-3">
-      {title ? (
-        <p
-          className="text-pretty font-[var(--font-grotesk)] text-[11px] font-semibold uppercase leading-relaxed tracking-[0.12em] break-words whitespace-normal sm:text-[11.5px]"
-          style={{ color: theme.hi }}
-        >
-          {title}
-        </p>
-      ) : null}
-      <ul className={title ? "mt-2 space-y-2" : "space-y-2"}>
-        {bullets.map((item, idx) => (
-          <li
-            key={idx}
-            className="flex gap-2.5 text-[12.5px] leading-[1.65] text-ink-0/92 sm:text-[13px]"
-          >
-            <span
-              aria-hidden
-              className="mt-[0.5em] h-1 w-1 shrink-0 rounded-full"
-              style={{
-                background: `linear-gradient(135deg, ${theme.hi}, ${theme.whyHi})`
-              }}
-            />
-            <span className="min-w-0 flex-1">{item}</span>
-          </li>
-        ))}
-      </ul>
-    </motion.div>
-  );
-}
-
-function BusinessPixelAnswerBody({
-  blocks,
-  theme
-}: {
-  blocks: AnswerBlock[];
-  theme: PillarQuestTheme;
-}) {
-  return (
-    <motion.div className="space-y-3">
-      {blocks.map((block, i) => (
-        <BusinessPixelAnswerBlock key={i} block={block} theme={theme} />
-      ))}
-    </motion.div>
-  );
-}
-
 function BusinessTemplateAnswerSlot({
   plainEnglishAnswer,
   investorInsight,
@@ -328,7 +240,6 @@ function BusinessTemplateAnswerSlot({
   companyTicker,
   showGeographicMap,
   showProductVisual,
-  visualNarrationText,
   isLoading
 }: {
   plainEnglishAnswer?: string | null;
@@ -338,11 +249,14 @@ function BusinessTemplateAnswerSlot({
   companyTicker?: string;
   showGeographicMap?: boolean;
   showProductVisual?: boolean;
-  visualNarrationText?: string | null;
   isLoading?: boolean;
 }) {
   const relatable = useMemo(
-    () => parseRelatableQuestAnswer(plainEnglishAnswer, investorInsight),
+    () =>
+      parseRelatableQuestAnswer(
+        plainEnglishAnswer,
+        CONTROLLED_DEMO_MODE ? null : investorInsight
+      ),
     [plainEnglishAnswer, investorInsight]
   );
 
@@ -361,56 +275,38 @@ function BusinessTemplateAnswerSlot({
     () =>
       businessPixelAnswerSentences(
         plainEnglishAnswer,
-        investorInsight,
+        CONTROLLED_DEMO_MODE ? null : investorInsight,
         supportParsed
       ),
     [plainEnglishAnswer, investorInsight, supportParsed]
   );
 
+  const simple = supportParsed.simple?.trim();
+  const hasBlocks = supportParsed.blocks.length > 0;
+
+  const compactParagraphs = useMemo(() => {
+    if (relatable?.paragraphs.length) return relatable.paragraphs;
+    if (simple) return [simple];
+    if (hasBlocks) return compactParagraphsFromBlocks(supportParsed.blocks);
+    if (pixelSentences.length > 0) return pixelSentences;
+    return [];
+  }, [relatable, simple, hasBlocks, supportParsed.blocks, pixelSentences]);
+
   if (isLoading) {
     return <QuestCardAnswerShimmer label="Drafting your plain-English answer…" />;
   }
 
-  const simple = supportParsed.simple?.trim();
-  const hasBlocks = supportParsed.blocks.length > 0;
-  const hasRelatable = Boolean(relatable?.paragraphs.length);
-
-  const relatableBody =
-    hasRelatable && relatable ? (
-      <RelatableQuestAnswer sections={relatable} compact theme={theme} />
+  const textFallback =
+    compactParagraphs.length > 0 ? (
+      <CompactFlashcardAnswer paragraphs={compactParagraphs} theme={theme} />
     ) : null;
-
-  const legacyBody =
-    hasBlocks || simple || pixelSentences.length > 0 ? (
-      <motion.div className="space-y-3.5">
-        {simple ? <TemplateSimplePull text={simple} /> : null}
-        {hasBlocks ? (
-          <BusinessPixelAnswerBody blocks={supportParsed.blocks} theme={theme} />
-        ) : null}
-        {!hasBlocks && pixelSentences.length > 0 ? (
-          <motion.div className="space-y-2.5">
-            {pixelSentences.map((s, i) => (
-              <p
-                key={i}
-                className="text-[13px] leading-[1.72] text-ink-0/93 sm:text-[14px]"
-              >
-                {s}
-              </p>
-            ))}
-          </motion.div>
-        ) : null}
-      </motion.div>
-    ) : null;
-
-  const supportBody = relatableBody ?? legacyBody;
 
   if (showGeographicMap && companyTicker) {
     return (
       <GeographicRevenueAnswer
         ticker={companyTicker}
         theme={theme}
-        narrationText={visualNarrationText}
-        supportBody={supportBody}
+        supportBody={textFallback}
       />
     );
   }
@@ -420,58 +316,12 @@ function BusinessTemplateAnswerSlot({
       <ProductServiceAnswer
         ticker={companyTicker}
         theme={theme}
-        narrationText={visualNarrationText}
-        supportBody={supportBody}
+        supportBody={textFallback}
       />
     );
   }
 
-  if (!hasRelatable && !hasBlocks && !simple && pixelSentences.length === 0) {
-    return (
-      <p className="text-[13px] leading-[1.72] text-ink-2/88">
-        Answer will appear once SEC filing sections are extracted and generated.
-      </p>
-    );
-  }
-
-  return supportBody ?? (
-    <p className="text-[13px] leading-[1.72] text-ink-2/88">
-      A short filing-based summary will appear here soon.
-    </p>
-  );
-}
-
-function BusinessTemplateWhySlot({
-  plainEnglishAnswer,
-  whyItMatters,
-  investorInsight,
-  theme
-}: {
-  plainEnglishAnswer?: string | null;
-  whyItMatters: string;
-  investorInsight?: string | null;
-  theme: PillarQuestTheme;
-}) {
-  const displayText = useMemo(() => {
-    const relatable = parseRelatableQuestAnswer(
-      plainEnglishAnswer,
-      investorInsight
-    );
-    if (relatable?.whyInvestorsCare) return relatable.whyInvestorsCare;
-    const generated = investorInsight?.trim();
-    if (generated) return generated;
-    return whyItMatters.trim();
-  }, [plainEnglishAnswer, whyItMatters, investorInsight]);
-
-  if (!displayText) {
-    return (
-      <p className="text-[12.5px] leading-[1.65] text-ink-2/85 sm:text-[13px]">
-        Why investors care will appear here.
-      </p>
-    );
-  }
-
-  return <QuestInvestorTakeaway text={displayText} theme={theme} />;
+  return textFallback;
 }
 
 function MarkAsReadGlowWrap({
@@ -552,18 +402,16 @@ function MarkAsReadCheckbox({
       >
         {isRead ? "✓" : ""}
       </span>
-      Mark as read
+      {MARK_AS_READ_LABEL}
     </motion.button>
   );
 }
 
 function QuestReadingHeader({
   title,
-  objective,
   theme
 }: {
   title: string;
-  objective: string;
   theme: PillarQuestTheme;
 }) {
   return (
@@ -579,34 +427,6 @@ function QuestReadingHeader({
       >
         {title}
       </p>
-      <p className="mt-1.5 text-pretty text-[12.5px] leading-snug text-ink-2 sm:text-[13px]">
-        {objective}
-      </p>
-    </motion.div>
-  );
-}
-
-function ReviewCardsLink({
-  onClick,
-  theme
-}: {
-  onClick: () => void;
-  theme: PillarQuestTheme;
-}) {
-  return (
-    <motion.div className="mx-auto mb-5 flex max-w-2xl justify-start">
-      <button
-        type="button"
-        onClick={onClick}
-        className="inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] transition hover:bg-white/[0.04]"
-        style={{
-          borderColor: theme.border,
-          color: theme.hi
-        }}
-      >
-        <span aria-hidden>←</span>
-        Review quest cards
-      </button>
     </motion.div>
   );
 }
@@ -666,10 +486,8 @@ function BusinessCardPager({
             aria-disabled={!quizReady}
             title={
               quizReady
-                ? "Open mastery quiz"
-                : missingCardCount > 0
-                  ? `Mark ${missingCardCount} more card(s) as read to unlock the quiz`
-                  : "Complete all cards to unlock the quiz"
+                ? QUIZ_PAGER_READY_TOOLTIP
+                : quizPagerLockTooltip(missingCardCount)
             }
             className="rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] transition disabled:cursor-not-allowed disabled:opacity-50"
             style={{
@@ -679,7 +497,7 @@ function BusinessCardPager({
               boxShadow: quizReady ? `0 0 20px -8px ${theme.glow}` : undefined
             }}
           >
-            {quizReady ? "Next: Quiz →" : "Next: Quiz"}
+            {quizReady ? QUIZ_PAGER_READY_LABEL : "Next"}
           </button>
         </div>
         {!quizReady && missingCardCount > 0 ? (
@@ -780,14 +598,13 @@ export function BusinessIslandQuestReading(
 
   const theme = getPillarQuestTheme(pillarId);
   const [cardIndex, setCardIndex] = useState(0);
-  const [screen, setScreen] = useState<"cards" | "quiz">("cards");
-  const quizAutoOpened = useRef(false);
+  const [screen, setScreen] = useState<"cards" | "mastery" | "quiz">("cards");
+  const masteryAutoOpened = useRef(false);
   const quiz = useMemo(
     () => normalizeQuizConfig(quest.quizConfig),
     [quest.quizConfig]
   );
   const hasQuiz = hasPlayableQuizConfig(quiz);
-  const showQuestDebug = useQuestProgressDebug();
   const readProgress = useMemo(
     () =>
       computeQuestCardReadProgress({
@@ -804,7 +621,7 @@ export function BusinessIslandQuestReading(
   useEffect(() => {
     setCardIndex(0);
     setScreen("cards");
-    quizAutoOpened.current = false;
+    masteryAutoOpened.current = false;
   }, [slug]);
 
   useEffect(() => {
@@ -817,11 +634,14 @@ export function BusinessIslandQuestReading(
     }
   }, [slug, cardIndex, cards, onCardView]);
 
+  const fastQuizHandoff = useControlledDemoFastQuizHandoff();
+
   useEffect(() => {
-    if (!allCardsRead || !hasQuiz || quizAutoOpened.current) return;
-    quizAutoOpened.current = true;
-    setScreen("quiz");
-  }, [allCardsRead, hasQuiz]);
+    if (!allCardsRead || !hasQuiz || masteryAutoOpened.current) return;
+    if (fastQuizHandoff) return;
+    masteryAutoOpened.current = true;
+    setScreen("mastery");
+  }, [allCardsRead, hasQuiz, fastQuizHandoff]);
 
   useEffect(() => {
     onQuizScreenChange?.(screen === "quiz");
@@ -890,22 +710,6 @@ export function BusinessIslandQuestReading(
     [pillarId, slug, cardView.cardId, cardView.question]
   );
 
-  const visualNarrationText = useMemo(() => {
-    if (!showGeographicMap && !showProductVisual) return null;
-    const raw =
-      cards.length > 0
-        ? cards[Math.min(cardIndex, cards.length - 1)]?.plainEnglishAnswer
-        : quest.plainEnglishAnswer;
-    if (!raw) return null;
-    return extractVisualNarration(raw);
-  }, [
-    showGeographicMap,
-    showProductVisual,
-    cards,
-    cardIndex,
-    quest.plainEnglishAnswer
-  ]);
-
   const shellClass =
     "relative px-5 pb-2 pt-5 sm:px-6 md:px-9 md:pt-7";
 
@@ -917,23 +721,33 @@ export function BusinessIslandQuestReading(
     [pillarId, slug, quest.title, quest.type]
   );
 
-  const sourceLine = source ? (
-    <p
-      className="mx-auto mt-7 max-w-2xl text-center text-[10.5px] font-semibold uppercase tracking-[0.22em]"
-      style={{ color: theme.hi }}
-    >
-      Source: {source}
-    </p>
-  ) : null;
+  const sourceLine = <QuestSourceFooter source={source} theme={theme} />;
+
+  if (screen === "mastery" && hasQuiz) {
+    return (
+      <motion.div className={shellClass}>
+        <AnimatePresence mode="wait" initial={false}>
+          <InvestorMasteryScreen
+            key={`${slug}-mastery`}
+            company={company}
+            pillarId={pillarId}
+            questSlug={slug}
+            questTitle={quest.title}
+            theme={theme}
+            cardsRead={cardReadFlags.filter(Boolean).length}
+            cardsTotal={cards.length || 1}
+            onContinue={() => setScreen("quiz")}
+            onReviewCards={() => setScreen("cards")}
+          />
+        </AnimatePresence>
+        {sourceLine}
+      </motion.div>
+    );
+  }
 
   if (screen === "quiz" && quiz) {
     return (
       <motion.div className={shellClass}>
-        <ReviewCardsLink
-          onClick={() => setScreen("cards")}
-          theme={theme}
-        />
-
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={`${slug}-quiz-screen`}
@@ -948,7 +762,7 @@ export function BusinessIslandQuestReading(
               slug={slug}
               quiz={quiz}
               unlocked
-              title={quizTitleFor(quest.type)}
+              title={islandQuizSectionTitle(pillarId, quest.type)}
               rewardXp={quest.rewardXp}
               cardsRead={cardReadFlags.filter(Boolean).length}
               cardsTotal={cards.length || 1}
@@ -956,6 +770,7 @@ export function BusinessIslandQuestReading(
               islandFinaleCta={islandFinaleCta}
               passCelebration={passCelebration}
               panelTheme={theme}
+              onReviewQuestCards={() => setScreen("cards")}
             />
           </motion.div>
         </AnimatePresence>
@@ -967,11 +782,7 @@ export function BusinessIslandQuestReading(
 
   return (
     <motion.div className={shellClass}>
-      <QuestReadingHeader
-        title={quest.title}
-        objective={quest.objective}
-        theme={theme}
-      />
+      <QuestReadingHeader title={quest.title} theme={theme} />
 
       {questPipeline ? (
         <PillarQuestPipelineBanner
@@ -1009,16 +820,7 @@ export function BusinessIslandQuestReading(
                 companyTicker={company.ticker}
                 showGeographicMap={showGeographicMap}
                 showProductVisual={showProductVisual}
-                visualNarrationText={visualNarrationText}
                 isLoading={cardView.isLoading}
-              />
-            }
-            whySlot={
-              <BusinessTemplateWhySlot
-                plainEnglishAnswer={cardView.plainEnglishAnswer}
-                whyItMatters={cardView.whyItMatters}
-                investorInsight={cardView.investorInsight}
-                theme={theme}
               />
             }
             companyName={company.name}
@@ -1045,7 +847,7 @@ export function BusinessIslandQuestReading(
           hasQuiz={hasQuiz}
           quizReady={quizReady}
           missingCardCount={missingCardCount}
-          onStartQuiz={() => setScreen("quiz")}
+          onStartQuiz={() => setScreen(fastQuizHandoff ? "quiz" : "mastery")}
           onPrev={() => setCardIndex((i) => Math.max(0, i - 1))}
           onNext={() =>
             setCardIndex((i) => Math.min(cards.length - 1, i + 1))
@@ -1060,13 +862,12 @@ export function BusinessIslandQuestReading(
           readQuestSlugs={readQuestSlugs}
           quizConfig={quest.quizConfig}
           theme={theme}
-          showDevDetails={showQuestDebug}
         />
       ) : null}
 
       {allCardsRead && hasQuiz && screen === "cards" ? (
         <ContinueToQuizCta
-          onClick={() => setScreen("quiz")}
+          onClick={() => setScreen(fastQuizHandoff ? "quiz" : "mastery")}
           theme={theme}
           cardsTotal={cards.length || 1}
         />

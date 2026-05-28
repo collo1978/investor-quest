@@ -1,15 +1,15 @@
+import { CONTROLLED_DEMO_COMPANY_ID, CONTROLLED_DEMO_MODE } from "@/lib/demo/controlledDemo";
+import {
+  CONTROLLED_DEMO_ONBOARDING_SHOWCASE_IDS,
+  getControlledDemoOnboardingCompanyCard
+} from "@/lib/demo/controlledOnboarding";
 import { DEMO_COMPANIES } from "@/lib/onboarding/seedData";
 import type { RecommendedCompanyCard } from "@/lib/onboarding/types";
 
 /** Default board when no interests were selected or API returns no matches. */
-export const QUEST_MATCH_FALLBACK_IDS = [
-  "aapl",
-  "nvda",
-  "dis",
-  "spot",
-  "nke",
-  "ea"
-] as const;
+export const QUEST_MATCH_FALLBACK_IDS = CONTROLLED_DEMO_MODE
+  ? CONTROLLED_DEMO_ONBOARDING_SHOWCASE_IDS
+  : (["aapl", "nvda", "nke"] as const);
 
 export function buildQuestMatchFallbackCards(): RecommendedCompanyCard[] {
   return QUEST_MATCH_FALLBACK_IDS.map((id, index) => {
@@ -20,8 +20,8 @@ export function buildQuestMatchFallbackCards(): RecommendedCompanyCard[] {
         logo: `/logos/companies/${id}.svg`,
         companyName: id.toUpperCase(),
         ticker: id.toUpperCase(),
-        sector: "—",
-        industry: "—",
+        sector: ". ",
+        industry: ". ",
         matchingInterests: [],
         score: QUEST_MATCH_FALLBACK_IDS.length - index
       };
@@ -39,10 +39,14 @@ export function buildQuestMatchFallbackCards(): RecommendedCompanyCard[] {
   });
 }
 
-/** Pick a winner from the pool — slight bias toward higher scores, still feels random. */
+/** Pick a winner from the pool, slight bias toward higher scores, still feels random. */
 export function pickQuestMatchWinner(
   pool: readonly RecommendedCompanyCard[]
 ): RecommendedCompanyCard {
+  if (CONTROLLED_DEMO_MODE) {
+    const nvda = pool.find((c) => c.id === CONTROLLED_DEMO_COMPANY_ID);
+    return nvda ?? getControlledDemoOnboardingCompanyCard();
+  }
   if (pool.length === 0) return buildQuestMatchFallbackCards()[0]!;
   const sorted = [...pool].sort((a, b) => b.score - a.score);
   const candidates = sorted.slice(0, Math.min(3, sorted.length));

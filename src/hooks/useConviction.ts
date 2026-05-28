@@ -12,9 +12,8 @@ import {
 } from "@/lib/conviction";
 
 export function useConviction() {
-  const [records, setRecords] = useState<ConvictionRecord[]>(() =>
-    typeof window === "undefined" ? [] : loadConvictionRecords()
-  );
+  // Always start empty so SSR and the first client render match; sync from storage in useEffect.
+  const [records, setRecords] = useState<ConvictionRecord[]>([]);
 
   useEffect(() => {
     const sync = () => setRecords(loadConvictionRecords());

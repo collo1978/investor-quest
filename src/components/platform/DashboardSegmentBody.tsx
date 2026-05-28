@@ -13,6 +13,7 @@ import type {
   DashboardSegment,
   PartnerType
 } from "@/platform/types";
+import { formatAnalyticsNumber } from "@/lib/analytics/formatDisplay";
 import { listPartners } from "@/platform/partners/partnerRegistry";
 import { PACKAGE_TIER_ORDER } from "@/platform/packages/packageDefinitions";
 
@@ -199,7 +200,7 @@ function DashboardBody(props: {
             >
               <div className="font-semibold text-white">{r.event}</div>
               <div className="mt-1 text-white/60">
-                {r.count.toLocaleString()} events
+                {formatAnalyticsNumber(r.count)} events
               </div>
             </div>
           ))}

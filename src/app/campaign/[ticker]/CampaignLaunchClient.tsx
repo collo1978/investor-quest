@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { NeonButton } from "@/components/NeonButton";
 import { useGame } from "@/components/GameProvider";
 import { COMPANIES, isCompanyId } from "@/data/companies";
+import { isPlayableDemoCompanyId } from "@/lib/demo/playableDemo";
 
 type Props = { ticker: string };
 
@@ -16,7 +17,7 @@ export function CampaignLaunchClient({ ticker }: Props) {
     () => COMPANIES.find((c) => c.ticker.toUpperCase() === upper),
     [upper]
   );
-  const canSwitch = match && isCompanyId(match.id);
+  const canSwitch = match && isCompanyId(match.id) && isPlayableDemoCompanyId(match.id);
 
   return (
     <div className="relative min-h-[calc(100vh-72px)] overflow-hidden bg-[#050508] text-ink-0 md:min-h-screen">
@@ -44,7 +45,7 @@ export function CampaignLaunchClient({ ticker }: Props) {
         <p className="mt-3 text-sm leading-relaxed text-ink-1">
           {canSwitch
             ? "This ticker matches a live Investor Quest campaign. Jump to the map to run quests, or switch your active company first."
-            : "This ticker is not wired to a live campaign yet — you can still open the map and continue your current company, or return to explore."}
+            : "This ticker isn't in the demo yet — Apple, Nike, and NVIDIA are live. Open the map to continue your current campaign, or return to explore."}
         </p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">

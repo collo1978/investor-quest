@@ -8,7 +8,9 @@ export type QuestionIntent =
   | "what_company_does"
   | "customer_problem"
   | "market_scale"
+  | "target_customer"
   | "how_they_make_money"
+  | "innovation_advantage"
   | "risk_force"
   | "force_positive"
   | "financials"
@@ -33,7 +35,11 @@ const EXPLICIT_CARD_INTENT: Partial<
   revenue: {
     "card-1": "how_they_make_money",
     "card-2": "how_they_make_money",
-    "card-3": "how_they_make_money"
+    "card-3": "target_customer"
+  },
+  advantage: {
+    "card-1": "innovation_advantage",
+    "card-2": "innovation_advantage"
   }
 };
 
@@ -60,6 +66,15 @@ function questionHints(q: string): QuestionIntent | null {
   }
 
   if (
+    /\b(who are|who is|who buys|who pays|whose customers?|customer base|target (?:audience|market|customer)|types? of (?:customers?|buyers?|clients?))\b/.test(
+      q
+    ) &&
+    /\b(customers?|buyers?|users?|clients?|audience)\b/.test(q)
+  ) {
+    return "target_customer";
+  }
+
+  if (
     /\b(what does|actually do|sell|products? or services|business model)\b/.test(
       q
     ) &&
@@ -69,15 +84,29 @@ function questionHints(q: string): QuestionIntent | null {
   }
 
   if (
-    /\b(revenue|make money|earn|geographic|region|who (?:are |pays |pay )|customers?|money comes)\b/.test(
-      q
-    )
+    /\b(revenue|make money|earn|geographic|region|money comes)\b/.test(q)
   ) {
     return "how_they_make_money";
   }
 
   if (
+    /\b(r&d|research and development|innovation|competitive advantage|competitive moat|\bmoat\b|what protects|proprietary|patents?|intellectual property|technology edge|invest in (?:research|development)|hard to copy|ecosystem (?:lock|advantage|moat))\b/.test(
+      q
+    )
+  ) {
+    return "innovation_advantage";
+  }
+
+  if (
     /\b(risk|go wrong|threat|headwind|regulat|compet|supply chain|could hurt)\b/.test(
+      q
+    )
+  ) {
+    return "risk_force";
+  }
+
+  if (
+    /\b(leave|step down|depart|succession|sold|takeover|acquisition|merger|ceo change)\b/.test(
       q
     )
   ) {
@@ -104,6 +133,11 @@ export function detectQuestionIntent(ctx: QuestionIntentContext): QuestionIntent
   const focus = normalizeQuestion(ctx.promptFocus ?? "");
 
   if (pillar === "financials") return "financials";
+  if (pillar === "management") {
+    const mgmt = questionHints(q);
+    if (mgmt) return mgmt;
+    return "general";
+  }
   if (pillar === "forces") {
     if (slug.startsWith("positive") || focus.includes("strength")) {
       return "force_positive";
@@ -127,7 +161,8 @@ export function detectQuestionIntent(ctx: QuestionIntentContext): QuestionIntent
   }
 
   if (slug === "revenue") return "how_they_make_money";
-  if (slug === "snapshot" && cardId === "card-1") return "what_company_does";
+  if (slug === "advantage") return "innovation_advantage";
+  if (slug === "what-they-do" && cardId === "card-1") return "what_company_does";
 
   return "general";
 }
@@ -136,7 +171,9 @@ export const QUESTION_INTENT_LABELS: Record<QuestionIntent, string> = {
   what_company_does: "What does the company do?",
   customer_problem: "What problem does it solve?",
   market_scale: "How big / market position",
+  target_customer: "Who are the customers?",
   how_they_make_money: "How do they make money?",
+  innovation_advantage: "R&D / innovation / moat",
   risk_force: "What could go wrong (force)",
   force_positive: "Strength / tailwind (force)",
   financials: "Financials",
@@ -144,8 +181,10 @@ export const QUESTION_INTENT_LABELS: Record<QuestionIntent, string> = {
 };
 
 export const INTENT_ADAPTIVE_PRINCIPLE = `INTENT-ADAPTIVE HUMAN-FIRST (critical)
-Human-first means the reader understands THIS card's question in normal life — not that every answer uses the same customer-pain template.
-Match the question type. Do NOT open with game lag / AI slowness unless the card is explicitly about customer pain.`;
+Human-first means the reader understands THIS card's question in normal life — not that every answer uses the same template.
+Match the question type. Answer ONLY what the card asks.
+Do NOT drift into investor analysis, loyalty economics, or clever meta-commentary in the main story.
+Sound like a smart friend — not Wikipedia, not a teacher ("In simple terms"), not forced analogies.`;
 
 type IntentPromptPack = {
   cardPrompt: string;
@@ -157,43 +196,59 @@ type IntentPromptPack = {
 export const INTENT_PROMPT_PACKS: Record<QuestionIntent, IntentPromptPack> = {
   what_company_does: {
     cardPrompt: `WHAT THE COMPANY DOES
-Pattern: everyday experience → simple analogy → what they sell/do → investor meaning.
-- Lead with where the reader already bumps into this company (phone, store, game, work).
-- Explain what they sell or help power in plain words — not engineering categories.
+Pattern: name what people actually use → where the money comes from → one extra fact if needed.
+- List real products/services people touch (iPhone, app store, etc.) — not "designs and sells a range of…"
+- No forced analogy. No "In simple terms". No textbook opener.
 - Do NOT lead with customer pain, lag, or "without them" unless this card asks for that.`,
     styleReference: `STYLE REFERENCE (what they do — tone only):
-"If you've streamed music or used a phone app, you've already touched this company's world.
+"Apple makes everyday tech people use constantly — iPhones, Macs, iPads, Apple Watches, and AirPods.
 
-Think of them like the team behind the apps and devices people use every day — not the shop you walk into.
+It also earns when you pay for App Store apps, iCloud, Apple Music, and Apple TV+.
 
-They design and sell the products and services people pay for most often.
+iPhone still brings in the biggest share of sales.
 
 Why investors care:
-When people keep buying those products, revenue can stay steady or grow."`,
+If people keep buying devices and subscriptions, Apple keeps making money from the same customers over and over."`,
     writeInstruction:
-      "Write: everyday moment → analogy → what they sell/do (max 4 sentences); then Why investors care:",
+      "Write: what people use/buy → main money lines → optional one fact (max 4 sentences); then Why investors care:",
     sentenceMap:
-      "1. Everyday experience — where people already see this company\n2. Analogy — what role they play\n3. What they sell/do — one plain line from the filing\n4. Optional — one extra fact if needed"
+      "1. What people actually use or buy — name real products\n2. Other ways money comes in (subscriptions, fees)\n3. What matters most (flagship line or habit)\n4. Optional — one short filing fact"
   },
 
   customer_problem: {
     cardPrompt: `CUSTOMER PROBLEM
-Pattern: customer pain → consequence → how the company helps → investor meaning.
-- Lead with frustration or risk WITHOUT the company, then what improves WITH them.
-- Never: industries tour, solutions, innovation hype, "technology is crucial."`,
+Pattern: what life feels like with them → concrete everyday example → how that helps (time, frustration, simplicity).
+- Answer ONLY the customer problem in the question. No investor analysis in the main story.
+- Name real moments: photos, messages, devices, bills, frustration, time saved.
+- Never: spec sheets, stickiness, loyalty economics, industries tour, solutions, innovation hype.`,
     styleReference: `STYLE REFERENCE (customer problem — tone only):
-"When a game stutters or an AI chat takes forever to reply, devices aren't fast enough.
+"Apple makes technology feel simple and connected.
 
-Think of it like a phone running too many apps — everything slows down.
+People can move photos, messages, apps, and files easily between devices without needing to think about it too much.
 
-This company makes the parts inside devices so games and apps feel quick again.
+For many customers, Apple products save time, reduce frustration, and work smoothly together in everyday life.
 
 Why investors care:
-If people keep demanding faster tech, demand for those parts can keep growing."`,
+When daily life feels easier, people tend to stay with the same brand."`,
     writeInstruction:
-      "Write: pain WITHOUT them → consequence → analogy → benefit WITH them (max 4 sentences); then Why investors care:",
+      "Write: what problem disappears for customers → everyday example → how life gets easier (max 4 sentences); then Why investors care:",
     sentenceMap:
-      "1. Pain WITHOUT them — everyday frustration\n2. Consequence — what stays broken\n3. Analogy OR how they help\n4. Benefit WITH them — plain role"
+      "1. What feels simpler or less frustrating for customers\n2. Concrete everyday example (photos, messages, devices, etc.)\n3. How that helps in daily life\n4. Optional — one short filing fact tied to the problem"
+  },
+
+  target_customer: {
+    cardPrompt: `TARGET CUSTOMERS / AUDIENCE
+Pattern: WHO buys (specific segment) → WHY they buy (value proposition) → WHY the model is strong (loyalty, repeat purchases, ecosystem, switching costs, developers, or enterprise — use filing facts).
+- Name a real customer type and how they purchase — not "regular people", "everyone", or "people upgrading phones".
+- Sentence 2: why they choose this company (premium, convenience, trust, network, etc.).
+- Sentence 3: business-model strength investors notice (ecosystem lock-in, repeat spend, developer pull, enterprise contracts).
+- You MAY mention loyalty, ecosystem, switching costs, and repeat purchases here — this card is about who pays and why that matters.
+${CUSTOMER_AUDIENCE_HARD_RULES}`,
+    styleReference: CUSTOMER_AUDIENCE_STYLE_REFERENCE,
+    writeInstruction:
+      "Write: target customer segment → why they buy → why the model is strong (max 4 sentences); then Why investors care:",
+    sentenceMap:
+      "1. WHO buys — specific segment + purchasing behavior\n2. WHY they buy — value proposition\n3. WHY the model is strong — loyalty, ecosystem, switching costs, repeat purchases, or enterprise adoption\n4. Optional — one short filing fact"
   },
 
   market_scale: {
@@ -218,6 +273,18 @@ Major players in a hot industry often attract attention when demand keeps rising
       "1. Scale in real life — how big/important it feels\n2. Market position — leader, major name, wide reach\n3. Analogy — what that scale is like\n4. Optional — one filing fact on size or flagship products"
   },
 
+  innovation_advantage: {
+    cardPrompt: `R&D / INNOVATION / COMPETITIVE ADVANTAGE
+Pattern: what the company invests in → why it matters for the business → optional one concrete example.
+- Explain R&D focus OR what protects the business (brand, IP, chips, software, ecosystem, switching costs) — match the card question.
+${INNOVATION_RD_HARD_RULES}`,
+    styleReference: `${INNOVATION_RD_STYLE_REFERENCE}\n\n${INNOVATION_MOAT_STYLE_REFERENCE}`,
+    writeInstruction:
+      "Write: what they invest in OR what protects them → business impact (integration, moat, switching costs) (max 4 sentences); then Why investors care:",
+    sentenceMap:
+      "1. What they invest in (R&D) OR what protects the business (moat)\n2. Why it matters — ecosystem, integration, performance, switching costs, or pricing power\n3. Optional — one concrete example from the filing\n4. Optional — rival or risk if R&D slows"
+  },
+
   how_they_make_money: {
     cardPrompt: `HOW THEY MAKE MONEY
 Pattern: what customers pay for → simple example → main money source → investor meaning.
@@ -234,7 +301,7 @@ The filing shows which product lines bring in the biggest share of revenue.
 Why investors care:
 When one line pays most of the bills, its health drives the whole business."`,
     writeInstruction:
-      "Write: what people pay for → simple money example → main revenue source for THIS card (max 4 sentences); then Why investors care:",
+      "Write: what people pay for → main revenue source for THIS card (max 4 sentences); no forced analogy; then Why investors care:",
     sentenceMap:
       "1. What customers pay for — everyday purchase moment\n2. Simple example or analogy for the money flow\n3. Main source for THIS card (product, region, or customer type)\n4. Optional — one number or filing fact"
   },
@@ -247,36 +314,32 @@ Pattern: real-world upside → why it helps the company → simple analogy → i
     styleReference: `STYLE REFERENCE (positive force — tone only):
 "When stores stay stocked and launches hit on time, shoppers notice.
 
-Think of it like a bakery that always has flour — it can bake every day without drama.
-
 The filing describes supply chain strength as something they manage well.
 
 Why investors care:
 Reliable operations can protect margins when demand is hot."`,
     writeInstruction:
-      "Write: everyday upside → why this strength matters → analogy → filing fact (max 4 sentences); then Why investors care:",
+      "Write: everyday upside → why this strength matters → filing fact (max 4 sentences); no forced analogy; then Why investors care:",
     sentenceMap:
-      "1. Real-world upside — what goes better\n2. Why this strength matters for the business\n3. Analogy — Think of it like…\n4. One filing fact about this force"
+      "1. Real-world upside — what goes better\n2. Why this strength matters for the business\n3. One filing fact about this force\n4. Optional — investor meaning"
   },
 
   risk_force: {
     cardPrompt: `RISK / NEGATIVE FORCE
-Pattern: real-world risk → what could happen → how it hurts the company → investor meaning.
+Pattern: real-world risk → what could happen → investor meaning.
 - Show how this force might show up in everyday life (price, delay, safety, hype).
-- One analogy required.`,
+- No forced kitchen/bakery analogies.`,
     styleReference: `STYLE REFERENCE (risk force — tone only):
 "If key parts get hard to buy, new products can launch late or cost more.
-
-Think of it like a bakery that can't get flour — shelves stay half-empty.
 
 The filing flags supply pressure as something that could squeeze margins or delays.
 
 Why investors care:
 Operational risks can slow growth even when demand looks strong."`,
     writeInstruction:
-      "Write: real-world risk → what could happen → filing fact about this force (max 4 sentences); include one analogy; then Why investors care:",
+      "Write: real-world risk → what could happen → filing fact (max 4 sentences); then Why investors care:",
     sentenceMap:
-      "1. Real-world risk — everyday stake\n2. What could happen\n3. Analogy — Think of it like…\n4. One filing fact about this force"
+      "1. Real-world risk — everyday stake\n2. What could happen to the business\n3. One filing fact about this force\n4. Optional — investor stake"
   },
 
   financials: {
@@ -319,13 +382,34 @@ Clear facts here help judge whether the business is getting stronger or shakier.
   }
 };
 
+import {
+  CUSTOMER_AUDIENCE_HARD_RULES,
+  CUSTOMER_AUDIENCE_STYLE_REFERENCE
+} from "@/lib/quests/customerAudienceCopy";
+import {
+  INNOVATION_MOAT_STYLE_REFERENCE,
+  INNOVATION_RD_HARD_RULES,
+  INNOVATION_RD_STYLE_REFERENCE
+} from "@/lib/quests/innovationRdCopy";
+import { QUEST_CARD_FOCUS_RULES } from "@/lib/quests/questionFocusGate";
+
 export function buildIntentPromptFooter(ctx: QuestionIntentContext): string {
   const intent = detectQuestionIntent(ctx);
   const pack = INTENT_PROMPT_PACKS[intent];
+  const questionBlock = ctx.cardQuestion?.trim()
+    ? [
+        "",
+        "CARD QUESTION (answer ONLY this in the main story):",
+        ctx.cardQuestion.trim()
+      ]
+    : [];
 
   return [
     "",
+    QUEST_CARD_FOCUS_RULES,
+    "",
     `QUESTION TYPE: ${QUESTION_INTENT_LABELS[intent]}`,
+    ...questionBlock,
     pack.cardPrompt,
     "",
     pack.styleReference,

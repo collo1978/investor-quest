@@ -6,13 +6,20 @@ import {
   insertGameHealthCheck,
   markAlertSent
 } from "@/lib/gameHealth/storage";
-import { scoreToStatusLabel } from "@/lib/gameHealth/statusLabel";
 import { sendGameHealthAlertEmail } from "@/lib/gameHealth/sendHealthAlert";
+import { buildPlatformHealthReport } from "@/lib/gameHealth/buildPlatformReport";
+import { enrichHealthCheck, item } from "@/lib/gameHealth/enrichCheck";
+import {
+  communicationChecksFromReport,
+  communicationIssueDraftsFromReport,
+  runCommunicationQualityAudit
+} from "@/lib/communicationQuality";
+import { shouldSuppressLegacyCommCheck } from "@/lib/communicationQuality/actionableDisplay";
+import { stampIssueDomainScores } from "@/lib/operations/stampIssueDomains";
 import type {
   GameHealthCheckRecord,
   GameHealthIssueRecord,
-  HealthCheckItem,
-  HealthCheckItemStatus
+  HealthCheckItem
 } from "@/lib/gameHealth/types";
 import { isOpenAiConfigured } from "@/lib/ai/env";
 import { isSecApiConfigured } from "@/lib/sec/env";
@@ -21,10 +28,15 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchQuestCardAnswersForSlug } from "@/lib/supabase/questCardAnswers/storage";
 import { runQuestFlowHealthChecks } from "@/lib/gameHealth/questFlowChecks";
+import {
+  behavioralIssueDraftsFromScores,
+  enrichIssueDraft,
+  gamificationIssueDraftsFromBehavioral
+} from "@/lib/gameHealth/resolutionIntelligence";
 
 const DEMO_TICKERS = ["NVDA", "AAPL"] as const;
 const PROBE_TICKER = "NVDA";
-const PROBE_QUEST = "snapshot";
+const PROBE_QUEST = "what-they-do";
 const PROBE_CARD = "card-1";
 
 function getBaseUrl(): string {
@@ -59,39 +71,10 @@ async function timedFetch(
   }
 }
 
-function item(
-  id: string,
-  name: string,
-  status: HealthCheckItemStatus,
-  message: string,
-  weight: number,
-  opts?: { layman?: string; durationMs?: number }
-): HealthCheckItem {
-  return {
-    id,
-    name,
-    status,
-    message,
-    laymanSummary: opts?.layman,
-    durationMs: opts?.durationMs,
-    weight
-  };
-}
-
-function computeScore(checks: HealthCheckItem[]): number {
-  let total = 0;
-  let earned = 0;
-  for (const c of checks) {
-    total += c.weight;
-    if (c.status === "pass") earned += c.weight;
-    else if (c.status === "warn") earned += c.weight * 0.55;
-  }
-  return total ? Math.round((earned / total) * 100) : 0;
-}
-
 function buildIssuesFromChecks(
   checks: HealthCheckItem[],
-  checkId: string | null
+  checkId: string | null,
+  communicationReport?: import("@/lib/communicationQuality/types").CommunicationQualityReport | null
 ): Omit<
   GameHealthIssueRecord,
   "id" | "checkId" | "createdAt" | "updatedAt" | "status"
@@ -103,8 +86,18 @@ function buildIssuesFromChecks(
 
   for (const c of checks) {
     if (c.status === "pass") continue;
+    if (c.outcomeKind && c.outcomeKind !== "actual_problem") continue;
+    /** Per-card comm:* issues carry actionable detail; skip vague category-only rows. */
+    if (c.id.startsWith("communication_")) continue;
+    if (
+      communicationReport &&
+      communicationReport.cardsNeedingRegeneration.length > 0 &&
+      (c.id === "jargon_gate" || c.id === "human_first_demo")
+    ) {
+      continue;
+    }
 
-    const severity = c.status === "fail" ? "critical" : "warning";
+    const severity = c.status === "fail" ? c.severity : "warning";
     let fixAction: string | null = "mark_resolved";
     let companyTicker: string | null = null;
     let companyName: string | null = null;
@@ -130,33 +123,35 @@ function buildIssuesFromChecks(
       fixAction = "recheck_quest_flow";
     }
 
-    issues.push({
-      issueKey: c.id,
-      severity,
-      title: c.laymanSummary ?? c.name,
-      problemPlain: c.laymanSummary ?? c.message,
-      whatUsersSee:
-        c.id === "quest_flow_demo"
-          ? "Players may get stuck before the quiz."
-          : c.status === "fail"
-            ? "Players may see a blank screen, empty card, or stuck loading message."
-            : "Players may notice slowness or incomplete text.",
-      suggestedFix:
-        c.id.includes("quest_answer") || c.id.includes("empty_answer")
-          ? "Tap Retry answer on the fix panel."
-          : c.id.startsWith("slow_")
-            ? "Tap Turn on fast mode if players are waiting too long."
-            : c.id === "jargon_gate"
-              ? "Tap Pause strict language checks for demo, then regenerate."
-              : "Open the fix panel and tap the top suggested button.",
-      fixAction,
-      companyTicker,
-      companyName,
-      pillarId,
-      questSlug,
-      cardId,
-      metadata: { checkItemId: c.id, technical: c.message }
-    });
+    issues.push(
+      enrichIssueDraft({
+        issueKey: c.id,
+        severity: c.severity === "critical" ? "critical" : severity,
+        title: c.laymanSummary ?? c.name,
+        problemPlain: c.laymanSummary ?? c.message,
+        whatUsersSee:
+          c.id === "quest_flow_demo"
+            ? "Players may get stuck before the quiz."
+            : c.status === "fail"
+              ? "Players may see a blank screen, empty card, or stuck loading message."
+              : "Players may notice slowness or incomplete text.",
+        suggestedFix: c.suggestedFix,
+        fixAction,
+        companyTicker,
+        companyName,
+        pillarId,
+        questSlug,
+        cardId,
+        metadata: {
+          checkItemId: c.id,
+          technical: c.message,
+          domainId: c.domainId,
+          subsectionId: c.subsectionId,
+          checkType: c.checkType,
+          checkOutcomeKind: c.outcomeKind
+        }
+      })
+    );
   }
 
   return issues;
@@ -590,8 +585,8 @@ export async function runGameHealthCheck(options?: {
     )
   );
 
-  const questPage = await timedFetch("/business/snapshot");
-  routeTimings.push({ route: "/business/snapshot", ms: questPage.ms });
+  const questPage = await timedFetch("/business/what-they-do");
+  routeTimings.push({ route: "/business/what-they-do", ms: questPage.ms });
   checks.push(
     item(
       "quest_page_load",
@@ -650,11 +645,33 @@ export async function runGameHealthCheck(options?: {
   const questFlow = runQuestFlowHealthChecks();
   checks.push(questFlow.summaryCheck);
 
-  const score = computeScore(checks);
-  const statusLabel = scoreToStatusLabel(score);
-  const passed = checks.filter((c) => c.status === "pass");
-  const warnings = checks.filter((c) => c.status === "warn");
-  const failed = checks.filter((c) => c.status === "fail");
+  let communicationReport = null;
+  try {
+    communicationReport = await runCommunicationQualityAudit();
+    checks.push(...communicationChecksFromReport(communicationReport));
+  } catch (err) {
+    checks.push(
+      item(
+        "communication_health_overall",
+        "Communication health (overall)",
+        "pending",
+        err instanceof Error ? err.message : "Communication audit could not complete.",
+        10,
+        {
+          layman:
+            "Mission Control could not score quest copy for beginner-friendly tone.",
+          outcomeKind: "audit_unavailable"
+        }
+      )
+    );
+  }
+
+  const platformReport = buildPlatformHealthReport(checks, communicationReport);
+  const score = platformReport.overallScore;
+  const statusLabel = platformReport.demoReadiness.status;
+  const passed = platformReport.legacy.passedChecks;
+  const warnings = platformReport.legacy.warnings;
+  const failed = platformReport.legacy.failedChecks;
 
   const slowest = [...routeTimings].sort((a, b) => b.ms - a.ms)[0];
 
@@ -662,15 +679,27 @@ export async function runGameHealthCheck(options?: {
     ...new Set(
       failed
         .concat(warnings)
-        .map((c) => c.laymanSummary ?? c.message)
+        .filter((c) => !shouldSuppressLegacyCommCheck(c.id, communicationReport))
+        .map((c) => c.suggestedFix || c.message)
         .filter(Boolean)
     )
   ].slice(0, 8);
 
-  const issueDrafts = [
-    ...buildIssuesFromChecks(failed.concat(warnings), null),
-    ...questFlow.issueDrafts
-  ];
+  const behavioralDrafts = behavioralIssueDraftsFromScores();
+  const gamificationDrafts = gamificationIssueDraftsFromBehavioral(behavioralDrafts);
+
+  const issueDrafts = stampIssueDomainScores(
+    [
+      ...buildIssuesFromChecks(failed.concat(warnings), null, communicationReport),
+      ...questFlow.issueDrafts,
+      ...(communicationReport
+        ? communicationIssueDraftsFromReport(communicationReport, "communication_health_overall")
+        : []),
+      ...behavioralDrafts,
+      ...gamificationDrafts
+    ],
+    platformReport
+  );
 
   const durationMs = Date.now() - started;
 
@@ -686,7 +715,8 @@ export async function runGameHealthCheck(options?: {
       suggestedFixes,
       slowestRoute: slowest ? `${slowest.route} (${slowest.ms}ms)` : null,
       durationMs,
-      issues: issueDrafts
+      issues: issueDrafts,
+      platformReport
     });
   } else {
     record = {
@@ -700,6 +730,7 @@ export async function runGameHealthCheck(options?: {
       slowestRoute: slowest ? `${slowest.route} (${slowest.ms}ms)` : null,
       durationMs,
       createdAt: new Date().toISOString(),
+      platformReport,
       issues: issueDrafts.map((i, idx) => ({
         ...i,
         id: `local-${idx}`,

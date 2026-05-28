@@ -3,6 +3,8 @@
 import { motion, useReducedMotion } from "framer-motion";
 
 import { NeonButton } from "@/components/NeonButton";
+import { CONTROLLED_DEMO_MODE } from "@/lib/demo/controlledDemo";
+import { NVDA_MISSION_BRIEF } from "@/lib/demo/nvidiaDemoVoice";
 
 const MISSION_STEPS = [
   "Mark quests as read",
@@ -19,6 +21,8 @@ export function BusinessIslandMissionBriefModal({ open, onDismiss }: Props) {
   const reduceMotion = useReducedMotion();
 
   if (!open) return null;
+
+  const brief = CONTROLLED_DEMO_MODE ? NVDA_MISSION_BRIEF : null;
 
   return (
     <motion.div
@@ -63,25 +67,25 @@ export function BusinessIslandMissionBriefModal({ open, onDismiss }: Props) {
 
         <header className="relative text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[rgba(245,197,71,0.9)]">
-            Business Island
+            {brief?.kicker ?? "Business Island"}
           </p>
           <h2
             id="business-island-brief-title"
             className="mt-3 font-[var(--font-grotesk)] text-2xl font-extrabold tracking-tight text-ink-0 sm:text-[1.65rem]"
           >
-            Your Mission
+            {brief?.title ?? "Your Mission"}
           </h2>
         </header>
 
         <div className="relative mt-5 space-y-4 text-center">
           <p className="text-sm leading-relaxed text-ink-1">
-            Every great investor first understands the business.
+            {brief?.lead ?? "Every great investor first understands the business."}
           </p>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neon-300">
-            Complete the Business Quests
+            {brief?.stepsTitle ?? "Complete the Business Quests"}
           </p>
           <ul className="mx-auto max-w-[16rem] space-y-2.5 text-left text-sm text-ink-0">
-            {MISSION_STEPS.map((step) => (
+            {(brief?.steps ?? MISSION_STEPS).map((step) => (
               <li key={step} className="flex items-start gap-2.5">
                 <span
                   aria-hidden
@@ -101,7 +105,7 @@ export function BusinessIslandMissionBriefModal({ open, onDismiss }: Props) {
             className="relative z-[1] w-full justify-center"
             onClick={onDismiss}
           >
-            Let&apos;s go
+            {brief?.cta ?? "Let's go"}
           </NeonButton>
         </div>
       </motion.article>

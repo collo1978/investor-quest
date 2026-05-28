@@ -7,6 +7,9 @@ import { useGame } from "@/components/GameProvider";
 import { ConvictionFeedbackModal } from "@/components/conviction/ConvictionFeedbackModal";
 import { companyById } from "@/data/companies";
 import { pillarById } from "@/data/pillars";
+import { CONTROLLED_DEMO_MODE } from "@/lib/demo/controlledDemo";
+import { NVDA_CONVICTION } from "@/lib/demo/nvidiaDemoVoice";
+import { XP_ISLAND_COMPLETION } from "@/engine/progression/xpEconomy";
 import { appendConvictionRecord } from "@/lib/conviction";
 import { filingForPillar } from "@/lib/conviction/filingForPillar";
 
@@ -64,6 +67,23 @@ export function ConvictionQueueHost() {
             head.pillarToUnlock
               ? pillarById(head.pillarToUnlock).title
               : undefined
+          }
+          kicker={
+            CONTROLLED_DEMO_MODE
+              ? NVDA_CONVICTION.kicker(pillarById(head.completedPillarId).title)
+              : undefined
+          }
+          heading={CONTROLLED_DEMO_MODE ? NVDA_CONVICTION.heading : undefined}
+          body={
+            CONTROLLED_DEMO_MODE
+              ? NVDA_CONVICTION.body(
+                  XP_ISLAND_COMPLETION,
+                  head.pillarToUnlock != null
+                )
+              : undefined
+          }
+          nextUnlockLabel={
+            CONTROLLED_DEMO_MODE ? NVDA_CONVICTION.nextUnlock : undefined
           }
           onConfident={() => void onPick("confident")}
           onCautious={() => void onPick("cautious")}

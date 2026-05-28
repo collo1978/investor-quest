@@ -1,7 +1,7 @@
 /**
  * Center-map final challenge — 12 questions (3 per pillar).
- * Mixed formats + difficulty bands (4 easy / 6 medium / 2 hard).
- * Pass threshold 70%; 90%+ surfaces “High Conviction Rookie” in the UI.
+ * ~75% company-specific ({Company.name}); ~25% filing / investor lenses.
+ * Tokens filled in FinalChallengeClient via fillQuizConfigTokens.
  */
 import type { QuizConfig } from "@/data/quests/types";
 
@@ -10,170 +10,176 @@ export const TEN_K_ROOKIE_CHALLENGE_XP = 1000;
 export const TEN_K_ROOKIE_FINAL_QUIZ: QuizConfig = {
   passThreshold: 0.7,
   questions: [
-    // --- Business (3): easy + medium + medium ---
+    // --- Business (3) ---
     {
       id: "tk-b-1",
-      kind: "true-false",
+      kind: "multiple-choice",
       prompt:
-        "Item 1 — Business in a 10-K is mostly the auditor’s opinion on whether the stock is fairly priced.",
-      correct: false,
+        "For {Company.name}, what should Item 1 in the 10-K help you explain first?",
+      choices: [
+        "What it sells, to whom, and how it makes money",
+        "Exact next-quarter EPS to two decimals",
+        "Only insider sales last Tuesday",
+        "Footnote font choices"
+      ],
+      correctIndex: 0,
       explain:
-        "Item 1 is management’s narrative: model, customers, products, and competition. Auditors weigh in elsewhere (financial statements + internal controls)."
+        "Item 1 is {Company.name}'s operating map — model before risks and numbers."
     },
     {
       id: "tk-b-2",
-      kind: "multiple-choice",
-      prompt: "On a first pass of a new name, what should Item 1 help you answer fastest?",
+      kind: "scenario",
+      prompt:
+        "A rival launches a cheaper clone of {Company.name}'s flagship offer. What is the first Item 1 lens?",
       choices: [
-        "Exact next-quarter EPS to two decimals",
-        "What the company sells, to whom, and how it makes money",
-        "Which insiders sold shares last Tuesday",
-        "The auditor’s favorite footnote"
+        "Switching costs, distribution, brand, and ecosystem in the business model",
+        "Ignore until the 10-Q mentions it",
+        "Assume price always wins forever",
+        "Skip Item 1 and only read risk factors"
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explain:
-        "Item 1 is your map of the operating reality — revenue logic, customers, and why the offer wins before you dive into risks and financial statements."
+        "Item 1 for {Company.name} should already hint at why customers stay beyond price alone."
     },
     {
       id: "tk-b-3",
-      kind: "scenario",
+      kind: "true-false",
       prompt:
-        "Scenario: a rival launches a cheaper clone of the flagship product. What is the *first* Item 1 lens you use to judge how scary it is?",
-      choices: [
-        "Ignore it until the 10-Q mentions it",
-        "Check switching costs, distribution, brand, and ecosystem lock-in described in the business model",
-        "Assume price always wins",
-        "Only read the risk factors section"
-      ],
-      correctIndex: 1,
+        "Item 1 describes {Company.name}'s business — not whether the auditor thinks the stock is fairly priced.",
+      correct: true,
       explain:
-        "Item 1 should already hint at why customers stay — distribution, habit, ecosystem, service, or performance advantages that blunt pure price cuts."
+        "Auditors weigh in on financial statements elsewhere; Item 1 is management's story of the model."
     },
 
-    // --- Forces (3): easy + medium + medium ---
+    // --- Forces (3) ---
     {
       id: "tk-f-1",
       kind: "red-flag",
-      prompt: "Spot the red flag in a competitive story (pick the warning sign).",
+      prompt:
+        "Which competitive story should worry you most about {Company.name}?",
       choices: [
-        "Customers can leave in a weekend with no switching cost",
+        "Customers can leave quickly with almost no switching cost",
         "A diversified supplier base with multiple qualified vendors",
         "Recurring revenue with multi-year contracts",
-        "Patents or trade secrets that are actively defended"
+        "Defensible patents actively enforced"
       ],
       flagIndex: 0,
       explain:
-        "Low switching costs + commodity-like offers mean rivals can steal share quickly — pricing power is fragile."
+        "Low switching costs at {Company.name} mean rivals can steal share fast — pricing power stays fragile."
     },
     {
       id: "tk-f-2",
-      kind: "order",
-      prompt: "Put these in the order a sharp investor usually stacks them.",
-      steps: [
-        "Name the players who capture value (customers, rivals, suppliers)",
-        "Map switching costs and substitutes",
-        "Translate forces into unit economics and cash flow risk",
-        "Skim marketing slogans for fun"
+      kind: "scenario",
+      prompt:
+        "Regulators tighten rules on {Company.name}'s platform fees. What is the realistic investor concern?",
+      choices: [
+        "High-margin platform economics could compress without a product miss",
+        "Regulation never affects large companies",
+        "Revenue must triple automatically",
+        "R&D becomes illegal"
       ],
+      correctIndex: 0,
       explain:
-        "Forces → economics: who has leverage, how easy it is to switch, then what that implies for margins and reinvestment needs."
+        "External rules can change take-rates and economics at {Company.name} even when execution is solid."
     },
     {
       id: "tk-f-3",
       kind: "multiple-choice",
-      prompt: "Which force is *most* about the threat of new companies entering and copying the playbook?",
+      prompt:
+        "For {Company.name}, why separate product rivals from regulators?",
       choices: [
-        "Bargaining power of buyers",
-        "Threat of new entrants",
-        "Intensity of rivalry among existing competitors",
-        "Bargaining power of suppliers"
+        "Rivals fight for demand; regulation can change the rules of the game",
+        "They are the same risk bucket",
+        "Only product quality matters",
+        "Macro never affects global companies"
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explain:
-        "New entrants threaten when capital requirements are low, differentiation is weak, and scale advantages are easy to replicate."
+        "Competition and regulation hit {Company.name} through different channels — model them separately."
     },
 
-    // --- Financials (3): easy + medium + hard ---
+    // --- Financials (3) ---
     {
       id: "tk-fi-1",
       kind: "true-false",
       prompt:
-        "A company can show growing revenue while free cash flow is negative because of heavy reinvestment or working capital swings.",
+        "{Company.name} can grow revenue while free cash flow is negative for a stretch.",
       correct: true,
       explain:
-        "Revenue is not cash timing. Capex, inventory, receivables, and deal activity can all pull FCF below net income for stretches."
+        "Revenue is not cash timing — capex, inventory, and working capital can absorb cash at {Company.name}."
     },
     {
       id: "tk-fi-2",
       kind: "scenario",
       prompt:
-        "Scenario: gross margin slips 1 point, but operating margin expands. What *most* deserves your next click in the filing?",
+        "Gross margin at {Company.name} slips 1 point but operating margin expands. What deserves your next click?",
       choices: [
-        "Assume the business is deteriorating and stop reading",
-        "Trace whether opex leverage, mix shift, or one-time items explain the operating margin move",
-        "Only celebrate revenue beat",
-        "Ignore MD&A and read the cover page again"
+        "Trace whether opex leverage, mix shift, or one-times explain operating margin",
+        "Assume the business is failing and stop",
+        "Only celebrate a revenue beat",
+        "Skip MD&A entirely"
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explain:
-        "Margins are a stack. Gross tells pricing/cost of goods; operating adds operating discipline — reconcile the bridge instead of reacting to one line."
+        "Margins are a stack for {Company.name} — reconcile gross vs. operating moves instead of one line."
     },
     {
       id: "tk-fi-3",
       kind: "bull-bear",
       prompt:
-        "Investor read: leverage ticks up to fund buybacks while organic revenue is slowing. Net debt/EBITDA still looks comfortable.",
+        "{Company.name} adds leverage to fund buybacks while organic revenue slows. Net debt/EBITDA still looks fine today.",
       correct: "bear",
       caption: "What matters more right now?",
       labels: { bull: "Mostly fine", bear: "Caution" },
       explain:
-        "Comfortable leverage *today* can turn fast if EBITDA softens. Pair capital returns with the trajectory of the core business, not just static ratios."
+        "Comfortable leverage at {Company.name} can turn fast if EBITDA softens — pair returns with core business trajectory."
     },
 
-    // --- Management (3): easy + medium + hard ---
+    // --- Management (3) ---
     {
       id: "tk-m-1",
       kind: "multiple-choice",
-      prompt: "A DEF 14A proxy statement is primarily for…",
+      prompt:
+        "For {Company.name}, a DEF 14A proxy is primarily for…",
       choices: [
-        "Quarterly product launch timelines",
-        "Executive comp, board structure, and shareholder votes",
-        "Detailed segment revenue tables",
+        "Executive pay, board structure, and shareholder votes",
+        "Quarterly product launch timelines only",
+        "Segment revenue tables only",
         "Audited cash flow statement only"
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explain:
-        "Proxies are the governance cockpit — pay design, independence, related-party items, and what shareholders are being asked to approve."
+        "The proxy is the governance cockpit for {Company.name} — pay, independence, and owner votes."
     },
     {
       id: "tk-m-2",
-      kind: "multiple-choice",
+      kind: "scenario",
       prompt:
-        "When reading a proxy incentive table, what should you verify first?",
+        "At {Company.name}, EPS misses guidance but the CEO bonus still pays above target. What fits best?",
       choices: [
-        "Whether the CEO photo is recent",
-        "How pay ties to metrics owners care about (TSR, EBITDA, FCF, etc.)",
-        "The font size of the footnotes",
-        "How many pages the filing has"
+        "Targets may have been too easy or the board used too much discretion",
+        "Bonuses never relate to performance",
+        "EPS is irrelevant to every plan",
+        "Ignore pay entirely"
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explain:
-        "Incentives should line up with the long-term economics you care about as an owner — start with what triggers payout, not the formatting."
+        "Pay at {Company.name} should tighten when results miss — repeated 'pay for miss' is a governance concern."
     },
     {
       id: "tk-m-3",
-      kind: "scenario",
+      kind: "multiple-choice",
       prompt:
-        "Founder-led company with dual-class shares: faster execution, but minority holders have limited votes on major decisions. What is the most *professional* way to carry that risk?",
+        "Why read incentives at {Company.name} after you understand the business and financials?",
       choices: [
-        "Ignore votes entirely because the brand is iconic",
-        "Price a governance discount and track visible capital discipline + alignment metrics",
-        "Assume regulators will normalize the share structure next quarter",
-        "Only watch headline revenue beats"
+        "Management connects strategy to cash returns and risk",
+        "Proxies replace income statements",
+        "Governance only matters for banks",
+        "CEOs never influence capital allocation"
       ],
-      correctIndex: 1,
+      correctIndex: 0,
       explain:
-        "Dual-class can be fine or awful — the investor job is to tie economic outcomes to incentives you can observe (dilution, related-party deals, M&A discipline), not to pretend votes equal protection."
+        "The team at {Company.name} decides how operating reality turns into owner outcomes over time."
     }
   ]
 };

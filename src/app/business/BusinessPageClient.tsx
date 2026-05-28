@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useGame } from "@/components/GameProvider";
 import { BusinessIslandMissionBriefModal } from "@/components/business/BusinessIslandMissionBriefModal";
 import { BusinessQuestMap } from "@/components/business/BusinessQuestMap";
+import { BusinessQuestRouteLoading } from "@/components/business/BusinessQuestRouteLoading";
 import { initialCompanyProgress } from "@/engine/progression/state";
 import { useHubRoutePrefetch } from "@/hooks/useHubRoutePrefetch";
 import { usePillarHubQuestData } from "@/hooks/usePillarHubQuestData";
@@ -17,6 +18,8 @@ import {
 import { companyById, type CompanyId } from "@/data/companies";
 import { BUSINESS_HUB_IMG_SRC } from "@/lib/screenAssetUrls";
 import { preloadImage } from "@/lib/preloadImage";
+import { prewarmQuestAnswers } from "@/lib/quests/questPrewarmClient";
+import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
 
 type Props = {
   /** When true, show `/business?dev=1` reset + debug panel. */
@@ -28,14 +31,19 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
   const [hydrationReady, setHydrationReady] = useState(false);
   const [briefDismissedLocal, setBriefDismissedLocal] = useState(false);
 
+  const companyId = state.activeCompanyId as CompanyId;
+  const company = companyById(companyId);
+
   useEffect(() => {
     setHydrationReady(true);
     actions.setActivePillar("business");
     preloadImage(BUSINESS_HUB_IMG_SRC);
+    preloadQuestDetailChunks();
   }, [actions]);
 
-  const companyId = state.activeCompanyId as CompanyId;
-  const company = companyById(companyId);
+  useEffect(() => {
+    void prewarmQuestAnswers(company.ticker, "business", "what-they-do");
+  }, [company.ticker]);
   const userId = getAnalyticsUserId();
 
   const { partnerId, quests, readSet, questViewBySlug } =
@@ -56,7 +64,7 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
     return Math.round(sum / hubCards.length);
   }, [hubCards]);
 
-  useHubRoutePrefetch(hubCards);
+  useHubRoutePrefetch(hydrated ? hubCards : []);
 
   const companyProgress =
     raw.companies[raw.activeCompanyId] ?? initialCompanyProgress();
@@ -94,15 +102,21 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
       />
 
       <div className="flex items-center justify-center px-1 py-3 sm:px-3 sm:py-5 md:py-6">
-        <BusinessQuestMap
-          cards={hubCards}
-          company={company}
-          companyLogoUrl={company.companyLogoUrl}
-          hubProgressPct={islandProgressPct}
-          partnerId={partnerId}
-          userId={userId}
-        />
-        {showDevPanel ? <BusinessIslandDevReset /> : null}
+        {!hydrated ? (
+          <BusinessQuestRouteLoading />
+        ) : (
+          <>
+            <BusinessQuestMap
+              cards={hubCards}
+              company={company}
+              companyLogoUrl={company.companyLogoUrl}
+              hubProgressPct={islandProgressPct}
+              partnerId={partnerId}
+              userId={userId}
+            />
+            {showDevPanel ? <BusinessIslandDevReset /> : null}
+          </>
+        )}
       </div>
     </main>
   );

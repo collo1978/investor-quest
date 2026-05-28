@@ -2,6 +2,9 @@
 
 import { useCallback, type ReactNode } from "react";
 import { GameProvider } from "@/components/GameProvider";
+import { DemoControlsHost } from "@/components/demo/DemoControlsHost";
+import { DemoStoryOrchestrator } from "@/components/demo/DemoStoryOrchestrator";
+import { DemoStoryProvider } from "@/components/demo/DemoStoryProvider";
 import { QuestContentCatalogProvider } from "@/components/platform/QuestContentCatalogProvider";
 import type { GameAction, GameState, RewardEvent } from "@/engine";
 import {
@@ -32,7 +35,13 @@ export function AnalyticsTelemetryBridge({ children }: Props) {
 
   return (
     <QuestContentCatalogProvider>
-      <GameProvider onAction={onAction}>{children}</GameProvider>
+      <GameProvider onAction={onAction}>
+        <DemoStoryProvider>
+          <DemoStoryOrchestrator />
+          {children}
+          <DemoControlsHost />
+        </DemoStoryProvider>
+      </GameProvider>
     </QuestContentCatalogProvider>
   );
 }

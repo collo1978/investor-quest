@@ -1,16 +1,13 @@
 import BusinessQuestClient from "./BusinessQuestClient";
+import {
+  BUSINESS_QUEST_SLUGS,
+  canonicalBusinessQuestSlug,
+  isBusinessQuestSlug,
+  isLegacyBusinessSlug,
+  type BusinessQuestSlug
+} from "@/app/business/businessQuestSlugs";
 
-const QUEST_SLUGS = [
-  "snapshot",
-  "revenue",
-  "operations",
-  "advantage",
-  "industry"
-] as const;
-
-type QuestSlug = (typeof QUEST_SLUGS)[number];
-
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function BusinessQuestPage({
   params
@@ -18,8 +15,18 @@ export default async function BusinessQuestPage({
   params: Promise<{ questSlug: string }>;
 }) {
   const { questSlug } = await params;
-  if (!QUEST_SLUGS.includes(questSlug as QuestSlug)) {
+
+  if (isLegacyBusinessSlug(questSlug)) {
+    redirect(`/business/${canonicalBusinessQuestSlug(questSlug)}`);
+  }
+
+  if (!isBusinessQuestSlug(questSlug)) {
     notFound();
   }
-  return <BusinessQuestClient slug={questSlug as QuestSlug} />;
+
+  return <BusinessQuestClient slug={questSlug as BusinessQuestSlug} />;
+}
+
+export function generateStaticParams() {
+  return BUSINESS_QUEST_SLUGS.map((questSlug) => ({ questSlug }));
 }

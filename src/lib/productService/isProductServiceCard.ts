@@ -1,4 +1,5 @@
 import type { PillarId } from "@/data/pillars";
+import { CONTROLLED_DEMO_MODE } from "@/lib/demo/controlledDemo";
 
 /** Quest sub-cards that should show the product/services visual as the main answer. */
 export function isProductServiceCard(
@@ -7,7 +8,10 @@ export function isProductServiceCard(
   cardId: string | undefined,
   investorQuestion: string
 ): boolean {
-  if (pillarId === "business" && questSlug === "revenue" && cardId === "card-1") {
+  // NVIDIA demo uses curated plain-English copy — not SEC product tables.
+  if (CONTROLLED_DEMO_MODE) return false;
+
+  if (pillarId === "business" && questSlug === "why-buying" && cardId === "card-2") {
     return true;
   }
   const q = investorQuestion.toLowerCase();

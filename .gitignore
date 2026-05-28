@@ -25,6 +25,16 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+*.log
+*.trace
+*.sqlite
+*.sqlite3
+
+# temp / local artifacts
+tmp/
+temp/
+*.tmp
+*-debug.*
 
 # IDE / OS
 .idea/

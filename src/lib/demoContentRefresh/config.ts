@@ -1,7 +1,15 @@
 import { companyByTicker, type CompanyId } from "@/data/companies";
 import type { PillarId } from "@/data/pillars";
 
-export const DEMO_REFRESH_TICKERS = ["NVDA", "AAPL", "NKE"] as const;
+/** All six playable demo companies — full refresh uses regenerateAllDemoQuests. */
+export const DEMO_REFRESH_TICKERS = [
+  "AAPL",
+  "MSFT",
+  "TSLA",
+  "NVDA",
+  "NKE",
+  "SPOT"
+] as const;
 
 export type DemoRefreshTicker = (typeof DEMO_REFRESH_TICKERS)[number];
 
@@ -17,8 +25,14 @@ export type DemoRefreshJob = {
   label: string;
 };
 
-const BUSINESS_SNAPSHOT = { pillarId: "business" as const, questSlug: "snapshot" };
-const BUSINESS_REVENUE = { pillarId: "business" as const, questSlug: "revenue" };
+const BUSINESS_WHAT = {
+  pillarId: "business" as const,
+  questSlug: "what-they-do"
+};
+const BUSINESS_WHY_BUYING = {
+  pillarId: "business" as const,
+  questSlug: "why-buying"
+};
 const FIN_GROWTH = { pillarId: "financials" as const, questSlug: "growth" };
 const FIN_PROFIT = { pillarId: "financials" as const, questSlug: "profitability" };
 const FORCES_SUPPLY = {
@@ -31,8 +45,8 @@ export function buildDemoRefreshJobs(
   companies: Array<{ ticker: DemoRefreshTicker; companyId: CompanyId; companyName: string }>
 ): DemoRefreshJob[] {
   const templates = [
-    { ...BUSINESS_SNAPSHOT, short: "Business Snapshot" },
-    { ...BUSINESS_REVENUE, short: "Business Revenue" },
+    { ...BUSINESS_WHAT, short: "Business · What they do" },
+    { ...BUSINESS_WHY_BUYING, short: "Business · Why buying" },
     { ...FIN_GROWTH, short: "Financials Growth" },
     { ...FIN_PROFIT, short: "Financials Profitability" },
     { ...FORCES_SUPPLY, short: "Forces · Supply chain" }

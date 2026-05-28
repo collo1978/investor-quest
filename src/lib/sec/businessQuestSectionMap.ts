@@ -1,5 +1,10 @@
-import type { BusinessAiQuestSlug } from "@/app/business/businessQuestSlugs";
-import { BUSINESS_AI_QUEST_SLUGS } from "@/app/business/businessQuestSlugs";
+import {
+  BUSINESS_AI_QUEST_SLUGS,
+  isBusinessAiQuestSlugValue,
+  type BusinessAiQuestSlug
+} from "@/app/business/businessQuestSlugs";
+
+export { isBusinessAiQuestSlugValue };
 import type { QuestCardSpec } from "@/lib/sec/questCardSpec";
 
 export const BUSINESS_REQUIRED_10K_SECTION_KEYS = ["item_1"] as const;
@@ -13,7 +18,7 @@ export const BUSINESS_REVENUE_VISUAL_SECTION_KEYS = [
 
 export const BUSINESS_QUEST_CARD_SPECS: readonly QuestCardSpec[] = [
   {
-    questSlug: "snapshot",
+    questSlug: "what-they-do",
     cardId: "card-1",
     formType: "10-K",
     sectionKeys: ["item_1"],
@@ -21,100 +26,139 @@ export const BUSINESS_QUEST_CARD_SPECS: readonly QuestCardSpec[] = [
       "ONLY what the company sells — main products and services. Do not discuss geography or competitors."
   },
   {
-    questSlug: "snapshot",
+    questSlug: "what-they-do",
     cardId: "card-2",
     formType: "10-K",
     sectionKeys: ["item_1"],
     promptFocus:
-      "ONLY the everyday customer pain WITHOUT this company, what goes wrong (slow/lag/broken/expensive/confusing), and how life feels better WITH them. Pain → consequence → benefit. No revenue, competitors, or industry overview. Never 'solutions for industries' or corporate AI buzzwords."
+      "ONLY the everyday customer pain WITHOUT this company, what goes wrong, and how life feels better WITH them. Pain → consequence → benefit. No revenue or competitor overview."
   },
   {
-    questSlug: "snapshot",
+    questSlug: "what-they-do",
     cardId: "card-3",
     formType: "10-K",
     sectionKeys: ["item_1"],
     promptFocus:
-      "ONLY company scale and market position — how big/important, reach, flagship products. Real-world scale comparison → why being a major player matters. Do NOT use customer-pain, lag, or stutter language. Do not repeat the product list from card-1."
+      "ONLY company scale and importance in AI / core markets today. Real-world scale comparison → why being a major player matters. No customer-pain language from card-2."
   },
   {
-    questSlug: "revenue",
+    questSlug: "why-buying",
     cardId: "card-1",
+    formType: "10-K",
+    sectionKeys: ["item_1"],
+    promptFocus:
+      "ONLY who pays the most — major customers and customer concentration. No product list from other cards."
+  },
+  {
+    questSlug: "why-buying",
+    cardId: "card-2",
     formType: "10-K",
     sectionKeys: ["item_1", "item_8"],
     promptFocus:
-      "ONLY revenue by product and service line (major segments). Name the biggest earners. A chart may show below — keep prose tight and segment-focused."
+      "ONLY revenue by product and service line — biggest earners. Segment-focused."
   },
   {
-    questSlug: "revenue",
+    questSlug: "why-buying",
+    cardId: "card-3",
+    formType: "10-K",
+    sectionKeys: ["item_1", "item_7"],
+    promptFocus:
+      "ONLY why demand is strong now — AI / data-center rush in plain terms. Not a customer list repeat."
+  },
+  {
+    questSlug: "everyday-life",
+    cardId: "card-1",
+    formType: "10-K",
+    sectionKeys: ["item_1"],
+    promptFocus:
+      "ONLY where end users meet the technology — apps, games, cloud services. No revenue tables."
+  },
+  {
+    questSlug: "everyday-life",
     cardId: "card-2",
     formType: "10-K",
-    sectionKeys: ["item_8", "item_7", "item_1"],
+    sectionKeys: ["item_1"],
     promptFocus:
-      "ONLY revenue by geography or region. Note concentration risk. Do not repeat product mix from card-1."
+      "ONLY gaming and AI application impact — speed, graphics, model training/inference feel. Relatable examples."
   },
   {
-    questSlug: "revenue",
+    questSlug: "everyday-life",
     cardId: "card-3",
     formType: "10-K",
     sectionKeys: ["item_1"],
     promptFocus:
-      "ONLY who pays — customer types (consumers, enterprises, partners, developers). No regional breakdown."
+      "ONLY why builders and AI companies rely on this company — ecosystem, software, default choice. Not competitor names yet."
   },
   {
-    questSlug: "operations",
+    questSlug: "how-it-works",
     cardId: "card-1",
     formType: "10-K",
     sectionKeys: ["item_1"],
     promptFocus:
-      "ONLY how products reach customers — channels, distribution, logistics, digital delivery. No workforce or R&D."
+      "ONLY design-to-build journey — who designs, who manufactures. No R&D moat essay."
   },
   {
-    questSlug: "operations",
+    questSlug: "how-it-works",
     cardId: "card-2",
     formType: "10-K",
     sectionKeys: ["item_1"],
     promptFocus:
-      "ONLY workforce and human capital — headcount themes, talent, key roles. Do not repeat distribution channels from card-1."
+      "ONLY manufacturing partners and supply chain — who builds, concentration risk. Do not repeat card-1 design story."
   },
   {
-    questSlug: "advantage",
-    cardId: "card-1",
-    formType: "10-K",
-    sectionKeys: ["item_1"],
-    promptFocus:
-      "ONLY R&D and innovation investment — what they build for the future. No brand or patent list yet."
-  },
-  {
-    questSlug: "advantage",
-    cardId: "card-2",
-    formType: "10-K",
-    sectionKeys: ["item_1"],
-    promptFocus:
-      "ONLY competitive moat — brand, IP, ecosystem, switching costs, loyalty. Do not repeat R&D spend details from card-1."
-  },
-  {
-    questSlug: "industry",
-    cardId: "card-1",
-    formType: "10-K",
-    sectionKeys: ["item_1"],
-    promptFocus:
-      "ONLY named competitors and rival categories. No regulation yet."
-  },
-  {
-    questSlug: "industry",
-    cardId: "card-2",
-    formType: "10-K",
-    sectionKeys: ["item_1"],
-    promptFocus:
-      "ONLY how competitive the industry is — pricing pressure, innovation pace, concentration. Do not repeat competitor names from card-1."
-  },
-  {
-    questSlug: "industry",
+    questSlug: "how-it-works",
     cardId: "card-3",
     formType: "10-K",
     sectionKeys: ["item_1"],
     promptFocus:
-      "ONLY regulations and legal risks that affect the business. Do not repeat competitor or industry intensity points."
+      "ONLY distribution and global delivery to customers. No workforce deep dive."
+  },
+  {
+    questSlug: "why-they-stay",
+    cardId: "card-1",
+    formType: "10-K",
+    sectionKeys: ["item_1"],
+    promptFocus:
+      "ONLY switching costs and why hard to replace — trust, habit, performance. Not competitor list."
+  },
+  {
+    questSlug: "why-they-stay",
+    cardId: "card-2",
+    formType: "10-K",
+    sectionKeys: ["item_1"],
+    promptFocus:
+      "ONLY differentiation vs rivals — speed, software, brand. Do not repeat card-1 switching cost paragraph."
+  },
+  {
+    questSlug: "why-they-stay",
+    cardId: "card-3",
+    formType: "10-K",
+    sectionKeys: ["item_1"],
+    promptFocus:
+      "ONLY developer ecosystem and software stack — CUDA, tools, habit. No R&D spend tables only."
+  },
+  {
+    questSlug: "competition",
+    cardId: "card-1",
+    formType: "10-K",
+    sectionKeys: ["item_1"],
+    promptFocus: "ONLY named competitors and rival categories. No regulation yet."
+  },
+  {
+    questSlug: "competition",
+    cardId: "card-2",
+    formType: "10-K",
+    sectionKeys: ["item_1", "item_7"],
+    promptFocus:
+      "ONLY industry tailwinds and trends that could accelerate growth. Do not repeat competitor names from card-1."
+  },
+  {
+    questSlug: "competition",
+    cardId: "card-3",
+    formType: "10-K",
+    sectionKeys: ["item_1"],
+    promptFocus:
+      "ONLY risks and headwinds — regulation, rivalry, demand slowdown. Land impact on the company."
   }
 ] as const;
 
@@ -127,10 +171,4 @@ export function getBusinessCardSpecs(
     );
   }
   return BUSINESS_QUEST_CARD_SPECS.filter((s) => s.questSlug === questSlug);
-}
-
-export function isBusinessAiQuestSlugValue(
-  value: string
-): value is BusinessAiQuestSlug {
-  return (BUSINESS_AI_QUEST_SLUGS as readonly string[]).includes(value);
 }

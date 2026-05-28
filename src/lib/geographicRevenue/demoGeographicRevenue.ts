@@ -4,6 +4,7 @@ import type { GeographicRevenueReport } from "@/lib/geographicRevenue/types";
 export const APPLE_DEMO_GEOGRAPHIC_REVENUE: GeographicRevenueReport = {
   ticker: "AAPL",
   fiscalYear: 2024,
+  headline: "Sales are spread across the Americas, Europe, Greater China, and Asia Pacific",
   segments: [
     {
       regionKey: "americas",
@@ -41,8 +42,6 @@ export const APPLE_DEMO_GEOGRAPHIC_REVENUE: GeographicRevenueReport = {
       revenueUsd: null
     }
   ],
-  investorInsight:
-    "Apple has broad global exposure, but Greater China remains an important region to watch.",
   sourceForm: "10-K",
   sourceSectionLabel: "Segment Information — Geographic Areas",
   sourceAccession: null

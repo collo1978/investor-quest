@@ -1,4 +1,4 @@
-import type { CompanyId } from "@/data/companies";
+import { companyById, type CompanyId } from "@/data/companies";
 import { buildQuestId } from "@/data/quests/library";
 import type { ForcesCategoryId } from "@/data/quests/forcesCategories";
 import type { QuestDefinition } from "@/data/quests/types";
@@ -18,6 +18,7 @@ import {
 } from "@/lib/quests/resolveHubVisualState";
 import type { QuestView } from "@/engine";
 import { getQuestProgressPct } from "@/engine";
+import { fillQuestTokens } from "@/lib/quests/fillQuestTokens";
 
 export function resolveForcesHubLocked(
   orderNumber: number,
@@ -29,26 +30,32 @@ export function resolveForcesHubLocked(
 
 function categoryProgressPct(
   categoryQuests: readonly QuestDefinition[],
-  viewsBySlug: Record<string, QuestView | undefined>
+  viewsBySlug: Record<string, QuestView | undefined>,
+  hubSlug: string,
+  readSlugs: ReadonlySet<string>
 ): number {
-  if (categoryQuests.length === 0) return 0;
   const topicQuests = categoryQuests.filter((q) => !isForcesHubQuest(q));
-  const pool = topicQuests.length > 0 ? topicQuests : categoryQuests;
-  const sum = pool.reduce((acc, q) => {
-    const view = viewsBySlug[q.slug];
-    return acc + (view ? getQuestProgressPct(view) : 0);
-  }, 0);
-  return Math.round(sum / pool.length);
+  if (topicQuests.length === 0) return 0;
+
+  const hubDone = Boolean(viewsBySlug[hubSlug]?.completed);
+  if (hubDone) return 100;
+
+  const readCount = topicQuests.filter((q) => readSlugs.has(q.slug)).length;
+  const topicPct = Math.round((readCount / topicQuests.length) * 85);
+  return readCount === topicQuests.length ? Math.max(topicPct, 85) : topicPct;
 }
 
 function categoryComplete(
   categoryQuests: readonly QuestDefinition[],
-  viewsBySlug: Record<string, QuestView | undefined>
+  viewsBySlug: Record<string, QuestView | undefined>,
+  hubSlug: string,
+  readSlugs: ReadonlySet<string>
 ): boolean {
   const topicQuests = categoryQuests.filter((q) => !isForcesHubQuest(q));
-  const pool = topicQuests.length > 0 ? topicQuests : categoryQuests;
-  if (pool.length === 0) return false;
-  return pool.every((q) => viewsBySlug[q.slug]?.completed);
+  if (topicQuests.length === 0) return false;
+  const allTopicsRead = topicQuests.every((q) => readSlugs.has(q.slug));
+  const hubQuizDone = Boolean(viewsBySlug[hubSlug]?.completed);
+  return allTopicsRead && hubQuizDone;
 }
 
 function findHubRow(
@@ -78,10 +85,13 @@ export function buildForcesHubCards(
   readSlugs: ReadonlySet<string>,
   companyId: CompanyId
 ): ForcesHubQuestCard[] {
+  const company = companyById(companyId);
   const forcesQuests = quests.filter((q) => q.pillarId === "forces");
   const priorCompleteByOrder = new Map<number, boolean>();
 
-  const cards = FORCES_HUB_CATEGORY_SLOTS.map((slot) => {
+  const hubSlots = FORCES_HUB_CATEGORY_SLOTS;
+
+  const cards = hubSlots.map((slot) => {
     const categoryQuests = forcesQuests.filter(
       (q) => q.forcesCategory === slot.categoryId
     );
@@ -103,20 +113,33 @@ export function buildForcesHubCards(
     const route =
       hubRow?.hubRoute?.trim() || forcesCategoryPath(slot.categoryId);
     const title = hubRow?.title?.trim() || slot.defaultTitle;
-    const subtitle =
+    const subtitle = fillQuestTokens(
       hubRow?.hubSubtitle?.trim() ||
-      hubRow?.investorQuestion?.trim() ||
-      hubRow?.description?.trim() ||
-      slot.defaultSubtitle;
+        hubRow?.investorQuestion?.trim() ||
+        hubRow?.description?.trim() ||
+        slot.defaultSubtitle,
+      company
+    );
     const cardCount = hubRow
       ? resolveHubCardCount(hubRow)
       : topicQuests.length > 0
         ? topicQuests.length
         : 5;
+    const hubSlugForCategory = hubRow?.slug ?? slot.hubSlug;
     const rawProgress = locked
       ? 0
-      : categoryProgressPct(categoryQuests, viewsBySlug);
-    const engineCompleted = categoryComplete(categoryQuests, viewsBySlug);
+      : categoryProgressPct(
+          categoryQuests,
+          viewsBySlug,
+          hubSlugForCategory,
+          readSlugs
+        );
+    const engineCompleted = categoryComplete(
+      categoryQuests,
+      viewsBySlug,
+      hubSlugForCategory,
+      readSlugs
+    );
     const completed = !locked && isHubQuestComplete(rawProgress, engineCompleted);
     const progressPct = completed ? 100 : rawProgress;
     const visualState = locked

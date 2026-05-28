@@ -13,10 +13,18 @@ import { Header } from "@/components/Header";
 import { MobileNavDrawer } from "@/components/MobileNavDrawer";
 import { levelProgress } from "@/lib/gameState";
 import { LevelBar } from "@/components/LevelBar";
-import { COMPANIES, companyById } from "@/lib/demoData";
+import { companyById, getPlayableDemoCompanies } from "@/lib/demoData";
+import { EntryFunnelGuard } from "@/components/entry/EntryFunnelGuard";
 import { InvestorQuestBrandLogo } from "@/components/InvestorQuestBrandLogo";
 import { LevelUpFx, UnlockFx, QuestCompletionFx } from "@/ui";
 import { pillarById } from "@/data/pillars";
+import {
+  CONTROLLED_DEMO_MODE,
+  getControlledDemoIslandNav,
+  getControlledDemoMobileTabNav,
+  getControlledDemoPrimaryNav
+} from "@/lib/demo/controlledDemo";
+import { NVDA_UNLOCK_FX } from "@/lib/demo/nvidiaDemoVoice";
 import {
   islandLinkActive,
   ISLAND_NAV,
@@ -25,6 +33,7 @@ import {
   MOBILE_TAB_NAV,
   PRIMARY_NAV
 } from "@/lib/navConfig";
+import { isDemoPath, stripDemoPrefix } from "@/lib/demo/demoHref";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -33,8 +42,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const lp = levelProgress(state.xp);
   const reading = useReadingProgress();
   const company = companyById(state.activeCompanyId);
-  const isOnboarding = pathname.startsWith("/onboarding");
-  const showAppChrome = !isOnboarding;
+  const playableCompanies = getPlayableDemoCompanies();
+  const primaryNav = CONTROLLED_DEMO_MODE
+    ? getControlledDemoPrimaryNav()
+    : PRIMARY_NAV;
+  const mobileTabNav = CONTROLLED_DEMO_MODE
+    ? getControlledDemoMobileTabNav()
+    : MOBILE_TAB_NAV;
+  const demoIslandNav = getControlledDemoIslandNav();
+  const isDemoProduction = isDemoPath(pathname);
+  const learnerPath = isDemoProduction ? stripDemoPrefix(pathname) : pathname;
+  const isOnboarding = learnerPath.startsWith("/onboarding");
+  const isEntryFunnel =
+    learnerPath === "/opening" || learnerPath === "/welcome";
+  const showAppChrome = !isOnboarding && !isEntryFunnel;
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -42,6 +63,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const isPlatformSurface =
     pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
+
+  if (isDemoProduction) {
+    return (
+      <div className="pointer-events-auto min-h-[100dvh] bg-[#030308]">
+        {children}
+      </div>
+    );
+  }
+
+  if (isEntryFunnel) {
+    return (
+      <div className="pointer-events-auto min-h-[100dvh] bg-[#030308]">
+        <EntryFunnelGuard />
+        {children}
+        <ToastHost />
+      </div>
+    );
+  }
 
   // Partner admin + analytics dashboards use their own chrome so we do not
   // stack the learner sidebar / mobile nav on top of multi-tenant tools.
@@ -67,7 +106,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               return fx.unlockTitle;
             }
           })()}
-          detail="The bridge is live — continue your expedition on the map."
+          detail={
+            CONTROLLED_DEMO_MODE
+              ? NVDA_UNLOCK_FX.detail
+              : "The bridge is live — continue your expedition on the map."
+          }
         />
         <QuestCompletionFx
           triggerKey={fx.completionKey}
@@ -97,6 +140,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         } as React.CSSProperties
       }
     >
+      <EntryFunnelGuard />
       {/* Desktop sidebar */}
       <aside className="pointer-events-auto fixed inset-y-0 left-0 z-[100] hidden w-[280px] overflow-hidden border-r border-panel-border bg-[rgba(7,7,18,0.72)] backdrop-blur-xl md:block">
         <div className="relative z-10 flex h-full min-h-0 flex-col overflow-y-auto overscroll-y-contain p-5 [-webkit-overflow-scrolling:touch]">
@@ -117,18 +161,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="mt-5 rounded-2xl border border-panel-border bg-[rgba(255,255,255,0.03)] p-3">
             <div className="text-[11px] text-ink-2">Company</div>
-            <select
-              suppressHydrationWarning
-              value={state.activeCompanyId}
-              onChange={(e) => actions.setActiveCompany(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-panel-border bg-[rgba(255,255,255,0.04)] px-3 py-2 text-xs text-ink-0 outline-none ring-neon-400/50 focus:ring-2"
-            >
-              {COMPANIES.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.ticker})
-                </option>
-              ))}
-            </select>
+            {CONTROLLED_DEMO_MODE ? (
+              <div className="mt-2 rounded-xl border border-panel-border bg-[rgba(255,255,255,0.04)] px-3 py-2.5">
+                <div className="text-sm font-semibold text-ink-0">
+                  {company.name} ({company.ticker})
+                </div>
+                <p className="mt-1 text-[10px] leading-snug text-ink-2">
+                  Real-life examples — games, AI apps, money you get
+                </p>
+              </div>
+            ) : (
+              <select
+                suppressHydrationWarning
+                value={state.activeCompanyId}
+                onChange={(e) => actions.setActiveCompany(e.target.value)}
+                className="mt-2 w-full rounded-xl border border-panel-border bg-[rgba(255,255,255,0.04)] px-3 py-2 text-xs text-ink-0 outline-none ring-neon-400/50 focus:ring-2"
+              >
+                {playableCompanies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} ({c.ticker})
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="mt-4">
@@ -188,28 +243,44 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <nav className="relative z-10 mt-6 grid gap-2" aria-label="Primary">
-            <ExploreDesktopFlyout pathname={pathname} />
+            {!CONTROLLED_DEMO_MODE ? (
+              <ExploreDesktopFlyout pathname={pathname} />
+            ) : null}
             <div className="pt-1">
               <p className="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-2">
                 Islands
               </p>
               <div className="grid gap-2">
-                {ISLAND_NAV.map((item) => {
-                  const active = islandLinkActive(pathname, item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      prefetch
-                      className={linkClass(active)}
-                    >
-                      {item.label}
-                    </Link>
-                  );
-                })}
+                {CONTROLLED_DEMO_MODE
+                  ? demoIslandNav.map((item) => {
+                      const active = islandLinkActive(pathname, item.href);
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          prefetch
+                          className={linkClass(active)}
+                        >
+                          {item.label}
+                        </Link>
+                      );
+                    })
+                  : ISLAND_NAV.map((item) => {
+                      const active = islandLinkActive(pathname, item.href);
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          prefetch
+                          className={linkClass(active)}
+                        >
+                          {item.label}
+                        </Link>
+                      );
+                    })}
               </div>
             </div>
-            {PRIMARY_NAV.map((item) => {
+            {primaryNav.map((item) => {
               const active = linkActive(pathname, item.href);
               return (
                 <Link
@@ -257,7 +328,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 onChange={(e) => actions.setActiveCompany(e.target.value)}
                 className="min-w-0 flex-1 rounded-xl border border-panel-border bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[11px] text-ink-0 outline-none ring-neon-400/50 focus:ring-2"
               >
-                {COMPANIES.map((c) => (
+                {playableCompanies.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name} ({c.ticker})
                   </option>
@@ -265,8 +336,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </select>
             </div>
 
-            <div className="grid grid-cols-4 gap-0.5">
-              {MOBILE_TAB_NAV.map((item) => {
+            <div
+              className={
+                mobileTabNav.length === 2
+                  ? "grid grid-cols-2 gap-0.5"
+                  : "grid grid-cols-4 gap-0.5"
+              }
+            >
+              {mobileTabNav.map((item) => {
                 const active = linkActive(pathname, item.href);
                 return (
                   <Link
@@ -309,7 +386,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <UnlockFx
         triggerKey={fx.unlockKey}
         title={unlockedPillarTitle ?? "New island"}
-        detail="Open the map to enter."
+        detail={
+          CONTROLLED_DEMO_MODE
+            ? NVDA_UNLOCK_FX.detail
+            : "Open the map to enter."
+        }
       />
       <QuestCompletionFx
         triggerKey={fx.completionKey}

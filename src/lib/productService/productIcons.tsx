@@ -140,6 +140,7 @@ const ICON_BY_KEY: Record<string, (props: IconProps) => ReactNode> = {
   iphone: IPhoneIcon,
   mac: LaptopIcon,
   ipad: TabletIcon,
+  wearables: WatchIcon,
   apple_watch: WatchIcon,
   airpods: HeadphonesIcon,
   app_store: StoreIcon,

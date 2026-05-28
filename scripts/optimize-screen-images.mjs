@@ -8,20 +8,27 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const screensDir = path.join(__dirname, "..", "public", "screens");
 
-/** Source PNGs → max width (preserve aspect). */
+/**
+ * Source PNGs → max width (preserve aspect) → WebP + AVIF.
+ * (WebP is the primary target; AVIF is a nice-to-have for modern browsers.)
+ */
 const TARGETS = [
-  { file: "biz-quest.png", maxWidth: 1920 },
-  { file: "financial-quest.png", maxWidth: 1920 },
-  { file: "management-quest.png", maxWidth: 1920 },
-  { file: "forces-quest.png", maxWidth: 1920 },
-  { file: "final-quest-map.png", maxWidth: 2048 },
-  { file: "mission-brief-image.png", maxWidth: 1600 }
+  // Hub + map scenery
+  { dir: "screens", file: "biz-quest.png", maxWidth: 1920 },
+  { dir: "screens", file: "financial-quest.png", maxWidth: 1920 },
+  { dir: "screens", file: "management-quest.png", maxWidth: 1920 },
+  { dir: "screens", file: "forces-quest.png", maxWidth: 1920 },
+  { dir: "screens", file: "final-quest-map.png", maxWidth: 2048 },
+  { dir: "screens", file: "mission-brief-image.png", maxWidth: 1600 },
+
+  // Large template + logos
+  { dir: "screens", file: "business-quest-template.png", maxWidth: 2048 },
+  { dir: "logos", file: "business-island-screen.png", maxWidth: 2048 }
 ];
 
-async function optimizeOne({ file, maxWidth }) {
-  const input = path.join(screensDir, file);
+async function optimizeOne({ dir, file, maxWidth }) {
+  const input = path.join(__dirname, "..", "public", dir, file);
   try {
     await fs.access(input);
   } catch {
@@ -30,8 +37,9 @@ async function optimizeOne({ file, maxWidth }) {
   }
 
   const base = file.replace(/\.png$/i, "");
-  const webpOut = path.join(screensDir, `${base}.webp`);
-  const avifOut = path.join(screensDir, `${base}.avif`);
+  const outDir = path.join(__dirname, "..", "public", dir);
+  const webpOut = path.join(outDir, `${base}.webp`);
+  const avifOut = path.join(outDir, `${base}.avif`);
 
   const pipeline = sharp(input).resize({
     width: maxWidth,

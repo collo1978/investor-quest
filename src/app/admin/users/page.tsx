@@ -1,6 +1,7 @@
 "use client";
 
 import { usePartnerPreview } from "@/components/platform/PartnerPreviewContext";
+import { formatAnalyticsNumber } from "@/lib/analytics/formatDisplay";
 
 export default function AdminUsersPage() {
   const { partner } = usePartnerPreview();
@@ -16,7 +17,7 @@ export default function AdminUsersPage() {
       <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-white/75">
         <div>
           <span className="text-white/45">Max seats:</span>{" "}
-          {partner.licence.maxSeats.toLocaleString()}
+          {formatAnalyticsNumber(partner.licence.maxSeats)}
         </div>
         <div className="mt-3">
           <span className="text-white/45">Roles:</span>{" "}

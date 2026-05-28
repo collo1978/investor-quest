@@ -1,37 +1,14 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-
 import { NextResponse } from "next/server";
 
-import { FINANCIAL_QUEST_FILENAME } from "@/lib/screenAssetUrls";
+import { FINANCIAL_HUB_IMG_SRC } from "@/lib/screenAssetUrls";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const dynamic = "force-static";
+export const revalidate = 31536000;
 
 /**
- * Streams the Financials hub PNG from disk on every request.
- * Source file: `public/screens/financial-quest.png`
+ * Deprecated endpoint kept for compatibility.
+ * Redirects to the cache-busted static asset rather than reading from disk.
  */
-export async function GET() {
-  const abs = path.join(
-    process.cwd(),
-    "public",
-    "screens",
-    FINANCIAL_QUEST_FILENAME
-  );
-  try {
-    const buf = await readFile(abs);
-    return new NextResponse(buf, {
-      status: 200,
-      headers: {
-        "Content-Type": "image/png",
-        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"
-      }
-    });
-  } catch {
-    return new NextResponse("Financials hub image not found on disk.", {
-      status: 404,
-      headers: { "Content-Type": "text/plain; charset=utf-8" }
-    });
-  }
+export async function GET(request: Request) {
+  return NextResponse.redirect(new URL(FINANCIAL_HUB_IMG_SRC, request.url), 307);
 }

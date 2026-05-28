@@ -3,6 +3,19 @@ export function formatAnalyticsNumber(value: number): string {
   return value.toLocaleString("en-US");
 }
 
+/** Short UTC timestamp for dashboards (stable SSR + client). */
+export function formatAnalyticsDateTimeShort(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC"
+  });
+}
+
 /** UTC display for activity timestamps — no locale-dependent formatting. */
 export function formatAnalyticsDateTime(iso: string): string {
   const d = new Date(iso);

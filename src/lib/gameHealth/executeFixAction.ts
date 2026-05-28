@@ -1,13 +1,27 @@
+import type { BusinessAiQuestSlug } from "@/app/business/businessQuestSlugs";
 import { companyByTicker } from "@/data/companies";
+import { canonicalBusinessQuestSlug } from "@/lib/business/businessSlugMigration";
+import { isBusinessAiQuestSlug } from "@/app/business/businessQuestSlugs";
 import { generateBusinessQuestAnswers } from "@/lib/ai/generateBusinessQuestAnswers";
 import { resolveQuestGenerationOptions } from "@/lib/ai/questGenerationMode";
 import {
   fetchGameHealthIssue,
   fetchGameHealthSettings,
   resolveGameHealthIssue,
+  updateGameHealthIssueMetadata,
   updateGameHealthSettings
 } from "@/lib/gameHealth/storage";
 import { runGameHealthCheck } from "@/lib/gameHealth/runGameHealthCheck";
+import {
+  appendResolutionHistory,
+  readResolutionIntelligence
+} from "@/lib/gameHealth/resolutionIntelligence/enrichIssue";
+import {
+  buildVerificationSnapshot,
+  verifyIssueResolution
+} from "@/lib/gameHealth/resolutionIntelligence/verifyIssue.server";
+import { RESOLUTION_METADATA_KEY } from "@/lib/gameHealth/resolutionIntelligence/types";
+import type { ResolutionStatus } from "@/lib/gameHealth/resolutionIntelligence/types";
 import type {
   FixActionClientRepair,
   FixActionId
@@ -22,6 +36,12 @@ export type FixActionResult = {
   laymanMessage: string;
   /** Run in the mobile-fix browser after a successful server response. */
   clientRepair?: FixActionClientRepair;
+  verification?: {
+    passed: boolean;
+    summary: string;
+    beforeScore?: number | null;
+    afterScore?: number | null;
+  };
 };
 
 export async function executeFixAction(
@@ -39,11 +59,17 @@ export async function executeFixAction(
 
   switch (action) {
     case "mark_resolved":
+      await recordResolutionStatus(
+        issue,
+        "manually_reviewed",
+        "Marked as handled by operator",
+        "mark_resolved"
+      );
       await resolveGameHealthIssue(issueId);
       return {
         ok: true,
         message: "Issue marked resolved.",
-        laymanMessage: "Marked as handled. Run another health check to confirm."
+        laymanMessage: "Marked as reviewed. Run Verify or another health check to confirm."
       };
 
     case "enable_fast_mode":
@@ -94,6 +120,9 @@ export async function executeFixAction(
     case "recheck_quest_flow":
       return recheckQuestFlow(issue);
 
+    case "verify_resolution":
+      return verifyResolution(issue);
+
     default:
       return {
         ok: false,
@@ -128,18 +157,30 @@ async function retryGeneration(
     const result = await generateBusinessQuestAnswers({
       ticker: company.ticker,
       companyId: company.id,
-      questSlug: (issue.questSlug as "snapshot") ?? "snapshot",
+      questSlug: (() => {
+        const raw = issue.questSlug?.trim();
+        if (!raw) return "what-they-do" satisfies BusinessAiQuestSlug;
+        const canonical = canonicalBusinessQuestSlug(raw);
+        return isBusinessAiQuestSlug(canonical)
+          ? canonical
+          : ("what-they-do" satisfies BusinessAiQuestSlug);
+      })(),
       cardIds: issue.cardId ? [issue.cardId] : ["card-1"],
       runExtractIfMissing: false,
       generationOptions: genOpts
     });
 
     if (result.generated > 0) {
-      await resolveGameHealthIssue(issue.id);
+      await recordResolutionStatus(
+        issue,
+        "regenerated",
+        `Generated ${result.generated} card(s) — run Verify to confirm audit pass.`,
+        "retry_generation"
+      );
       return {
         ok: true,
         message: `Generated ${result.generated} card(s).`,
-        laymanMessage: `${company.name}'s explanation was rewritten. Ask players to refresh the quest page.`
+        laymanMessage: `${company.name}'s explanation was rewritten. Tap Verify fix to confirm the audit passes.`
       };
     }
 
@@ -164,7 +205,9 @@ async function clearAndRegenerate(
 ): Promise<FixActionResult> {
   const ticker = (issue.companyTicker ?? "NVDA").trim().toUpperCase();
   const pillarId = issue.pillarId ?? "business";
-  const questSlug = issue.questSlug ?? "snapshot";
+  const questSlug = issue.questSlug
+    ? canonicalBusinessQuestSlug(issue.questSlug)
+    : "what-they-do";
   const cardId = issue.cardId ?? "card-1";
 
   if (isSupabaseConfigured()) {
@@ -196,7 +239,9 @@ function questProgressFix(
   }
 
   const pillarId = (issue.pillarId ?? "business") as PillarId;
-  const questSlug = issue.questSlug ?? "snapshot";
+  const questSlug = issue.questSlug
+    ? canonicalBusinessQuestSlug(issue.questSlug)
+    : "what-they-do";
   const meta = issue.metadata ?? {};
   const problems = Array.isArray(meta.problems) ? (meta.problems as string[]) : [];
   const cardIds =
@@ -248,6 +293,12 @@ async function recheckQuestFlow(
       (i) => i.issueKey === key && i.status === "open"
     );
     if (!stillOpen) {
+      await recordResolutionStatus(
+        issue,
+        "auto_fixed",
+        "Quest flow recheck passed",
+        "recheck_quest_flow"
+      );
       await resolveGameHealthIssue(issue.id);
     }
     return {
@@ -265,6 +316,94 @@ async function recheckQuestFlow(
       laymanMessage: "Could not rerun the health check. Try from Mission Control."
     };
   }
+}
+
+async function recordResolutionStatus(
+  issue: NonNullable<Awaited<ReturnType<typeof fetchGameHealthIssue>>>,
+  status: ResolutionStatus,
+  note: string,
+  action?: string
+): Promise<void> {
+  const existing = readResolutionIntelligence(issue.metadata);
+  if (!existing) return;
+
+  const next = appendResolutionHistory(existing, {
+    status,
+    at: new Date().toISOString(),
+    note,
+    action
+  });
+
+  await updateGameHealthIssueMetadata(issue.id, {
+    [RESOLUTION_METADATA_KEY]: next
+  });
+}
+
+async function verifyResolution(
+  issue: NonNullable<Awaited<ReturnType<typeof fetchGameHealthIssue>>>
+): Promise<FixActionResult> {
+  const prior = readResolutionIntelligence(issue.metadata);
+  const detectionBefore =
+    typeof issue.metadata?.detectionDomainScore === "number"
+      ? issue.metadata.detectionDomainScore
+      : null;
+  const result = await verifyIssueResolution(issue.id);
+  const resultWithBefore: typeof result & { beforeScore?: number | null } = {
+    ...result,
+    beforeScore: result.beforeScore ?? detectionBefore
+  };
+  const verification = buildVerificationSnapshot(
+    resultWithBefore,
+    prior?.verification ??
+      (detectionBefore != null
+        ? {
+            verifiedAt: new Date().toISOString(),
+            beforeScore: detectionBefore,
+            afterScore: null,
+            beforeStatus: "warn",
+            afterStatus: null,
+            passed: false,
+            summary: "Awaiting verification"
+          }
+        : null)
+  );
+
+  const nextStatus: ResolutionStatus = result.passed
+    ? "resolved"
+    : "needs_human_review";
+
+  if (prior) {
+    const next = {
+      ...appendResolutionHistory(prior, {
+        status: nextStatus,
+        at: new Date().toISOString(),
+        note: result.summary,
+        action: "verify_resolution"
+      }),
+      verification
+    };
+    await updateGameHealthIssueMetadata(issue.id, {
+      [RESOLUTION_METADATA_KEY]: next
+    });
+  }
+
+  if (result.passed) {
+    await resolveGameHealthIssue(issue.id);
+  }
+
+  return {
+    ok: result.passed,
+    message: result.summary,
+    laymanMessage: result.passed
+      ? "Verified — this issue looks fixed. Run a full health check to refresh scores."
+      : `Verification incomplete: ${result.summary}`,
+    verification: {
+      passed: result.passed,
+      summary: result.summary,
+      beforeScore: verification.beforeScore,
+      afterScore: verification.afterScore
+    }
+  };
 }
 
 /** Merge DB emergency flags into generation options for API routes. */

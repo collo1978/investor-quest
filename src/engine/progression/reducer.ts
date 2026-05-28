@@ -7,6 +7,7 @@
  */
 
 import { isCompanyId, type CompanyId } from "@/data/companies";
+import { coercePlayableDemoCompanyId } from "@/lib/demo/playableDemo";
 import { type PillarId } from "@/data/pillars";
 import { findQuestDefinition } from "@/data/quests/library";
 import type { QuestDefinition } from "@/data/quests/types";
@@ -39,8 +40,10 @@ import {
   questWorkKey,
   type CompanyProgress,
   type GameState,
+  type PillarState,
   type QuestWork
 } from "@/engine/progression/state";
+import { questCardCompositeSlug } from "@/lib/quests/questCardReadProgress";
 
 // -----------------------------------------------------------------------------
 // Actions
@@ -52,6 +55,8 @@ export type GameAction =
   | { type: "set-profile"; playerName: string; goal: string }
   | { type: "set-onboarding-step"; step: number }
   | { type: "complete-onboarding" }
+  | { type: "complete-opening-screen" }
+  | { type: "complete-welcome-screen" }
   | { type: "set-active-company"; companyId: string }
   | { type: "set-active-pillar"; pillarId: PillarId }
   | { type: "set-active-quest"; pillarId: PillarId; slug: string | null }
@@ -82,6 +87,15 @@ export type GameAction =
   | { type: "mark-quest-unread"; pillarId: PillarId; slug: string }
   /** Clears read/completion/work for one pillar (testing). Keeps pillar unlocked. */
   | { type: "clear-pillar-progress"; pillarId: PillarId }
+  /** Mission Control repair — patch read state for a quest (any company). */
+  | {
+      type: "repair-quest-progress";
+      companyId: CompanyId;
+      pillarId: PillarId;
+      questSlug: string;
+      cardIds: string[];
+      mode: "repair" | "reset" | "unlock_quiz";
+    }
   | { type: "submit-conviction-and-advance" }
   | { type: "complete-ten-k-rookie-challenge"; scoreFraction: number }
   | { type: "dismiss-quest-map-brief" }
@@ -127,6 +141,106 @@ function putProg(state: GameState, prog: CompanyProgress): GameState {
       ...state.companies,
       [state.activeCompanyId]: prog
     }
+  };
+}
+
+function getCompanyProg(
+  state: GameState,
+  companyId: CompanyId
+): CompanyProgress {
+  return state.companies[companyId] ?? initialCompanyProgress();
+}
+
+function putCompanyProg(
+  state: GameState,
+  companyId: CompanyId,
+  prog: CompanyProgress
+): GameState {
+  return {
+    ...state,
+    companies: {
+      ...state.companies,
+      [companyId]: prog
+    }
+  };
+}
+
+function isQuestReadSlug(slug: string, questSlug: string): boolean {
+  return slug === questSlug || slug.startsWith(`${questSlug}#`);
+}
+
+function slugsForQuestRepair(questSlug: string, cardIds: string[]): string[] {
+  const slugs = cardIds.map((id) => questCardCompositeSlug(questSlug, id));
+  slugs.push(questSlug);
+  return [...new Set(slugs)];
+}
+
+function patchPillarReadsForRepair(
+  pillar: PillarState,
+  questSlug: string,
+  cardIds: string[],
+  mode: "repair" | "reset" | "unlock_quiz"
+): PillarState {
+  const existing = new Set(pillar.readQuestSlugs);
+  const now = Date.now();
+  const readAt = { ...pillar.readAt };
+
+  if (mode === "reset") {
+    const nextSlugs = pillar.readQuestSlugs.filter(
+      (s) => !isQuestReadSlug(s, questSlug)
+    );
+    for (const key of Object.keys(readAt)) {
+      if (isQuestReadSlug(key, questSlug)) delete readAt[key];
+    }
+    const completedSlugs = pillar.completedQuestSlugs.filter(
+      (s) => !isQuestReadSlug(s, questSlug)
+    );
+    const completedAt = { ...pillar.completedAt };
+    for (const key of Object.keys(completedAt)) {
+      if (isQuestReadSlug(key, questSlug)) delete completedAt[key];
+    }
+    return {
+      ...pillar,
+      readQuestSlugs: nextSlugs,
+      readAt,
+      completedQuestSlugs: completedSlugs,
+      completedAt
+    };
+  }
+
+  for (const slug of slugsForQuestRepair(questSlug, cardIds)) {
+    if (!existing.has(slug)) {
+      existing.add(slug);
+      readAt[slug] = now;
+    }
+  }
+
+  return {
+    ...pillar,
+    readQuestSlugs: [...existing],
+    readAt
+  };
+}
+
+function stripQuestWorkForQuest(
+  questWork: CompanyProgress["questWork"],
+  pillarId: PillarId,
+  questSlug: string
+): CompanyProgress["questWork"] {
+  const prefix = `${pillarId}:${questSlug}`;
+  const next = { ...questWork };
+  for (const key of Object.keys(next)) {
+    if (key === prefix || key.startsWith(`${prefix}#`)) {
+      delete next[key];
+    }
+  }
+  return next;
+}
+
+function bumpCompanyRevision(prog: CompanyProgress): CompanyProgress {
+  return {
+    ...prog,
+    progressRevision: (prog.progressRevision ?? 0) + 1
   };
 }
 
@@ -267,16 +381,41 @@ export function reduce(state: GameState, action: GameAction): ReduceResult {
         events
       };
 
-    case "set-active-company": {
-      if (!isCompanyId(action.companyId)) return { state, events };
-      const exists = state.companies[action.companyId];
+    case "complete-opening-screen":
       return {
         state: {
           ...state,
-          activeCompanyId: action.companyId,
+          onboarding: {
+            ...state.onboarding,
+            openingScreenSeenAt: Date.now()
+          }
+        },
+        events
+      };
+
+    case "complete-welcome-screen":
+      return {
+        state: {
+          ...state,
+          onboarding: {
+            ...state.onboarding,
+            welcomeScreenSeenAt: Date.now()
+          }
+        },
+        events
+      };
+
+    case "set-active-company": {
+      const companyId = coercePlayableDemoCompanyId(action.companyId);
+      if (!isCompanyId(companyId)) return { state, events };
+      const exists = state.companies[companyId];
+      return {
+        state: {
+          ...state,
+          activeCompanyId: companyId,
           companies: {
             ...state.companies,
-            [action.companyId]: exists ?? initialCompanyProgress()
+            [companyId]: exists ?? initialCompanyProgress()
           }
         },
         events
@@ -796,7 +935,7 @@ export function reduce(state: GameState, action: GameAction): ReduceResult {
         if (key.startsWith(prefix)) delete nextWork[key];
       }
       return {
-        state: putProg(state, {
+        state: putProg(state, bumpCompanyRevision({
           ...prog0,
           pillars: {
             ...prog0.pillars,
@@ -807,7 +946,45 @@ export function reduce(state: GameState, action: GameAction): ReduceResult {
             }
           },
           questWork: nextWork
-        }),
+        })),
+        events
+      };
+    }
+
+    case "repair-quest-progress": {
+      const prog0 = getCompanyProg(state, action.companyId);
+      const pillarState = prog0.pillars[action.pillarId];
+      if (!pillarState) return { state, events };
+      const nextPillar = patchPillarReadsForRepair(
+        pillarState,
+        action.questSlug,
+        action.cardIds,
+        action.mode
+      );
+      const nextQuestWork =
+        action.mode === "reset"
+          ? stripQuestWorkForQuest(prog0.questWork, action.pillarId, action.questSlug)
+          : prog0.questWork;
+      const nextProg =
+        action.mode === "reset"
+          ? bumpCompanyRevision({
+              ...prog0,
+              pillars: {
+                ...prog0.pillars,
+                [action.pillarId]: nextPillar
+              },
+              questWork: nextQuestWork
+            })
+          : {
+              ...prog0,
+              pillars: {
+                ...prog0.pillars,
+                [action.pillarId]: nextPillar
+              },
+              questWork: nextQuestWork
+            };
+      return {
+        state: putCompanyProg(state, action.companyId, nextProg),
         events
       };
     }
@@ -834,6 +1011,8 @@ const ACTIVITY_ACTIONS: ReadonlySet<GameAction["type"]> = new Set<
   "set-active-pillar",
   "set-active-quest",
   "mark-quest-read",
+  "repair-quest-progress",
+  "clear-pillar-progress",
   "submit-conviction-and-advance",
   "complete-ten-k-rookie-challenge"
 ]);

@@ -6,8 +6,13 @@ import { useEffect, useState } from "react";
 
 import { InvestorQuestBrandLogo } from "@/components/InvestorQuestBrandLogo";
 import { LevelBar } from "@/components/LevelBar";
-import { COMPANIES, companyById } from "@/lib/demoData";
+import { companyById, getPlayableDemoCompanies } from "@/lib/demoData";
 import { ExploreSearchNavItem } from "@/components/explore/ExploreSearchNavItem";
+import {
+  CONTROLLED_DEMO_MODE,
+  getControlledDemoIslandNav,
+  getControlledDemoPrimaryNav
+} from "@/lib/demo/controlledDemo";
 import {
   EXPLORE_SUB_LINKS,
   ISLAND_NAV,
@@ -125,6 +130,7 @@ function MobileExploreAccordion({
 export function MobileNavDrawer({ open, onClose, pathname, state, onCompanyChange, reading }: Props) {
   const lp = levelProgress(state.xp);
   const company = companyById(state.activeCompanyId);
+  const playableCompanies = getPlayableDemoCompanies();
 
   useEffect(() => {
     if (!open) return;
@@ -185,18 +191,29 @@ export function MobileNavDrawer({ open, onClose, pathname, state, onCompanyChang
 
               <div className="mt-4 rounded-2xl border border-panel-border bg-[rgba(255,255,255,0.03)] p-3">
                 <div className="text-[11px] text-ink-2">Company</div>
-                <select
-                  suppressHydrationWarning
-                  value={state.activeCompanyId}
-                  onChange={(e) => onCompanyChange(e.target.value)}
-                  className="mt-2 min-h-[44px] w-full rounded-xl border border-panel-border bg-[rgba(255,255,255,0.04)] px-3 py-2.5 text-sm text-ink-0 outline-none ring-neon-400/50 focus:ring-2"
-                >
-                  {COMPANIES.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.ticker})
-                    </option>
-                  ))}
-                </select>
+                {CONTROLLED_DEMO_MODE ? (
+                  <div className="mt-2 min-h-[44px] rounded-xl border border-panel-border bg-[rgba(255,255,255,0.04)] px-3 py-2.5">
+                    <div className="text-sm font-semibold text-ink-0">
+                      {company.name} ({company.ticker})
+                    </div>
+                    <p className="mt-0.5 text-[10px] text-ink-2">
+                      Investor demo campaign
+                    </p>
+                  </div>
+                ) : (
+                  <select
+                    suppressHydrationWarning
+                    value={state.activeCompanyId}
+                    onChange={(e) => onCompanyChange(e.target.value)}
+                    className="mt-2 min-h-[44px] w-full rounded-xl border border-panel-border bg-[rgba(255,255,255,0.04)] px-3 py-2.5 text-sm text-ink-0 outline-none ring-neon-400/50 focus:ring-2"
+                  >
+                    {playableCompanies.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} ({c.ticker})
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div className="mt-4">
@@ -247,32 +264,55 @@ export function MobileNavDrawer({ open, onClose, pathname, state, onCompanyChang
               </div>
 
               <nav className="mt-6 grid gap-2 pb-6" aria-label="Primary mobile">
-                <MobileExploreAccordion pathname={pathname} onNavigate={onClose} />
+                {!CONTROLLED_DEMO_MODE ? (
+                  <MobileExploreAccordion pathname={pathname} onNavigate={onClose} />
+                ) : null}
                 <div className="pt-1">
                   <p className="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-2">
                     Islands
                   </p>
                   <div className="grid gap-2">
-                    {ISLAND_NAV.map((item) => {
-                      const active = islandLinkActive(pathname, item.href);
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          prefetch
-                          onClick={onClose}
-                          className={[
-                            linkClass(active),
-                            "flex min-h-[48px] items-center"
-                          ].join(" ")}
-                        >
-                          {item.label}
-                        </Link>
-                      );
-                    })}
+                    {CONTROLLED_DEMO_MODE
+                      ? getControlledDemoIslandNav().map((item) => {
+                          const active = islandLinkActive(pathname, item.href);
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              prefetch
+                              onClick={onClose}
+                              className={[
+                                linkClass(active),
+                                "flex min-h-[48px] items-center"
+                              ].join(" ")}
+                            >
+                              {item.label}
+                            </Link>
+                          );
+                        })
+                      : ISLAND_NAV.map((item) => {
+                          const active = islandLinkActive(pathname, item.href);
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              prefetch
+                              onClick={onClose}
+                              className={[
+                                linkClass(active),
+                                "flex min-h-[48px] items-center"
+                              ].join(" ")}
+                            >
+                              {item.label}
+                            </Link>
+                          );
+                        })}
                   </div>
                 </div>
-                {PRIMARY_NAV.map((item) => {
+                {(CONTROLLED_DEMO_MODE
+                  ? getControlledDemoPrimaryNav()
+                  : PRIMARY_NAV
+                ).map((item) => {
                   const active = linkActive(pathname, item.href);
                   return (
                     <Link

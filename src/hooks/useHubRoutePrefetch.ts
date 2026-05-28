@@ -1,18 +1,33 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
-/** Warm quest routes while a hub is visible (matches Business hub behavior). */
+import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
+
+/** Warm quest routes + detail chunks while a hub is visible. */
 export function useHubRoutePrefetch(
   cards: ReadonlyArray<{ route?: string | null }>
 ) {
   const router = useRouter();
+  const routerRef = useRef(router);
+  routerRef.current = router;
+  const prefetchedRef = useRef<string>("");
 
   useEffect(() => {
+    if (cards.length === 0) return;
+    preloadQuestDetailChunks();
+    const key = cards.map((c) => c.route ?? "").join("|");
+    if (prefetchedRef.current === key) return;
+    prefetchedRef.current = key;
     for (const card of cards) {
       const route = card.route?.trim();
-      if (route) router.prefetch(route);
+      if (!route) continue;
+      try {
+        routerRef.current.prefetch(route);
+      } catch {
+        /* ignore */
+      }
     }
-  }, [router, cards]);
+  }, [cards]);
 }

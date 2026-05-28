@@ -1,6 +1,9 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import ForcesQuestClient from "./ForcesQuestClient";
-import { getPillarQuestTemplates } from "@/platform/quests/questContentRegistry";
+import {
+  isValidForcesQuestSlug,
+  resolveForcesQuestSlug
+} from "@/lib/forces/forcesQuestRoutes";
 
 export default async function ForcesQuestPage({
   params
@@ -8,9 +11,12 @@ export default async function ForcesQuestPage({
   params: Promise<{ questSlug: string }>;
 }) {
   const { questSlug } = await params;
-  const exists = getPillarQuestTemplates("forces").some((q) => q.slug === questSlug);
-  if (!exists) {
+  const resolved = resolveForcesQuestSlug(questSlug);
+  if (resolved !== questSlug) {
+    redirect(`/forces/${resolved}`);
+  }
+  if (!isValidForcesQuestSlug(resolved)) {
     notFound();
   }
-  return <ForcesQuestClient slug={questSlug} />;
+  return <ForcesQuestClient slug={resolved} />;
 }

@@ -1,9 +1,10 @@
 import type { QuestTemplate } from "@/data/quests/types";
+import { MANAGEMENT_QUEST_QUIZZES } from "@/data/quests/managementQuestQuizzes";
 
 const MGMT_QUIZ_PASS = 0.6 as const;
 
 /**
- * Management pillar — five island sections. Each quest uses stacked gold
+ * Management pillar, five island sections. Each quest uses stacked gold
  * sub-cards (Mark as Read per card) plus a section quiz; the quiz panel
  * unlocks only after every sub-card is read (`QuestDetailScreen`). XP is
  * awarded only when the quiz is passed (`completionState.kind: "quiz"`).
@@ -19,7 +20,7 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     description:
       "Read the leadership bench: who runs {Company.name}, how long they have been there, and what they have actually delivered.",
     investorQuestion:
-      "Meet the people in charge and see if you'd trust them with your money.",
+      "Who runs {Company.name}, and would you trust them with your money?",
     plainEnglishAnswer: null,
     whyItMatters:
       "Leadership quality is a leading indicator of execution, culture, and how incentives will play out over time.",
@@ -42,70 +43,28 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
       {
         id: "card-1",
         investorQuestion:
-          "Who are the key executives and what experience do they have?",
+          "Who are {Company.name}'s key executives, and what experience do they bring?",
         plainEnglishAnswer:
-          "Start with the DEF 14A: it lists the CEO, CFO, and other named executive officers with short bios — prior employers, scope of responsibility, and relevant industry experience.\n\nCompare that to what the business actually needs right now (turnaround vs. scale vs. capital returns). Experienced operators are not a guarantee — but thin benches and constant churn are yellow flags.",
-        whyItMatters: "Experienced leaders = fewer mistakes."
+          "The proxy lists the CEO, CFO, and other top officers with short bios, where they worked and what they ran before.\n\nMatch that résumé to what the company needs now: turnaround, scale, or returning cash.\n\nA thin bench or musical chairs in the C-suite is a yellow flag even when titles sound impressive.",
+        whyItMatters: "The people in charge set what actually gets done."
       },
       {
         id: "card-2",
-        investorQuestion: "How long have executives been with the company?",
+        investorQuestion: "How long have {Company.name}'s executives been in role?",
         plainEnglishAnswer:
-          "Proxy and 10-K bios usually show tenure in-role and sometimes total years at the company.\n\nLong tenure can mean deep institutional knowledge and steadier execution; rapid turnover in the CFO or COO seat can signal internal issues, strategy whiplash, or a board losing confidence.",
+          "Proxy bios show how long leaders have been in the job, sometimes decades at the same company.\n\nLong runs can mean steady execution or a team that's gone stale.\n\nIf the CFO keeps changing with no clear story, dig deeper, that's louder than normal middle-manager turnover.",
         whyItMatters:
-          "Stability is good. Constant changes = warning sign."
+          "Stable leadership is comforting; mystery churn is not."
       },
       {
         id: "card-3",
-        investorQuestion: "What has management achieved so far?",
+        investorQuestion: "What has {Company.name}'s management delivered so far?",
         plainEnglishAnswer:
-          "Look for evidence, not slogans: revenue growth, margin trajectory, cash generation, market share, product cadence, and capital returned to owners.\n\nThen compare outcomes to what leadership said they would prioritise 2–3 years ago. The gap between narrative and delivery is where thesis risk hides.",
-        whyItMatters: "Results matter more than promises."
+          "Skip the slogans, check revenue, margins, cash, product launches, and money returned to shareholders.\n\nThen compare those results to what leadership said they'd focus on two or three years ago.\n\nThe gap between talk and numbers is where thesis risk hides.",
+        whyItMatters: "Promises are cheap; delivered numbers are not."
       }
     ],
-    quizConfig: {
-      passThreshold: MGMT_QUIZ_PASS,
-      questions: [
-        {
-          kind: "multiple-choice",
-          id: "mgmt1-q1",
-          prompt:
-            "Which filing is usually the first place to find named executive officers, bios, and pay tables?",
-          choices: ["8-K", "Form 4", "DEF 14A (Proxy)", "13F"],
-          correctIndex: 2,
-          explain:
-            "The annual proxy (DEF 14A) is the standard home for executive leadership disclosure and compensation tables."
-        },
-        {
-          kind: "true-false",
-          id: "mgmt1-q2",
-          prompt:
-            "Long CEO tenure always means lower risk for shareholders.",
-          correct: false,
-          explain:
-            "Tenure is context, not proof. Long tenure can be excellence — or entrenchment. Pair tenure with outcomes and incentives."
-        },
-        {
-          kind: "fill-blank",
-          id: "mgmt1-q3",
-          prompt:
-            "When judging leadership, the most useful test is whether stated strategy matches ___ outcomes.",
-          options: ["random", "actual", "headline", "social"],
-          correctIndex: 1,
-          explain:
-            "Execution is measured against real operating and financial outcomes — not vibes."
-        },
-        {
-          kind: "true-false",
-          id: "mgmt1-q4",
-          prompt:
-            "Investors should judge leadership on whether pay and operating outcomes align over multiple years — not resume polish alone.",
-          correct: true,
-          explain:
-            "If you cannot connect leadership to outcomes, you are flying blind on execution risk."
-        }
-      ]
-    }
+    quizConfig: MANAGEMENT_QUEST_QUIZZES["mgmt-1"]
   },
   {
     slug: "mgmt-quiz",
@@ -113,11 +72,11 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     pillarId: "management",
     title: "Executive Compensation",
     objective:
-      "See how leaders are paid — and whether incentives line up with long-term shareholder outcomes.",
+      "See how leaders are paid, and whether incentives line up with long-term shareholder outcomes.",
     description:
-      "Walk through ownership, pay vs. performance, pay design, and the metrics that drive annual bonuses.",
+      "Walk through ownership, pay vs. Performance, pay design, and the metrics that drive annual bonuses.",
     investorQuestion:
-      "See how they get paid — and if they win when you win.",
+      "How does {Company.name}'s leadership get paid, and do they win when you win?",
     plainEnglishAnswer: null,
     whyItMatters:
       "Compensation is the board's loudest statement about what management should optimise for.",
@@ -139,91 +98,35 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     cards: [
       {
         id: "card-1",
-        investorQuestion: "Do executives own company stock?",
+        investorQuestion: "Do {Company.name}'s executives own meaningful stock?",
         plainEnglishAnswer:
-          "Check Form 4 activity and the ownership table in the proxy: do executives hold material stock and buy on the open market, or mostly receive grants they sell routinely?\n\nMeaningful ownership aligns incentives; perpetual net-selling can be a red flag (not always — but it is worth asking why).",
+          "Check Form 4 activity and the ownership table in the proxy: do executives hold material stock and buy on the open market, or mostly receive grants they sell routinely?\n\nMeaningful ownership aligns incentives; perpetual net-selling can be a red flag (not always, but it is worth asking why).",
         whyItMatters: "If they own shares, they win or lose with you."
       },
       {
         id: "card-2",
-        investorQuestion: "How does executive pay compare to performance?",
+        investorQuestion: "How does pay at {Company.name} compare to performance?",
         plainEnglishAnswer:
-          "Compare total pay (cash + equity) to TSR, operating income growth, and return metrics across a 3–5 year window.\n\nPay rising while returns deteriorate is a classic governance tension: boards should tighten targets, reduce leverage to outcomes, or reset leadership.",
+          "Compare total pay (cash + equity) to TSR, operating income growth, and return metrics across a 3. 5 year window.\n\nPay rising while returns deteriorate is a classic governance tension: boards should tighten targets, reduce leverage to outcomes, or reset leadership.",
         whyItMatters: "Bad results + high pay = red flag."
       },
       {
         id: "card-3",
-        investorQuestion: "How is executive pay structured?",
+        investorQuestion: "How is executive pay structured at {Company.name}?",
         plainEnglishAnswer:
-          "Most large-cap programs mix base salary, annual bonus, and long-term equity (RSUs/PSUs/options).\n\nLook for weighting toward long-term equity, holding periods, and performance vesting — structures that reward sustained compounding, not short-term spikes.",
+          "Most large-cap programs mix base salary, annual bonus, and long-term equity (RSUs/PSUs/options).\n\nLook for weighting toward long-term equity, holding periods, and performance vesting, structures that reward sustained compounding, not short-term spikes.",
         whyItMatters:
           "Good pay rewards long-term success, not quick wins."
       },
       {
         id: "card-4",
-        investorQuestion: "What performance targets determine bonuses?",
+        investorQuestion: "What targets determine bonuses at {Company.name}?",
         plainEnglishAnswer:
-          "CD&A usually lists the metrics for annual incentives (revenue, EPS, cash flow, ESG milestones, etc.) and how targets are set vs. prior year.\n\nTargets reveal what the board wants management to optimise — sometimes that is growth at any cost; sometimes returns, cash conversion, or safety.",
+          "CD&A usually lists the metrics for annual incentives (revenue, EPS, cash flow, ESG milestones, etc.) and how targets are set vs. Prior year.\n\nTargets reveal what the board wants management to optimise, sometimes that is growth at any cost; sometimes returns, cash conversion, or safety.",
         whyItMatters: "Shows what they actually care about."
       }
     ],
-    quizConfig: {
-      passThreshold: MGMT_QUIZ_PASS,
-      questions: [
-        {
-          kind: "scenario",
-          id: "mgmtq-q1",
-          prompt:
-            "EPS misses guidance, but the CEO bonus still pays out above target. Which interpretation fits best?",
-          choices: [
-            "Targets were likely too easy or discretion favoured management",
-            "This is always meaningless noise",
-            "EPS never matters for incentives",
-            "Bonuses are legally random"
-          ],
-          correctIndex: 0,
-          explain:
-            "Incentives should tighten when performance misses; repeated 'pay for miss' is a governance concern."
-        },
-        {
-          kind: "red-flag",
-          id: "mgmtq-q2",
-          prompt: "Which pay pattern is most often a governance red flag?",
-          choices: [
-            "Heavy long-term equity with multi-year vesting",
-            "Rising total pay while returns to shareholders deteriorate",
-            "Clawback policies tied to restatements",
-            "Meaningful stock ownership requirements"
-          ],
-          flagIndex: 1,
-          explain:
-            "Pay should track long-term value creation; persistent divergence deserves scrutiny."
-        },
-        {
-          kind: "true-false",
-          id: "mgmtq-q3",
-          prompt:
-            "Performance-based equity (PSUs) can still reward management if the chosen metrics are easy to beat.",
-          correct: true,
-          explain:
-            "The quality of metrics matters as much as the label 'performance-based'."
-        },
-        {
-          kind: "order",
-          id: "mgmtq-q4",
-          prompt:
-            "Order these steps as an investor reviewing executive pay (first → last).",
-          steps: [
-            "Read the summary pay table",
-            "Compare pay to 3–5 year performance",
-            "Check equity ownership and sales patterns",
-            "Read incentive metrics and target difficulty"
-          ],
-          explain:
-            "Start with facts (tables), then outcomes, then incentives and mechanics."
-        }
-      ]
-    }
+    quizConfig: MANAGEMENT_QUEST_QUIZZES["mgmt-quiz"]
   },
   {
     slug: "mgmt-2",
@@ -233,9 +136,9 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     objective:
       "Trace how {Company.name} reinvests, returns cash, and finances itself.",
     description:
-      "Decide whether cash is being deployed into durable advantages — or dissipated.",
+      "Decide whether cash is being deployed into durable advantages, or dissipated.",
     investorQuestion:
-      "See how they use the company's money — smart moves or costly mistakes.",
+      "How does {Company.name} use its cash, smart moves or costly mistakes?",
     plainEnglishAnswer: null,
     whyItMatters:
       "Capital allocation is the CEO's main job after setting strategy; it directly drives per-share value.",
@@ -257,69 +160,22 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     cards: [
       {
         id: "card-1",
-        investorQuestion: "How does the company use its profits?",
+        investorQuestion: "How does {Company.name} use its profits?",
         plainEnglishAnswer:
-          "Follow operating cash flow: reinvestment (capex, R&D), acquisitions, debt paydown, dividends, and buybacks.\n\nHealthy companies usually fund reinvestment first, then return excess cash while keeping leverage sensible — the mix depends on maturity and opportunity set.",
+          "Follow operating cash flow: reinvestment (capex, R&D), acquisitions, debt paydown, dividends, and buybacks.\n\nHealthy companies usually fund reinvestment first, then return excess cash while keeping leverage sensible, the mix depends on maturity and opportunity set.",
         whyItMatters:
           "Smart spending grows your investment. Bad spending wastes it."
       },
       {
         id: "card-2",
-        investorQuestion: "Is management returning cash to shareholders?",
+        investorQuestion: "Is {Company.name} returning cash to shareholders?",
         plainEnglishAnswer:
-          "Check dividends (growth, payout ratio) and buybacks (net of SBC dilution). Buybacks at high valuations can destroy value; buybacks when the business is cheap and fundamentals are sound can be attractive.\n\nThe key is whether returns are funded by durable cash generation — not one-time asset sales or leverage ramps.",
+          "Check dividends (growth, payout ratio) and buybacks (net of SBC dilution). Buybacks at high valuations can destroy value; buybacks when the business is cheap and fundamentals are sound can be attractive.\n\nThe key is whether returns are funded by durable cash generation, not one-time asset sales or leverage ramps.",
         whyItMatters:
           "Dividends/buybacks = sharing the profits with you."
       }
     ],
-    quizConfig: {
-      passThreshold: MGMT_QUIZ_PASS,
-      questions: [
-        {
-          kind: "multiple-choice",
-          id: "mgmt2-q1",
-          prompt:
-            "Which combination best signals disciplined capital allocation over time?",
-          choices: [
-            "High ROIC reinvestment + returning excess cash",
-            "Empire-building M&A at any price",
-            "Leverage spikes to fund dividends",
-            "Capex cuts every year regardless of demand"
-          ],
-          correctIndex: 0,
-          explain:
-            "Discipline is reinvest where returns are high, return cash when reinvestment opportunities shrink."
-        },
-        {
-          kind: "odd-one-out",
-          id: "mgmt2-q2",
-          prompt: "Pick the odd one out — three are common cash-return tools.",
-          choices: ["Dividends", "Buybacks", "Operating leases", "Special dividends"],
-          oddIndex: 2,
-          explain:
-            "Operating leases are an operating structure, not a cash return mechanism like dividends/buybacks."
-        },
-        {
-          kind: "true-false",
-          id: "mgmt2-q3",
-          prompt:
-            "Stock-based compensation dilution can make buybacks partially self-defeating.",
-          correct: true,
-          explain:
-            "If dilution eats a large share of repurchases, net share count may barely move."
-        },
-        {
-          kind: "fill-blank",
-          id: "mgmt2-q4",
-          prompt:
-            "When free cash flow is strong, the board's main allocation decision is reinvest vs. ___ cash.",
-          options: ["hide", "return", "ignore", "inflate"],
-          correctIndex: 1,
-          explain:
-            "Excess cash should be returned unless reinvestment offers better incremental returns."
-        }
-      ]
-    }
+    quizConfig: MANAGEMENT_QUEST_QUIZZES["mgmt-2"]
   },
   {
     slug: "mgmt-governance",
@@ -334,7 +190,7 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
       "Check if anyone is keeping management in check and protecting investors.",
     plainEnglishAnswer: null,
     whyItMatters:
-      "Governance failures show up slowly — then suddenly — in restatements, write-downs, and broken trust.",
+      "Governance failures show up slowly, then suddenly, in restatements, write-downs, and broken trust.",
     secSection: {
       form: "DEF 14A",
       section: "Corporate Governance + Certain Relationships",
@@ -353,7 +209,7 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     cards: [
       {
         id: "card-1",
-        investorQuestion: "Who sits on the board and are they independent?",
+        investorQuestion: "Who sits on {Company.name}'s board, and are they independent?",
         plainEnglishAnswer:
           "The proxy lists directors, independence determinations, and any non-independent relationships.\n\nA majority-independent board is baseline for large caps; look for lead independent director structures when the chair is also CEO.",
         whyItMatters:
@@ -361,7 +217,7 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
       },
       {
         id: "card-2",
-        investorQuestion: "What committees oversee management decisions?",
+        investorQuestion: "What committees oversee {Company.name}'s management?",
         plainEnglishAnswer:
           "Audit, compensation, and nominating/governance committees are the usual triad.\n\nStrong charters include financial literacy on audit, independent comp committee members, and refreshment practices on nominating.",
         whyItMatters:
@@ -370,81 +226,23 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
       {
         id: "card-3",
         investorQuestion:
-          "Are there related-party transactions or conflicts of interest?",
+          "Are there related-party deals or conflicts at {Company.name}?",
         plainEnglishAnswer:
-          "Read 'Certain Relationships' and transaction footnotes: related-party deals, consulting arrangements, family ties, or cross-ownership can create conflicts.\n\nNot all related-party deals are bad — but they must be priced at arm's length and disclosed clearly.",
+          "Read 'Certain Relationships' and transaction footnotes: related-party deals, consulting arrangements, family ties, or cross-ownership can create conflicts.\n\nNot all related-party deals are bad, but they must be priced at arm's length and disclosed clearly.",
         whyItMatters:
           "Conflicts of interest can signal weak governance or misuse of company resources."
       },
       {
         id: "card-4",
         investorQuestion:
-          "What happens if executives leave or the company is acquired?",
+          "What happens if {Company.name}'s leaders leave or the company is sold?",
         plainEnglishAnswer:
-          "Review employment agreements and change-in-control provisions: severance multiples, accelerated equity, and golden parachutes.\n\nLarge payouts can protect talent — or reward failure — depending on structure and performance tests.",
+          "Review employment agreements and change-in-control provisions: severance multiples, accelerated equity, and golden parachutes.\n\nLarge payouts can protect talent, or reward failure, depending on structure and performance tests.",
         whyItMatters:
           "Large severance packages can create misaligned incentives or governance concerns."
       }
     ],
-    quizConfig: {
-      passThreshold: MGMT_QUIZ_PASS,
-      questions: [
-        {
-          kind: "multiple-choice",
-          id: "mgmgov-q1",
-          prompt:
-            "Which committee is primarily responsible for overseeing financial reporting quality?",
-          choices: [
-            "Compensation committee",
-            "Audit committee",
-            "Nominating committee",
-            "Technology committee"
-          ],
-          correctIndex: 1,
-          explain:
-            "The audit committee oversees audits, internal controls, and financial reporting risk."
-        },
-        {
-          kind: "bull-bear",
-          id: "mgmgov-q2",
-          prompt:
-            "A CEO is also board chair with no lead independent director. Bull or bear for governance quality?",
-          correct: "bear",
-          explain:
-            "Combined chair/CEO roles can work — but absent a strong lead independent director, minority oversight can be weaker."
-        },
-        {
-          kind: "swipe-cards",
-          id: "mgmgov-q3",
-          prompt: "Swipe each statement: good governance sign vs. warning sign.",
-          cards: [
-            {
-              text: "Majority-independent board with annual evaluations",
-              verdict: "good"
-            },
-            {
-              text: "Opaque related-party transactions with vague pricing",
-              verdict: "warning"
-            },
-            {
-              text: "Clawback policy tied to misconduct and restatements",
-              verdict: "good"
-            }
-          ],
-          explain:
-            "Independence + evaluation + clear accountability mechanisms are positives; opacity around conflicts is a warning."
-        },
-        {
-          kind: "true-false",
-          id: "mgmgov-q4",
-          prompt:
-            "Related-party transactions are always illegal for public companies.",
-          correct: false,
-          explain:
-            "They are common but must be disclosed and fair; the risk is unfair pricing or poor oversight."
-        }
-      ]
-    }
+    quizConfig: MANAGEMENT_QUEST_QUIZZES["mgmt-governance"]
   },
   {
     slug: "mgmt-financial-strength",
@@ -456,7 +254,7 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     description:
       "Stress-test liquidity, leverage, cash conversion, and refinancing risk.",
     investorQuestion:
-      "Check if the company is financially strong and can handle tough times.",
+      "Can {Company.name}'s balance sheet handle tough times?",
     plainEnglishAnswer: null,
     whyItMatters:
       "Balance sheet resilience determines whether good strategy survives bad luck.",
@@ -486,9 +284,9 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
       },
       {
         id: "card-2",
-        investorQuestion: "How much debt does the company owe?",
+        investorQuestion: "How much debt does {Company.name} owe?",
         plainEnglishAnswer:
-          "Review gross vs. net debt, fixed vs. floating exposure, and covenant summaries if disclosed.\n\nRising net debt into slowing earnings is a classic stress pattern — especially if maturities cluster in a short window.",
+          "Review gross vs. Net debt, fixed vs. Floating exposure, and covenant summaries if disclosed.\n\nRising net debt into slowing earnings is a classic stress pattern, especially if maturities cluster in a short window.",
         whyItMatters: "Too much debt can force bad choices in a downturn."
       },
       {
@@ -500,61 +298,7 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
           "Self-funding operations reduce dependence on lenders and markets."
       }
     ],
-    quizConfig: {
-      passThreshold: MGMT_QUIZ_PASS,
-      questions: [
-        {
-          kind: "multiple-choice",
-          id: "mgmtfs-q1",
-          prompt:
-            "Which metric is most useful as a first-pass solvency / leverage lens for most investors?",
-          choices: [
-            "Instagram followers",
-            "Net debt / EBITDA (or gross debt / EBITDA)",
-            "Store count only",
-            "Patent count only"
-          ],
-          correctIndex: 1,
-          explain:
-            "Leverage multiples contextualise debt against earnings power — always pair with maturity walls and cash conversion."
-        },
-        {
-          kind: "risk-meter",
-          id: "mgmtfs-q2",
-          prompt:
-            "Rate the balance-sheet risk implied by: rising net debt, flat earnings, and a large maturity wall in 18 months.",
-          scaleMax: 5,
-          correctLevel: 4,
-          levelLabels: ["Very low", "Low", "Medium", "High", "Very high"],
-          explain:
-            "Clustered maturities plus rising leverage into weak earnings is typically elevated risk."
-        },
-        {
-          kind: "true-false",
-          id: "mgmtfs-q3",
-          prompt:
-            "A company can show positive net income while still facing a liquidity crunch.",
-          correct: true,
-          explain:
-            "Earnings are not cash; working capital and capex can absorb cash even when accounting income looks fine."
-        },
-        {
-          kind: "scenario",
-          id: "mgmtfs-q4",
-          prompt:
-            "Revenue drops 20% for two quarters. Which response best indicates financial strength?",
-          choices: [
-            "Cut discretionary costs and preserve liquidity while protecting critical R&D",
-            "Max leverage to maintain a dividend at any cost",
-            "Pause all disclosures",
-            "Double acquisitions to distract investors"
-          ],
-          correctIndex: 0,
-          explain:
-            "Strength shows up in flexible cost structure, liquidity buffers, and disciplined financing choices."
-        }
-      ]
-    }
+    quizConfig: MANAGEMENT_QUEST_QUIZZES["mgmt-financial-strength"]
   },
   {
     slug: "management-summary",
@@ -562,14 +306,14 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     pillarId: "management",
     title: "Management Summary",
     objective:
-      "Synthesize leadership, incentives, capital discipline, and governance into one conviction check.",
+      "Synthesize leadership, incentives, capital discipline, and governance into one section quiz.",
     description:
       "Recap what you learned across the Management pillar before moving on.",
     investorQuestion:
-      "Can you explain—in your own words—whether you trust this management team with your capital?",
+      "Do you trust {Company.name}'s management team with your capital?",
     plainEnglishAnswer: null,
     whyItMatters:
-      "Conviction comes from connecting people, incentives, capital, and oversight—not from reading one section in isolation.",
+      "Conviction comes from connecting people, incentives, capital, and oversight. Not from reading one section in isolation.",
     secSection: {
       form: "DEF 14A",
       section: "Corporate Governance",
@@ -590,31 +334,12 @@ export const MANAGEMENT_QUEST_TEMPLATES: readonly QuestTemplate[] = [
       {
         id: "card-1",
         investorQuestion:
-          "What is your one-sentence verdict on management quality?",
+          "What is your one-sentence verdict on {Company.name}'s management?",
         plainEnglishAnswer:
           "Pull together the board bench, pay alignment, capital track record, and governance protections into a single yes/no/maybe with one reason.",
         whyItMatters: "Investing is ultimately a bet on people and incentives."
       }
     ],
-    quizConfig: {
-      passThreshold: MGMT_QUIZ_PASS,
-      questions: [
-        {
-          kind: "multiple-choice",
-          id: "mgmtsum-q1",
-          prompt:
-            "Which signal best supports a 'yes' on management quality?",
-          choices: [
-            "Pay packages that only reward short-term stock pops",
-            "Capital allocation and incentives aligned with long-term owners",
-            "A charismatic CEO with no disclosed pay metrics",
-            "Frequent unexplained CFO turnover with no explanation"
-          ],
-          correctIndex: 1,
-          explain:
-            "If you cannot explain it simply, keep digging — but the underlying test is alignment between incentives, governance, and outcomes."
-        }
-      ]
-    }
+    quizConfig: MANAGEMENT_QUEST_QUIZZES["management-summary"]
   }
 ] as const;

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 
 import type { PillarQuestTheme } from "@/components/quest/pillarQuestTheme";
+import { CONTINUE_TO_QUIZ_SUMMARY_CTA } from "@/lib/quests/quizFlowCopy";
 
 type Props = {
   onClick: () => void;
@@ -18,13 +19,8 @@ export function ContinueToQuizCta({ onClick, theme, cardsTotal }: Props) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mx-auto mt-8 flex max-w-2xl flex-col items-center gap-2"
+      className="mx-auto mt-8 flex max-w-2xl flex-col items-center"
     >
-      <p className="text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-2">
-        {cardsTotal && cardsTotal > 1
-          ? "All cards unlocked — time to prove the read"
-          : "Reading complete — lock in mastery"}
-      </p>
       <motion.button
         type="button"
         onClick={onClick}
@@ -54,7 +50,7 @@ export function ContinueToQuizCta({ onClick, theme, cardsTotal }: Props) {
             background: `linear-gradient(105deg, transparent 35%, ${theme.hi}22 50%, transparent 65%)`
           }}
         />
-        <span className="relative">Start mastery quiz →</span>
+        <span className="relative">{CONTINUE_TO_QUIZ_SUMMARY_CTA}</span>
       </motion.button>
     </motion.div>
   );

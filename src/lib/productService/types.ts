@@ -1,4 +1,5 @@
-export type ProductCategoryKey = "hardware" | "services" | "ecosystem";
+/** Segment bucket key — hardware, services, or company-specific labels. */
+export type ProductCategoryKey = string;
 
 export type ProductLineItem = {
   productKey: string;
@@ -33,7 +34,10 @@ export type ProductServiceReport = {
   /** Top-line revenue mix for the summary bar (optional). */
   revenueMix?: ProductRevenueMixItem[];
   categories: ProductCategoryGroup[];
-  investorInsight: string | null;
+  /** Legacy pipeline field — not shown in the player UI. */
+  investorInsight?: string | null;
+  /** Legacy pipeline field — not shown in the player UI. */
+  howToReadThis?: string | null;
   sourceForm: string;
   sourceSectionLabel: string | null;
   sourceAccession?: string | null;

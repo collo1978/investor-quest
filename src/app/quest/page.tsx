@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import QuestPageClient from "@/app/quest/QuestPageClient";
+import { DemoQuestGate } from "@/components/demo/DemoQuestGate";
 import { useGame } from "@/components/GameProvider";
 import {
   PILLAR_ORDER,
@@ -53,7 +53,7 @@ function QuestPageInner() {
 
   if (!questParam) return null;
 
-  return <QuestPageClient pillarId={pillarId} slug={questParam} />;
+  return <DemoQuestGate pillarId={pillarId} slug={questParam} />;
 }
 
 function isPillarId(value: string): value is PillarId {

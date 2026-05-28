@@ -1,5 +1,6 @@
 "use client";
 
+import { formatAnalyticsDateTime } from "@/lib/analytics/formatDisplay";
 import { tierFromScoreOrLabel } from "@/lib/operations/healthTier";
 import type { HealthStatusLabel } from "@/lib/gameHealth/types";
 
@@ -62,7 +63,7 @@ export function OpsHealthHero({
 
       {lastCheckAt ? (
         <p className="mt-4 text-[12px] text-white/40">
-          Last check: {new Date(lastCheckAt).toLocaleString()}
+          Last check: {formatAnalyticsDateTime(lastCheckAt)}
           {durationSec != null ? ` · ${durationSec.toFixed(1)}s` : ""}
         </p>
       ) : null}

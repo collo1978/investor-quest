@@ -1,6 +1,6 @@
 "use client";
 
-import { fixActionsForIssue } from "@/lib/operations/fixActions";
+import { operatorFixActionCopy, operatorFixActionsForIssue } from "@/lib/operations/fixActions";
 import type { FixActionId, GameHealthIssueRecord } from "@/lib/gameHealth/types";
 
 import { OpsTouchButton } from "./OpsTouchButton";
@@ -16,7 +16,12 @@ export function OpsFixActionList({
   busy: FixActionId | null;
   onRun: (action: FixActionId) => void;
 }) {
-  const actions = fixActionsForIssue(issue ?? null, recommendedAction);
+  const actions = issue
+    ? operatorFixActionsForIssue(issue)
+    : [
+        operatorFixActionCopy("verify_resolution"),
+        operatorFixActionCopy("mark_resolved")
+      ];
 
   return (
     <div className="space-y-3">

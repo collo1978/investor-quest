@@ -16,6 +16,7 @@
  * order — hydration-safe.
  */
 
+import { useEffect, useMemo, useState } from "react";
 import { motion, Reorder, useDragControls } from "framer-motion";
 
 import type {
@@ -34,6 +35,10 @@ import type {
   TrueFalseQuestion
 } from "@/data/quests/types";
 import { isQuizAnswerCorrect } from "@/data/quests/types";
+import {
+  initialOrderPermutation,
+  shuffleIndices
+} from "@/lib/quests/quizOrderShuffle";
 
 // ---------------------------------------------------------------------------
 // Visual tokens
@@ -48,39 +53,6 @@ const RED_HI = "#F47878";
 const RED_BORDER = "rgba(244, 120, 120, 0.55)";
 
 // ---------------------------------------------------------------------------
-// Deterministic shuffle (seeded by question id) — hydration-safe.
-// ---------------------------------------------------------------------------
-
-function hashSeed(id: string): number {
-  let h = 5381;
-  for (let i = 0; i < id.length; i++) {
-    h = ((h * 33) ^ id.charCodeAt(i)) >>> 0;
-  }
-  return h >>> 0;
-}
-
-function makeRng(seed: number): () => number {
-  let s = seed | 0;
-  if (s === 0) s = 1;
-  return () => {
-    s = (s * 9301 + 49297) | 0;
-    s = ((s % 233280) + 233280) % 233280;
-    return s / 233280;
-  };
-}
-
-/** Returns a permutation array `p` where item `p[i]` should display at slot `i`. */
-function shuffleIndices(n: number, idSeed: string, salt: string): number[] {
-  const out = Array.from({ length: n }, (_, i) => i);
-  const rng = makeRng(hashSeed(idSeed + "::" + salt));
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
-
-// ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
 
@@ -90,28 +62,33 @@ export type QuizQuestionViewProps = {
   value: unknown;
   onChange: (next: unknown) => void;
   mode: "input" | "review";
+  /** Order questions: show ✓/✗ per step while still allowing reorder (input mode). */
+  showFeedback?: boolean;
 };
 
 export function QuizQuestionView(props: QuizQuestionViewProps) {
-  const { question, mode, value } = props;
+  const { question, mode, value, showFeedback } = props;
   const isReview = mode === "review";
-  const answeredCorrect = isReview && isQuizAnswerCorrect(question, value);
+  const showResult =
+    isReview || (showFeedback && question.kind === "order");
+  const answeredCorrect =
+    showResult && isQuizAnswerCorrect(question, value);
 
   return (
     <fieldset
       className="rounded-xl border px-4 py-3 transition-[border-color,box-shadow] duration-300"
       style={{
-        borderColor: isReview
+        borderColor: showResult
           ? answeredCorrect
             ? GREEN_BORDER
             : RED_BORDER
           : GOLD_BORDER_SOFT,
-        background: isReview
+        background: showResult
           ? answeredCorrect
             ? "rgba(34,197,139,0.04)"
             : "rgba(244,120,120,0.04)"
           : "rgba(255,255,255,0.02)",
-        boxShadow: isReview
+        boxShadow: showResult
           ? answeredCorrect
             ? "0 0 28px -8px rgba(34,197,139,0.55)"
             : "0 0 28px -8px rgba(244,120,120,0.45)"
@@ -120,12 +97,14 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
     >
       <legend
         className="flex items-center gap-2 px-1 text-[10.5px] font-semibold uppercase tracking-[0.22em]"
-        style={{ color: isReview ? (answeredCorrect ? GREEN_HI : RED_HI) : GOLD_HI }}
+        style={{
+          color: showResult ? (answeredCorrect ? GREEN_HI : RED_HI) : GOLD_HI
+        }}
       >
         <span>{`Question ${props.index + 1}`}</span>
         <span aria-hidden style={{ opacity: 0.6 }}>·</span>
         <span>{kindLabel(question.kind)}</span>
-        {isReview ? (
+        {showResult ? (
           <>
             <span aria-hidden style={{ opacity: 0.6 }}>·</span>
             <span>{answeredCorrect ? "Correct" : "Not quite"}</span>
@@ -139,7 +118,7 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
         <QuestionInput {...props} />
       </div>
 
-      {isReview && question.explain ? (
+      {(isReview || showFeedback) && question.explain ? (
         <motion.p
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
@@ -280,7 +259,13 @@ function QuestionInput(props: QuizQuestionViewProps) {
     case "match":
       return <MatchInput {...props} question={question} />;
     case "order":
-      return <OrderInput {...props} question={question} />;
+      return (
+        <OrderInput
+          {...props}
+          question={question}
+          showStepFeedback={props.showFeedback ?? props.mode === "review"}
+        />
+      );
     case "bull-bear":
       return <BullBearInput {...props} question={question} />;
     case "risk-meter":
@@ -965,68 +950,59 @@ function OrderInput({
   question,
   value,
   onChange,
-  mode
-}: QuizQuestionViewProps & { question: OrderQuestion }) {
+  mode,
+  showStepFeedback
+}: QuizQuestionViewProps & {
+  question: OrderQuestion;
+  showStepFeedback: boolean;
+}) {
   const steps = question.steps;
-  // initial display order = deterministically shuffled original indices
-  const initialOrder = shuffleIndices(steps.length, question.id, "order");
+  const initialOrder = useMemo(
+    () => initialOrderPermutation(question.id, steps.length),
+    [question.id, steps.length]
+  );
 
-  const current: number[] = Array.isArray(value)
-    ? (value as number[])
-    : initialOrder;
+  const [order, setOrder] = useState<number[]>(() => {
+    if (Array.isArray(value) && value.length === steps.length) {
+      return value as number[];
+    }
+    return initialOrder;
+  });
+
+  useEffect(() => {
+    if (Array.isArray(value) && value.length === steps.length) {
+      setOrder(value as number[]);
+    }
+  }, [question.id, steps.length, value]);
+
+  const applyOrder = (next: number[]) => {
+    setOrder(next);
+    onChange(next);
+  };
+
+  const moveStep = (displayIdx: number, direction: -1 | 1) => {
+    const target = displayIdx + direction;
+    if (target < 0 || target >= order.length) return;
+    const next = [...order];
+    const [item] = next.splice(displayIdx, 1);
+    next.splice(target, 0, item);
+    applyOrder(next);
+  };
 
   // ----- Review mode: static list with ✓/✗ markers (no drag) -----
   if (mode === "review") {
     return (
-      <ol className="grid gap-2">
-        {current.map((origIdx, displayIdx) => {
-          const inCorrectSpot = origIdx === displayIdx;
-          return (
-            <li
-              key={`${origIdx}-${displayIdx}`}
-              className="flex items-center gap-3 rounded-xl border px-3 py-2.5 text-[13.5px] leading-snug"
-              style={{
-                borderColor: inCorrectSpot ? GREEN_BORDER : RED_BORDER,
-                background: inCorrectSpot
-                  ? "rgba(34,197,139,0.05)"
-                  : "rgba(244,120,120,0.05)",
-                color: "rgb(225 225 235)"
-              }}
-            >
-              <span
-                className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11.5px] font-semibold"
-                style={{
-                  borderColor: inCorrectSpot ? GREEN_BORDER : RED_BORDER,
-                  color: inCorrectSpot ? GREEN_HI : RED_HI,
-                  background: inCorrectSpot
-                    ? "rgba(34,197,139,0.12)"
-                    : "rgba(244,120,120,0.12)"
-                }}
-              >
-                {displayIdx + 1}
-              </span>
-              <span className="flex-1">{steps[origIdx]}</span>
-              {inCorrectSpot ? (
-                <CheckGlyph
-                  className="h-3.5 w-3.5"
-                  style={{ color: GREEN_HI }}
-                />
-              ) : (
-                <span
-                  className="text-[11px]"
-                  style={{ color: "rgb(180 180 200)" }}
-                >
-                  belongs at step {origIdx + 1}
-                </span>
-              )}
-            </li>
-          );
-        })}
-      </ol>
+      <OrderStepList
+        order={order}
+        steps={steps}
+        showStepFeedback
+        interactive={false}
+        onMove={() => undefined}
+      />
     );
   }
 
-  // ----- Input mode: drag-to-reorder cards -----
+  // ----- Input mode: drag + tap up/down; feedback without locking -----
   return (
     <div>
       <p
@@ -1034,21 +1010,27 @@ function OrderInput({
         style={{ color: "rgba(245,197,71,0.7)" }}
       >
         <GripGlyph className="h-3 w-3" />
-        Drag to reorder
+        Drag or use arrows to reorder
       </p>
       <Reorder.Group
         axis="y"
-        values={current}
-        onReorder={(next) => onChange(next as number[])}
+        values={order}
+        onReorder={(next) => applyOrder(next as number[])}
         className="grid gap-2"
         as="ol"
       >
-        {current.map((origIdx, displayIdx) => (
+        {order.map((origIdx, displayIdx) => (
           <OrderDragItem
             key={origIdx}
             origIdx={origIdx}
             displayIdx={displayIdx}
             label={steps[origIdx]}
+            canMoveUp={displayIdx > 0}
+            canMoveDown={displayIdx < order.length - 1}
+            onMoveUp={() => moveStep(displayIdx, -1)}
+            onMoveDown={() => moveStep(displayIdx, 1)}
+            inCorrectSpot={showStepFeedback && origIdx === displayIdx}
+            inWrongSpot={showStepFeedback && origIdx !== displayIdx}
           />
         ))}
       </Reorder.Group>
@@ -1056,21 +1038,169 @@ function OrderInput({
   );
 }
 
+function OrderStepList({
+  order,
+  steps,
+  showStepFeedback,
+  interactive,
+  onMove
+}: {
+  order: number[];
+  steps: string[];
+  showStepFeedback: boolean;
+  interactive: boolean;
+  onMove: (displayIdx: number, direction: -1 | 1) => void;
+}) {
+  return (
+    <ol className="grid gap-2">
+      {order.map((origIdx, displayIdx) => {
+        const inCorrectSpot = origIdx === displayIdx;
+        const showBad = showStepFeedback && !inCorrectSpot;
+        const showGood = showStepFeedback && inCorrectSpot;
+        return (
+          <li
+            key={`${origIdx}-${displayIdx}`}
+            className="flex items-center gap-3 rounded-xl border px-3 py-2.5 text-[13.5px] leading-snug"
+            style={{
+              borderColor: showGood
+                ? GREEN_BORDER
+                : showBad
+                  ? RED_BORDER
+                  : GOLD_BORDER_SOFT,
+              background: showGood
+                ? "rgba(34,197,139,0.05)"
+                : showBad
+                  ? "rgba(244,120,120,0.05)"
+                  : "rgba(255,255,255,0.025)",
+              color: "rgb(225 225 235)"
+            }}
+          >
+            <span
+              className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11.5px] font-semibold"
+              style={{
+                borderColor: showGood
+                  ? GREEN_BORDER
+                  : showBad
+                    ? RED_BORDER
+                    : GOLD_BORDER,
+                color: showGood ? GREEN_HI : showBad ? RED_HI : GOLD_HI,
+                background: showGood
+                  ? "rgba(34,197,139,0.12)"
+                  : showBad
+                    ? "rgba(244,120,120,0.12)"
+                    : "rgba(245,197,71,0.10)"
+              }}
+            >
+              {displayIdx + 1}
+            </span>
+            <span className="flex-1">{steps[origIdx]}</span>
+            {interactive ? (
+              <OrderMoveButtons
+                canMoveUp={displayIdx > 0}
+                canMoveDown={displayIdx < order.length - 1}
+                onMoveUp={() => onMove(displayIdx, -1)}
+                onMoveDown={() => onMove(displayIdx, 1)}
+              />
+            ) : showGood ? (
+              <CheckGlyph className="h-3.5 w-3.5" style={{ color: GREEN_HI }} />
+            ) : showBad ? (
+              <span className="text-[11px]" style={{ color: "rgb(180 180 200)" }}>
+                belongs at step {origIdx + 1}
+              </span>
+            ) : null}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function OrderMoveButtons({
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown
+}: {
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+}) {
+  return (
+    <div className="flex shrink-0 flex-col gap-0.5">
+      <button
+        type="button"
+        disabled={!canMoveUp}
+        onClick={(e) => {
+          e.stopPropagation();
+          onMoveUp();
+        }}
+        aria-label="Move step up"
+        className="inline-flex h-7 w-7 items-center justify-center rounded-md border text-[13px] font-bold transition enabled:hover:bg-white/5 disabled:opacity-30"
+        style={{
+          borderColor: GOLD_BORDER_SOFT,
+          color: GOLD_HI
+        }}
+      >
+        ↑
+      </button>
+      <button
+        type="button"
+        disabled={!canMoveDown}
+        onClick={(e) => {
+          e.stopPropagation();
+          onMoveDown();
+        }}
+        aria-label="Move step down"
+        className="inline-flex h-7 w-7 items-center justify-center rounded-md border text-[13px] font-bold transition enabled:hover:bg-white/5 disabled:opacity-30"
+        style={{
+          borderColor: GOLD_BORDER_SOFT,
+          color: GOLD_HI
+        }}
+      >
+        ↓
+      </button>
+    </div>
+  );
+}
+
 function OrderDragItem({
   origIdx,
   displayIdx,
-  label
+  label,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
+  inCorrectSpot,
+  inWrongSpot
 }: {
   origIdx: number;
   displayIdx: number;
   label: string;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  inCorrectSpot: boolean;
+  inWrongSpot: boolean;
 }) {
-  // A drag-controls handle lets the user grab the whole card OR just the
-  // grip — both feel native on desktop and mobile.
   const controls = useDragControls();
+  const borderColor = inCorrectSpot
+    ? GREEN_BORDER
+    : inWrongSpot
+      ? RED_BORDER
+      : GOLD_BORDER_SOFT;
+  const background = inCorrectSpot
+    ? "rgba(34,197,139,0.05)"
+    : inWrongSpot
+      ? "rgba(244,120,120,0.05)"
+      : "rgba(255,255,255,0.025)";
+
   return (
     <Reorder.Item
       value={origIdx}
+      as="li"
       dragListener={false}
       dragControls={controls}
       whileDrag={{
@@ -1082,27 +1212,45 @@ function OrderDragItem({
       transition={{ type: "spring", stiffness: 420, damping: 32 }}
       className="select-none rounded-xl border px-3 py-2.5 text-[13.5px] leading-snug"
       style={{
-        borderColor: GOLD_BORDER_SOFT,
-        background: "rgba(255,255,255,0.025)",
+        borderColor,
+        background,
         color: "rgb(225 225 235)",
         cursor: "grab",
-        touchAction: "none"
+        touchAction: "none",
+        listStyle: "none"
       }}
-      onPointerDown={(event) => controls.start(event)}
+      onPointerDown={(event) => {
+        if ((event.target as HTMLElement).closest("button")) return;
+        controls.start(event);
+      }}
     >
       <div className="flex items-center gap-3">
         <span
           aria-hidden
           className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11.5px] font-semibold"
           style={{
-            borderColor: GOLD_BORDER,
-            color: GOLD_HI,
-            background: "rgba(245,197,71,0.10)"
+            borderColor: inCorrectSpot
+              ? GREEN_BORDER
+              : inWrongSpot
+                ? RED_BORDER
+                : GOLD_BORDER,
+            color: inCorrectSpot ? GREEN_HI : inWrongSpot ? RED_HI : GOLD_HI,
+            background: inCorrectSpot
+              ? "rgba(34,197,139,0.12)"
+              : inWrongSpot
+                ? "rgba(244,120,120,0.12)"
+                : "rgba(245,197,71,0.10)"
           }}
         >
           {displayIdx + 1}
         </span>
         <span className="flex-1">{label}</span>
+        <OrderMoveButtons
+          canMoveUp={canMoveUp}
+          canMoveDown={canMoveDown}
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
+        />
         <span
           aria-hidden
           className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md"

@@ -37,18 +37,19 @@ export function HubTrailBridgeBeacon({ pillarId, className = "" }: Props) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -6 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={[
-        "pointer-events-none absolute left-1/2 top-3 z-[30] w-[min(92%,22rem)] -translate-x-1/2",
+        "pointer-events-none absolute bottom-[4%] left-1/2 z-[35] w-[min(92%,20rem)] -translate-x-1/2 sm:bottom-[5%]",
+        "max-sm:right-3 max-sm:bottom-3 max-sm:left-auto max-sm:w-[min(88vw,18rem)] max-sm:translate-x-0",
         className
       ].join(" ")}
     >
-      <div className="pointer-events-auto rounded-2xl border border-[rgba(245,197,71,0.35)] bg-[rgba(8,7,14,0.88)] px-4 py-3 text-center shadow-[0_0_40px_rgba(139,92,246,0.22)] backdrop-blur-md">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[rgba(245,197,71,0.9)]">
+      <div className="pointer-events-auto rounded-2xl border border-[rgba(245,197,71,0.35)] bg-[rgba(8,7,14,0.92)] px-3.5 py-2.5 text-left shadow-[0_12px_36px_rgba(0,0,0,0.5),0_0_24px_rgba(139,92,246,0.18)] backdrop-blur-md sm:text-center">
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[rgba(245,197,71,0.9)]">
           {pendingConviction ? "Bridge charging" : "Next island unlocked"}
         </p>
-        <p className="mt-1 font-[var(--font-grotesk)] text-[15px] text-ink-0">
+        <p className="mt-0.5 font-[var(--font-grotesk)] text-[14px] font-semibold leading-snug text-ink-0 sm:text-[15px]">
           {pendingConviction
             ? `Chart conviction on ${pillarById(pillarId).title} to power the trail`
             : `${nextMeta.title} is ready`}
@@ -56,21 +57,21 @@ export function HubTrailBridgeBeacon({ pillarId, className = "" }: Props) {
         {!reduceMotion ? (
           <div
             aria-hidden
-            className="pointer-events-none relative mx-auto mt-2 flex h-5 max-w-[160px] items-center justify-center gap-2"
+            className="pointer-events-none relative mx-auto mt-1.5 hidden h-4 max-w-[140px] items-center justify-center gap-2 sm:flex"
           >
             <motion.span
-              className="h-1 w-10 rounded-full bg-violet-400/70"
+              className="h-1 w-8 rounded-full bg-violet-400/70"
               animate={{ opacity: [0.35, 1, 0.35] }}
               transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.span
-              className="h-2 w-2 rounded-full bg-amber-300"
-              style={{ boxShadow: "0 0 12px rgba(245,197,71,0.75)" }}
+              className="h-1.5 w-1.5 rounded-full bg-amber-300"
+              style={{ boxShadow: "0 0 10px rgba(245,197,71,0.75)" }}
               animate={{ scale: [0.9, 1.15, 0.9] }}
               transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.span
-              className="h-1 w-10 rounded-full bg-emerald-400/70"
+              className="h-1 w-8 rounded-full bg-emerald-400/70"
               animate={{ opacity: [0.4, 1, 0.4] }}
               transition={{
                 duration: 1.2,
@@ -84,7 +85,7 @@ export function HubTrailBridgeBeacon({ pillarId, className = "" }: Props) {
         {href ? (
           <Link
             href={href}
-            className="mt-2 inline-block text-[11px] font-semibold uppercase tracking-[0.16em] text-neon-300 underline-offset-4 hover:underline"
+            className="mt-1.5 inline-block text-[10.5px] font-semibold uppercase tracking-[0.14em] text-neon-300 underline-offset-4 hover:underline sm:mt-2 sm:text-[11px]"
           >
             Enter {nextMeta.title} →
           </Link>

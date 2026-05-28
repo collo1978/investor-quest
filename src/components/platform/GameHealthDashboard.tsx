@@ -1,8 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
+import {
+  applyCommunicationAuditToPlatformReport,
+  mergePlatformReportWithLiveAudit
+} from "@/lib/gameHealth/applyCommunicationAuditToReport";
+import {
+  filterOpenIssuesAfterCardRepair,
+  type RepairVerificationResult
+} from "@/lib/gameHealth/missionControlRepairSync";
+import type { RepairQueueDoneItem } from "@/lib/operations/repairQueue";
+
+import { MissionControlSimpleRepair } from "@/components/platform/MissionControlSimpleRepair";
+import { CommunicationQualityPanel } from "@/components/platform/CommunicationQualityPanel";
+import { BehavioralIntelligenceTeaser } from "@/components/platform/behavioralDesign/BehavioralIntelligenceTeaser";
 import { DemoContentRefreshPanel } from "@/components/platform/DemoContentRefreshPanel";
+import { PlatformHealthOverview } from "@/components/platform/PlatformHealthOverview";
 import { OpsHealthHero } from "@/components/operations/OpsHealthHero";
 import { OpsHealthTrendChart } from "@/components/operations/OpsHealthTrendChart";
 import { OpsIssueCard } from "@/components/operations/OpsIssueCard";
@@ -13,8 +27,11 @@ import { humanizeTechnicalMessage } from "@/lib/operations/layman";
 import type {
   GameHealthCheckRecord,
   GameHealthIssueRecord,
-  GameHealthSettings
+  GameHealthSettings,
+  PlatformHealthReport
 } from "@/lib/gameHealth/types";
+
+const SIMPLE_MODE_KEY = "mission-control-simple-mode";
 
 type SupabaseDiagnostics = {
   configured: boolean;
@@ -44,10 +61,71 @@ export function GameHealthDashboard() {
   const [running, setRunning] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [settingsForm, setSettingsForm] = useState<GameHealthSettings | null>(null);
-  const [showTechnical, setShowTechnical] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [diagnostics, setDiagnostics] = useState<SupabaseDiagnostics | null>(null);
+  const [liveReport, setLiveReport] = useState<PlatformHealthReport | null>(null);
+  const [liveOpenIssues, setLiveOpenIssues] = useState<GameHealthIssueRecord[]>([]);
+  const [simpleMode, setSimpleMode] = useState(true);
+  const [doneRepairs, setDoneRepairs] = useState<RepairQueueDoneItem[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SIMPLE_MODE_KEY);
+      if (stored === "advanced") setSimpleMode(false);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    const incoming = data?.latest?.platformReport;
+    if (!incoming) {
+      setLiveReport(null);
+      setLiveOpenIssues([]);
+      return;
+    }
+    setLiveReport((prev) => mergePlatformReportWithLiveAudit(incoming, prev));
+    setLiveOpenIssues(data?.openIssues ?? []);
+  }, [data?.latest?.platformReport, data?.openIssues]);
+
+  const displayReport = liveReport ?? data?.latest?.platformReport ?? null;
+  const displayOpenIssues =
+    data?.openIssues != null ? liveOpenIssues : [];
+
+  const domainScores = useMemo(
+    () =>
+      Object.fromEntries(
+        (displayReport?.domains ?? []).map((d) => [d.domainId, d.score])
+      ),
+    [displayReport?.domains]
+  );
+
+  const handleRepairSync = useCallback(
+    async (result: RepairVerificationResult) => {
+      setLiveReport((prev) => {
+        const base = prev ?? data?.latest?.platformReport;
+        if (!base) return prev;
+        return applyCommunicationAuditToPlatformReport(base, result.communicationQuality);
+      });
+      setLiveOpenIssues((prev) => {
+        const base = prev.length > 0 ? prev : (data?.openIssues ?? []);
+        return filterOpenIssuesAfterCardRepair(base, result.cardChange);
+      });
+      if (result.cardChange) {
+        const loc = result.cardChange;
+        setDoneRepairs((prev) => [
+          {
+            id: `fix:${loc.ticker}:${loc.cardId}:${Date.now()}`,
+            title: `${loc.ticker} ${loc.cardId} fixed`,
+            fixedAt: loc.fixedAt
+          },
+          ...prev
+        ].slice(0, 12));
+      }
+    },
+    [data?.latest?.platformReport, data?.openIssues]
+  );
 
   const load = useCallback(async () => {
     try {
@@ -77,22 +155,39 @@ export function GameHealthDashboard() {
   }, [load]);
 
   useEffect(() => {
+    if (!data?.configured) return;
+
     const refreshMs = 45_000;
-    const intervalMs = (settingsForm?.checkIntervalMinutes ?? 15) * 60_000;
+    const intervalMinutes = settingsForm?.checkIntervalMinutes ?? 15;
+    /** Browser background checks — never more often than every 5 minutes. */
+    const intervalMs = Math.max(intervalMinutes, 5) * 60_000;
 
     const refreshTimer = window.setInterval(() => void load(), refreshMs);
 
+    const runScheduledCheck = async () => {
+      if (document.visibilityState === "hidden") return;
+      try {
+        // Use main admin route (no cron secret). External schedulers use POST /cron.
+        const res = await fetch("/api/admin/game-health", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sendAlerts: true })
+        });
+        if (res.ok) await load();
+      } catch {
+        /* Dev server offline or network blip — refresh timer still reloads dashboard data. */
+      }
+    };
+
     const cronTimer = window.setInterval(() => {
-      void fetch("/api/admin/game-health/cron", { method: "POST" }).then(() =>
-        load()
-      );
+      void runScheduledCheck();
     }, intervalMs);
 
     return () => {
       window.clearInterval(refreshTimer);
       window.clearInterval(cronTimer);
     };
-  }, [load, settingsForm?.checkIntervalMinutes]);
+  }, [load, settingsForm?.checkIntervalMinutes, data?.configured]);
 
   const runCheck = async () => {
     setRunning(true);
@@ -105,7 +200,8 @@ export function GameHealthDashboard() {
       });
       const json = (await res.json()) as { check?: GameHealthCheckRecord; error?: string };
       if (!res.ok) throw new Error(json.error ?? "Health check failed.");
-      setMessage(`Check done — ${json.check?.score ?? "?"}%`);
+      const pct = json.check?.platformReport?.overallScore ?? json.check?.score ?? "?";
+      setMessage(`Check done — ${pct}% platform health`);
       await load();
     } catch (err) {
       setMessage(humanizeTechnicalMessage(err instanceof Error ? err.message : "Check failed."));
@@ -191,13 +287,52 @@ export function GameHealthDashboard() {
   return (
     <OpsPageShell
       title="Mission Control"
-      subtitle="Monitor demo readiness and fix issues from your phone. Refreshes every 45 seconds."
+      subtitle={
+        simpleMode
+          ? "Prioritized repair queue — fix what matters, verify it worked."
+          : "Full audit intelligence — deep review and card-level repair."
+      }
       showQuickNav
       showBackLink={false}
     >
+      <div className="flex rounded-xl border border-white/12 bg-black/30 p-1">
+        <button
+          type="button"
+          className={`min-h-[40px] flex-1 rounded-lg px-4 py-2 text-[13px] font-semibold touch-manipulation ${
+            simpleMode ? "bg-violet-500/30 text-violet-100" : "text-white/55"
+          }`}
+          onClick={() => {
+            setSimpleMode(true);
+            try {
+              localStorage.setItem(SIMPLE_MODE_KEY, "simple");
+            } catch {
+              /* ignore */
+            }
+          }}
+        >
+          Simple repair
+        </button>
+        <button
+          type="button"
+          className={`min-h-[40px] flex-1 rounded-lg px-4 py-2 text-[13px] font-semibold touch-manipulation ${
+            !simpleMode ? "bg-violet-500/30 text-violet-100" : "text-white/55"
+          }`}
+          onClick={() => {
+            setSimpleMode(false);
+            try {
+              localStorage.setItem(SIMPLE_MODE_KEY, "advanced");
+            } catch {
+              /* ignore */
+            }
+          }}
+        >
+          Advanced audit
+        </button>
+      </div>
+
       <OpsHealthHero
-        score={data.latest?.score ?? null}
-        statusLabel={data.latest?.statusLabel}
+        score={displayReport?.overallScore ?? data.latest?.score ?? null}
+        statusLabel={displayReport?.demoReadiness.status ?? data.latest?.statusLabel}
         lastCheckAt={data.latest?.createdAt}
         slowestRoute={data.latest?.slowestRoute}
         durationSec={
@@ -208,45 +343,72 @@ export function GameHealthDashboard() {
         onRefresh={() => void load()}
       />
 
-      <DemoContentRefreshPanel onRefreshMissionControl={() => void load()} />
+      {simpleMode ? (
+        <MissionControlSimpleRepair
+          report={displayReport}
+          openIssues={displayOpenIssues}
+          doneItems={doneRepairs}
+          onRepairSync={handleRepairSync}
+          onRefresh={load}
+          onShowAdvanced={() => {
+            setSimpleMode(false);
+            try {
+              localStorage.setItem(SIMPLE_MODE_KEY, "advanced");
+            } catch {
+              /* ignore */
+            }
+          }}
+          onDoneItem={(item) => setDoneRepairs((prev) => [item, ...prev].slice(0, 12))}
+        />
+      ) : null}
 
-      <OpsHealthTrendChart history={data.history} />
+      {!simpleMode && displayReport ? (
+        <PlatformHealthOverview
+          report={displayReport}
+          openIssues={displayOpenIssues}
+          onRepairComplete={handleRepairSync}
+        />
+      ) : null}
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-white/80">
-          Open issues ({data.openIssues.length})
-        </h2>
-        {data.openIssues.length === 0 ? (
-          <p className={`${opsPanel} text-[15px] text-emerald-400/90`}>
-            No open issues — looking good for a demo.
-          </p>
-        ) : (
-          <ul className="space-y-3">
-            {data.openIssues.map((issue) => (
-              <OpsIssueCard key={issue.id} issue={issue} />
-            ))}
-          </ul>
-        )}
-      </section>
+      {!simpleMode ? (
+        <>
+          <CommunicationQualityPanel
+            report={displayReport?.communicationQuality}
+            openIssues={displayOpenIssues}
+            onRepairComplete={handleRepairSync}
+          />
 
-      {data.latest ? (
-        <section className={opsPanel}>
-          <button
-            type="button"
-            className="flex w-full min-h-[44px] items-center justify-between text-left text-sm font-semibold text-white/80 touch-manipulation"
-            onClick={() => setShowTechnical((v) => !v)}
-          >
-            Technical check details
-            <span className="text-white/40">{showTechnical ? "▲" : "▼"}</span>
-          </button>
-          {showTechnical ? (
-            <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <CheckList title="Passed" items={data.latest.passedChecks} tone="pass" />
-              <CheckList title="Warnings" items={data.latest.warnings} tone="warn" />
-              <CheckList title="Failed" items={data.latest.failedChecks} tone="fail" />
-            </div>
-          ) : null}
-        </section>
+          <BehavioralIntelligenceTeaser />
+
+          <DemoContentRefreshPanel onRefreshMissionControl={() => void load()} />
+
+          <OpsHealthTrendChart history={data.history} />
+
+          <section id="mission-control-open-issues" className="scroll-mt-6 space-y-3">
+            <h2 className="text-sm font-semibold text-white/80">
+              Open issues — resolution workflow ({displayOpenIssues.length})
+            </h2>
+            <p className="text-[12px] text-white/45">
+              Card-level repair with before/after copy review.
+            </p>
+            {displayOpenIssues.length === 0 ? (
+              <p className={`${opsPanel} text-[15px] text-emerald-400/90`}>
+                No open issues — looking good for a demo.
+              </p>
+            ) : (
+              <ul className="space-y-3">
+                {displayOpenIssues.map((issue) => (
+                  <OpsIssueCard
+                    key={issue.id}
+                    issue={issue}
+                    domainScores={domainScores}
+                    onIssueUpdated={load}
+                  />
+                ))}
+              </ul>
+            )}
+          </section>
+        </>
       ) : null}
 
       <section className={opsPanel}>
@@ -349,42 +511,5 @@ export function GameHealthDashboard() {
         </p>
       ) : null}
     </OpsPageShell>
-  );
-}
-
-function CheckList({
-  title,
-  items,
-  tone
-}: {
-  title: string;
-  items: Array<{ name: string; message: string; laymanSummary?: string }>;
-  tone: "pass" | "warn" | "fail";
-}) {
-  const color =
-    tone === "pass" ? "text-emerald-400" : tone === "warn" ? "text-amber-300" : "text-red-400";
-
-  return (
-    <div className="rounded-xl border border-white/8 bg-black/20 p-3">
-      <h3 className={`text-xs font-bold uppercase tracking-wider ${color}`}>{title}</h3>
-      <ul className="mt-2 max-h-40 space-y-2 overflow-y-auto text-[12px] text-white/55">
-        {items.length === 0 ? (
-          <li>None</li>
-        ) : (
-          items.map((c) => (
-            <li key={c.name}>
-              <span className="font-medium text-white/75">
-                {c.laymanSummary ?? c.name}
-              </span>
-              {c.laymanSummary ? (
-                <span className="block text-[10px] text-white/35">{c.name}</span>
-              ) : (
-                <span className="block text-white/40">{c.message}</span>
-              )}
-            </li>
-          ))
-        )}
-      </ul>
-    </div>
   );
 }

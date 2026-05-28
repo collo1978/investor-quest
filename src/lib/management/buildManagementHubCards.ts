@@ -12,6 +12,7 @@ import {
   resolveHubVisualState
 } from "@/lib/quests/resolveHubVisualState";
 import type { QuestView } from "@/engine";
+import { CONTROLLED_DEMO_MODE } from "@/lib/demo/controlledDemo";
 
 const SLUG_FALLBACK_ORDER: Record<string, number> = {
   "board-leadership": 1,
@@ -34,6 +35,9 @@ const CANONICAL_PRIOR_SLUG: Record<number, string | undefined> = {
 };
 
 export function managementQuestPath(slug: string): string {
+  if (CONTROLLED_DEMO_MODE) {
+    return `/management/${slug}`;
+  }
   return `/quest?pillar=management&quest=${encodeURIComponent(slug)}`;
 }
 

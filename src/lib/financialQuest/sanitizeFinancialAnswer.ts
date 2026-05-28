@@ -1,3 +1,5 @@
+import { normalizeQuestProseDashes } from "@/lib/quests/normalizeQuestProse";
+
 const WORD_ONES: Record<string, number> = {
   zero: 0,
   one: 1,
@@ -155,7 +157,9 @@ export function normalizeFinancialNumericFormatting(text: string): string {
 }
 
 export function sanitizeFinancialAnswerText(text: string): string {
-  return normalizeFinancialNumericFormatting(stripMarkdownFromAnswer(text));
+  return normalizeFinancialNumericFormatting(
+    normalizeQuestProseDashes(stripMarkdownFromAnswer(text))
+  );
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Data Layer — company-specific quest content overrides.
+ * Data Layer, company-specific quest content overrides.
  *
  * Companies share the same {@link QuestTemplate} blueprints (so quest
  * structure stays company-agnostic), but the *actual* plain-English
@@ -13,7 +13,7 @@
  */
 import type { CompanyId } from "@/data/companies";
 import type { PillarId } from "@/data/pillars";
-import type { QuizConfig } from "@/data/quests/types";
+import type { QuizConfig, SecSectionRef } from "@/data/quests/types";
 
 /**
  * Resolved per-sub-card content for a multi-card quest. Maps to the
@@ -23,6 +23,8 @@ export type SubCardContent = {
   plainEnglishAnswer: string;
   /** Elite one-liner for the reading HUD (optional). */
   investorInsight?: string;
+  /** Optional per-card question override (demo / curated copy). */
+  investorQuestion?: string;
 };
 
 /**
@@ -30,6 +32,16 @@ export type SubCardContent = {
  * by the composite key `${pillarId}:${slug}`.
  */
 export type QuestContentOverride = {
+  /** Optional display title override. */
+  title?: string;
+  /** Hub tile + hero subtitle hook. */
+  investorQuestion?: string;
+  /** Short quest blurb on detail screens. */
+  objective?: string;
+  description?: string;
+  whyItMatters?: string;
+  /** Optional source line override (form + section label). */
+  secSection?: SecSectionRef;
   /** Single-card quests: the plain-English answer for the parent quest. */
   plainEnglishAnswer?: string;
   /** Single-card: optional investor insight line for the HUD. */

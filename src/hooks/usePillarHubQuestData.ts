@@ -7,6 +7,7 @@ import { getAnalyticsPartnerId } from "@/lib/analytics/identity";
 import type { CompanyId } from "@/data/companies";
 import type { PillarId } from "@/data/pillars";
 import { getCompanyPillarQuests } from "@/data/quests/library";
+import { filterDemoHubQuests } from "@/lib/demo/playableDemo";
 import {
   getPillarQuestViews,
   getQuestProgressPct,
@@ -21,7 +22,12 @@ export function usePillarHubQuestData(pillarId: PillarId, companyId: CompanyId) 
   const { raw, state } = useGame();
 
   const quests = useMemo(
-    () => getCompanyPillarQuests(companyId, pillarId),
+    () =>
+      filterDemoHubQuests(
+        companyId,
+        pillarId,
+        getCompanyPillarQuests(companyId, pillarId)
+      ),
     [companyId, pillarId, contentVersion]
   );
 

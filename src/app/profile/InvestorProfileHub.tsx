@@ -8,7 +8,8 @@ import { GlassCard } from "@/components/GlassCard";
 import { InvestorQuestBrandLogo } from "@/components/InvestorQuestBrandLogo";
 import { NeonButton } from "@/components/NeonButton";
 import { useGame } from "@/components/GameProvider";
-import { COMPANIES, companyById, type CompanyId } from "@/data/companies";
+import { companyById, type CompanyId } from "@/data/companies";
+import { getPlayableDemoCompanies } from "@/lib/demo/playableDemo";
 import {
   INVESTOR_RUNGS,
   investorLadderProgress,
@@ -17,6 +18,7 @@ import {
 import { BADGES, type BadgeId } from "@/engine/progression/badges";
 import { levelProgress } from "@/engine";
 import { useConviction } from "@/hooks/useConviction";
+import { formatAnalyticsNumber } from "@/lib/analytics/formatDisplay";
 
 const GOLD = "#F5C547";
 const VIOLET = "#C4B5FD";
@@ -188,16 +190,16 @@ export default function InvestorProfileHub() {
                 </h2>
                 <p className="mt-1 text-sm text-ink-1">
                   <span className="font-semibold text-ink-0 tabular-nums">
-                    {state.xp.toLocaleString()}
+                    {formatAnalyticsNumber(state.xp)}
                   </span>{" "}
                   XP · this rank band{" "}
                   <span className="tabular-nums text-ink-0">
-                    {lp.inLevel.toLocaleString()} / {lp.needed.toLocaleString()}
+                    {formatAnalyticsNumber(lp.inLevel)} / {formatAnalyticsNumber(lp.needed)}
                   </span>
                   {nextRung ? (
                     <span className="text-ink-2">
                       {" "}
-                      · {xpToNext.toLocaleString()} XP until{" "}
+                      · {formatAnalyticsNumber(xpToNext)} XP until{" "}
                       <span className="font-medium text-violet-200/95">{nextTitle}</span>
                     </span>
                   ) : null}
@@ -444,7 +446,7 @@ export default function InvestorProfileHub() {
                 </Link>
               </div>
               <p className="mt-3 text-xs text-ink-2">
-                {COMPANIES.map((c) => c.ticker).join(" · ")}
+                {getPlayableDemoCompanies().map((c) => c.ticker).join(" · ")}
               </p>
             </GlassCard>
 

@@ -9,7 +9,12 @@
  */
 
 import { STORAGE_KEY, type GameState } from "@/engine/progression/state";
-import { migrateRaw } from "@/engine/progression/persistence";
+import {
+  clearPersistedSnapshots,
+  loadPersistedSnapshot,
+  savePersistedSnapshot,
+  STORAGE_BACKUP_KEY
+} from "@/engine/progression/persistence";
 import type { ProgressionStore, StoreSubscriber } from "@/engine/persistence/store";
 
 function isAvailable(): boolean {
@@ -21,48 +26,29 @@ function isAvailable(): boolean {
   }
 }
 
-function readRaw(): GameState | null {
-  if (!isAvailable()) return null;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as unknown;
-    return migrateRaw(parsed);
-  } catch {
-    return null;
-  }
-}
-
 export const localStorageStore: ProgressionStore = {
   id: "localStorage",
 
   async load() {
-    return readRaw();
+    if (!isAvailable()) return null;
+    return loadPersistedSnapshot();
   },
 
   async save(state: GameState) {
     if (!isAvailable()) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      // quota or privacy mode — ignore
-    }
+    savePersistedSnapshot(state, { mergeIfDiskNewer: true });
   },
 
   async clear() {
     if (!isAvailable()) return;
-    try {
-      window.localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // ignore
-    }
+    clearPersistedSnapshots();
   },
 
   subscribe(handler: StoreSubscriber) {
     if (!isAvailable()) return () => undefined;
     const onStorage = (e: StorageEvent) => {
-      if (e.key !== STORAGE_KEY) return;
-      const next = readRaw();
+      if (e.key !== STORAGE_KEY && e.key !== STORAGE_BACKUP_KEY) return;
+      const next = loadPersistedSnapshot();
       if (next) handler(next);
     };
     window.addEventListener("storage", onStorage);

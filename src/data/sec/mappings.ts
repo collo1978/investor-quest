@@ -18,6 +18,7 @@ export const QUEST_TYPE_SEC_MAP: QuestTypeSecMap = {
     { form: "10-K", section: "Item 7 — MD&A (revenue)" },
     { form: "10-Q", section: "MD&A (revenue)" }
   ],
+  everyday: [{ form: "10-K", section: "Item 1 — Business (markets / products)" }],
   operations: [
     { form: "10-K", section: "Item 1 — Business (operations)" }
   ],

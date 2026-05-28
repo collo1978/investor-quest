@@ -1,4 +1,5 @@
 import { sanitizeQuestAnswerText } from "@/lib/quests/sanitizeQuestAnswer";
+import { formatQuestCardCopy } from "@/lib/quests/questAnswerFormatter";
 
 export {
   QUEST_BEGINNER_VOICE,
@@ -44,11 +45,19 @@ export function parseRelatableQuestAnswer(
   const raw = plainEnglishAnswer?.trim();
   if (!raw) return null;
 
-  let body = raw
+  const formatted = formatQuestCardCopy({
+    plainEnglishAnswer: raw,
+    investorInsight,
+    displayMode: "display"
+  });
+  const sanitized = sanitizeQuestAnswerText(
+    formatted?.plainEnglishAnswer ?? raw
+  );
+  let body = sanitized
     .replace(/\n\s*Simple [Vv]ersion:\s*[\s\S]*$/i, "")
     .trim();
 
-  let why = investorInsight?.trim() || null;
+  let why = formatted?.whyInvestorsCare ?? investorInsight?.trim() ?? null;
 
   const embeddedWhy = body.match(/\n\s*Why investors care:\s*\n?([\s\S]+)$/i);
   if (embeddedWhy?.index != null) {

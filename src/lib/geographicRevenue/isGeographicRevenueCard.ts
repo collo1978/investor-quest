@@ -1,4 +1,5 @@
 import type { PillarId } from "@/data/pillars";
+import { CONTROLLED_DEMO_MODE } from "@/lib/demo/controlledDemo";
 
 /** Quest sub-cards that should show the geographic revenue map as the main visual. */
 export function isGeographicRevenueCard(
@@ -7,7 +8,9 @@ export function isGeographicRevenueCard(
   cardId: string | undefined,
   investorQuestion: string
 ): boolean {
-  if (pillarId === "business" && questSlug === "revenue" && cardId === "card-2") {
+  if (CONTROLLED_DEMO_MODE) return false;
+
+  if (pillarId === "business" && questSlug === "why-buying" && cardId === "card-1") {
     return true;
   }
   if (pillarId === "financials" && questSlug === "growth" && cardId === "card-3") {

@@ -2,12 +2,14 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import Link, { useLinkStatus } from "next/link";
+import { toDemoHref } from "@/lib/demo/demoHref";
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { HubMapCardTheme } from "@/components/quest/hub/hubMapCardTheme";
 import type { HubMapQuestCardData } from "@/lib/quests/hubMapQuestCardTypes";
 import type { HubQuestVisualState } from "@/lib/quests/resolveHubVisualState";
 import { trackUserEvent } from "@/lib/analytics/trackUserEvent";
 import type { Company } from "@/data/companies";
+import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
 
 function pulseShadow(theme: HubMapCardTheme, peak = false): string {
   const g = theme.glow;
@@ -26,12 +28,12 @@ function pulseShadow(theme: HubMapCardTheme, peak = false): string {
   ].join(", ");
 }
 
-function QuestLinkPendingOverlay() {
+function QuestLinkPendingOverlay({ active }: { active: boolean }) {
   const { pending } = useLinkStatus();
-  if (!pending) return null;
+  if (!active && !pending) return null;
   return (
     <span
-      className="pointer-events-none absolute inset-0 z-[4] rounded-xl bg-[rgba(245,197,71,0.08)] ring-2 ring-[rgba(245,197,71,0.35)] animate-pulse"
+      className="pointer-events-none absolute inset-0 z-[4] rounded-xl bg-[rgba(245,197,71,0.12)] ring-2 ring-[rgba(245,197,71,0.45)]"
       aria-hidden
     />
   );
@@ -111,6 +113,7 @@ export function SharedHubQuestMapCard({
   const wasCompleteRef = useRef(state === "completed");
   const [celebrateUnlock, setCelebrateUnlock] = useState(false);
   const [celebrateComplete, setCelebrateComplete] = useState(false);
+  const [navigating, setNavigating] = useState(false);
 
   useEffect(() => {
     if (isLocked) setCelebrateUnlock(false);
@@ -222,6 +225,11 @@ export function SharedHubQuestMapCard({
         theme={theme}
         pulseLo={pulseLo}
         pulsePeak={pulsePeak}
+        navigating={navigating}
+        onNavigateStart={() => {
+          preloadQuestDetailChunks();
+          setNavigating(true);
+        }}
       >
         <HubCardBody
           card={card}
@@ -258,13 +266,17 @@ function HubQuestCardFrame({
   userId,
   theme,
   pulseLo,
-  pulsePeak
+  pulsePeak,
+  navigating,
+  onNavigateStart
 }: {
   state: HubQuestVisualState;
   isLocked: boolean;
   card: HubMapQuestCardData;
   company: Company;
   children: ReactNode;
+  navigating: boolean;
+  onNavigateStart: () => void;
   enter: { opacity: number; y: number; scale: number };
   shown: { opacity: number; y: number; scale: number };
   scale: number;
@@ -447,7 +459,7 @@ function HubQuestCardFrame({
         whileTap={reduceMotion ? undefined : { scale: 0.99 }}
       >
         <Link
-          href={card.route}
+          href={toDemoHref(card.route)}
           prefetch
           scroll
           className={linkClass}
@@ -456,6 +468,8 @@ function HubQuestCardFrame({
               ? `Review completed quest: ${card.title}`
               : `Open quest: ${card.title}`
           }
+          onPointerEnter={() => preloadQuestDetailChunks()}
+          onPointerDown={onNavigateStart}
           onClick={() => {
             trackUserEvent({
               eventType: "user_started_quest",
@@ -474,7 +488,7 @@ function HubQuestCardFrame({
             });
           }}
         >
-          <QuestLinkPendingOverlay />
+          <QuestLinkPendingOverlay active={navigating} />
           {state === "completed" ? (
             <CompletedCardSheen />
           ) : (
@@ -506,6 +520,7 @@ function HubCardBody({
   showCategoryIcon?: boolean;
 }) {
   const dimmed = isLocked || state === "locked";
+  const subtitle = card.subtitle?.trim() ?? "";
   return (
     <article className="flex flex-col">
       <header
@@ -568,20 +583,22 @@ function HubCardBody({
         >
           {card.title}
         </h3>
-        <p
-          className={[
-            "line-clamp-2 text-[14.5px] leading-snug sm:text-[15.5px]",
-            dimmed
-              ? "text-[rgba(255,235,200,0.52)]"
-              : state === "completed"
-                ? "text-[rgba(255,242,215,0.72)]"
-                : isPrimaryActive
-                  ? "text-[rgba(255,242,215,0.92)]"
-                  : "text-[rgba(255,235,200,0.78)]"
-          ].join(" ")}
-        >
-          {card.subtitle}
-        </p>
+        {subtitle ? (
+          <p
+            className={[
+              "line-clamp-2 text-[14.5px] leading-snug sm:text-[15.5px]",
+              dimmed
+                ? "text-[rgba(255,235,200,0.52)]"
+                : state === "completed"
+                  ? "text-[rgba(255,242,215,0.72)]"
+                  : isPrimaryActive
+                    ? "text-[rgba(255,242,215,0.92)]"
+                    : "text-[rgba(255,235,200,0.78)]"
+            ].join(" ")}
+          >
+            {subtitle}
+          </p>
+        ) : null}
       </motion.div>
 
       <footer className="mt-2.5 space-y-2">

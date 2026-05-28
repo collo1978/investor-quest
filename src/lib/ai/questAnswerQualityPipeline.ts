@@ -10,6 +10,8 @@ import {
   JARGON_REWRITE_SYSTEM_PROMPT,
   type QuestJargonGateResult
 } from "@/lib/quests/questJargonGate";
+import { formatQuestCardFields } from "@/lib/quests/questAnswerFormatter";
+import { suggestCleanedQuestCopy } from "@/lib/quests/questAnswerValidator";
 
 export type FinalizeQuestAnswerInput = {
   companyName: string;
@@ -91,6 +93,22 @@ export async function finalizeQuestAnswer(
     input.rawAnswer
   );
 
+  if (plainEnglishAnswer?.trim()) {
+    const cleaned = suggestCleanedQuestCopy(plainEnglishAnswer, {
+      pillarId: input.pillarId,
+      questSlug: input.questSlug,
+      cardId: input.cardId,
+      cardQuestion: input.cardQuestion,
+      kind: "quest_card"
+    });
+    const formatted = formatQuestCardFields({
+      plainEnglishAnswer: cleaned || plainEnglishAnswer,
+      investorInsight
+    });
+    plainEnglishAnswer = formatted.plainEnglishAnswer ?? cleaned;
+    investorInsight = formatted.investorInsight ?? null;
+  }
+
   if (!plainEnglishAnswer?.trim()) {
     return {
       ok: false,
@@ -148,6 +166,12 @@ export async function finalizeQuestAnswer(
       if (!plainEnglishAnswer?.trim()) {
         break;
       }
+      const reformatted = formatQuestCardFields({
+        plainEnglishAnswer,
+        investorInsight
+      });
+      plainEnglishAnswer = reformatted.plainEnglishAnswer ?? plainEnglishAnswer;
+      investorInsight = reformatted.investorInsight ?? null;
       gate = analyzeQuestJargonGate(
         plainEnglishAnswer,
         investorInsight,

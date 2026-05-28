@@ -2,7 +2,7 @@
 
 import { MotionIn } from "@/components/MotionIn";
 import { NeonButton } from "@/components/NeonButton";
-import { COMPANIES } from "@/lib/demoData";
+import { getPlayableDemoCompanies } from "@/lib/demoData";
 import { SkyBackdrop, XPHud, IslandPillarCard } from "@/components/FloatingIslands";
 import Link from "next/link";
 import { useGame } from "@/components/GameProvider";
@@ -19,7 +19,7 @@ const HOME_PILLAR_SUBTITLES: Record<PillarId, string> = {
 export default function HomeHubPage() {
   const { state } = useGame();
 
-  // Live island-preview model — reads pillar unlock + quest counts from the
+  // Live island-preview model, reads pillar unlock + quest counts from the
   // engine so the home cards stay in sync with the real progression state.
   // Previously these props were hardcoded (locked=true, "2 quests"), which
   // both blocked clicks on Forces / Financials / Management and showed stale
@@ -82,7 +82,7 @@ export default function HomeHubPage() {
                 <div className="rounded-2xl border border-panel-border bg-panel p-4 shadow-glow backdrop-blur-xl">
                   <div className="text-[11px] text-ink-2">Available campaigns</div>
                   <div className="mt-2 text-sm font-semibold text-ink-0">
-                    {COMPANIES.map((c) => c.ticker).join(" · ")}
+                    {getPlayableDemoCompanies().map((c) => c.ticker).join(" · ")}
                   </div>
                   <div className="mt-2 text-xs text-ink-2">
                     Each company saves its own XP, unlocks, and journal.

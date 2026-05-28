@@ -1,4 +1,6 @@
 import type { PillarId } from "@/data/pillars";
+import { CONTROLLED_DEMO_MODE } from "@/lib/demo/controlledDemo";
+import { NVDA_PIPELINE_LINES } from "@/lib/demo/nvidiaDemoVoice";
 
 /** How long each generating-phase line stays visible before cycling. */
 export const PIPELINE_STATUS_CYCLE_MS = 2800;
@@ -9,7 +11,7 @@ const PILLAR_LINES: Record<PillarId, readonly string[]> = {
     "Finding where this shows up in everyday life…",
     "Translating the business into plain English…",
     "Checking what problem it solves for people…",
-    "Almost ready — human-first intel incoming…"
+    "Almost ready — smart-friend answers incoming…"
   ],
   forces: [
     "Reading SEC filings…",
@@ -42,7 +44,7 @@ const QUEST_OVERRIDES: Partial<
       "Reading SEC filings…",
       "Tracing where money shows up in real life…",
       "Mapping products and regions…",
-      "Plain-English revenue intel loading…"
+      "Plain-English revenue answers loading…"
     ],
     snapshot: [
       "Reading SEC filings…",
@@ -81,6 +83,7 @@ export function getPipelineStatusLines(
   pillarId: PillarId,
   questSlug?: string
 ): readonly string[] {
+  if (CONTROLLED_DEMO_MODE) return NVDA_PIPELINE_LINES;
   const slugLines = questSlug
     ? QUEST_OVERRIDES[pillarId]?.[questSlug]
     : undefined;
@@ -89,34 +92,40 @@ export function getPipelineStatusLines(
 }
 
 export function playerFacingPipelineError(raw: string | null): string {
-  if (!raw) return "Could not refresh this intel — tap retry in a moment.";
+  if (CONTROLLED_DEMO_MODE) {
+    return "One sec — lining up examples you'll actually recognize.";
+  }
+  if (!raw) return "Could not refresh quest content — tap Try again in a moment.";
   const lower = raw.toLowerCase();
   if (lower.includes("teenager") || lower.includes("jargon") || lower.includes("human-first")) {
     return "Answer was too corporate or technical — regenerating in plain everyday language…";
   }
-  if (lower.includes("extract") || lower.includes("filing")) {
-    return "We could not reach the latest filing yet. Tap retry to pull fresh SEC intel.";
+  if (lower.includes("extract") || lower.includes("filing") || lower.includes("missing")) {
+    return "SEC filing sections are not loaded yet. Use Admin → Quest copy to pull filings, then retry.";
   }
   if (lower.includes("openai") || lower.includes("api key")) {
-    return "Research engine is warming up — retry shortly.";
+    return "Answer writer is not configured — check OPENAI_API_KEY in .env.local.";
   }
-  if (lower.includes("rate") || lower.includes("429")) {
-    return "High demand on the research line — give it a few seconds, then retry.";
+  if (lower.includes("rate") || lower.includes("429") || lower.includes("quota")) {
+    return "Filing or answer service is rate-limited — wait a moment, then try again.";
   }
-  return "Intel refresh hit a snag — tap retry to run the pipeline again.";
+  return "Quest content hit a snag — tap Try again or regenerate from Admin.";
 }
 
 export function playerFacingEmptyQuestCopy(pillarId: PillarId): string {
+  if (CONTROLLED_DEMO_MODE) {
+    return "Almost ready — your card with real-life examples is on the way.";
+  }
   switch (pillarId) {
     case "business":
-      return "No plain-English cards yet for this company — generate from Mission Control or open another quest.";
+      return "No quest answers yet for this company — generate from Admin or open another quest.";
     case "financials":
-      return "Financial intel is not loaded yet — run generation when filings are ready.";
+      return "Financial quest answers are not loaded yet — run generation when filings are ready.";
     case "forces":
-      return "Forces intel is not loaded yet — pull fresh risk factors first.";
+      return "Forces quest answers are not loaded yet — pull fresh risk factors first.";
     case "management":
-      return "Management intel is not loaded yet — proxy excerpts need a refresh.";
+      return "Management quest answers are not loaded yet — proxy excerpts need a refresh.";
     default:
-      return "This quest intel is not ready yet — try again shortly.";
+      return "This quest content is not ready yet — try again shortly.";
   }
 }

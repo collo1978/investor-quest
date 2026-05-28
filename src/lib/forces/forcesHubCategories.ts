@@ -14,7 +14,7 @@ export const FORCES_HUB_CATEGORY_SLOTS: readonly ForcesHubCategorySlot[] = [
     orderNumber: 1,
     categoryId: "positive-inside",
     defaultTitle: "Positive Inside Forces",
-    defaultSubtitle: "Strengths within the company's control",
+    defaultSubtitle: "Strengths within {Company.name}'s control",
     hubSlug: "forces-hub-positive-inside"
   },
   {
@@ -28,14 +28,14 @@ export const FORCES_HUB_CATEGORY_SLOTS: readonly ForcesHubCategorySlot[] = [
     orderNumber: 3,
     categoryId: "negative-inside",
     defaultTitle: "Negative Inside Forces",
-    defaultSubtitle: "Risks within the company's control",
+    defaultSubtitle: "Risks within {Company.name}'s control",
     hubSlug: "forces-hub-negative-inside"
   },
   {
     orderNumber: 4,
     categoryId: "negative-outside",
     defaultTitle: "Negative Outside Forces",
-    defaultSubtitle: "Headwinds outside the company's control",
+    defaultSubtitle: "Headwinds outside {Company.name}'s control",
     hubSlug: "forces-hub-negative-outside"
   }
 ] as const;

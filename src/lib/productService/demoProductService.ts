@@ -1,13 +1,15 @@
 import type { ProductServiceReport } from "@/lib/productService/types";
+import { normalizeProductServiceReport } from "@/lib/productService/normalizeProductServiceReport";
 
 /** Demo product & services mix for Apple (10-K–style buckets). */
-export const APPLE_DEMO_PRODUCT_SERVICE: ProductServiceReport = {
+const APPLE_DEMO_RAW: ProductServiceReport = {
   ticker: "AAPL",
   fiscalYear: 2024,
-  headline: "Premium devices plus a growing services ecosystem",
+  headline: "Most money still comes from iPhone, with Services adding recurring revenue on top",
   revenueMix: [
     { label: "iPhone", percent: 52 },
     { label: "Services", percent: 22 },
+    { label: "Wearables", percent: 10 },
     { label: "Mac", percent: 8 },
     { label: "iPad", percent: 8 }
   ],
@@ -21,8 +23,7 @@ export const APPLE_DEMO_PRODUCT_SERVICE: ProductServiceReport = {
           label: "iPhone",
           category: "hardware",
           percent: 52,
-          isPrimary: true,
-          tag: "Largest revenue driver"
+          isPrimary: true
         },
         {
           productKey: "mac",
@@ -83,26 +84,15 @@ export const APPLE_DEMO_PRODUCT_SERVICE: ProductServiceReport = {
           recurring: true
         }
       ]
-    },
-    {
-      categoryKey: "ecosystem",
-      label: "Ecosystem",
-      items: [
-        {
-          productKey: "ecosystem",
-          label: "Device + software lock-in",
-          category: "ecosystem",
-          tag: "Cross-sell & retention"
-        }
-      ]
     }
   ],
-  investorInsight:
-    "Apple sells premium hardware, then layers recurring services on top of a massive installed base — diversifying away from pure iPhone cycles over time.",
   sourceForm: "10-K",
   sourceSectionLabel: "Products and Services",
   sourceAccession: null
 };
+
+export const APPLE_DEMO_PRODUCT_SERVICE =
+  normalizeProductServiceReport(APPLE_DEMO_RAW);
 
 export function getDemoProductServiceReport(
   ticker: string

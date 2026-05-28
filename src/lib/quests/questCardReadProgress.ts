@@ -82,24 +82,12 @@ export function computeQuestCardReadProgress(input: {
   };
 }
 
+/** Player-facing unlock hints — omitted; card progress UI carries the state. */
 export function questQuizUnlockUserMessage(
-  progress: QuestCardReadProgress,
-  cards?: readonly QuestSubCard[]
+  _progress: QuestCardReadProgress,
+  _cards?: readonly QuestSubCard[]
 ): string | null {
-  if (progress.quizUnlocked) return null;
-  if (!progress.hasQuiz) {
-    return "Mastery quiz is not available for this quest yet.";
-  }
-  const n = progress.missingCardIds.length;
-  if (n === 0) return null;
-  if (n === 1 && cards?.length) {
-    const id = progress.missingCardIds[0];
-    const card = cards.find((c) => c.id === id);
-    if (card) {
-      return "You still need to mark 1 card as read — finish the current card above.";
-    }
-  }
-  return `You still need to complete ${n} card${n === 1 ? "" : "s"} before the quiz unlocks.`;
+  return null;
 }
 
 /** Admin/debug: why Next: Quiz or quiz CTA stays inactive. */

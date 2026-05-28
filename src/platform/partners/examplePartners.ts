@@ -67,7 +67,7 @@ const bank: PartnerConfig = {
   type: "bank",
   branding: {
     partnerName: "Northstar Community Bank",
-    logoUrl: "/screens/business-island-screen.png",
+    logoUrl: "/logos/business-island-screen.webp",
     colors: {
       primary: "#1D4ED8",
       secondary: "#38BDF8",

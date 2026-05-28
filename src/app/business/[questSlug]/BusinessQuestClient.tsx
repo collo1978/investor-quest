@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import type { BusinessQuestSlug } from "@/app/business/businessQuestSlugs";
 import { useGame } from "@/components/GameProvider";
 import { BusinessQuestRouteLoading } from "@/components/business/BusinessQuestRouteLoading";
-import { DynamicQuestDetailScreen } from "@/components/quest/DynamicQuestDetailScreen";
+import { QuestDetailScreen } from "@/components/QuestDetailScreen";
 import { companyById, type CompanyId } from "@/data/companies";
 import { findQuestDefinition } from "@/data/quests/library";
 import { usePillarHubQuestData } from "@/hooks/usePillarHubQuestData";
@@ -41,11 +41,13 @@ function BusinessQuestWithPipeline({ slug }: { slug: BusinessQuestSlug }) {
     if (!payload?.cards || Object.keys(payload.cards).length === 0) {
       return base;
     }
-    return mergeGeneratedQuestContent(base, payload.cards);
-  }, [companyId, slug, payload?.cards]);
+    return mergeGeneratedQuestContent(base, payload.cards, {
+      pipelineGenerating: generating
+    });
+  }, [companyId, slug, payload?.cards, generating]);
 
   return (
-    <DynamicQuestDetailScreen
+    <QuestDetailScreen
       pillarId="business"
       slug={slug}
       questOverride={questOverride ?? undefined}
@@ -90,7 +92,11 @@ export default function BusinessQuestClient({ slug }: Props) {
     router.replace("/business");
   }, [hydrated, hubCard?.locked, router]);
 
-  if (!hydrated || hubCard?.locked) {
+  if (hubCard?.locked) {
+    return <BusinessQuestRouteLoading />;
+  }
+
+  if (!hydrated) {
     return <BusinessQuestRouteLoading />;
   }
 

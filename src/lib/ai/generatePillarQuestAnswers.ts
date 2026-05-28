@@ -24,11 +24,23 @@ import {
 import { isSecApiConfigured } from "@/lib/sec/env";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import {
+  appendDemoLearningDesignToUserPrompt,
+  shouldInjectDemoLearningDesign
+} from "@/lib/demo/nvidiaDemoLearningDesign";
+import { hasCuratedCardAnswer } from "@/lib/quests/questCardContentSource";
+import {
   fetchQuestCardAnswersForSlug,
   hashSectionContent,
   upsertQuestCardAnswer
 } from "@/lib/supabase/questCardAnswers/storage";
 import type { SecFilingFormType } from "@/lib/sec/types";
+
+const QUEST_PIPELINE_LOGS_ENABLED = process.env.QUEST_PIPELINE_LOGS === "1";
+
+function pipelineInfo(message: string, detail?: Record<string, unknown>) {
+  if (!QUEST_PIPELINE_LOGS_ENABLED) return;
+  console.info(message, detail ?? {});
+}
 
 export type PriorQuestCardSummary = {
   cardId: string;
@@ -86,6 +98,8 @@ export type GeneratePillarQuestResult = {
   extractRan: boolean;
   fastMode?: boolean;
   cachedSkipped?: number;
+  /** Cards skipped because hand-authored override wins on screen */
+  curatedSkipped?: number;
 };
 
 export async function generatePillarQuestAnswers(
@@ -97,6 +111,7 @@ export async function generatePillarQuestAnswers(
   let generated = 0;
   let skipped = 0;
   let cachedSkipped = 0;
+  let curatedSkipped = 0;
   let extractRan = false;
   const genOpts = resolveQuestGenerationOptions(ctx.generationOptions);
   const pipelineTimer = new QuestPipelineTimer();
@@ -219,6 +234,38 @@ export async function generatePillarQuestAnswers(
     }
 
     try {
+      if (
+        hasCuratedCardAnswer(
+          ctx.companyId,
+          ctx.pillarId,
+          spec.questSlug,
+          spec.cardId
+        ) &&
+        !genOpts.forceRegenerate
+      ) {
+        curatedSkipped++;
+        skipped++;
+        const curatedQuest = findQuestDefinition(
+          ctx.companyId,
+          ctx.pillarId,
+          spec.questSlug
+        );
+        const curatedCard = curatedQuest?.cards?.find(
+          (c) => c.id === spec.cardId
+        );
+        const summary =
+          curatedCard?.plainEnglishAnswer?.trim().slice(0, 160) ??
+          "Curated override";
+        const questPrior = priorByQuest.get(spec.questSlug) ?? [];
+        questPrior.push({
+          cardId: spec.cardId,
+          investorQuestion: card.investorQuestion,
+          summary
+        });
+        priorByQuest.set(spec.questSlug, questPrior);
+        continue;
+      }
+
       const cached = existingByQuest.get(spec.questSlug)?.[spec.cardId];
       if (
         !genOpts.forceRegenerate &&
@@ -246,7 +293,7 @@ export async function generatePillarQuestAnswers(
       const priorCardsInQuest = priorByQuest.get(spec.questSlug) ?? [];
 
       cardTimer.mark("promptBuildStart");
-      const userPrompt = await ctx.buildUserPrompt({
+      let userPrompt = await ctx.buildUserPrompt({
         companyName: company.name,
         ticker: company.ticker,
         questSlug: spec.questSlug,
@@ -258,6 +305,14 @@ export async function generatePillarQuestAnswers(
         sectionIds: resolved.sectionIds,
         priorCardsInQuest
       });
+      if (shouldInjectDemoLearningDesign(ctx.companyId)) {
+        userPrompt = appendDemoLearningDesignToUserPrompt(
+          userPrompt,
+          ctx.pillarId,
+          spec.questSlug,
+          card.investorQuestion
+        );
+      }
       cardTimer.mark("promptBuildDone");
 
       cardTimer.mark("openaiStart");
@@ -305,7 +360,7 @@ export async function generatePillarQuestAnswers(
       const { plainEnglishAnswer, investorInsight } = finalized;
 
       if (finalized.rewriteAttempts > 0 || finalized.acceptedDespiteJargon) {
-        console.info("[quest-pipeline:jargon-rewrite]", {
+        pipelineInfo("[quest-pipeline:jargon-rewrite]", {
           ticker,
           questSlug: spec.questSlug,
           cardId: spec.cardId,
@@ -331,7 +386,7 @@ export async function generatePillarQuestAnswers(
       cardTimer.mark("saveDone");
 
       const timing = cardTimer.summary();
-      console.info("[quest-pipeline:timing]", {
+      pipelineInfo("[quest-pipeline:timing]", {
         ticker,
         pillarId: ctx.pillarId,
         questSlug: spec.questSlug,
@@ -375,10 +430,11 @@ export async function generatePillarQuestAnswers(
     errors,
     extractRan,
     fastMode: genOpts.fastMode,
-    cachedSkipped
+    cachedSkipped,
+    curatedSkipped
   };
 
-  console.info("[quest-pipeline:generate]", {
+  pipelineInfo("[quest-pipeline:generate]", {
     ...result,
     timingMs: pipelineTimer.summary()
   });

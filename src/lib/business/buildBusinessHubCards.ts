@@ -26,36 +26,26 @@ import {
 
 import type { QuestView } from "@/engine";
 
-
+/** Mirror `CONTROLLED_DEMO_MODE` — do not import `nvidiaDemoVoice` / `controlledDemo` here (library cycle). */
+const NVDA_DEMO_HUB_SUBTITLES_OFF =
+  process.env.NEXT_PUBLIC_CONTROLLED_DEMO !== "false";
 
 const SLUG_FALLBACK_ORDER: Record<string, number> = {
-
-  snapshot: 1,
-
-  revenue: 2,
-
-  operations: 3,
-
-  advantage: 4,
-
-  industry: 5
-
+  "what-they-do": 1,
+  "why-buying": 2,
+  "everyday-life": 3,
+  "how-it-works": 4,
+  "why-they-stay": 5,
+  competition: 6
 };
 
-
-
 /** Canonical prior quest slug for each hub slot (not “whatever occupies slot N−1”). */
-
 const CANONICAL_PRIOR_SLUG: Record<number, string | undefined> = {
-
-  2: "snapshot",
-
-  3: "revenue",
-
-  4: "operations",
-
-  5: "advantage"
-
+  2: "what-they-do",
+  3: "why-buying",
+  4: "everyday-life",
+  5: "how-it-works",
+  6: "why-they-stay"
 };
 
 
@@ -152,13 +142,13 @@ export function buildBusinessHubCards(
 
     const route = quest.hubRoute?.trim() || `/business/${quest.slug}`;
 
+    const hubSubtitleOnly = quest.hubSubtitle?.trim() ?? "";
     const subtitle =
-
-      quest.hubSubtitle?.trim() ||
-
-      quest.investorQuestion ||
-
-      quest.description;
+      NVDA_DEMO_HUB_SUBTITLES_OFF && quest.companyId === "nvda"
+        ? hubSubtitleOnly
+        : hubSubtitleOnly ||
+          quest.investorQuestion ||
+          quest.description;
 
     const cardCount = resolveHubCardCount(quest);
 

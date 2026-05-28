@@ -1,3 +1,5 @@
+import { NVDA_DEMO_TAGLINE } from "@/lib/demo/nvidiaDemoSources";
+
 /**
  * Data Layer — company directory.
  *
@@ -67,7 +69,7 @@ export const COMPANIES: readonly Company[] = [
     ticker: "NVDA",
     logoSrc: "/logos/companies/nvda.svg",
     cik: "0001045810",
-    tagline: "The compute layer powering the AI economy.",
+    tagline: NVDA_DEMO_TAGLINE,
     sector: "Semiconductors"
   },
   {
@@ -95,7 +97,11 @@ export function isCompanyId(id: string): id is CompanyId {
 }
 
 export function companyById(id: string | null | undefined): Company {
-  return COMPANIES.find((c) => c.id === id) ?? COMPANIES[0];
+  const fallback =
+    process.env.NEXT_PUBLIC_CONTROLLED_DEMO !== "false"
+      ? (COMPANIES.find((c) => c.id === "nvda") ?? COMPANIES[0])
+      : COMPANIES[0];
+  return COMPANIES.find((c) => c.id === id) ?? fallback;
 }
 
 export function companyByTicker(ticker: string): Company | null {

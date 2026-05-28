@@ -37,6 +37,14 @@ export default function RootLayout({
       className={`${grotesk.variable} ${inter.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <link
+          rel="preload"
+          href="/logos/investor-quest-logo.png"
+          as="image"
+          type="image/png"
+        />
+      </head>
       <body className="grain font-[var(--font-inter)]" suppressHydrationWarning>
         <ClientAppRoot>{children}</ClientAppRoot>
       </body>

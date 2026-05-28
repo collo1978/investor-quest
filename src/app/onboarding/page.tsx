@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { NeonButton } from "@/components/NeonButton";
@@ -9,6 +9,17 @@ import { useGame } from "@/components/GameProvider";
 import { InvestorQuestBrandLogo } from "@/components/InvestorQuestBrandLogo";
 import { QuestMatchReveal } from "@/app/onboarding/QuestMatchReveal";
 import { getOrCreateOnboardingGuestId } from "@/lib/onboarding/guestId";
+import {
+  CONTROLLED_DEMO_MODE,
+  CONTROLLED_DEMO_COMPANY_ID
+} from "@/lib/demo/controlledDemo";
+import { NVDA_ONBOARDING } from "@/lib/demo/nvidiaDemoVoice";
+import {
+  buildControlledDemoOnboardingShowcase,
+  buildControlledDemoQuestMatchPool,
+  mergeRecommendationsForControlledDemo,
+  shuffleOnboardingDeck
+} from "@/lib/demo/controlledOnboarding";
 import { buildQuestMatchFallbackCards } from "@/lib/onboarding/questMatchFallback";
 import type {
   OnboardingInterest,
@@ -19,6 +30,12 @@ import {
   isCompanyId,
   type CompanyId
 } from "@/lib/demoData";
+import { useDemoStory } from "@/components/demo/DemoStoryProvider";
+import { isDemoStoryModeActive } from "@/lib/demo/demoStoryMode";
+import { useRunOnceOnMount } from "@/hooks/useRunOnceOnMount";
+import { releaseFunnelTransition } from "@/lib/startup/funnelTransition";
+import { prefetchStartupAssets } from "@/lib/startup/prefetchStartupAssets";
+import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
 
 const FALLBACK_INTERESTS: OnboardingInterest[] = [
   { id: "ai", label: "AI & Robotics", icon: "⌬", sortOrder: 10 },
@@ -32,6 +49,7 @@ const FALLBACK_INTERESTS: OnboardingInterest[] = [
 ];
 
 function resolveGameCompanyId(cardId: string): CompanyId {
+  if (CONTROLLED_DEMO_MODE) return CONTROLLED_DEMO_COMPANY_ID;
   return isCompanyId(cardId) ? cardId : DEFAULT_COMPANY_ID;
 }
 
@@ -59,7 +77,29 @@ function InterestTags({
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { state, actions } = useGame();
+  const { state, actions, persistenceReady, raw } = useGame();
+  const demoStory = useDemoStory();
+
+  useRunOnceOnMount(() => {
+    releaseFunnelTransition("onboarding");
+    prefetchStartupAssets();
+    preloadQuestDetailChunks();
+    try {
+      router.prefetch("/business");
+      router.prefetch("/business/what-they-do");
+      router.prefetch("/map");
+    } catch {
+      /* ignore */
+    }
+  });
+
+  useEffect(() => {
+    if (demoStory.active || isDemoStoryModeActive()) return;
+    if (!persistenceReady) return;
+    if (raw.onboarding.completedAt != null) {
+      router.replace("/map");
+    }
+  }, [demoStory.active, persistenceReady, raw.onboarding.completedAt, router]);
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [interests, setInterests] = useState<string[]>([]);
@@ -68,7 +108,7 @@ export default function OnboardingPage() {
   const [recommendedCards, setRecommendedCards] = useState<RecommendedCompanyCard[]>(
     []
   );
-  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(false);
   const [swipeLikes, setSwipeLikes] = useState<string[]>([]);
   const [swipeNope, setSwipeNope] = useState<string[]>([]);
   const [selectedCardId, setSelectedCardId] = useState<string>(state.activeCompanyId);
@@ -92,8 +132,6 @@ export default function OnboardingPage() {
         }
       } catch {
         // keep fallback
-      } finally {
-        if (!cancelled) setCatalogLoading(false);
       }
     })();
     return () => {
@@ -102,6 +140,13 @@ export default function OnboardingPage() {
   }, []);
 
   const loadRecommendations = useCallback(async (selected: string[]) => {
+    if (CONTROLLED_DEMO_MODE) {
+      setRecommendedCards(
+        shuffleOnboardingDeck(buildControlledDemoOnboardingShowcase(selected))
+      );
+      setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID);
+      return;
+    }
     if (!selected.length) {
       setRecommendedCards([]);
       return;
@@ -110,21 +155,35 @@ export default function OnboardingPage() {
     const res = await fetch(`/api/onboarding/recommendations?interests=${qs}&limit=12`, {
       cache: "no-store"
     });
-    if (!res.ok) return;
+    if (!res.ok) {
+      if (CONTROLLED_DEMO_MODE) {
+        setRecommendedCards(
+          shuffleOnboardingDeck(buildControlledDemoOnboardingShowcase(selected))
+        );
+        setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID);
+      }
+      return;
+    }
     const body = (await res.json()) as { companies?: RecommendedCompanyCard[] };
     if (Array.isArray(body.companies)) {
-      setRecommendedCards(body.companies);
-      if (body.companies[0]) {
-        setSelectedCardId((prev) =>
-          body.companies!.some((c) => c.id === prev) ? prev : body.companies![0].id
-        );
-      }
+      const companies = CONTROLLED_DEMO_MODE
+        ? shuffleOnboardingDeck(
+            mergeRecommendationsForControlledDemo(body.companies, selected)
+          )
+        : body.companies;
+      setRecommendedCards(companies);
+      setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID);
+    } else if (CONTROLLED_DEMO_MODE) {
+      setRecommendedCards(
+        shuffleOnboardingDeck(buildControlledDemoOnboardingShowcase(selected))
+      );
+      setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID);
     }
   }, []);
 
-  const persistInterests = useCallback(async (selected: string[]) => {
+  const persistInterests = useCallback((selected: string[]) => {
     const guestId = getOrCreateOnboardingGuestId();
-    await fetch("/api/onboarding/interests", {
+    void fetch("/api/onboarding/interests", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ guestId, interestIds: selected })
@@ -158,24 +217,97 @@ export default function OnboardingPage() {
       playerName: state.playerName ?? "Investor",
       goal: state.goal ?? "Build conviction"
     });
+
+    if (demoStory.active || isDemoStoryModeActive()) {
+      actions.completeOnboarding();
+      demoStory.advance("map-brief");
+      return;
+    }
+
+    if (!persistenceReady) return;
     actions.completeOnboarding();
-    router.replace("/mission-brief");
-  }, [actions, router, selectedCard, state.goal, state.playerName]);
+    router.replace("/map");
+  }, [
+    actions,
+    demoStory,
+    persistenceReady,
+    router,
+    selectedCard,
+    state.goal,
+    state.playerName
+  ]);
 
   const questMatchPool = useMemo(() => {
+    if (CONTROLLED_DEMO_MODE) {
+      return buildControlledDemoQuestMatchPool(recommendedCards);
+    }
     if (recommendedCards.length > 0) return recommendedCards;
     return buildQuestMatchFallbackCards();
   }, [recommendedCards]);
 
+  const mapPrefetchedRef = useRef(false);
   useEffect(() => {
-    if (step === 3) setQuestMatchKey((k) => k + 1);
-  }, [step]);
+    if (step === 3) {
+      setQuestMatchKey((k) => k + 1);
+      if (!mapPrefetchedRef.current) {
+        mapPrefetchedRef.current = true;
+        try {
+          router.prefetch("/map");
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+  }, [step, router]);
 
-  const continueFromInterests = async () => {
-    await persistInterests(interests);
-    await loadRecommendations(interests);
+  const continueFromInterests = () => {
+    if (CONTROLLED_DEMO_MODE) {
+      setRecommendedCards(
+        shuffleOnboardingDeck(buildControlledDemoOnboardingShowcase(interests))
+      );
+      setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID);
+    } else if (recommendedCards.length === 0) {
+      setRecommendationsLoading(true);
+      void loadRecommendations(interests).finally(() =>
+        setRecommendationsLoading(false)
+      );
+    }
+    persistInterests(interests);
     setStep(2);
   };
+
+  useEffect(() => {
+    if (interests.length === 0) return;
+    if (CONTROLLED_DEMO_MODE) {
+      setRecommendedCards(
+        shuffleOnboardingDeck(buildControlledDemoOnboardingShowcase(interests))
+      );
+      setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      void loadRecommendations(interests);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [interests, loadRecommendations]);
+
+  const storyActive = demoStory.active || isDemoStoryModeActive();
+
+  if (!storyActive && !persistenceReady) {
+    return (
+      <main className="static-ui relative flex min-h-screen items-center justify-center bg-[#05050F]">
+        <p className="text-sm text-ink-2">Loading onboarding…</p>
+      </main>
+    );
+  }
+
+  if (!storyActive && raw.onboarding.completedAt != null) {
+    return (
+      <main className="static-ui relative flex min-h-screen items-center justify-center bg-[#05050F]">
+        <p className="text-sm text-ink-2">Loading…</p>
+      </main>
+    );
+  }
 
   return (
     <main className="static-ui relative min-h-screen overflow-hidden bg-[#05050F]">
@@ -244,14 +376,27 @@ export default function OnboardingPage() {
         {step === 1 ? (
           <section className="rounded-[28px] border border-panel-border bg-[rgba(7,7,18,0.55)] p-6 shadow-[0_0_0_1px_rgba(139,92,246,0.14),0_30px_70px_rgba(0,0,0,0.55)] backdrop-blur-xl">
             <div className="text-[44px] leading-[1.02] font-[var(--font-grotesk)] font-extrabold text-ink-0">
-              Discover{" "}
-              <span className="bg-[linear-gradient(90deg,#a855f7,#7c3aed,#60a5fa)] bg-clip-text text-transparent">
-                what matters
-              </span>
+              {CONTROLLED_DEMO_MODE ? (
+                <>
+                  {NVDA_ONBOARDING.step1Title}{" "}
+                  <span className="bg-[linear-gradient(90deg,#a855f7,#7c3aed,#60a5fa)] bg-clip-text text-transparent">
+                    {NVDA_ONBOARDING.step1TitleAccent}
+                  </span>
+                </>
+              ) : (
+                <>
+                  Discover{" "}
+                  <span className="bg-[linear-gradient(90deg,#a855f7,#7c3aed,#60a5fa)] bg-clip-text text-transparent">
+                    what matters
+                  </span>
+                </>
+              )}
             </div>
             <div className="mt-3 flex items-center gap-3 text-sm text-ink-2">
               <span className="h-px w-10 bg-[linear-gradient(90deg,transparent,rgba(139,92,246,0.75),transparent)] shadow-[0_0_18px_rgba(139,92,246,0.22)]" />
-              Choose topics you enjoy — we match companies from metadata first.
+              {CONTROLLED_DEMO_MODE
+                ? NVDA_ONBOARDING.step1Subtitle
+                : "Choose topics you enjoy, we match companies from metadata first."}
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -288,12 +433,16 @@ export default function OnboardingPage() {
               <NeonButton
                 className="w-full justify-center"
                 onClick={() => void continueFromInterests()}
-                disabled={interests.length === 0 || catalogLoading}
+                disabled={interests.length === 0}
               >
-                {catalogLoading ? "Loading…" : "Continue"}
+                {CONTROLLED_DEMO_MODE
+                  ? NVDA_ONBOARDING.step1Continue
+                  : "Continue"}
               </NeonButton>
               <div className="mt-2 text-center text-[11px] text-ink-2">
-                Takes less than 30 seconds
+                {CONTROLLED_DEMO_MODE
+                  ? NVDA_ONBOARDING.step1Footnote
+                  : "Takes less than 30 seconds"}
               </div>
             </div>
           </section>
@@ -302,10 +451,14 @@ export default function OnboardingPage() {
         {step === 2 ? (
           <section className="rounded-[28px] border border-panel-border bg-[rgba(7,7,18,0.55)] p-6 shadow-[0_0_0_1px_rgba(139,92,246,0.14),0_30px_70px_rgba(0,0,0,0.55)] backdrop-blur-xl">
             <div className="text-3xl font-[var(--font-grotesk)] font-extrabold text-ink-0">
-              Swipe to discover
+              {CONTROLLED_DEMO_MODE
+                ? NVDA_ONBOARDING.step2Title
+                : "Swipe to discover"}
             </div>
             <div className="mt-2 text-sm text-ink-2">
-              Right if you like it, left if you don’t.
+              {CONTROLLED_DEMO_MODE
+                ? NVDA_ONBOARDING.step2Subtitle
+                : "Right if you like it, left if you don’t."}
             </div>
 
             {(() => {
@@ -355,9 +508,11 @@ export default function OnboardingPage() {
                       </div>
                     ) : (
                       <div className="absolute inset-0 grid place-items-center text-sm text-ink-2">
-                        {recommendedCards.length === 0
+                        {recommendationsLoading
                           ? "Loading matches…"
-                          : "No more cards."}
+                          : recommendedCards.length === 0
+                            ? "Pick interests and continue."
+                            : "No more cards."}
                       </div>
                     )}
                   </div>
@@ -411,8 +566,10 @@ export default function OnboardingPage() {
               key={questMatchKey}
               companies={questMatchPool}
               interestLabelById={interestLabelById}
-              onWinnerChosen={(card) => setSelectedCardId(card.id)}
+              controlledDemoReveal={CONTROLLED_DEMO_MODE}
+              onWinnerChosen={() => setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID)}
               onEnterQuest={enterQuestFromMatch}
+              enterQuestDisabled={!persistenceReady}
             />
           </section>
         ) : null}

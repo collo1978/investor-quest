@@ -23,14 +23,19 @@
  *   v10 — `quiz` streak key (was `quiz_mastery`), quiz streak milestone XP +
  *        `quizStreakMilestoneXpClaimed`, quiz streak badges
  *   v11 — sequential pillar unlock (business first), `questMapBriefDismissedAt`
+ *   v12 — `onboarding.openingScreenSeenAt` (cinematic opening gate)
+ *   v13 — `onboarding.welcomeScreenSeenAt` (post-logo welcome landing)
  */
 
 import {
-  COMPANIES,
   DEFAULT_COMPANY_ID,
   isCompanyId,
   type CompanyId
 } from "@/data/companies";
+import {
+  coercePlayableDemoCompanyId,
+  normalizePlayableUnlockedCompanies
+} from "@/lib/demo/playableDemo";
 import { PILLAR_ORDER, type PillarId } from "@/data/pillars";
 import { getCompanyPillarQuests } from "@/data/quests/library";
 import type { BadgeId } from "@/engine/progression/badges";
@@ -55,6 +60,8 @@ import {
   type CompanyStreaks,
   type StreakState
 } from "@/engine/progression/streaks";
+import { getGameStateActivityTimestamp, getMaxProgressRevision } from "@/lib/gameState/stateActivity";
+import { mergeLoadedGameState } from "@/lib/gameState/mergeLoadedGameState";
 
 function isPlainObject(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
@@ -322,6 +329,8 @@ function migrateCompanyProgress(
     typeof rawObj.businessIslandBriefDismissedAt === "number"
       ? (rawObj.businessIslandBriefDismissedAt as number)
       : null;
+  const progressRevision =
+    typeof rawObj.progressRevision === "number" ? rawObj.progressRevision : 0;
 
   return {
     ...mid,
@@ -331,7 +340,8 @@ function migrateCompanyProgress(
     pillarIslandBonusClaimed,
     quizStreakMilestoneXpClaimed,
     questMapBriefDismissedAt,
-    businessIslandBriefDismissedAt
+    businessIslandBriefDismissedAt,
+    progressRevision
   };
 }
 
@@ -358,22 +368,44 @@ function migratePendingConvictionQueue(raw: unknown): PendingConvictionItem[] {
 }
 
 function migrateOnboarding(raw: unknown): OnboardingState {
-  if (!isPlainObject(raw)) return { step: 0, completedAt: null };
+  if (!isPlainObject(raw)) {
+    return {
+      step: 0,
+      completedAt: null,
+      openingScreenSeenAt: null,
+      welcomeScreenSeenAt: null
+    };
+  }
   const step = typeof raw.step === "number" ? raw.step : 0;
   const completedAt =
     typeof raw.completedAt === "number" ? raw.completedAt : null;
-  return { step, completedAt };
+  const hasOpeningKey =
+    Object.prototype.hasOwnProperty.call(raw, "openingScreenSeenAt");
+  const openingRaw = raw.openingScreenSeenAt;
+  const openingScreenSeenAt =
+    typeof openingRaw === "number"
+      ? openingRaw
+      : !hasOpeningKey && completedAt != null
+        ? completedAt
+        : null;
+  const hasWelcomeKey =
+    Object.prototype.hasOwnProperty.call(raw, "welcomeScreenSeenAt");
+  const welcomeRaw = raw.welcomeScreenSeenAt;
+  const welcomeScreenSeenAt =
+    typeof welcomeRaw === "number"
+      ? welcomeRaw
+      : !hasWelcomeKey && completedAt != null
+        ? completedAt
+        : null;
+  return { step, completedAt, openingScreenSeenAt, welcomeScreenSeenAt };
 }
 
 function migrateUnlockedCompanies(raw: unknown): CompanyId[] {
-  const all = COMPANIES.map((c) => c.id);
-  if (!Array.isArray(raw)) return all;
+  if (!Array.isArray(raw)) return normalizePlayableUnlockedCompanies([]);
   const filtered = raw.filter((x): x is CompanyId => {
     return typeof x === "string" && isCompanyId(x);
   });
-  // Always include the default company so the user can't lock themselves out.
-  if (!filtered.includes(DEFAULT_COMPANY_ID)) filtered.push(DEFAULT_COMPANY_ID);
-  return filtered;
+  return normalizePlayableUnlockedCompanies(filtered);
 }
 
 /**
@@ -393,8 +425,13 @@ export function migrateRaw(raw: unknown): GameState | null {
       goal: typeof raw.goal === "string" ? raw.goal : null,
       activeCompanyId: DEFAULT_COMPANY_ID,
       companies: { [DEFAULT_COMPANY_ID]: migratedProg },
-      unlockedCompanyIds: COMPANIES.map((c) => c.id),
-      onboarding: { step: 0, completedAt: null },
+      unlockedCompanyIds: normalizePlayableUnlockedCompanies([]),
+      onboarding: {
+        step: 0,
+        completedAt: null,
+        openingScreenSeenAt: null,
+        welcomeScreenSeenAt: null
+      },
       lastActivityAt: null
     };
   }
@@ -415,10 +452,12 @@ export function migrateRaw(raw: unknown): GameState | null {
     isCompanyId(raw.activeCompanyId) &&
     companies[raw.activeCompanyId]
   ) {
-    activeCompanyId = raw.activeCompanyId;
+    activeCompanyId = coercePlayableDemoCompanyId(raw.activeCompanyId);
   } else {
     const first = Object.keys(companies)[0];
-    if (first && isCompanyId(first)) activeCompanyId = first;
+    if (first && isCompanyId(first)) {
+      activeCompanyId = coercePlayableDemoCompanyId(first);
+    }
   }
 
   return {
@@ -437,35 +476,260 @@ export function migrateRaw(raw: unknown): GameState | null {
 }
 
 // ---------------------------------------------------------------------------
-// Legacy synchronous helpers.
+// Persisted snapshot envelope + backup/recovery
+// ---------------------------------------------------------------------------
+
+export const STORAGE_BACKUP_KEY = "investor-quest::state::backup";
+
+export type PersistedSnapshot = {
+  envelopeVersion: 1;
+  savedAt: number;
+  state: GameState;
+};
+
+const PERSIST_LOG = "[investor-quest:persist]";
+
+function parseStoredPayload(raw: string): GameState | null {
+  const parsed = JSON.parse(raw) as unknown;
+  if (!isPlainObject(parsed)) return null;
+
+  if (
+    parsed.envelopeVersion === 1 &&
+    isPlainObject(parsed.state) &&
+    typeof parsed.savedAt === "number"
+  ) {
+    return migrateRaw(parsed.state);
+  }
+
+  return migrateRaw(parsed);
+}
+
+function readStorageKey(key: string): GameState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+    return parseStoredPayload(raw);
+  } catch {
+    return null;
+  }
+}
+
+/** Load persisted game state with backup recovery. */
+export function loadPersistedSnapshot(): GameState | null {
+  const primary = readStorageKey(STORAGE_KEY);
+  if (primary) return primary;
+
+  const hadPrimaryRaw =
+    typeof window !== "undefined" &&
+    window.localStorage.getItem(STORAGE_KEY) != null;
+
+  if (hadPrimaryRaw) {
+    console.warn(
+      `${PERSIST_LOG} Primary save is corrupt or unreadable. Trying backup…`
+    );
+  }
+
+  const backup = readStorageKey(STORAGE_BACKUP_KEY);
+  if (backup) {
+    console.warn(`${PERSIST_LOG} Restored game state from backup snapshot.`);
+    return backup;
+  }
+
+  if (hadPrimaryRaw) {
+    console.warn(
+      `${PERSIST_LOG} Backup unavailable. Progress was NOT silently reset.`
+    );
+  }
+
+  return null;
+}
+
+export type PersistLoadStatus =
+  | { kind: "empty" }
+  | { kind: "loaded"; state: GameState; recoveredFromBackup?: boolean }
+  | { kind: "corrupt_unrecoverable" };
+
+/**
+ * Probe localStorage without side effects — distinguishes empty vs corrupt vs loaded.
+ */
+export function probePersistLoadStatus(): PersistLoadStatus {
+  if (typeof window === "undefined") return { kind: "empty" };
+
+  try {
+    const primaryRaw = window.localStorage.getItem(STORAGE_KEY);
+    if (!primaryRaw) return { kind: "empty" };
+
+    const primary = parseStoredPayload(primaryRaw);
+    if (primary) return { kind: "loaded", state: primary };
+
+    const backupRaw = window.localStorage.getItem(STORAGE_BACKUP_KEY);
+    if (backupRaw) {
+      const backup = parseStoredPayload(backupRaw);
+      if (backup) {
+        return { kind: "loaded", state: backup, recoveredFromBackup: true };
+      }
+    }
+
+    console.warn(
+      `${PERSIST_LOG} Save data is corrupt and could not be restored from backup.`
+    );
+    return { kind: "corrupt_unrecoverable" };
+  } catch {
+    return { kind: "corrupt_unrecoverable" };
+  }
+}
+
+/** True when primary localStorage key exists but neither primary nor backup parsed. */
+export function hasUnrecoverableCorruptSave(): boolean {
+  return probePersistLoadStatus().kind === "corrupt_unrecoverable";
+}
+
+/** Raw blobs for support export when parse fails. */
+export function readCorruptSaveRawBlobs(): {
+  primary: string | null;
+  backup: string | null;
+} {
+  if (typeof window === "undefined") {
+    return { primary: null, backup: null };
+  }
+  try {
+    return {
+      primary: window.localStorage.getItem(STORAGE_KEY),
+      backup: window.localStorage.getItem(STORAGE_BACKUP_KEY)
+    };
+  } catch {
+    return { primary: null, backup: null };
+  }
+}
+
+/**
+ * Promote a parseable backup snapshot to primary storage.
+ * Returns restored state or null if backup is missing/unreadable.
+ */
+export function restoreProgressFromBackup(): GameState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const backupRaw = window.localStorage.getItem(STORAGE_BACKUP_KEY);
+    if (!backupRaw) return null;
+    const backup = parseStoredPayload(backupRaw);
+    if (!backup) return null;
+
+    window.localStorage.removeItem(STORAGE_KEY);
+    const envelope: PersistedSnapshot = {
+      envelopeVersion: 1,
+      savedAt: Date.now(),
+      state: { ...backup, version: STATE_VERSION }
+    };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(envelope));
+    console.warn(`${PERSIST_LOG} Restored progress from backup snapshot.`);
+    return backup;
+  } catch (err) {
+    console.warn(
+      `${PERSIST_LOG} Backup restore failed:`,
+      err instanceof Error ? err.message : err
+    );
+    return null;
+  }
+}
+
+/** Erase corrupt blobs so a fresh campaign can be saved. */
+export function clearCorruptSaveForFreshStart(): void {
+  clearPersistedSnapshots();
+  console.warn(`${PERSIST_LOG} Cleared corrupt save — fresh start allowed.`);
+}
+
+export type SavePersistedOptions = {
+  mergeIfDiskNewer?: boolean;
+};
+
+/** Persist game state: rotate primary → backup, then write envelope. */
+export function savePersistedSnapshot(
+  incoming: GameState,
+  options: SavePersistedOptions = {}
+): void {
+  if (typeof window === "undefined") return;
+  if (hasUnrecoverableCorruptSave()) {
+    console.warn(
+      `${PERSIST_LOG} Skipping save — unrecoverable corrupt primary save. Fix or clear storage manually.`
+    );
+    return;
+  }
+
+  const { mergeIfDiskNewer = true } = options;
+  let toSave = incoming;
+
+  try {
+    const existingRaw = window.localStorage.getItem(STORAGE_KEY);
+    const disk = existingRaw ? parseStoredPayload(existingRaw) : null;
+
+    if (disk && mergeIfDiskNewer) {
+      const incomingTs = getGameStateActivityTimestamp(incoming);
+      const diskTs = getGameStateActivityTimestamp(disk);
+      const incomingRev = getMaxProgressRevision(incoming);
+      const diskRev = getMaxProgressRevision(disk);
+      if (diskTs > incomingTs || diskRev > incomingRev) {
+        console.warn(
+          `${PERSIST_LOG} Stale tab detected (disk ts ${diskTs} vs memory ${incomingTs}, rev ${diskRev} vs ${incomingRev}). Merging before save.`
+        );
+        toSave = mergeLoadedGameState(incoming, disk);
+      }
+    }
+
+    const envelope: PersistedSnapshot = {
+      envelopeVersion: 1,
+      savedAt: Date.now(),
+      state: { ...toSave, version: STATE_VERSION }
+    };
+    const serialized = JSON.stringify(envelope);
+
+    if (existingRaw) {
+      window.localStorage.setItem(STORAGE_BACKUP_KEY, existingRaw);
+    }
+    window.localStorage.setItem(STORAGE_KEY, serialized);
+  } catch (err) {
+    console.warn(
+      `${PERSIST_LOG} Failed to save game state:`,
+      err instanceof Error ? err.message : err
+    );
+  }
+}
+
+export function clearPersistedSnapshots(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(STORAGE_BACKUP_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Legacy synchronous helpers — delegate to envelope + backup layer.
 // ---------------------------------------------------------------------------
 
 export function loadState(): GameState {
   if (typeof window === "undefined") return initialState();
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return initialState();
-    const parsed = JSON.parse(raw) as unknown;
-    return migrateRaw(parsed) ?? initialState();
+    const status = probePersistLoadStatus();
+    if (status.kind === "loaded") return status.state;
+    if (status.kind === "corrupt_unrecoverable") {
+      return initialState();
+    }
+    return initialState();
   } catch {
+    console.warn(
+      "[investor-quest:persist] loadState failed; using fresh state."
+    );
     return initialState();
   }
 }
 
 export function saveState(state: GameState): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // ignore quota errors
-  }
+  savePersistedSnapshot(state, { mergeIfDiskNewer: true });
 }
 
 export function clearSavedState(): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // ignore
-  }
+  clearPersistedSnapshots();
 }

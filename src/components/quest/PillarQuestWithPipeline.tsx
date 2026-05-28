@@ -8,6 +8,8 @@ import { companyById, type CompanyId } from "@/data/companies";
 import type { PillarId } from "@/data/pillars";
 import { findQuestDefinition } from "@/data/quests/library";
 import { usePillarQuestGeneratedContent } from "@/hooks/usePillarQuestGeneratedContent";
+import { CONTROLLED_DEMO_MODE } from "@/lib/demo/controlledDemo";
+import { isDemoQuestPlayable } from "@/lib/demo/playableDemo";
 import { mergeGeneratedQuestContent } from "@/lib/quests/mergeGeneratedQuestContent";
 import { pillarHasQuestPipeline } from "@/lib/quests/pillarQuestPipelineConfig";
 
@@ -41,19 +43,36 @@ export function PillarQuestWithPipeline({ pillarId, slug }: Props) {
     if (!payload?.cards || Object.keys(payload.cards).length === 0) {
       return base;
     }
-    return mergeGeneratedQuestContent(base, payload.cards);
-  }, [companyId, pillarId, slug, payload?.cards]);
+    return mergeGeneratedQuestContent(base, payload.cards, {
+      pipelineGenerating: generating
+    });
+  }, [companyId, pillarId, slug, payload?.cards, generating]);
+
+  const curatedDemoReady =
+    CONTROLLED_DEMO_MODE &&
+    isDemoQuestPlayable(companyId, pillarId, slug, {
+      generatedCards: payload?.cards ?? null,
+      pipelineGenerating: generating
+    });
 
   if (!pillarHasQuestPipeline(pillarId)) {
     return <DynamicQuestDetailScreen pillarId={pillarId} slug={slug} />;
   }
 
-  return (
-    <DynamicQuestDetailScreen
-      pillarId={pillarId}
-      slug={slug}
-      questOverride={questOverride ?? undefined}
-      questPipeline={{
+  const questPipeline = curatedDemoReady
+    ? {
+        status: "ready" as const,
+        sourceLabel: null,
+        generating: false,
+        pipelinePhase: "idle" as const,
+        progress: null,
+        loadingCardIds: [] as string[],
+        canReadQuest: true,
+        compact: false,
+        error: null,
+        onRetry: () => void retryGenerate()
+      }
+    : {
         status: payload?.status ?? null,
         sourceLabel: payload?.sourceLabel ?? null,
         generating,
@@ -64,7 +83,14 @@ export function PillarQuestWithPipeline({ pillarId, slug }: Props) {
         compact: Boolean(canReadQuest && generating),
         error,
         onRetry: () => void retryGenerate()
-      }}
+      };
+
+  return (
+    <DynamicQuestDetailScreen
+      pillarId={pillarId}
+      slug={slug}
+      questOverride={questOverride ?? undefined}
+      questPipeline={questPipeline}
     />
   );
 }

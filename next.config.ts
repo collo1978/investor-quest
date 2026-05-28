@@ -13,6 +13,25 @@ const nextConfig: NextConfig = {
       { pathname: "/logos/**" }
     ]
   },
+  async redirects() {
+    return [
+      {
+        source: "/forces/positive-inside-business-strength",
+        destination: "/forces/positive-inside-brand-strength",
+        permanent: true
+      },
+      {
+        source: "/forces/inside-forces",
+        destination: "/forces",
+        permanent: true
+      },
+      {
+        source: "/forces/outside-forces",
+        destination: "/forces",
+        permanent: true
+      }
+    ];
+  },
   async headers() {
     const hubSceneAssets = [
       "biz-quest.webp",

@@ -3,7 +3,11 @@ import type { PillarId } from "@/data/pillars";
 import { findQuestDefinition } from "@/data/quests/library";
 import type { QuestDefinition } from "@/data/quests/types";
 import { getDemoRefreshPlan, type DemoRefreshJob } from "@/lib/demoContentRefresh/config";
+import { enrichHealthCheck } from "@/lib/gameHealth/enrichCheck";
+import { buildQuestFlowActionableDetail, questFlowProblemPlain } from "@/lib/gameHealth/questFlowActionable";
+import { enrichIssueDraft } from "@/lib/gameHealth/resolutionIntelligence/enrichIssue";
 import type { GameHealthIssueRecord, HealthCheckItem } from "@/lib/gameHealth/types";
+import { resolveForcesQuestSlug } from "@/lib/forces/forcesQuestRoutes";
 import { usesPillarQuestCardTemplate } from "@/components/quest/pillarQuestTheme";
 import {
   computeQuestCardReadProgress,
@@ -39,7 +43,7 @@ export type QuestFlowAudit = {
 function questRouteFor(pillarId: PillarId, questSlug: string): string | null {
   if (pillarId === "business") return `/business/${questSlug}`;
   if (pillarId === "financials") return `/financials/${questSlug}`;
-  if (pillarId === "forces") return `/forces/${questSlug}`;
+  if (pillarId === "forces") return `/forces/${resolveForcesQuestSlug(questSlug)}`;
   if (pillarId === "management") return `/management/${questSlug}`;
   return null;
 }
@@ -153,13 +157,13 @@ function flowCheckItem(
 ): HealthCheckItem {
   const weight = 18;
   if (broken.length === 0) {
-    return {
+    return enrichHealthCheck({
       id: "quest_flow_demo",
       name: "Quest quiz unlock (demo companies)",
       status: "pass",
       message: `All ${audits.length} priority demo quests unlock the quiz when every card is read.`,
       weight
-    };
+    });
   }
 
   const critical = broken.filter((b) =>
@@ -177,14 +181,14 @@ function flowCheckItem(
     .map((b) => `${b.ticker} ${b.pillarId}/${b.questSlug}`)
     .join("; ");
 
-  return {
+  return enrichHealthCheck({
     id: "quest_flow_demo",
     name: "Quest quiz unlock (demo companies)",
     status: critical.length > 0 ? "fail" : "warn",
     message: `${broken.length} demo quest(s) have broken card→quiz flow: ${names}${broken.length > 4 ? "…" : ""}.`,
     laymanSummary: "Players may get stuck before the quiz.",
     weight
-  };
+  });
 }
 
 export function buildQuestFlowIssueDrafts(
@@ -209,7 +213,6 @@ export function buildQuestFlowIssueDrafts(
         p === "quest_not_found"
     );
 
-    const problemLine = a.problems.join(", ");
     const suggestedFix =
       a.problems.includes("missing_quiz_config") ||
       a.problems.includes("completion_requires_quiz")
@@ -218,35 +221,50 @@ export function buildQuestFlowIssueDrafts(
           ? "Tap Repair quest progress on a test phone, or Reset quest progress if reads look wrong."
           : "Open the fix panel and tap Repair quest progress, then recheck.";
 
-    drafts.push({
-      issueKey: `quest_flow:${a.ticker}:${a.pillarId}:${a.questSlug}`,
-      severity: critical ? "critical" : "warning",
-      title: "Players may get stuck before the quiz.",
-      problemPlain: `${a.companyName} (${a.ticker}) · ${a.pillarId} · ${a.questTitle}: ${problemLine}.`,
-      whatUsersSee: "Players may get stuck before the quiz.",
-      suggestedFix,
-      fixAction: "repair_quest_progress",
-      companyTicker: a.ticker,
+    const actionableDetail = buildQuestFlowActionableDetail({
+      ticker: a.ticker,
       companyName: a.companyName,
       pillarId: a.pillarId,
       questSlug: a.questSlug,
-      cardId: null,
-      metadata: {
-        category: "quest_flow",
-        cardsRequired: a.cardsRequired,
-        cardsReadSimulated: a.simulatedAllCardsRead ? a.cardsRequired : 0,
-        completedCards: a.simulatedAllCardsRead ? a.cardsRequired : 0,
-        missingCardIds: a.simulatedAllCardsRead ? [] : a.cardIds,
-        cardIds: a.cardIds,
-        quizUnlockedWhenAllRead: a.quizUnlockedWhenAllRead,
-        hasQuiz: a.hasQuiz,
-        lockReasons: a.lockReasonsWhenSimulated,
-        problems: a.problems,
-        questRoute: a.questRoute,
-        quizButtonWouldDisable:
-          a.simulatedAllCardsRead && !a.quizUnlockedWhenAllRead
-      }
+      questTitle: a.questTitle,
+      problems: a.problems,
+      cardIds: a.cardIds
     });
+    const primary = actionableDetail.findings[0];
+
+    drafts.push(
+      enrichIssueDraft({
+        issueKey: `quest_flow:${a.ticker}:${a.pillarId}:${a.questSlug}`,
+        severity: critical ? "critical" : "warning",
+        title: `${a.ticker} · ${a.questTitle} — quest flow`,
+        problemPlain: questFlowProblemPlain(actionableDetail),
+        whatUsersSee: primary?.flaggedText ?? "Players may get stuck before the quiz.",
+        suggestedFix: primary?.rewriteDirection ?? suggestedFix,
+        fixAction: "repair_quest_progress",
+        companyTicker: a.ticker,
+        companyName: a.companyName,
+        pillarId: a.pillarId,
+        questSlug: a.questSlug,
+        cardId: a.cardIds[0] ?? null,
+        metadata: {
+          auditCategory: "quiz_quality",
+          actionableDetail,
+          category: "quest_flow",
+          cardsRequired: a.cardsRequired,
+          cardsReadSimulated: a.simulatedAllCardsRead ? a.cardsRequired : 0,
+          completedCards: a.simulatedAllCardsRead ? a.cardsRequired : 0,
+          missingCardIds: a.simulatedAllCardsRead ? [] : a.cardIds,
+          cardIds: a.cardIds,
+          quizUnlockedWhenAllRead: a.quizUnlockedWhenAllRead,
+          hasQuiz: a.hasQuiz,
+          lockReasons: a.lockReasonsWhenSimulated,
+          problems: a.problems,
+          questRoute: a.questRoute,
+          quizButtonWouldDisable:
+            a.simulatedAllCardsRead && !a.quizUnlockedWhenAllRead
+        }
+      })
+    );
   }
 
   return drafts;

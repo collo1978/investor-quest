@@ -682,7 +682,7 @@ export function QuestContentManager() {
                               ? "/quest?pillar=management&quest=board-leadership"
                               : editing.pillarId === "forces"
                                 ? "/forces/category/positive-inside"
-                                : "/business/snapshot"
+                                : "/business/what-they-do"
                         }
                       />
                     </label>

@@ -3,7 +3,7 @@ import type { PillarId } from "@/data/pillars";
 import { FINANCIALS_ISLAND } from "@/components/quest/financialsIslandColors";
 import { FORCES_ISLAND } from "@/components/quest/forcesIslandColors";
 
-/** Premium Q/A/Why quest card + island reading chrome per pillar. */
+/** Premium Q/A quest card + island reading chrome per pillar. */
 export type PillarQuestTheme = {
   hi: string;
   lo: string;

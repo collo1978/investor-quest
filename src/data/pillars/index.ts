@@ -40,7 +40,7 @@ export const PILLAR_META: readonly PillarMeta[] = [
     accent: "rgba(139,92,246,0.85)",
     glyph: "◇",
     route: "/business",
-    screenImage: "/screens/business-island-screen.png"
+    screenImage: "/logos/business-island-screen.webp"
   },
   {
     id: "forces",

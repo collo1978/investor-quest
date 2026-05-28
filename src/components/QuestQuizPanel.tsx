@@ -47,8 +47,21 @@ import {
   hasPlayableQuizConfig,
   isQuizAnswerCorrect,
   isQuizAnswerProvided,
-  normalizeQuizConfig
+  normalizeQuizConfig,
+  type OrderQuestion
 } from "@/data/quests/types";
+import {
+  initialOrderPermutation,
+  orderPermutationsEqual
+} from "@/lib/quests/quizOrderShuffle";
+import {
+  islandQuizLockedHint,
+  islandQuizPlayingFeedback,
+  islandQuizReadyIntro,
+  islandQuizStartCta,
+  islandQuizStatusLabel,
+  islandQuizUnlockedHeadline
+} from "@/lib/quests/islandQuizStyle";
 
 export type QuestQuizPanelProps = {
   pillarId: PillarId;
@@ -90,6 +103,8 @@ export type QuestQuizPanelProps = {
   passCelebration?: { headline: string; message: string };
   /** Pillar accent for quiz panel chrome (business / financials / management). */
   panelTheme?: PillarQuestTheme;
+  /** Return to insight cards (pillar quest reading flow). */
+  onReviewQuestCards?: () => void;
 };
 
 const GOLD_HI = "#F5C547";
@@ -129,7 +144,8 @@ export function QuestQuizPanel({
   nextQuest,
   islandFinaleCta,
   passCelebration,
-  panelTheme
+  panelTheme,
+  onReviewQuestCards
 }: QuestQuizPanelProps) {
   const { state, actions } = useGame();
   const quiz = useMemo(() => normalizeQuizConfig(quizRaw), [quizRaw]);
@@ -284,6 +300,11 @@ export function QuestQuizPanel({
     questTrailIndex >= 0 && questTrailIndex === questViews.length - 1;
   const nextIsland = nextPillarId(pillarId);
 
+  const quizPlayingCopy = useMemo(
+    () => islandQuizPlayingFeedback(pillarId, slug),
+    [pillarId, slug]
+  );
+
   const learningRecap = useMemo(() => {
     if (phase !== "summary" || lastScore === null) return [];
     const snippets: string[] = [];
@@ -302,6 +323,16 @@ export function QuestQuizPanel({
     if (checkedIds.includes(currentQ.id)) return;
     const ans = answers[currentQ.id];
     if (!isQuizAnswerProvided(currentQ, ans)) return;
+    if (currentQ.kind === "order") {
+      const oq = currentQ as OrderQuestion;
+      const initial = initialOrderPermutation(oq.id, oq.steps.length);
+      if (
+        Array.isArray(ans) &&
+        orderPermutationsEqual(ans as number[], initial)
+      ) {
+        return;
+      }
+    }
     const qid = currentQ.id;
     const t = window.setTimeout(() => {
       setCheckedIds((prev) => (prev.includes(qid) ? prev : [...prev, qid]));
@@ -456,6 +487,8 @@ export function QuestQuizPanel({
             >
               <LockedBody
                 isTenK={isTenK}
+                pillarId={pillarId}
+                questSlug={slug}
                 cardsRead={cardsRead}
                 cardsTotal={cardsTotal}
               />
@@ -470,6 +503,8 @@ export function QuestQuizPanel({
             >
               <ReadyBody
                 isTenK={isTenK}
+                pillarId={pillarId}
+                questSlug={slug}
                 total={total}
                 requiredCorrect={requiredCorrect}
                 title={title}
@@ -503,7 +538,12 @@ export function QuestQuizPanel({
                         question={currentQ}
                         value={answers[currentQ.id]}
                         onChange={(v) => setAnswer(currentQ.id, v)}
-                        mode={isCurrentChecked ? "review" : "input"}
+                        mode={
+                          isCurrentChecked && currentQ.kind !== "order"
+                            ? "review"
+                            : "input"
+                        }
+                        showFeedback={isCurrentChecked}
                       />
                     </motion.div>
                   ) : null}
@@ -527,9 +567,11 @@ export function QuestQuizPanel({
                 >
                   {isCurrentChecked
                     ? isCurrentCorrect
-                      ? "Nice — keep the momentum"
-                      : "Locked in — review and continue"
-                    : "Tap your answer"}
+                      ? quizPlayingCopy.correct
+                      : quizPlayingCopy.wrong
+                    : currentQ?.kind === "order"
+                      ? "Reorder the steps, then continue"
+                      : quizPlayingCopy.prompt}
                 </span>
                 <PrimaryGoldButton
                   onClick={advance}
@@ -557,6 +599,7 @@ export function QuestQuizPanel({
                 rewardXp={rewardXp ?? 0}
                 celebrateXp={Boolean((rewardXp ?? 0) > 0 || (isTenK && showTenKXpBanner))}
                 onReplay={startQuiz}
+                onReviewQuestCards={onReviewQuestCards}
                 nextQuest={nextQuest}
                 islandFinaleCta={islandFinaleCta}
                 isLastQuestInPillar={isLastQuestInPillar}
@@ -589,18 +632,17 @@ export function QuestQuizPanel({
 
 function LockedBody({
   isTenK,
+  pillarId,
+  questSlug,
   cardsRead,
   cardsTotal
 }: {
   isTenK: boolean;
+  pillarId: PillarId;
+  questSlug: string;
   cardsRead?: number;
   cardsTotal?: number;
 }) {
-  const cardsRemaining =
-    typeof cardsRead === "number" && typeof cardsTotal === "number"
-      ? Math.max(0, cardsTotal - cardsRead)
-      : null;
-
   if (isTenK) {
     return (
       <>
@@ -617,38 +659,26 @@ function LockedBody({
     );
   }
   return (
-    <>
-      <h3 className="mt-3 font-[var(--font-grotesk)] text-[18px] leading-tight text-ink-0">
-        Mark all cards as read to unlock the quiz
-      </h3>
-      <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-1">
-        The quiz uses the answers and &ldquo;why this matters&rdquo; content
-        from the cards above. Read each card and mark it as read â€” once you
-        finish all{cardsTotal ? ` ${cardsTotal}` : ""} cards, the quiz unlocks.
-      </p>
-      {cardsRemaining !== null && cardsRemaining > 0 ? (
-        <p
-          className="mt-2 text-[13px] font-semibold leading-snug"
-          style={{ color: "rgba(245,197,71,0.9)" }}
-        >
-          You still need to complete {cardsRemaining} card
-          {cardsRemaining === 1 ? "" : "s"}.
-        </p>
-      ) : null}
+    <div className="mt-3 space-y-2 text-center">
       {typeof cardsRead === "number" && typeof cardsTotal === "number" ? (
         <p
-          className="mt-3 text-[10.5px] font-semibold uppercase tracking-[0.20em]"
+          className="text-[10.5px] font-semibold uppercase tracking-[0.20em] text-ink-2"
           style={{ color: "rgba(245,197,71,0.75)" }}
         >
-          Progress: {cardsRead} / {cardsTotal} cards read
+          {cardsRead} / {cardsTotal} insights
         </p>
       ) : null}
-    </>
+      <p className="text-[13px] leading-relaxed text-ink-2">
+        {islandQuizLockedHint(pillarId, questSlug)}
+      </p>
+    </div>
   );
 }
 
 function ReadyBody({
   isTenK,
+  pillarId,
+  questSlug,
   total,
   requiredCorrect,
   title,
@@ -656,6 +686,8 @@ function ReadyBody({
   accent
 }: {
   isTenK: boolean;
+  pillarId: PillarId;
+  questSlug: string;
   total: number;
   requiredCorrect: number;
   title: string;
@@ -715,22 +747,18 @@ function ReadyBody({
               textShadow: `0 0 32px ${accent.glow}, 0 2px 0 rgba(0,0,0,0.35)`
             }}
           >
-            Quiz Unlocked
+            {islandQuizUnlockedHeadline(pillarId, questSlug)}
           </h3>
         </motion.div>
       </motion.div>
 
       <p className="max-w-md text-[13.5px] leading-relaxed text-ink-1">
-        Prove your read — nail{" "}
-        <span className="font-semibold text-ink-0">
-          {requiredCorrect} of {total}
-        </span>{" "}
-        to lock in Investor XP and advance the trail.
+        {islandQuizReadyIntro(pillarId, requiredCorrect, total, questSlug)}
       </p>
 
       <div className="mt-6 flex w-full justify-center">
         <PrimaryGoldButton onClick={onStart} theme={accent} variant="trail">
-          Begin mastery run →
+          {islandQuizStartCta(pillarId, questSlug)}
         </PrimaryGoldButton>
       </div>
     </div>
@@ -787,6 +815,7 @@ function SummaryBody({
   rewardXp,
   celebrateXp,
   onReplay,
+  onReviewQuestCards,
   nextQuest,
   islandFinaleCta,
   isLastQuestInPillar,
@@ -810,6 +839,7 @@ function SummaryBody({
   rewardXp: number;
   celebrateXp: boolean;
   onReplay: () => void;
+  onReviewQuestCards?: () => void;
   nextQuest?: { href: string; label: string };
   islandFinaleCta?: { href: string; label: string };
   isLastQuestInPillar?: boolean;
@@ -953,38 +983,31 @@ function SummaryBody({
             : "XP is locked in for this quest. Replay any time â€” your XP only counts once."
           : isTenK
           ? "No penalty run â€” shuffle a new lane, skim one weak island, and dive back in."
-          : "Re-read the cards above (especially the \u201CWhy this matters\u201D lines), then try again. Question order shuffles every attempt."}
+          : "Skim the insights once more, then retry the quiz. Questions shuffle every attempt."}
       </p>
 
-      <motion.div className="mt-5 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        {didPass && nextQuest && !isTenK ? (
-          <PrimaryGoldButton href={nextQuest.href} theme={accent}>
-            [ {nextQuest.label} ]
-          </PrimaryGoldButton>
-        ) : null}
-        {didPass && nextQuest && !isTenK ? (
-          <button
-            type="button"
-            onClick={onReplay}
-            className="text-[12.5px] font-semibold tracking-[0.04em] text-ink-2 underline-offset-4 transition hover:text-ink-0 hover:underline"
-          >
-            Replay Quiz
-          </button>
-        ) : (
-          <PrimaryGoldButton onClick={onReplay} theme={accent}>
-            {didPass ? (isTenK ? "Run it again" : "Replay quiz") : "Try again"}
-          </PrimaryGoldButton>
-        )}
-        {isTenK && didPass ? (
-          <Link
-            href="/map"
-            className="text-[12.5px] font-semibold uppercase tracking-[0.16em] text-ink-1 underline-offset-4 transition hover:text-ink-0 hover:underline"
-            style={{ color: GOLD_HI }}
-          >
-            Return to map
-          </Link>
-        ) : null}
-      </motion.div>
+      <QuizSummaryActions
+        className="mt-5"
+        accent={accent}
+        onReplay={onReplay}
+        onReviewQuestCards={onReviewQuestCards}
+        primary={
+          didPass && nextQuest && !isTenK
+            ? { kind: "link", href: nextQuest.href, label: nextQuest.label }
+            : didPass && islandFinaleCta && !isTenK
+              ? {
+                  kind: "link",
+                  href: islandFinaleCta.href,
+                  label: islandFinaleCta.label
+                }
+              : { kind: "button", label: didPass ? (isTenK ? "Retry quiz" : "Retry quiz") : "Retry quiz" }
+        }
+        extraLink={
+          isTenK && didPass
+            ? { href: "/map", label: "Return to map" }
+            : undefined
+        }
+      />
     </>
   );
 }
@@ -1007,6 +1030,7 @@ function QuizCompleteReward({
   nextIslandTitle,
   islandMasteryXp,
   onReplay,
+  onReviewQuestCards,
   accent,
   celebrateKey
 }: {
@@ -1027,6 +1051,7 @@ function QuizCompleteReward({
   nextIslandTitle?: string;
   islandMasteryXp: number;
   onReplay: () => void;
+  onReviewQuestCards?: () => void;
   accent: PillarQuestTheme;
   celebrateKey: string | null;
 }) {
@@ -1161,13 +1186,13 @@ function QuizCompleteReward({
         </motion.div>
       ) : null}
 
-      {message ? (
+      {message && pillarId !== "business" ? (
         <p className="relative mt-4 max-w-md text-[13.5px] leading-relaxed text-ink-1">
           {message}
         </p>
       ) : null}
 
-      {learningRecap.length > 0 ? (
+      {pillarId !== "business" && learningRecap.length > 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1229,33 +1254,28 @@ function QuizCompleteReward({
           />
         </div>
         <p className="mt-2 text-[11.5px] text-ink-2">
-          {nextQuest
-            ? "Your next quest is warmed up — keep the momentum."
-            : islandConquered
-              ? "Return to the island hub to lock conviction and unlock the trail ahead."
-              : "This slice is cleared — explore the map for your next expedition."}
+          {pillarId === "business" && nextQuest
+            ? "Next quest unlocked — keep moving."
+            : nextQuest
+              ? "Your next quest is warmed up — keep the momentum."
+              : islandConquered
+                ? "Return to the island hub to lock conviction and unlock the trail ahead."
+                : "This slice is cleared — explore the map for your next expedition."}
         </p>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.24 }}
-        className="relative mt-7 flex w-full max-w-sm flex-col items-center gap-3"
-      >
-        {trailCta ? (
-          <PrimaryGoldButton href={trailCta.href} theme={accent} variant="trail">
-            {trailCta.label}
-          </PrimaryGoldButton>
-        ) : null}
-        <button
-          type="button"
-          onClick={onReplay}
-          className="text-[12.5px] font-semibold tracking-[0.04em] text-ink-2 underline-offset-4 transition hover:text-ink-0 hover:underline"
-        >
-          Run it again
-        </button>
-      </motion.div>
+      <QuizSummaryActions
+        className="relative mt-7"
+        accent={accent}
+        onReplay={onReplay}
+        onReviewQuestCards={onReviewQuestCards}
+        primaryVariant={pillarId === "business" && trailCta ? "hero" : "trail"}
+        primary={
+          trailCta
+            ? { kind: "link", href: trailCta.href, label: trailCta.label }
+            : { kind: "button", label: "Retry quiz" }
+        }
+      />
     </motion.div>
   );
 }
@@ -1290,6 +1310,96 @@ function BridgeUnlockPulse({ accent }: { accent: PillarQuestTheme }) {
   );
 }
 
+function QuizSummarySecondaryButton({
+  children,
+  onClick
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-ink-2/70 transition hover:text-ink-1"
+    >
+      {children}
+    </button>
+  );
+}
+
+function QuizSummaryActions({
+  accent,
+  onReplay,
+  onReviewQuestCards,
+  primary,
+  extraLink,
+  className = "",
+  primaryVariant = "trail"
+}: {
+  accent: PillarQuestTheme;
+  onReplay: () => void;
+  onReviewQuestCards?: () => void;
+  primary:
+    | { kind: "link"; href: string; label: string }
+    | { kind: "button"; label: string };
+  extraLink?: { href: string; label: string };
+  className?: string;
+  primaryVariant?: "trail" | "hero";
+}) {
+  const showSecondaries =
+    Boolean(onReviewQuestCards) || primary.kind === "link";
+  const containerMaxClass = primaryVariant === "hero" ? "max-w-md" : "max-w-sm";
+
+  return (
+    <div
+      className={`flex w-full ${containerMaxClass} flex-col items-center gap-4 ${className}`.trim()}
+    >
+      {primary.kind === "link" ? (
+        <PrimaryGoldButton
+          href={primary.href}
+          theme={accent}
+          variant={primaryVariant}
+        >
+          {primary.label}
+        </PrimaryGoldButton>
+      ) : (
+        <PrimaryGoldButton
+          onClick={onReplay}
+          theme={accent}
+          variant={primaryVariant}
+        >
+          {primary.label}
+        </PrimaryGoldButton>
+      )}
+
+      {showSecondaries ? (
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+          {onReviewQuestCards ? (
+            <QuizSummarySecondaryButton onClick={onReviewQuestCards}>
+              Review quest cards
+            </QuizSummarySecondaryButton>
+          ) : null}
+          {primary.kind === "link" ? (
+            <QuizSummarySecondaryButton onClick={onReplay}>
+              Retry quiz
+            </QuizSummarySecondaryButton>
+          ) : null}
+        </div>
+      ) : null}
+
+      {extraLink ? (
+        <Link
+          href={extraLink.href}
+          className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-ink-2/70 transition hover:text-ink-1"
+        >
+          {extraLink.label}
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
 function PrimaryGoldButton({
   onClick,
   href,
@@ -1302,7 +1412,7 @@ function PrimaryGoldButton({
   href?: string;
   disabled?: boolean;
   theme?: PillarQuestTheme;
-  variant?: "default" | "trail";
+  variant?: "default" | "trail" | "hero";
   children: React.ReactNode;
 }) {
   const t = buttonTheme ?? {
@@ -1313,14 +1423,19 @@ function PrimaryGoldButton({
   } as Pick<PillarQuestTheme, "hi" | "border" | "glow" | "glowSoft">;
   const className = [
     "inline-flex items-center justify-center gap-2 rounded-2xl border text-[13.5px] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/75",
-    variant === "trail" ? "w-full max-w-sm px-5 py-3 text-[12px] uppercase tracking-[0.18em]" : "px-4 py-2.5"
+    variant === "hero"
+      ? "w-full max-w-md px-8 py-4 text-[13px] uppercase tracking-[0.18em]"
+      : variant === "trail"
+        ? "w-full max-w-sm px-5 py-3 text-[12px] uppercase tracking-[0.18em]"
+        : "px-4 py-2.5"
   ].join(" ");
   const style: React.CSSProperties = {
     borderColor: t.border,
     background: disabled ? t.glowSoft : `color-mix(in srgb, ${t.hi} 24%, transparent)`,
     color: disabled ? `${t.hi}88` : t.hi,
     cursor: disabled ? "not-allowed" : "pointer",
-    boxShadow: disabled ? "none" : `0 0 24px -10px ${t.glow}`,
+    boxShadow:
+      disabled ? "none" : variant === "hero" ? `0 0 34px -12px ${t.glow}` : `0 0 24px -10px ${t.glow}`,
     opacity: disabled ? 0.85 : 1
   };
 

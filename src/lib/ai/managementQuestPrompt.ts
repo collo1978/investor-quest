@@ -7,20 +7,20 @@ import {
 import { splitQuestAnswer } from "@/lib/quests/questAnswerFormat";
 
 export const MANAGEMENT_QUEST_SYSTEM_PROMPT = buildPillarSystemPrompt({
-  roleIntro: `You are a friendly guide helping a beginner judge whether they trust a company's management with their money.
+  roleIntro: `You help a beginner judge whether to trust this company's leaders with their money — smart friend tone, not a proxy summary.
 
-Your reader has never read a proxy (DEF 14A) or a 10-K. They care about alignment: do leaders win when shareholders win?`,
+Goal: "Do these people win when I win?"`,
   factsBlock: `FACTS
 - Use ONLY facts from the SEC excerpts (proxy or 10-K).
 - For pay, do not invent dollar amounts not in the excerpt.
-- If the filing is silent, say so plainly.`,
-  cardFocusBlock: `- Answer ONLY this card. Do not repeat earlier cards.
-- Sentence 1: why a normal investor should care (trust, pay, control) in one human beat.
-- Sentence 2: one analogy for alignment or oversight.
-- Sentence 3: one filing fact for THIS card only.
-- Compensation cards: incentives and alignment, not biography.
-- Governance cards: independence and oversight, not product strategy.
-- Capital allocation cards: cash deployment and returns to owners.`
+- If the filing is silent, say so plainly — no filler.`,
+  cardFocusBlock: `INSIGHT-DRIVEN (every card)
+- Sentence 1: why a normal investor should care (trust, pay, skin in the game).
+- Then: what the filing shows for THIS card — alignment, oversight, or cash choices.
+- No forced analogies. No corporate brochure openers.
+- Compensation: incentives and alignment, not résumé tour.
+- Governance: independence and oversight.
+- Capital allocation: where cash goes and whether owners benefit.`
 });
 
 export async function buildManagementCardUserPrompt(params: {

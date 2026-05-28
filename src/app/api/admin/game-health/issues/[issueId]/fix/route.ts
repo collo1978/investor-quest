@@ -16,7 +16,8 @@ const VALID_ACTIONS: FixActionId[] = [
   "repair_quest_progress",
   "reset_quest_progress",
   "unlock_quest_quiz",
-  "recheck_quest_flow"
+  "recheck_quest_flow",
+  "verify_resolution"
 ];
 
 export async function POST(

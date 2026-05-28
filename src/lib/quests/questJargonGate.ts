@@ -12,6 +12,7 @@ import {
   type QuestionIntentContext
 } from "@/lib/quests/humanFirstExplanation";
 import { buildIntentPromptFooter } from "@/lib/quests/questionIntent";
+import { QUEST_CARD_FOCUS_RULES } from "@/lib/quests/questionFocusGate";
 import { splitIntoSentences } from "@/lib/quests/scannableAnswer";
 
 export type QuestJargonGateContext = {
@@ -60,7 +61,6 @@ export const HARD_JARGON_PATTERNS: ReadonlyArray<{
   { label: "semiconductor", re: /\bsemiconductor/i },
   { label: "complex tasks", re: /\bcomplex tasks?\b/i },
   { label: "training AI models", re: /\btraining ai models?\b/i },
-  { label: "data center", re: /\bdata centers?\b/i },
   { label: "hyperscaler", re: /\bhyperscalers?\b/i },
   { label: "workload", re: /\bworkloads?\b/i },
   { label: "processing units", re: /\bprocessing units?\b/i },
@@ -85,6 +85,23 @@ export const HARD_JARGON_PATTERNS: ReadonlyArray<{
   { label: "technology is crucial", re: /\btechnology is crucial\b/i },
   { label: "provide solutions", re: /\bprovides? solutions\b/i },
   { label: "their solutions", re: /\btheir solutions\b/i },
+  { label: "designs and sells", re: /\bdesigns and sells\b/i },
+  { label: "spec sheets", re: /\bspec sheets?\b/i },
+  { label: "stickiness", re: /\bstickiness\b/i },
+  { label: "em dash", re: /[—–]|\s--\s/ },
+  { label: "operates across", re: /\boperates across\b/i },
+  { label: "offers a range of", re: /\boffers a range of\b/i },
+  { label: "delivers value", re: /\bdelivers value\b/i },
+  { label: "in simple terms", re: /\bin simple terms\b/i },
+  { label: "simple version", re: /\bsimple version\b/i },
+  {
+    label: "forced analogy",
+    re: /\bthink of [\w']+ (?:like|as)\b|\bit'?s like trying to\b|\bpicture it like\b/i
+  },
+  {
+    label: "forced kitchen analogy",
+    re: /\bthink of (?:it|them|this) like a (?:kitchen|bakery)\b|\bphone running too many apps\b/i
+  },
   { label: "cutting-edge AI", re: /\bcutting[- ]edge ai\b/i },
   { label: "transformative", re: /\btransformative\b/i },
   { label: "next-generation", re: /\bnext[- ]generation\b/i },
@@ -92,7 +109,11 @@ export const HARD_JARGON_PATTERNS: ReadonlyArray<{
   { label: "best-in-class", re: /\bbest[- ]in[- ]class\b/i },
   { label: "industry-leading", re: /\bindustry[- ]leading\b/i },
   { label: "mission-critical", re: /\bmission[- ]critical\b/i },
-  { label: "world-class", re: /\bworld[- ]class\b/i }
+  { label: "world-class", re: /\bworld[- ]class\b/i },
+  {
+    label: "innovation filler",
+    re: /\b(?:the )?innovation behind\b|\bmight not realize the innovation\b|\binnovation hype\b/i
+  }
 ];
 
 /** Softer signals — two or more fail the gate. */
@@ -100,6 +121,7 @@ export const SOFT_JARGON_PATTERNS: ReadonlyArray<{
   label: string;
   re: RegExp;
 }> = [
+  { label: "data center (prefer plain words)", re: /\bdata centers?\b/i },
   { label: "platform (standalone)", re: /\bplatforms?\b/i },
   { label: "computing (noun)", re: /\bcomputing\b/i },
   { label: "compute (noun)", re: /\bcompute\b/i },
@@ -118,7 +140,8 @@ export const SOFT_JARGON_PATTERNS: ReadonlyArray<{
 ];
 
 const TECHNICAL_OPENING_RE = [
-  /^(?:[A-Z][A-Za-z0-9&.'-]+\s+){0,2}(?:develops?|provides?|specializes|offers|designs?|manufactures|builds?)\b/i,
+  /^(?:[A-Z][A-Za-z0-9&.'-]+\s+){0,2}(?:develops?|provides?|specializes|offers|designs?|manufactures|builds?|operates)\b/i,
+  /^(?:[A-Z][A-Za-z0-9&.'-]+\s+){0,2}designs and sells\b/i,
   /^they\s+(?:mainly|primarily|mostly)\s+(?:sell|make|build|provide|develop|design)\b/i,
   /^the company\s+(?:develops?|provides?|specializes|offers|builds?)\b/i,
   /^their\s+(?:main|core|primary)\s+(?:business|focus)\s+is\b/i
@@ -291,17 +314,19 @@ export function describeJargonGateFailure(result: QuestJargonGateResult): string
   return parts.join("; ") || "failed teenager picture test";
 }
 
-export const JARGON_REWRITE_SYSTEM_PROMPT = `You are an editor for Investor Quest — rewrite copy so it sounds like a smart friend, not an AI filing summary.
+export const JARGON_REWRITE_SYSTEM_PROMPT = `You are an editor for Investor Quest — rewrite so it sounds like a smart friend explaining what matters to investors.
 
 ${HUMAN_FIRST_SIX_STEPS}
 
-Match the QUESTION TYPE in the user message — do NOT force customer-pain / lag language on market-size or revenue cards.
+${QUEST_CARD_FOCUS_RULES}
+
+Match the QUESTION TYPE and CARD QUESTION in the user message — do NOT force customer-pain / lag language on market-size or revenue cards.
 
 HARD BANS (remove or replace):
-GPU, SDK, infrastructure, analytics, semiconductor, computing platform, cloud platform, solutions (corporate), industries (vague), innovation (filler), synergies, landscape, leverages, "technology is crucial", "solutions are essential".
+designs and sells, operates across, provides solutions, offers a range of, delivers value, in simple terms, simple version, spec sheets, stickiness, em dashes (— or –), kitchen/bakery/phone-running-apps analogies (unless true customer-pain card), GPU, SDK, infrastructure, analytics, semiconductor, computing platform, solutions (corporate), industries (vague), innovation (filler), synergies, landscape, leverages.
 
-NEVER open with what the company builds technically or a corporate brochure tone.
-Explain what the technology helps people DO in everyday life.
+Use insight-driven rhythm: answer the card question first with everyday moments the reader can picture.
+Short sentences. No bullet dumps. No Wikipedia tone. No investor analysis in the main story unless the card asks for money or risk.
 
 Keep the same facts. Do not invent products or numbers.
 Max 4 short sentences in the main story, then:
@@ -341,7 +366,7 @@ export function buildJargonRewriteUserPrompt(params: {
           "- Say how BIG or IMPORTANT the company is (biggest, leading, major player, market position, scale).",
           "- Mention AI market importance if relevant to this company.",
           "- DELETE all lag, stutter, slow-game, and slow-AI language.",
-          '- Include one sentence starting with "Think of it like" or "It\'s like".',
+          "- Do NOT use \"Think of it like\" or other forced analogies.",
           ""
         ].join("\n")
       : "";

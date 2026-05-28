@@ -12,6 +12,8 @@ export type InvestorQuestBrandLogoProps = {
   align?: "left" | "center";
   /** Passed to `next/image` `sizes` for responsive loading. */
   sizes?: string;
+  /** Static violet bloom behind the mark; off for sequenced intro glow. */
+  showDecorativeGlow?: boolean;
 };
 
 /**
@@ -21,24 +23,29 @@ export function InvestorQuestBrandLogo({
   priority,
   className = "h-11 w-auto sm:h-12",
   align = "left",
-  sizes = "(max-width: 640px) 280px, 340px"
+  sizes = "(max-width: 640px) 280px, 340px",
+  showDecorativeGlow = true
 }: InvestorQuestBrandLogoProps) {
   const objectAlign = align === "center" ? "object-center" : "object-left";
   return (
     <span className="relative inline-flex shrink-0 items-center align-middle">
-      {/* Outer violet bloom — premium, non-interactive */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -inset-4 rounded-[22px] bg-[radial-gradient(ellipse_125%_90%_at_45%_48%,rgba(192,132,252,0.38),rgba(139,92,246,0.18)_40%,rgba(88,28,135,0.08)_55%,transparent_72%)] blur-[20px] opacity-[0.92]"
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -inset-2 rounded-2xl bg-[radial-gradient(ellipse_110%_75%_at_50%_52%,rgba(167,139,250,0.28),transparent_62%)] blur-[10px]"
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -inset-1 rounded-xl bg-[radial-gradient(ellipse_95%_70%_at_50%_55%,rgba(139,92,246,0.2),transparent_60%)] blur-[5px]"
-      />
+      {showDecorativeGlow ? (
+        <>
+          {/* Outer violet bloom — premium, non-interactive */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -inset-4 rounded-[22px] bg-[radial-gradient(ellipse_125%_90%_at_45%_48%,rgba(192,132,252,0.38),rgba(139,92,246,0.18)_40%,rgba(88,28,135,0.08)_55%,transparent_72%)] blur-[20px] opacity-[0.92]"
+          />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -inset-2 rounded-2xl bg-[radial-gradient(ellipse_110%_75%_at_50%_52%,rgba(167,139,250,0.28),transparent_62%)] blur-[10px]"
+          />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -inset-1 rounded-xl bg-[radial-gradient(ellipse_95%_70%_at_50%_55%,rgba(139,92,246,0.2),transparent_60%)] blur-[5px]"
+          />
+        </>
+      ) : null}
       <Image
         src="/logos/investor-quest-logo.png"
         alt="Investor Quest"

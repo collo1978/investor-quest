@@ -1,10 +1,10 @@
 /** Public URLs under `public/` — client-safe. */
 
 export const BUSINESS_ISLAND_PUBLIC_REL =
-  "screens/business-island-screen.png" as const;
+  "logos/business-island-screen.webp" as const;
 
 export const BUSINESS_ISLAND_SCREEN_PATH =
-  "/screens/business-island-screen.png" as const;
+  "/logos/business-island-screen.webp" as const;
 
 /** Filename under `public/screens/` — scenery only (no baked UI). */
 export const BIZ_ISLAND_QUEST_FILENAME = "biz-quest.webp" as const;

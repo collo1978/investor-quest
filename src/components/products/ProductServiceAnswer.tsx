@@ -3,9 +3,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 
-import { VisualAnswerNarration } from "@/components/financial/VisualAnswerNarration";
 import { ProductServiceVisual } from "@/components/products/ProductServiceVisual";
 import type { PillarQuestTheme } from "@/components/quest/pillarQuestTheme";
+import { normalizeProductServiceReport } from "@/lib/productService/normalizeProductServiceReport";
 import type { ProductServiceReport } from "@/lib/productService/types";
 
 const NO_DISCLOSURE =
@@ -16,8 +16,6 @@ type Props = {
   theme: PillarQuestTheme;
   /** Filing text fallback — only shown when structured product data is unavailable. */
   supportBody: ReactNode | null;
-  /** Short guide copy shown under the visual (from AI answer). */
-  narrationText?: string | null;
   initialReport?: ProductServiceReport | null;
 };
 
@@ -30,17 +28,20 @@ export function ProductServiceAnswer({
   ticker,
   theme,
   supportBody,
-  narrationText,
   initialReport
 }: Props) {
   const [report, setReport] = useState<ProductServiceReport | null>(
-    initialReport ?? null
+    initialReport ? normalizeProductServiceReport(initialReport) : null
   );
   const [resolved, setResolved] = useState(initialReport !== undefined);
 
   useEffect(() => {
     if (initialReport !== undefined) {
-      setReport(initialReport);
+      setReport(
+        initialReport
+          ? normalizeProductServiceReport(initialReport)
+          : null
+      );
       setResolved(true);
       return;
     }
@@ -52,7 +53,10 @@ export function ProductServiceAnswer({
       .then((res) => (res.ok ? res.json() : { report: null }))
       .then((data: { report?: ProductServiceReport | null }) => {
         if (cancelled) return;
-        setReport(hasProductData(data.report ?? null) ? data.report! : null);
+        const raw = data.report ?? null;
+        setReport(
+          hasProductData(raw) ? normalizeProductServiceReport(raw!) : null
+        );
         setResolved(true);
       })
       .catch(() => {
@@ -77,39 +81,17 @@ export function ProductServiceAnswer({
   }
 
   if (!report) {
+    if (supportBody) {
+      return <motion.div className="space-y-3.5">{supportBody}</motion.div>;
+    }
     return (
       <motion.div className="space-y-3.5">
         <p className="rounded-lg border border-white/[0.08] bg-black/25 px-3.5 py-3 text-[13px] leading-relaxed text-ink-0/88 sm:text-[13.5px]">
           {NO_DISCLOSURE}
         </p>
-        {supportBody ? (
-          <motion.div className="space-y-3 border-t border-white/[0.06] pt-3">
-            <p
-              className="text-[9px] font-bold uppercase tracking-[0.16em]"
-              style={{ color: theme.hi }}
-            >
-              Context
-            </p>
-            {supportBody}
-          </motion.div>
-        ) : null}
       </motion.div>
     );
   }
 
-  return (
-    <div className="space-y-3.5">
-      <ProductServiceVisual report={report} theme={theme} />
-      {narrationText ? (
-        <VisualAnswerNarration
-          text={narrationText}
-          theme={theme}
-          label="How to read this"
-        />
-      ) : null}
-      {supportBody ? (
-        <div className="border-t border-white/[0.06] pt-3">{supportBody}</div>
-      ) : null}
-    </div>
-  );
+  return <ProductServiceVisual report={report} theme={theme} />;
 }

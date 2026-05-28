@@ -1,4 +1,5 @@
-import { COMPANIES, type Company } from "@/data/companies";
+import { getPlayableDemoCompanies } from "@/lib/demo/playableDemo";
+import type { Company } from "@/data/companies";
 
 export type SupportedSearchRow = {
   kind: "supported";
@@ -27,8 +28,9 @@ function normalizeQuery(raw: string): string {
 function matchSupportedCompanies(query: string): Company[] {
   const upper = query.toUpperCase();
   const lower = query.toLowerCase();
+  const playable = getPlayableDemoCompanies();
 
-  return COMPANIES.filter(
+  return playable.filter(
     (c) =>
       c.ticker === upper ||
       c.ticker.startsWith(upper) ||
@@ -46,8 +48,8 @@ function unsupportedLabel(query: string): string {
 }
 
 /**
- * Supported demo companies (AAPL, MSFT, TSLA, NVDA, NKE, SPOT) plus an optional
- * disabled row when the query does not match the directory.
+ * Playable demo companies (AAPL, NKE, NVDA) plus an optional disabled row
+ * when the query does not match the directory.
  */
 export function resolveCompanySearch(query: string): CompanySearchResult {
   const q = normalizeQuery(query);
@@ -77,5 +79,5 @@ export function resolveCompanySearch(query: string): CompanySearchResult {
   return { kind: "results", rows };
 }
 
-/** All supported companies for empty-query hints (optional). */
-export const SUPPORTED_EXPLORE_COMPANIES = COMPANIES;
+/** Playable demo companies for empty-query hints. */
+export const SUPPORTED_EXPLORE_COMPANIES = getPlayableDemoCompanies();

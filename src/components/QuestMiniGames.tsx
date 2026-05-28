@@ -178,7 +178,7 @@ function DuolingoQuiz({
       </div>
 
       <div className="rounded-2xl border border-panel-border bg-[rgba(255,255,255,0.03)] p-4">
-        <div className="mb-3 text-xs text-ink-2">Quick check (Duolingo-style)</div>
+        <div className="mb-3 text-xs text-ink-2">Quick challenge</div>
         <div className="grid gap-4">
           {questions.map((qq, idx) => (
             <div key={idx} className="rounded-2xl border border-panel-border bg-[rgba(0,0,0,0.16)] p-3">

@@ -47,6 +47,11 @@ export {
   pillarById,
   nextPillarId
 };
+export {
+  getPlayableDemoCompanies,
+  PLAYABLE_DEMO_COMPANY_IDS,
+  PLAYABLE_DEMO_TICKERS
+} from "@/lib/demo/playableDemo";
 
 /** Legacy quest shape used by older pages. New code should use `QuestDefinition`. */
 export type Quest = {

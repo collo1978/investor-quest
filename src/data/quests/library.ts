@@ -13,6 +13,8 @@ import {
 } from "@/data/pillars";
 import type { QuestDefinition, QuestTemplate } from "@/data/quests/types";
 import { mergeQuizConfig } from "@/data/quests/types";
+import { bindQuestDefinitionToCompany } from "@/lib/quests/fillQuestTokens";
+import "@/data/quests/validateQuestQuizCatalogs";
 import {
   contentKey,
   getQuestContentOverride,
@@ -45,50 +47,15 @@ export function buildQuestId(
   return `${companyId}.${pillarId}.${slug}`;
 }
 
-/** Replace `{Company.name}` / `{Company.ticker}` / `{Company.sector}` tokens. */
-function fillTokens(input: string, company: Company): string {
-  return input
-    .replace(/\{Company\.name\}/g, company.name)
-    .replace(/\{Company\.ticker\}/g, company.ticker)
-    .replace(/\{Company\.sector\}/g, company.sector);
-}
-
 function instantiate(
   template: QuestTemplate,
   company: Company
 ): QuestDefinition {
-  const base: QuestDefinition = {
+  let quest: QuestDefinition = {
     ...template,
     id: buildQuestId(company.id, template.pillarId, template.slug),
-    companyId: company.id,
-    title: fillTokens(template.title, company),
-    objective: fillTokens(template.objective, company),
-    description: fillTokens(template.description, company),
-    aiTask: fillTokens(template.aiTask, company),
-    investorQuestion: fillTokens(template.investorQuestion, company),
-    plainEnglishAnswer: template.plainEnglishAnswer
-      ? fillTokens(template.plainEnglishAnswer, company)
-      : null,
-    whyItMatters: fillTokens(template.whyItMatters, company),
-    investorInsight: template.investorInsight
-      ? fillTokens(template.investorInsight, company)
-      : undefined,
-    cards: template.cards
-      ? template.cards.map((c) => ({
-          id: c.id,
-          investorQuestion: fillTokens(c.investorQuestion, company),
-          plainEnglishAnswer: c.plainEnglishAnswer
-            ? fillTokens(c.plainEnglishAnswer, company)
-            : null,
-          whyItMatters: fillTokens(c.whyItMatters, company),
-          investorInsight: c.investorInsight
-            ? fillTokens(c.investorInsight, company)
-            : undefined
-        }))
-      : undefined
+    companyId: company.id
   };
-
-  let quest = base;
   if (usesAiPipelineContent(template.pillarId, template.slug)) {
     quest = {
       ...quest,
@@ -104,7 +71,9 @@ function instantiate(
     company.id,
     contentKey(template.pillarId, template.slug)
   );
-  return override ? applyContentOverride(quest, override) : quest;
+  quest = override ? applyContentOverride(quest, override) : quest;
+
+  return bindQuestDefinitionToCompany(quest, company);
 }
 
 /**
@@ -117,6 +86,30 @@ function applyContentOverride(
   override: QuestContentOverride
 ): QuestDefinition {
   let next = quest;
+
+  if (override.title?.trim()) {
+    next = { ...next, title: override.title.trim() };
+  }
+
+  if (override.investorQuestion?.trim()) {
+    next = { ...next, investorQuestion: override.investorQuestion.trim() };
+  }
+
+  if (override.objective?.trim()) {
+    next = { ...next, objective: override.objective.trim() };
+  }
+
+  if (override.description?.trim()) {
+    next = { ...next, description: override.description.trim() };
+  }
+
+  if (override.whyItMatters?.trim()) {
+    next = { ...next, whyItMatters: override.whyItMatters.trim() };
+  }
+
+  if (override.secSection) {
+    next = { ...next, secSection: override.secSection };
+  }
 
   if (override.plainEnglishAnswer && !next.plainEnglishAnswer) {
     next = { ...next, plainEnglishAnswer: override.plainEnglishAnswer };
@@ -134,6 +127,7 @@ function applyContentOverride(
         if (!oc) return c;
         return {
           ...c,
+          investorQuestion: oc.investorQuestion ?? c.investorQuestion,
           plainEnglishAnswer: oc.plainEnglishAnswer ?? c.plainEnglishAnswer,
           investorInsight: oc.investorInsight ?? c.investorInsight
         };

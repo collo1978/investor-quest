@@ -1,12 +1,18 @@
 import type { QuestTemplate } from "@/data/quests/types";
 import { mergeQuizConfig } from "@/data/quests/types";
 
+import {
+  FORCES_LEGACY_TOPIC_SLUGS,
+  FORCES_RETIRED_TOPIC_SLUG_ALIASES
+} from "@/lib/forces/forcesQuestRoutes";
+
 /** Supabase slug → demo template slug (Management pillar naming drift). */
 const DEMO_SLUG_ALIASES: Partial<Record<string, string>> = {
   "board-leadership": "mgmt-1",
   "executive-compensation": "mgmt-quiz",
   "capital-allocation": "mgmt-2",
-  "governance-control": "mgmt-governance"
+  "governance-control": "mgmt-governance",
+  ...FORCES_RETIRED_TOPIC_SLUG_ALIASES
 };
 
 function demoTemplateForSlug(
@@ -66,8 +72,15 @@ export function mergePillarTemplatesWithDemo(
   for (const d of demo) merged.set(d.slug, { ...d });
 
   for (const row of fromSupabase) {
+    if (row.pillarId === "forces" && FORCES_LEGACY_TOPIC_SLUGS.has(row.slug)) {
+      continue;
+    }
+    const canonicalSlug = DEMO_SLUG_ALIASES[row.slug] ?? row.slug;
     const demoTpl = demoTemplateForSlug(demoBySlug, row.slug);
-    merged.set(row.slug, mergeQuestTemplateWithDemo(demoTpl, row));
+    merged.set(
+      canonicalSlug,
+      mergeQuestTemplateWithDemo(demoTpl, { ...row, slug: canonicalSlug })
+    );
   }
 
   return [...merged.values()];

@@ -20,8 +20,11 @@ export type GeographicRevenueSegment = {
 export type GeographicRevenueReport = {
   ticker: string;
   fiscalYear: number;
+  /** Optional one-line headline above the map. */
+  headline?: string | null;
   segments: GeographicRevenueSegment[];
-  investorInsight: string | null;
+  /** Legacy pipeline field — not shown in the player UI. */
+  investorInsight?: string | null;
   sourceForm: string;
   sourceSectionLabel: string | null;
   sourceAccession?: string | null;

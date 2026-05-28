@@ -7,6 +7,10 @@ import { XP_ISLAND_COMPLETION } from "@/engine/progression/xpEconomy";
 export type ConvictionFeedbackModalProps = {
   pillarTitle: string;
   nextIslandTitle?: string;
+  kicker?: string;
+  heading?: string;
+  body?: string;
+  nextUnlockLabel?: string;
   onConfident: () => void;
   onCautious: () => void;
 };
@@ -14,6 +18,10 @@ export type ConvictionFeedbackModalProps = {
 export function ConvictionFeedbackModal({
   pillarTitle,
   nextIslandTitle,
+  kicker,
+  heading,
+  body,
+  nextUnlockLabel,
   onConfident,
   onCautious
 }: ConvictionFeedbackModalProps) {
@@ -44,17 +52,17 @@ export function ConvictionFeedbackModal({
         className="pointer-events-auto relative w-full max-w-lg rounded-3xl border border-[rgba(139,92,246,0.28)] bg-[rgba(10,10,22,0.92)] p-8 shadow-[0_0_60px_rgba(124,58,237,0.22),inset_0_0_0_1px_rgba(255,255,255,0.04)]"
       >
         <p className="text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-2">
-          {pillarTitle} island · power-up complete
+          {kicker ?? `${pillarTitle} island · power-up complete`}
         </p>
         <h2
           id="conviction-heading"
           className="mt-3 text-center font-[var(--font-grotesk)] text-xl leading-snug text-ink-0 sm:text-2xl"
         >
-          How strong is your conviction?
+          {heading ?? "How strong is your conviction?"}
         </h2>
         <p className="mt-3 text-center text-[13px] leading-relaxed text-ink-1">
-          Your read is logged locally. Choose a pulse — then claim +{XP_ISLAND_COMPLETION}{" "}
-          mastery XP and {nextIslandTitle ? "unlock the bridge ahead." : "advance your expedition."}
+          {body ??
+            `Your read is logged locally. Choose a pulse — then claim +${XP_ISLAND_COMPLETION} mastery XP and ${nextIslandTitle ? "unlock the bridge ahead." : "advance your expedition."}`}
         </p>
 
         {nextIslandTitle ? (
@@ -65,7 +73,7 @@ export function ConvictionFeedbackModal({
             className="relative mx-auto mt-6 max-w-sm rounded-2xl border border-[rgba(245,197,71,0.35)] bg-[rgba(245,197,71,0.06)] px-4 py-3 text-center"
           >
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[rgba(245,197,71,0.9)]">
-              Next island unlocked
+              {nextUnlockLabel ?? "Next island unlocked"}
             </p>
             <p className="mt-1 font-[var(--font-grotesk)] text-lg text-ink-0">
               {nextIslandTitle}

@@ -1,5 +1,5 @@
 /**
- * Apple (AAPL) — hand-authored quest content overrides.
+ * Apple (AAPL), hand-authored quest content overrides.
  *
  * Placeholder for the eventual SEC -> AI pipeline. Each override
  * provides the plain-English answer(s) and (optionally) a quiz config
@@ -7,25 +7,26 @@
  */
 import type { CompanyContent } from "@/data/quests/content/types";
 import { contentKey } from "@/data/quests/content/types";
-
 export const APPLE_CONTENT: CompanyContent = {
   companyId: "aapl",
   overrides: {
-    [contentKey("business", "revenue")]: {
+    [contentKey("business", "why-buying")]: {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple makes most of its money from:\n• iPhone\n• Mac\n• iPad\n• Wearables like Apple Watch and AirPods\n\nIt also earns recurring revenue from services such as:\n• App Store\n• Apple Music\n• iCloud\n• Apple TV+\n• Apple Pay\n\nThe iPhone remains Apple's biggest revenue driver.\n\nSimple version\nApple sells premium devices, then keeps customers connected through its software and services ecosystem.",
+            "Most of Apple's money still comes from iPhone.\n\nMac, iPad, Watch, and AirPods add the rest.\n\nApple also earns recurring revenue from App Store fees, iCloud, Music, TV+, and Apple Pay every month.\n\nWhy investors care:\nRepeat spend from the same customers is steadier than one-off hardware spikes.",
           investorInsight:
-            "Apple's services business matters because recurring revenue is more stable than hardware cycles — it compounds as the installed base grows."
+            "Services growing on top of iPhone is why many investors watch recurring revenue as closely as new device launches."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Apple sells products and services globally.\n\nIts major markets include:\n• Americas\n• Europe\n• Greater China\n• Japan\n• Rest of Asia Pacific\n\nApple depends heavily on international sales and global consumer demand."
+            "Apple sells everywhere, across Americas, Europe, Greater China, Japan, and the rest of Asia Pacific.\n\nNo region is a rounding error; China demand alone can swing the stock.\n\nGlobal reach diversifies growth, but it also imports world headlines into one ticker.\n\nWhy investors care:\nInvestors track which regions are hot because a slowdown in one big market can dent a giant revenue base."
         },
         "card-3": {
           plainEnglishAnswer:
-            "Apple mainly sells to:\n• everyday consumers\n• professionals\n• students\n• businesses\n• developers using its ecosystem\n\nIts customers are generally willing to pay premium prices for quality, simplicity, and ecosystem integration."
+            "Apple mainly sells to consumers willing to pay more for premium devices and a connected ecosystem.\n\nThey come back for seamless devices, App Store habits, and services that stack on the phone they already own.\n\nDevelopers build for iOS because that is where paying users already are, which reinforces the loop.\n\nWhy investors care:\nPremium buyers who stay in the ecosystem support higher margins and steadier revenue than one-off discount phone sales.",
+          investorInsight:
+            "A defined premium segment plus ecosystem lock-in is why Apple can charge more and earn repeat services revenue, not just one-time hardware sales."
         }
       },
       quizConfig: {
@@ -35,7 +36,7 @@ export const APPLE_CONTENT: CompanyContent = {
             kind: "odd-one-out",
             id: "revenue-q1",
             prompt:
-              "Three of these are real Apple revenue sources. Pick the odd one out.",
+              "Which of these is not a real way Apple makes money?",
             choices: [
               "iPhone sales",
               "App Store fees",
@@ -64,20 +65,20 @@ export const APPLE_CONTENT: CompanyContent = {
             options: ["Vehicle", "Services", "Advertising", "Banking"],
             correctIndex: 1,
             explain:
-              "Apple's Services line — App Store, iCloud, Apple Music, Apple TV+, Apple Pay — provides recurring revenue that compounds on top of one-time hardware sales."
+              "Apple's Services line. App Store, iCloud, Apple Music, Apple TV+, Apple Pay, provides recurring revenue that compounds on top of one-time hardware sales."
           }
         ]
       }
     },
-    [contentKey("business", "operations")]: {
+    [contentKey("business", "how-it-works")]: {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple sells products through:\n• Apple retail stores\n• online stores\n• telecom carriers\n• wholesalers\n• third-party retailers\n\nIts supply chain includes manufacturing partners, logistics networks, and global distribution systems.\n\nApple also uses digital platforms to distribute services and software updates directly to customers."
+            "You can grab Apple gear in its stores, online, through phone carriers, or at partners like Best Buy.\n\nApple designs in California; partners build and ship at massive scale.\n\nUpdates and services hit your device directly, that's how Apple controls the experience end to end.\n\nWhy investors care:\nOwning the customer relationship protects margin when competitors race to the bottom on price."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Apple employs a large global workforce across:\n• engineering\n• retail\n• operations\n• software\n• design\n• marketing\n• leadership\n\nThe company relies heavily on skilled talent, innovation, and operational execution."
+            "Thousands of engineers, designers, retail staff, and operations people run the machine behind each launch.\n\nA new iPhone drop in fifty countries on the same day is not luck, it's choreography.\n\nMiss that window and empty shelves become front-page news.\n\nWhy investors care:\nExecution risk shows up in sales immediately, investors watch launch timing and supply snags closely."
         }
       },
       quizConfig: {
@@ -101,16 +102,16 @@ export const APPLE_CONTENT: CompanyContent = {
             kind: "scenario",
             id: "operations-q2",
             prompt:
-              "Imagine one of Apple's key manufacturing partners is hit by a major disruption. What's the most reasonable investor concern?",
+              "A key manufacturing partner hits a major disruption. What should worry you first as an investor?",
             choices: [
-              "Zero impact — Apple's revenue is unrelated to manufacturing",
-              "Production delays could affect supply, sales, and margins",
-              "Apple's services revenue automatically triples",
-              "iPhones suddenly become free to make"
+              "Supply delays could pressure production, sales, and margins",
+              "Manufacturing never matters for a company Apple's size",
+              "Services revenue automatically doubles overnight",
+              "The stock price must fall exactly 10% that day"
             ],
-            correctIndex: 1,
+            correctIndex: 0,
             explain:
-              "Apple depends on manufacturing partners as a core part of its operations. A disruption can ripple into supply, sales, and margins — which is exactly why supply-chain concentration is something investors watch."
+              "Apple depends on manufacturing partners as a core part of its operations. A disruption can ripple into supply, sales, and margins, which is exactly why supply-chain concentration is something investors watch."
           },
           {
             kind: "true-false",
@@ -119,20 +120,20 @@ export const APPLE_CONTENT: CompanyContent = {
               "Apple's products only reach customers through Apple's own retail stores.",
             correct: false,
             explain:
-              "Apple sells through Apple retail stores, online stores, telecom carriers, wholesalers, and third-party retailers — a deliberately broad channel mix that helps reduce reliance on any single one."
+              "Apple sells through Apple retail stores, online stores, telecom carriers, wholesalers, and third-party retailers, a deliberately broad channel mix that helps reduce reliance on any single one."
           }
         ]
       }
     },
-    [contentKey("business", "advantage")]: {
+    [contentKey("business", "why-they-stay")]: {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple invests heavily in research and development to improve:\n• hardware\n• software\n• artificial intelligence\n• chips\n• ecosystem integration\n• future products\n\nThis helps Apple continue innovating and improving customer experience."
+            "Apple invests heavily in R&D to improve its devices, chips, software, and AI capabilities.\n\nThat spending supports integrated features across iPhone, Mac, and iPad, including Apple silicon in Macs.\n\nIf R&D slows, rivals can catch up on speed, cameras, and how well products work together.\n\nWhy investors care:\nSteady R&D helps Apple defend premium pricing and keep customers upgrading."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Apple benefits from:\n• a globally recognized brand\n• patents and intellectual property\n• proprietary chips and software\n• ecosystem lock-in\n• customer loyalty\n\nIts ecosystem makes it harder for customers to switch to competitors."
+            "Apple's edge comes from its brand, proprietary chips, software, and products that work together.\n\nCustomers stay because photos, messages, and subscriptions are tied to Apple devices.\n\nSwitching platforms means rebuilding habits and paid services.\n\nWhy investors care:\nHard-to-leave customers support higher prices and more Services revenue per buyer."
         }
       },
       quizConfig: {
@@ -152,7 +153,7 @@ export const APPLE_CONTENT: CompanyContent = {
               { left: "A globally recognised logo", right: "Brand power" }
             ],
             explain:
-              "Apple's moat is layered: proprietary tech (chips and software), ecosystem lock-in (products that work together), and brand power (a globally recognised name customers trust)."
+              "Apple's advantage comes from proprietary tech, products that work together, and a brand customers trust."
           },
           {
             kind: "red-flag",
@@ -181,24 +182,24 @@ export const APPLE_CONTENT: CompanyContent = {
             ],
             correctIndex: 2,
             explain:
-              "R&D is how Apple stays ahead — across hardware, software, AI, chips, and the ecosystem. It's a key reason competitors find Apple hard to catch."
+              "Apple uses R&D to improve hardware, software, and how its products work together. That makes the offer harder for rivals to copy."
           }
         ]
       }
     },
-    [contentKey("business", "industry")]: {
+    [contentKey("business", "competition")]: {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple competes with companies such as:\n• Samsung\n• Google\n• Microsoft\n• Amazon\n• Huawei\n• Sony\n\nCompetition varies across smartphones, computers, wearables, services, and entertainment."
+            "On phones it's Samsung and Google; on PCs it's Microsoft; streaming bumps into Amazon and Sony.\n\nHuawei still matters in China.\n\nApple usually fights upstairs, fewer phones sold, more profit per phone.\n\nWhy investors care:\nPremium share is smaller but juicier; investors watch whether rivals can pull people downmarket."
         },
         "card-2": {
           plainEnglishAnswer:
-            "The technology industry is highly competitive and changes rapidly.\n\nCompanies compete on:\n• price\n• innovation\n• ecosystem\n• design\n• software\n• user experience\n\nNew technologies and changing consumer preferences can quickly impact market leaders."
+            "Android phones keep improving for less money each year.\n\nApple does not win on the lowest sticker. It wins on brand, its own chips, and customers who do not want to rebuild their digital life.\n\nA strong rival year can still stretch upgrade cycles.\n\nWhy investors care:\nIf upgrades slow, hardware revenue can dip even when loyalty stays high."
         },
         "card-3": {
           plainEnglishAnswer:
-            "Apple faces regulations involving:\n• privacy\n• app store practices\n• competition laws\n• international trade\n• taxes\n• data security\n\nGovernments around the world continue increasing scrutiny on large technology companies."
+            "Governments keep poking the App Store, payments, and privacy rules.\n\nTrade fights and tax fights show up country by country.\n\nOne court case on app fees can nick high-margin Services cash, no bad iPhone required.\n\nWhy investors care:\nRegulation can change the profit pool without Apple losing a product battle."
         }
       },
       quizConfig: {
@@ -208,22 +209,22 @@ export const APPLE_CONTENT: CompanyContent = {
             kind: "scenario",
             id: "industry-q1",
             prompt:
-              "Imagine a new regulation forces Apple to allow alternative app stores on iPhone. What's the most reasonable investor concern?",
+              "Regulators push alternative app stores on iPhone. What is the most realistic investor concern?",
             choices: [
-              "Apple's App Store revenue could shrink if developers and users move to other stores",
-              "Apple instantly gets free worldwide advertising",
-              "iPhone becomes illegal to sell",
-              "Apple's hardware revenue automatically triples"
+              "App Store revenue could shrink if fees and traffic shift away",
+              "Brand value becomes irrelevant overnight",
+              "Hardware sales are legally banned globally",
+              "Operating margins must triple automatically"
             ],
             correctIndex: 0,
             explain:
-              "App Store practices are one of Apple's most-regulated areas. Forced alternatives could reduce the fees Apple collects from in-app purchases — exactly the kind of regulation that increases costs or limits operations."
+              "App Store practices are one of Apple's most-regulated areas. Forced alternatives could reduce the fees Apple collects from in-app purchases, exactly the kind of regulation that increases costs or limits operations."
           },
           {
             kind: "odd-one-out",
             id: "industry-q2",
             prompt:
-              "Three of these are real Apple competitors mentioned in the cards. Pick the odd one out.",
+              "Which company is not a real rival in Apple's competitive set?",
             choices: ["Samsung", "Google", "ExxonMobil", "Microsoft"],
             oddIndex: 2,
             explain:
@@ -236,24 +237,24 @@ export const APPLE_CONTENT: CompanyContent = {
               "The technology industry is a low-competition space where market leaders stay safe without much innovation.",
             correct: false,
             explain:
-              "The opposite is true — tech is highly competitive and changes fast. Companies compete on price, innovation, ecosystem, design, software, and user experience all at once."
+              "Tech is brutal and fast, rivals fight on price, features, and experience every year. No leader gets to coast."
           }
         ]
       }
     },
-    [contentKey("business", "snapshot")]: {
+    [contentKey("business", "what-they-do")]: {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple designs and sells iPhone, Mac, iPad, Apple Watch, AirPods, and related accessories.\n\nApple also earns money from services like iCloud, Apple Music, Apple TV+, the App Store, Apple Pay, and other digital services.\n\nIn simple terms: Apple sells premium devices and then keeps customers connected through its software and services ecosystem."
+            "Apple makes tech products people use every day, like iPhones, Macs, iPads, AirPods, and Apple Watches.\n\nApple also earns recurring revenue from the App Store, iCloud, subscriptions, and accessories after the device is sold.\n\nWhy investors care:\nRepeat spending from the same customers is steadier than one-off hardware sales."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Apple helps people communicate, work, create, stay entertained, manage their digital life, and stay connected.\n\nIts products are designed to work together smoothly, so customers can move easily between devices and services.\n\nIn simple terms: Apple makes technology feel easier, more useful, and more connected."
+            "Apple makes technology feel simple and connected.\n\nPeople can move photos, messages, apps, and files easily between devices without needing to think about it too much.\n\nFor many customers, Apple products save time, reduce frustration, and work smoothly together in everyday life."
         },
         "card-3": {
           plainEnglishAnswer:
-            "Apple is one of the largest technology companies in the world.\n\nIt sells products and services globally, has a huge customer base, and its iPhone remains its biggest product category.\n\nIts Services business has also become a major recurring revenue engine."
+            "Apple is one of the biggest names in consumer tech. iPhone alone is a global phenomenon.\n\nMillions of people already use Apple products every day, and many keep paying for Apple services long after buying their devices.\n\nBecause Apple is already so massive, even small improvements in sales can create huge amounts of extra revenue.\n\nWhy investors care:\nScale plus loyalty means small wins still matter, and missteps hit a giant customer base fast."
         }
       },
       quizConfig: {
@@ -266,7 +267,7 @@ export const APPLE_CONTENT: CompanyContent = {
               "Apple's products are designed to work together so customers can move easily between devices and services.",
             correct: true,
             explain:
-              "That's the heart of Apple's ecosystem — iPhone, Mac, iPad, Apple Watch, AirPods and services are all designed to feel seamless together, which is exactly what keeps customers loyal."
+              "That's the heart of Apple's ecosystem: iPhone, Mac, iPad, Apple Watch, AirPods, and services all feel seamless together, which is exactly what keeps customers loyal."
           },
           {
             kind: "multiple-choice",
@@ -275,7 +276,7 @@ export const APPLE_CONTENT: CompanyContent = {
               "Which part of Apple's business has become a major recurring revenue engine?",
             choices: [
               "Cloud computing for enterprises",
-              "Services — iCloud, App Store, Apple Music, Apple TV+, Apple Pay",
+              "Services, iCloud, App Store, Apple Music, Apple TV+, Apple Pay",
               "Electric vehicles",
               "Search advertising"
             ],
@@ -296,7 +297,7 @@ export const APPLE_CONTENT: CompanyContent = {
             ],
             correctIndex: 1,
             explain:
-              "Hardware gets customers in the door; Services (App Store, iCloud, Music, TV+, Pay) keep them paying over time — that's the ecosystem investors watch."
+              "Hardware gets customers in the door. Services (App Store, iCloud, Music, TV+, Pay) keep them paying over time. That's the ecosystem investors watch."
           }
         ]
       }
@@ -307,22 +308,22 @@ export const APPLE_CONTENT: CompanyContent = {
     //
     // Numbers below are illustrative placeholders aligned with Apple's
     // publicly reported figures around FY21-FY23. They are not a substitute
-    // for live filings — replace via the SEC -> AI pipeline when it ships.
+    // for live filings, replace via the SEC -> AI pipeline when it ships.
     // =====================================================================
 
     [contentKey("financials", "growth")]: {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple's revenue trend over the last three reported years:\n• FY2021 — ~$365 billion\n• FY2022 — ~$394 billion (record high)\n• FY2023 — ~$383 billion (slight pullback)\n\nThat works out to a modest mid-single-digit growth rate over three years on top of a very large base. For a company already over $380B in revenue, single-digit growth is normal — the math gets harder the bigger you get."
+            "Revenue climbed from about $365B (FY2021) to a peak near $394B (FY2022), then eased to roughly $383B (FY2023).\n\nThat's mid-single-digit growth on an already massive base, at this size, every extra percent is billions, not a rounding error.\n\nSlower top-line growth isn't automatically failure; it's what happens when you're already one of the biggest companies on earth."
         },
         "card-2": {
           plainEnglishAnswer:
-            "A rough product-mix split of Apple's revenue:\n• iPhone — ~52%\n• Services (App Store, iCloud, Music, TV+, AppleCare, payments) — ~22%\n• Wearables, Home & Accessories (Watch, AirPods, HomePod) — ~10%\n• Mac — ~8%\n• iPad — ~8%\n\niPhone is still the centre of gravity, but the most interesting trend is Services — it has grown roughly double-digit every year and now carries significantly higher margins than hardware."
+            "A rough product-mix split of Apple's revenue:\n• iPhone. ~52%\n• Services (App Store, iCloud, Music, TV+, AppleCare, payments). ~22%\n• Wearables, Home & Accessories (Watch, AirPods, HomePod). ~10%\n• Mac. ~8%\n• iPad. ~8%\n\niPhone is still the centre of gravity, but the most interesting trend is Services, it has grown roughly double-digit every year and now carries significantly higher margins than hardware."
         },
         "card-3": {
           plainEnglishAnswer:
-            "A rough geographic split of Apple's revenue:\n• Americas — ~43%\n• Europe — ~25%\n• Greater China — ~19%\n• Japan — ~6%\n• Rest of Asia Pacific — ~7%\n\nApple is genuinely global — no single region dominates beyond the Americas, and Greater China is large enough that headlines about Chinese demand often move the stock."
+            "A rough geographic split of Apple's revenue:\n• Americas. ~43%\n• Europe. ~25%\n• Greater China. ~19%\n• Japan. ~6%\n• Rest of Asia Pacific. ~7%\n\nApple is genuinely global, no single region dominates beyond the Americas, and Greater China is large enough that headlines about Chinese demand often move the stock."
         }
       },
       quizConfig: {
@@ -332,12 +333,12 @@ export const APPLE_CONTENT: CompanyContent = {
             kind: "bull-bear",
             id: "growth-q1",
             prompt:
-              "Apple's revenue grew from ~$365B in FY21 to ~$383B in FY23 — mid-single-digit growth on a giant base.",
+              "Apple's revenue grew from ~$365B in FY21 to ~$383B in FY23, mid-single-digit growth on a giant base.",
             caption: "Take a stance",
             correct: "bull",
             labels: { bull: "Bullish", bear: "Bearish" },
             explain:
-              "For a company already over $380B in revenue, mid-single-digit growth is solid — at that scale, every percentage point is tens of billions of dollars. Compare it to most peers and you'll see why investors lean bullish."
+              "For a company already over $380B in revenue, mid-single-digit growth is solid, at that scale, every percentage point is tens of billions of dollars. Compare it to most peers and you'll see why investors lean bullish."
           },
           {
             kind: "multiple-choice",
@@ -347,7 +348,7 @@ export const APPLE_CONTENT: CompanyContent = {
             choices: ["Mac", "Services", "iPhone", "Wearables"],
             correctIndex: 2,
             explain:
-              "iPhone is still roughly half of Apple's total revenue. Services is the fastest-growing segment, but iPhone is the engine that funds everything else — for now."
+              "iPhone is still roughly half of Apple's total revenue. Services is the fastest-growing segment, but iPhone is the engine that funds everything else, for now."
           },
           {
             kind: "swipe-cards",
@@ -373,7 +374,7 @@ export const APPLE_CONTENT: CompanyContent = {
               }
             ],
             explain:
-              "Diversified geography and fast-growing Services are clear strengths. Concentration risks — heavy exposure to a single country (China) and a single product (iPhone) — are the offsetting warnings investors should keep on their dashboard."
+              "Diversified geography and fast-growing Services are clear strengths. Concentration risks, heavy exposure to a single country (China) and a single product (iPhone), are the offsetting warnings investors should keep on their dashboard."
           }
         ]
       }
@@ -383,11 +384,11 @@ export const APPLE_CONTENT: CompanyContent = {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple's profit margins have been gradually improving:\n• Gross margin — ~42% (FY21) → ~44-46% (FY23). Up.\n• Operating margin — ~30% range, holding or modestly improving.\n\nThe quiet driver behind the upward trend is mix: Services revenue carries dramatically higher gross margin (~70%) than hardware (~35%). Every dollar of Services growth pulls the company-wide margin up a little."
+            "Apple's profit margins have been gradually improving:\n• Gross margin. ~42% (FY21) → ~44-46% (FY23). Up.\n• Operating margin. ~30% range, holding or modestly improving.\n\nThe quiet driver behind the upward trend is mix: Services revenue carries dramatically higher gross margin (~70%) than hardware (~35%). Every dollar of Services growth pulls the company-wide margin up a little."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Yes — Apple's earnings per share has grown faster than net income.\n• FY21 diluted EPS — ~$5.61\n• FY22 diluted EPS — ~$6.11\n• FY23 diluted EPS — ~$6.13\n\nTwo levers are working at once: profits are growing slowly, and Apple's aggressive buyback program is shrinking the share count by ~3-4% a year. Fewer slices means each slice is bigger — even when the whole pie is barely changing."
+            "Yes. Apple's earnings per share has grown faster than net income.\n• FY21 diluted EPS. ~$5.61\n• FY22 diluted EPS. ~$6.11\n• FY23 diluted EPS. ~$6.13\n\nTwo levers are working at once: profits are growing slowly, and Apple's aggressive buyback program is shrinking the share count by ~3-4% a year. Fewer slices means each slice is bigger, even when the whole pie is barely changing."
         }
       },
       quizConfig: {
@@ -400,7 +401,7 @@ export const APPLE_CONTENT: CompanyContent = {
               "Apple's gross margin has been trending higher over the last few years, mostly because of mix shift toward Services.",
             correct: true,
             explain:
-              "Services carries roughly 70% gross margin vs. ~35% for hardware. As Services grows faster than hardware, the blended company margin drifts up — exactly what the income statement has been showing."
+              "Services carries roughly 70% gross margin vs. ~35% for hardware. As Services grows faster than hardware, the blended company margin drifts up, exactly what the income statement has been showing."
           },
           {
             kind: "risk-meter",
@@ -411,7 +412,7 @@ export const APPLE_CONTENT: CompanyContent = {
             correctLevel: 2,
             levelLabels: ["Very low", "Low", "Medium", "High", "Critical"],
             explain:
-              "Apple's margin is protected by brand, ecosystem, and Services mix — but no margin is permanent. 'Low' (not 'very low') is the honest read: regulatory pressure on the App Store, smartphone demand cycles, or supply-chain shocks could each take a bite."
+              "Apple's margin is protected by brand, ecosystem, and Services mix, but no margin is permanent. 'Low' (not 'very low') is the honest read: regulatory pressure on the App Store, smartphone demand cycles, or supply-chain shocks could each take a bite."
           },
           {
             kind: "fill-blank",
@@ -421,7 +422,7 @@ export const APPLE_CONTENT: CompanyContent = {
             options: ["buybacks", "dividends", "tax credits", "acquisitions"],
             correctIndex: 0,
             explain:
-              "Apple has been buying back ~3-4% of its shares every year for a decade. Fewer shares = each share earns a bigger slice of profit — that's why EPS rises even when net income is roughly flat."
+              "Apple has been buying back ~3-4% of its shares every year for a decade. Fewer shares = each share earns a bigger slice of profit, that's why EPS rises even when net income is roughly flat."
           }
         ]
       }
@@ -431,11 +432,11 @@ export const APPLE_CONTENT: CompanyContent = {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple's operating expenses (R&D + SG&A) have grown roughly in step with the business, not faster:\n• Total opex — around $55B per year today, up from ~$45B three years ago.\n• R&D — ~$30B (up from ~$22B)\n• SG&A — ~$25B (relatively flat)\n\nBecause revenue grew by a similar percentage, operating margin held steady. The fact that R&D rose faster than SG&A is actually a good sign — Apple is leaning into future products, not just paying for overhead."
+            "Apple's operating expenses (R&D + SG&A) have grown roughly in step with the business, not faster:\n• Total opex, around $55B per year today, up from ~$45B three years ago.\n• R&D. ~$30B (up from ~$22B)\n• SG&A. ~$25B (relatively flat)\n\nBecause revenue grew by a similar percentage, operating margin held steady. The fact that R&D rose faster than SG&A is actually a good sign. Apple is leaning into future products, not just paying for overhead."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Yes. Apple's main growth investment buckets are:\n• R&D — ~$30B per year (Apple Silicon, Vision Pro, AI, health, Services infra)\n• Capex — ~$10-12B per year (data centers, retail, manufacturing tooling)\n• Acquisitions — small, tuck-in deals\n\nR&D in particular has more than doubled over the last decade. Whether the bets pay off depends on what you think of Apple Silicon, Vision Pro, and the company's AI roadmap — but the *willingness* to invest is clearly there."
+            "Yes. Apple's main growth investment buckets are:\n• R&D. ~$30B per year (Apple Silicon, Vision Pro, AI, health, Services infra)\n• Capex. ~$10-12B per year (data centers, retail, manufacturing tooling)\n• Acquisitions, small, tuck-in deals\n\nR&D in particular has more than doubled over the last decade. Whether the bets pay off depends on what you think of Apple Silicon, Vision Pro, and the company's AI roadmap, but the *willingness* to invest is clearly there."
         }
       },
       quizConfig: {
@@ -454,7 +455,7 @@ export const APPLE_CONTENT: CompanyContent = {
             ],
             correctIndex: 1,
             explain:
-              "R&D outpacing revenue isn't automatically bad — it can mean Apple is investing ahead of a product cycle. The right first question is *what* the money is buying. If you can point to specific bets (Apple Silicon, Vision Pro, AI), it's growth investment; if not, it's cost creep."
+              "R&D outpacing revenue isn't automatically bad, it can mean Apple is investing ahead of a product cycle. The right first question is *what* the money is buying. If you can point to specific bets (Apple Silicon, Vision Pro, AI), it's growth investment; if not, it's cost creep."
           },
           {
             kind: "match",
@@ -464,21 +465,21 @@ export const APPLE_CONTENT: CompanyContent = {
             pairs: [
               {
                 left: "R&D",
-                right: "Fund tomorrow's products — chips, AI, new categories."
+                right: "Fund tomorrow's products, chips, AI, new categories."
               },
               {
                 left: "Selling, general & admin",
                 right:
-                  "Run the day-to-day — marketing, retail, corporate overhead."
+                  "Run the day-to-day, marketing, retail, corporate overhead."
               },
               {
                 left: "Capex",
                 right:
-                  "Build the physical capacity — data centers, stores, manufacturing tools."
+                  "Build the physical capacity, data centers, stores, manufacturing tools."
               }
             ],
             explain:
-              "R&D builds the future. SG&A keeps the present running. Capex is the bricks and silicon that everything else depends on. A healthy company funds all three — and Apple does."
+              "R&D builds the future. SG&A keeps the present running. Capex is the bricks and silicon that everything else depends on. A healthy company funds all three, and Apple does."
           },
           {
             kind: "multiple-choice",
@@ -498,11 +499,11 @@ export const APPLE_CONTENT: CompanyContent = {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Yes — Apple's operating cash flow has held in the very strong $100B+ per year range over the last three years.\n\n• Operating cash flow — ~$104B (FY21) → ~$122B (FY22) → ~$110B (FY23)\n• Net income tracks closely, which is a sign earnings quality is high.\n\nThe lumpiness quarter-to-quarter is mostly working-capital noise (inventory and payables timing). The trailing 12-month trend is what matters — and that trend is steady-to-up."
+            "Yes. Apple's operating cash flow has held in the very strong $100B+ per year range over the last three years.\n\n• Operating cash flow. ~$104B (FY21) → ~$122B (FY22) → ~$110B (FY23)\n• Net income tracks closely, which is a sign earnings quality is high.\n\nThe lumpiness quarter-to-quarter is mostly working-capital noise (inventory and payables timing). The trailing 12-month trend is what matters, and that trend is steady-to-up."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Apple deploys cash with a clear hierarchy:\n• Share buybacks — ~$80-90B per year (biggest by far)\n• R&D — ~$30B per year\n• Dividends — ~$15B per year\n• Capex — ~$10-12B per year\n• M&A — small, tuck-in only\n\nThe headline: Apple returns more than $90B a year to shareholders via buybacks + dividends. Critics say it should be more aggressive on M&A (especially in AI). Supporters argue the discipline is part of what made the stock such a strong compounder."
+            "Apple deploys cash with a clear hierarchy:\n• Share buybacks. ~$80-90B per year (biggest by far)\n• R&D. ~$30B per year\n• Dividends. ~$15B per year\n• Capex. ~$10-12B per year\n• M&A, small, tuck-in only\n\nThe headline: Apple returns more than $90B a year to shareholders via buybacks + dividends. Critics say it should be more aggressive on M&A (especially in AI). Supporters argue the discipline is part of what made the stock such a strong compounder."
         }
       },
       quizConfig: {
@@ -517,7 +518,7 @@ export const APPLE_CONTENT: CompanyContent = {
             correct: "bull",
             labels: { bull: "Bullish", bear: "Bearish" },
             explain:
-              "Huge, consistent cash generation that lines up with reported earnings is a textbook bullish signal — it means profits are real and there's plenty of fuel for buybacks, dividends, and reinvestment."
+              "Huge, consistent cash generation that lines up with reported earnings is a textbook bullish signal, it means profits are real and there's plenty of fuel for buybacks, dividends, and reinvestment."
           },
           {
             kind: "odd-one-out",
@@ -528,17 +529,17 @@ export const APPLE_CONTENT: CompanyContent = {
               "Share buybacks",
               "Dividends",
               "Research & development",
-              "Real estate flipping"
+              "Unrelated side ventures with no link to the core business"
             ],
             oddIndex: 3,
             explain:
-              "Apple's cash goes mainly to buybacks, dividends, R&D, capex, and small acquisitions. Real estate flipping is not part of the playbook."
+              "Apple's cash goes mainly to buybacks, dividends, R&D, capex, and small acquisitions, not random bets outside the franchise."
           },
           {
             kind: "order",
             id: "cash-q3",
             prompt:
-              "Drag Apple's annual cash uses into order — biggest at the top, smallest at the bottom.",
+              "Drag Apple's annual cash uses into order, biggest at the top, smallest at the bottom.",
             steps: [
               "Share buybacks (~$80-90B)",
               "R&D (~$30B)",
@@ -546,7 +547,7 @@ export const APPLE_CONTENT: CompanyContent = {
               "Capex (~$10-12B)"
             ],
             explain:
-              "Buybacks dominate — Apple is one of the most aggressive buyback companies in history. R&D comes next, then dividends, then capex. Understanding this hierarchy tells you what management really prioritises."
+              "Buybacks dominate. Apple is one of the most aggressive buyback companies in history. R&D comes next, then dividends, then capex. Understanding this hierarchy tells you what management really prioritises."
           }
         ]
       }
@@ -556,11 +557,11 @@ export const APPLE_CONTENT: CompanyContent = {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple actually carries both — but cash and investments are bigger than debt.\n\n• Cash + short-term investments — ~$60-70B\n• Long-term marketable securities — ~$100B+\n• Long-term debt — ~$100B\n\nMost of the debt was issued cheaply during the low-rate years. On a *net* basis (assets minus debt), Apple is close to zero or slightly positive — and it generates ~$100B of free cash flow every year on top of that. The balance sheet is genuinely strong."
+            "Apple actually carries both, but cash and investments are bigger than debt.\n\n• Cash + short-term investments. ~$60-70B\n• Long-term marketable securities. ~$100B+\n• Long-term debt. ~$100B\n\nMost of the debt was issued cheaply during the low-rate years. On a *net* basis (assets minus debt), Apple is close to zero or slightly positive, and it generates ~$100B of free cash flow every year on top of that. The balance sheet is genuinely strong."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Beyond long-term debt, Apple's biggest other obligations are:\n• Operating leases — primarily its global retail-store footprint and corporate offices\n• Manufacturing purchase commitments — multi-year deals with key suppliers (chips, displays, etc.)\n• Deferred revenue and warranty obligations — money owed in services not yet delivered\n• Supplier financing arrangements — short-term, but worth tracking\n\nNone of these are alarming on their own. They're disclosed in the 10-K footnotes — and on the scale of Apple's cash generation, all of them combined still leave the company comfortably solvent."
+            "Beyond long-term debt, Apple's biggest other obligations are:\n• Operating leases, primarily its global retail-store footprint and corporate offices\n• Manufacturing purchase commitments, multi-year deals with key suppliers (chips, displays, etc.)\n• Deferred revenue and warranty obligations, money owed in services not yet delivered\n• Supplier financing arrangements, short-term, but worth tracking\n\nNone of these are alarming on their own. They're disclosed in the 10-K footnotes, and on the scale of Apple's cash generation, all of them combined still leave the company comfortably solvent."
         }
       },
       quizConfig: {
@@ -575,7 +576,7 @@ export const APPLE_CONTENT: CompanyContent = {
             correctLevel: 1,
             levelLabels: ["Very low", "Low", "Medium", "High", "Critical"],
             explain:
-              "Apple has more liquid assets than total long-term debt and generates ~$100B of free cash flow a year. Balance-sheet risk here is genuinely 'very low' — the realistic risks for Apple sit in competition and regulation, not solvency."
+              "Apple has more liquid assets than total long-term debt and generates ~$100B of free cash flow a year. Balance-sheet risk here is genuinely 'very low', the realistic risks for Apple sit in competition and regulation, not solvency."
           },
           {
             kind: "true-false",
@@ -584,7 +585,7 @@ export const APPLE_CONTENT: CompanyContent = {
               "Apple's cash plus marketable investments are larger than its long-term debt.",
             correct: true,
             explain:
-              "Cash + short-term investments (~$60-70B) plus long-term marketable securities (~$100B+) comfortably exceed long-term debt (~$100B). That's why investors talk about Apple's *net* debt position — and why it stays comfortably negative or near zero."
+              "Cash + short-term investments (~$60-70B) plus long-term marketable securities (~$100B+) comfortably exceed long-term debt (~$100B). That's why investors talk about Apple's *net* debt position, and why it stays comfortably negative or near zero."
           },
           {
             kind: "multiple-choice",
@@ -606,30 +607,30 @@ export const APPLE_CONTENT: CompanyContent = {
     },
 
     // =====================================================================
-    // Forces pillar — Inside / Outside paths (placeholder demo content)
+    // Forces pillar. Inside / Outside paths (placeholder demo content)
     // =====================================================================
 
     [contentKey("forces", "inside-forces")]: {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple runs one of the tightest consumer-hardware operations on earth — but it is not risk-free.\n\n• Scale + vertical integration help: Apple designs its own silicon (A-series, M-series), controls retail and online channels, and negotiates from a position of strength with suppliers.\n• Operational risks investors watch: launch execution (new iPhone cycles), quality control at massive volume, and concentration in a handful of mega-suppliers for key components.\n\nFor Apple specifically, the bull case on operations is that its supply chain discipline and brand allow it to absorb shocks better than smaller peers. The bear case is that *any* mis-execution at iPhone scale is expensive — one bad cycle hits revenue immediately."
+            "Apple designs its own chips, runs its own stores, and pushes huge volume through a tight launch calendar every year.\n\nWhen a new iPhone lands on time at scale, that's operational muscle, miss a window and revenue disappears for a quarter.\n\nQuality glitches at this volume are expensive; investors watch return rates and launch delays."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Apple's supply chain is legendary — and famously concentrated.\n\n• Manufacturing is heavily outsourced (notably final assembly in Asia) with multi-year purchase commitments for chips, displays, memory, and optics.\n• Positive read: those commitments lock in capacity when demand is hot.\n• Negative read: disruption at a single critical supplier (or geopolitical friction in a key region) can ripple into product availability and margins faster than at a more distributed manufacturer.\n\nInvestors don't ask whether Apple *has* supply-chain risk — they ask whether the company is diversified *enough* across partners and geographies to survive the next shock."
+            "Most manufacturing happens at partners in Asia, with multi-year orders for screens, chips, and memory locked in advance.\n\nThat locks capacity when demand is hot, but one key supplier going offline can empty shelves fast.\n\nThe question isn't whether Apple has supply risk; it's whether enough backup exists when the next shock hits."
         },
         "card-3": {
           plainEnglishAnswer:
-            "Technology is the product at Apple — which makes cyber and platform risk existential rather than back-office.\n\n• Positives: deep in-house security engineering, tight hardware–software integration, and a services layer (iCloud, App Store, Apple Pay) that benefits from Apple's control of the stack.\n• Negatives: high-profile breach or App Store policy blowback could damage trust overnight; regulators globally scrutinise Apple's platform rules.\n\nFor investors, the key is not 'Does Apple use computers?' — it's whether outages, attacks, or policy reversals could materially hit revenue or multiple."
+            "A bad iCloud outage or App Store scandal hits trust, not just IT. Services revenue depends on people believing Apple keeps data safe.\n\nApple controls hardware and software, which helps security, but regulators keep poking at platform rules.\n\nCyber and policy headlines can move the stock even when iPhone sales look fine."
         },
         "card-4": {
           plainEnglishAnswer:
-            "Apple's financial profile is a core part of the bull thesis: enormous cash generation, a fortress balance sheet, and aggressive capital return.\n\n• Positives: ~$100B+ annual free cash flow (ballpark recent years), huge cash and marketable securities, and access to cheap debt if needed.\n• Negatives: debt is still ~$100B — manageable, but not zero; FX swings matter because revenue is global; any sustained revenue decline would test the buyback math.\n\nThe investor question is simple: if revenue stalls for two years, does Apple still have room to invest *and* return cash without stressing the balance sheet? Today, the answer is generally yes — but that's the lens."
+            "Apple throws off roughly $100B+ of cash a year and still sits on a pile of cash and investments bigger than its long-term debt.\n\nBuybacks and dividends return tens of billions to shareholders annually.\n\nIf revenue flatlined for two years, could Apple still fund R&D and those returns? Today most investors say yes, but that's the stress test."
         },
         "card-5": {
           plainEnglishAnswer:
-            "Apple's brand is arguably its single most valuable intangible — premium positioning, extreme loyalty, and pricing power.\n\n• Positive impact: customers upgrade on cycles even when competitors discount; Services attach rates climb because the hardware base is sticky.\n• Negative impact: brand damage from product-safety issues, App Store disputes, or major privacy mis-steps could erode trust — and in consumer electronics, trust *is* demand.\n\nInvestors watch NPS-style signals indirectly through retention, Services growth, and pricing — but the honest answer is that brand risk for Apple is about tail events, not everyday volatility."
+            "People pay Apple prices because the brand signals quality and the experience feels safe.\n\nLoyal users upgrade on a rhythm; Services attach because the devices already in the bag are Apple.\n\nA major safety scare or ugly App Store fight can dent trust, and in gadgets, trust is demand."
         }
       },
       quizConfig: {
@@ -642,22 +643,22 @@ export const APPLE_CONTENT: CompanyContent = {
               "For Apple, a major cyberattack on iCloud is unlikely to matter to investors because Services is a small part of revenue.",
             correct: false,
             explain:
-              "Services is now a very large, high-margin business — and iCloud is part of the trust fabric for the whole ecosystem. A serious breach could hurt both revenue and the premium multiple."
+              "Services is now a very large, high-margin business, and iCloud is part of the trust fabric for the whole ecosystem. A serious breach could hurt both revenue and the premium multiple."
           },
           {
             kind: "scenario",
             id: "inside-forces-q2",
             prompt:
-              "Imagine Apple's largest display supplier suddenly cannot ship panels for one quarter. What's the most reasonable investor takeaway?",
+              "A major display supplier cannot ship panels for a quarter. What is the realistic takeaway?",
             choices: [
-              "Supply shocks cannot affect Apple because it has infinite inventory",
-              "Near-term revenue and mix could be pressured until supply recovers",
-              "Apple automatically doubles Android market share",
-              "Debt covenants force an immediate bankruptcy filing"
+              "Near-term revenue and product mix could suffer until supply recovers",
+              "Large companies are immune to any supply shock",
+              "Competitors automatically gain 100% market share",
+              "The balance sheet forces bankruptcy within a week"
             ],
-            correctIndex: 1,
+            correctIndex: 0,
             explain:
-              "Even Apple concentrates some critical components. A panel shortage is a classic 'execution + supply chain' shock — it can delay launches, skew mix, and hit margins until supply normalises."
+              "Even Apple concentrates some critical components. A panel shortage is a classic 'execution + supply chain' shock, it can delay launches, skew mix, and hit margins until supply normalises."
           },
           {
             kind: "red-flag",
@@ -671,7 +672,7 @@ export const APPLE_CONTENT: CompanyContent = {
             ],
             flagIndex: 0,
             explain:
-              "Rising warranty accruals *plus* rising returns often precedes quality or demand issues — exactly the kind of internal execution signal investors dig into first."
+              "Rising warranty accruals *plus* rising returns often precedes quality or demand issues, exactly the kind of internal execution signal investors dig into first."
           }
         ]
       }
@@ -681,15 +682,15 @@ export const APPLE_CONTENT: CompanyContent = {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Smartphones and PCs are brutally competitive — but Apple competes mostly at the premium tier where share is smaller but profit pools are deeper.\n\n• Key rivals: Samsung, Google (Pixel + Android ecosystem), Chinese OEMs in various price tiers, and Microsoft on productivity/cross-device.\n• Bull angle: differentiation via silicon, ecosystem lock-in, and retail experience.\n• Bear angle: premium share is still share — if Android closes the camera/performance gap at lower prices, upgrade cycles can lengthen."
+            "Phones and PCs are crowded, but Apple usually fights at the high end where profit per device is fatter.\n\nSamsung and Google push Android; Chinese brands undercut on price in many markets.\n\nIf a $800 Android feels close enough to a $1,200 iPhone, people delay upgrades, that's the bear case in one sentence."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Apple is one of the most scrutinised platforms on earth — App Store rules, payments, defaults, and privacy all draw regulatory attention in the US, EU, UK, and beyond.\n\n• Positive read: settlements and rule changes can *clarify* the roadmap and reduce uncertainty.\n• Negative read: forced sideloading, lower take-rates, or browser-engine mandates could compress high-margin Services economics over time.\n\nInvestors model regulatory outcomes as distribution shifts: not always catastrophic, but rarely free."
+            "Governments keep testing App Store fees, payment rules, and whether rivals get equal footing on iPhone.\n\nA clear settlement can remove overhang; forced sideloading or lower take-rates shrink high-margin Services cash.\n\nRegulation changes the rules of the platform, competitors don't have to beat Apple on product alone."
         },
         "card-3": {
           plainEnglishAnswer:
-            "Apple is globally diversified — which means it inherits global macro sensitivity.\n\n• Demand shocks: consumer weakness in China or Europe hits high-end handset cycles; strong USD hurts reported revenue from overseas.\n• Cost shocks: memory pricing, freight, and energy matter at the margin.\n\nThe reason macro matters for Apple specifically is scale: a few points of revenue growth lost to macro is tens of billions of dollars — enough to change the narrative even if operations are perfect."
+            "Weak spending in China or Europe shows up in iPhone cycles; a strong dollar makes overseas sales look smaller in dollars.\n\nMemory, shipping, and energy costs nibble at margins when they spike.\n\nAt Apple's size, losing a few points of growth is tens of billions, enough to reset the whole narrative."
         }
       },
       quizConfig: {
@@ -708,12 +709,12 @@ export const APPLE_CONTENT: CompanyContent = {
             ],
             correctIndex: 1,
             explain:
-              "App Store economics are an *external* legal/regulatory battle — exactly the kind of force that can compress take-rates without Apple 'mis-executing' operationally."
+              "App Store economics are an *external* legal/regulatory battle, exactly the kind of force that can compress take-rates without Apple 'mis-executing' operationally."
           },
           {
             kind: "odd-one-out",
             id: "outside-forces-q2",
-            prompt: "Pick the odd one out — three are classic *external* forces.",
+            prompt: "Pick the odd one out, three are classic *external* forces.",
             choices: [
               "FX headwinds on reported revenue",
               "Antitrust scrutiny of mobile platforms",
@@ -744,22 +745,22 @@ export const APPLE_CONTENT: CompanyContent = {
     },
 
     // =====================================================================
-    // Management pillar — Apple demo answers (overrides generic templates)
+    // Management pillar. Apple demo answers (overrides generic templates)
     // =====================================================================
 
     [contentKey("management", "mgmt-1")]: {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple's DEF 14A names Tim Cook as CEO, the current CFO and other named executive officers, with short bios — always read the latest proxy for the exact roster.\n\nCook's background is famously operations-heavy (IBM, Intelligent Electronics, Compaq) before Apple — relevant because Apple's edge is supply chain + product cadence at massive scale.\n\nInvestor takeaway: Apple's bench is deep, but the key question is whether the leadership team matches the company's current chapter (Services scale, regulation, and new product bets) — not just whether resumes look impressive."
+            "The proxy lists Tim Cook as CEO plus the CFO and other top officers, with short bios on where they worked before.\n\nCook's background is operations, supply chain and scale, which fits how Apple actually wins.\n\nAsk whether today's leaders match today's fights: Services growth, regulation, and new bets like Vision and AI."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Cook has been CEO since 2011 — an unusually long runway for a mega-cap consumer hardware leader.\n\nMany other senior leaders have multi-year (sometimes multi-decade) Apple tenure, which can mean strong culture and execution discipline — but also risks group-think if refresh is too slow.\n\nWatch CFO / retail / operations transitions: frequent unexplained churn in finance leadership is a bigger yellow flag for Apple than normal tech turnover in middle management."
+            "Cook has run Apple since 2011, a long stretch for a consumer hardware giant.\n\nMany lieutenants have been there for years, which can mean steady execution or slow refresh if the bench never turns over.\n\nIf the CFO seat keeps changing with no clear reason, pay extra attention, finance churn is a louder alarm than random middle-manager turnover."
         },
         "card-3": {
           plainEnglishAnswer:
-            "Outcomes investors usually cite for the Cook era: enormous cash generation, a world-class balance sheet, aggressive buybacks, and expansion of Services revenue and margin — alongside navigating US–China tensions and multiple regulatory battles.\n\nThe honest test is the same as any company: compare prior-year promises (SKU cadence, Services growth narrative, margin guardrails) to what shipped in numbers — not just keynote headlines."
+            "Under Cook, Apple piled up cash, bought back mountains of stock, and grew Services into a much bigger, higher-margin business.\n\nThey also navigated China tension and App Store fights.\n\nCompare what leadership promised a few years ago, iPhone cadence, Services growth, margins, to what the numbers actually delivered, not just keynote hype."
         }
       }
     },
@@ -768,19 +769,19 @@ export const APPLE_CONTENT: CompanyContent = {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple executives typically hold meaningful equity through RSUs/PSUs and historically have shown significant ownership versus many peers.\n\nStill read Form 4s: planned sales for taxes/diversification are normal — what you are hunting for is a pattern of net selling into weakness without clear explanation, or ownership requirements that look weak relative to pay."
+            "Top Apple leaders usually hold a lot of stock through RSUs and PSUs, check the proxy ownership table.\n\nSelling some shares for taxes is normal; a pattern of dumping stock while results slide is worth a raised eyebrow."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Compare Apple's total shareholder return and operating performance (revenue, gross margin, Services mix) to the trend in reported CEO pay and incentive outcomes in the proxy CD&A.\n\nApple's bull narrative is often 'great business compounding' — the governance check is whether pay stays tethered to long-term per-share value creation, not a single lucky iPhone cycle."
+            "Line up how the stock and profits did versus how CEO pay moved in the proxy.\n\nA great compounder should not pay like a lottery ticket after one lucky iPhone cycle, pay should track long-term per-share value."
         },
         "card-3": {
           plainEnglishAnswer:
-            "Apple's pay design is typical of large-cap tech: base salary is modest versus total comp; the real package is equity with performance tests on annual cash incentives.\n\nRead for equity vs. cash mix, PSU metrics (revenue, operating income, relative TSR, etc.), holding periods, and clawbacks — those details tell you what the board optimises for."
+            "Base salary is small next to stock grants and bonus plans tied to performance tests.\n\nLook at how much is equity, what triggers vesting, and whether executives must hold shares, that tells you what the board really rewards."
         },
         "card-4": {
           plainEnglishAnswer:
-            "Apple's CD&A spells out the metrics used for annual cash incentives (and how targets compare year to year).\n\nInvestors often focus on whether metrics reward durable fundamentals (profitability, revenue quality) versus short-term optics — and whether targets look challenging vs. last year's actuals."
+            "The proxy lists which numbers drive annual bonuses, revenue, profit, cash flow, sometimes relative stock performance.\n\nSee if targets look hard versus last year's actuals or like easy wins for management."
         }
       }
     },
@@ -789,11 +790,11 @@ export const APPLE_CONTENT: CompanyContent = {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple historically generates enormous operating cash flow and then allocates among: capex ( fabs, tooling, retail), R&D, acquisitions (usually small bolt-ons), dividends, and buybacks.\n\nThe bull case is disciplined reinvestment at high returns plus returning excess cash. The bear case to watch is whether buybacks remain attractive if growth slows or valuation stretches."
+            "Apple brings in massive cash from selling devices and Services.\n\nLeadership decides where it goes: factories and stores, R&D, small acquisitions, dividends, and stock buybacks.\n\nThe real test is whether those choices still look smart if phone upgrades stretch longer."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Apple pays a growing dividend and runs large buybacks — but investors should net buybacks against stock-based compensation dilution and watch the debt stack (Apple uses debt tactically despite huge cash).\n\nThe key question is whether cash returns are funded sustainably by free cash flow, not one-time items."
+            "Apple pays a dividend and buys back huge amounts of its own stock.\n\nIt also uses debt even with a big cash pile, similar to keeping savings while still financing big projects.\n\nWatch whether cash returns stay funded by normal business cash flow, not one-time windfalls."
         }
       }
     },
@@ -802,19 +803,19 @@ export const APPLE_CONTENT: CompanyContent = {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple's board includes independent directors alongside insiders; the proxy explains independence determinations and any relationships.\n\nIndependence is not a guarantee of great oversight — but it is a baseline hygiene factor for a company of Apple's scrutiny."
+            "Apple's board includes independent directors alongside insiders; the proxy explains independence determinations and any relationships.\n\nIndependence is not a guarantee of great oversight, but it is a baseline hygiene factor for a company of Apple's scrutiny."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Apple's committees mirror large-cap best practice: audit, compensation, nominating/corporate governance (names vary slightly by year).\n\nAudit oversees financial reporting and controls; comp sets pay; nominating handles board refreshment and governance policies — investors read charters for teeth, not titles."
+            "Apple's committees mirror large-cap best practice: audit, compensation, nominating/corporate governance (names vary slightly by year).\n\nAudit oversees financial reporting and controls; comp sets pay; nominating handles board refreshment and governance policies, investors read charters for teeth, not titles."
         },
         "card-3": {
           plainEnglishAnswer:
-            "Apple discloses related-party transactions where material (and routine commercial relationships can look 'related' in footnotes).\n\nThe investor job is not moralism — it is whether transactions look arm's length, well explained, and unlikely to tunnel value away from minority shareholders."
+            "Apple discloses related-party transactions where material (and routine commercial relationships can look 'related' in footnotes).\n\nThe investor job is not moralism, it is whether transactions look arm's length, well explained, and unlikely to tunnel value away from minority shareholders."
         },
         "card-4": {
           plainEnglishAnswer:
-            "Apple's proxy includes standard change-in-control and severance themes for executives; investors compare multiples and equity acceleration to peers.\n\nLarge parachutes can be justified to retain talent — or can reward failure if performance hurdles are weak; Apple is judged like any mega-cap here."
+            "Apple's proxy includes standard change-in-control and severance themes for executives; investors compare multiples and equity acceleration to peers.\n\nLarge parachutes can be justified to retain talent, or can reward failure if performance hurdles are weak; Apple is judged like any mega-cap here."
         }
       }
     },
@@ -823,15 +824,24 @@ export const APPLE_CONTENT: CompanyContent = {
       cards: {
         "card-1": {
           plainEnglishAnswer:
-            "Apple routinely reports very large cash + marketable securities balances versus operating needs — one reason the company is often described as having a fortress balance sheet.\n\nStill pair cash with liabilities, purchase commitments, and cyclicality: cash is only strength if it is truly unencumbered and stable through a shock."
+            "Apple routinely reports very large cash + marketable securities balances versus operating needs, one reason the company is often described as having a fortress balance sheet.\n\nStill pair cash with liabilities, purchase commitments, and cyclicality: cash is only strength if it is truly unencumbered and stable through a shock."
         },
         "card-2": {
           plainEnglishAnswer:
-            "Apple carries meaningful total debt even with huge cash — a treasury strategy (term out liabilities, term out yield on cash).\n\nInvestors watch net cash/net debt, maturities, fixed vs. floating mix, and interest coverage. Apple's scale usually makes refinancing risk manageable — but it is not 'zero debt'."
+            "Apple carries real debt even with a huge cash balance.\n\nThat can spread out big payments while cash earns interest in the meantime.\n\nCheck whether debt maturities look manageable and interest costs stay easy to cover in a slow year."
         },
         "card-3": {
           plainEnglishAnswer:
-            "Apple's operations historically convert a large share of revenue into cash — the Services mix also helps margins.\n\nStress questions: what happens to free cash flow if iPhone cycles elongate or China demand weakens? Strength is whether the business can self-fund priorities without panicking into dilution or destructive leverage."
+            "Apple usually turns a large share of each sale into cash, and Services helps on that front.\n\nAsk what happens if iPhone upgrades slow or a big region cools off.\n\nStrength means the company can still fund priorities without panic moves."
+        }
+      }
+    },
+
+    [contentKey("management", "management-summary")]: {
+      cards: {
+        "card-1": {
+          plainEnglishAnswer:
+            "Cook has run Apple for years with a deep bench and a board that mostly looks independent on paper.\n\nPay is heavy on stock, and the company has returned huge cash while growing Services.\n\nVerdict: mostly trust, but watch the next CEO plan and whether App Store fights stay managed without hurting the brand."
         }
       }
     }

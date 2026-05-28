@@ -22,6 +22,10 @@ import {
   findQuestDefinition,
   getCompanyPillarQuests
 } from "@/data/quests/library";
+import {
+  CONTROLLED_DEMO_COMPANY_ID,
+  CONTROLLED_DEMO_MODE
+} from "@/lib/demo/controlledDemo";
 import type { QuestDefinition } from "@/data/quests/types";
 import {
   isPillarComplete,
@@ -98,7 +102,11 @@ export function getPillarQuestViews(
       !reqs.questSlugs || reqs.questSlugs.every((s) => completedSet.has(s));
     const xpMet = (reqs.minXp ?? 0) <= progress.xp;
     const levelMet = (reqs.minLevel ?? 1) <= progress.level;
-    const unlocked = pillarUnlocked && prereqsMet && xpMet && levelMet;
+    const unlocked =
+      CONTROLLED_DEMO_MODE &&
+      state.activeCompanyId === CONTROLLED_DEMO_COMPANY_ID
+        ? pillarUnlocked
+        : pillarUnlocked && prereqsMet && xpMet && levelMet;
 
     const workKey = `${pillarId}:${q.slug}`;
     return {

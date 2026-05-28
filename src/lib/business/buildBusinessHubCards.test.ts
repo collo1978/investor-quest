@@ -23,33 +23,61 @@ function demoQuests(): QuestDefinition[] {
   }));
 }
 
-test("fresh state: only snapshot unlocked", () => {
+test("fresh state: only what-they-do unlocked", () => {
   const quests = demoQuests();
   const views = Object.fromEntries(
-    quests.map((q) => [q.slug, { quest: q, completed: false, read: false, readAt: null, unlocked: true, work: null }])
+    quests.map((q) => [
+      q.slug,
+      {
+        quest: q,
+        completed: false,
+        read: false,
+        readAt: null,
+        unlocked: true,
+        work: null
+      }
+    ])
   );
   const cards = buildBusinessHubCards(quests, views, new Set());
 
   const bySlug = Object.fromEntries(cards.map((c) => [c.slug, c]));
 
-  assert.equal(bySlug.snapshot?.locked, false);
-  assert.equal(bySlug.snapshot?.visualState, "active");
-  assert.equal(bySlug.snapshot?.isPrimaryActive, true);
+  assert.equal(bySlug["what-they-do"]?.locked, false);
+  assert.equal(bySlug["what-they-do"]?.visualState, "active");
+  assert.equal(bySlug["what-they-do"]?.isPrimaryActive, true);
 
-  for (const slug of ["revenue", "operations", "advantage", "industry"] as const) {
+  for (const slug of [
+    "why-buying",
+    "everyday-life",
+    "how-it-works",
+    "why-they-stay",
+    "competition"
+  ] as const) {
     assert.equal(bySlug[slug]?.locked, true, `${slug} should be locked`);
     assert.equal(bySlug[slug]?.visualState, "locked", `${slug} visual`);
     assert.equal(bySlug[slug]?.isPrimaryActive, false, `${slug} primary`);
   }
+
+  assert.equal(cards.length, 6);
 });
 
-test("missing revenue row still locks operations (canonical prior chain)", () => {
-  const quests = demoQuests().filter((q) => q.slug !== "revenue");
+test("missing why-buying row still locks everyday-life (canonical prior chain)", () => {
+  const quests = demoQuests().filter((q) => q.slug !== "why-buying");
   const views = Object.fromEntries(
-    quests.map((q) => [q.slug, { quest: q, completed: false, read: false, readAt: null, unlocked: true, work: null }])
+    quests.map((q) => [
+      q.slug,
+      {
+        quest: q,
+        completed: false,
+        read: false,
+        readAt: null,
+        unlocked: true,
+        work: null
+      }
+    ])
   );
   const cards = buildBusinessHubCards(quests, views, new Set());
-  const operations = cards.find((c) => c.slug === "operations");
-  assert.equal(operations?.locked, true);
-  assert.equal(operations?.visualState, "locked");
+  const everyday = cards.find((c) => c.slug === "everyday-life");
+  assert.equal(everyday?.locked, true);
+  assert.equal(everyday?.visualState, "locked");
 });

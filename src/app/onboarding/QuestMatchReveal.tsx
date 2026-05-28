@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { NeonButton } from "@/components/NeonButton";
+import { NVDA_ONBOARDING } from "@/lib/demo/nvidiaDemoVoice";
 import { pickQuestMatchWinner } from "@/lib/onboarding/questMatchFallback";
 import type { RecommendedCompanyCard } from "@/lib/onboarding/types";
 
@@ -15,10 +16,14 @@ type Props = {
   interestLabelById: Map<string, string>;
   onWinnerChosen: (card: RecommendedCompanyCard) => void;
   onEnterQuest: () => void;
+  enterQuestDisabled?: boolean;
+  /** Controlled demo: broad spin, NVIDIA is always the final unlock. */
+  controlledDemoReveal?: boolean;
 };
 
 const STATUS_SCAN = ["Matching detected", "Scanning interests", "Quest signals found"];
 const STATUS_SLOW = ["Narrowing matches", "Almost there", "Quest company found"];
+const STATUS_SLOW_DEMO = [...NVDA_ONBOARDING.matchSlow, NVDA_ONBOARDING.matchLocked];
 
 function InterestTags({
   ids,
@@ -85,7 +90,9 @@ export function QuestMatchReveal({
   companies,
   interestLabelById,
   onWinnerChosen,
-  onEnterQuest
+  onEnterQuest,
+  enterQuestDisabled = false,
+  controlledDemoReveal = false
 }: Props) {
   const reduceMotion = useReducedMotion();
   const pool = useMemo(() => companies.slice(0, 9), [companies]);
@@ -124,14 +131,19 @@ export function QuestMatchReveal({
     let lockTimer: number | null = null;
     let completeTimer: number | null = null;
 
+    const scanMs = controlledDemoReveal ? 1200 : 2200;
+    const lockMs = controlledDemoReveal ? 900 : 1400;
+    const completeMs = controlledDemoReveal ? 400 : 700;
+
     const slowStart = window.setTimeout(() => {
       window.clearInterval(fast);
       setPhase("slowing");
       let slowTick = 0;
+      const slowLines = controlledDemoReveal ? STATUS_SLOW_DEMO : STATUS_SLOW;
       slow = window.setInterval(() => {
         slowTick += 1;
         setHighlightIndex((i) => (i + 1) % pool.length);
-        setStatusLine(STATUS_SLOW[slowTick % STATUS_SLOW.length]!);
+        setStatusLine(slowLines[slowTick % slowLines.length]!);
       }, 220);
 
       lockTimer = window.setTimeout(() => {
@@ -139,13 +151,15 @@ export function QuestMatchReveal({
         const winnerIdx = pool.findIndex((c) => c.id === chosen.id);
         setHighlightIndex(winnerIdx >= 0 ? winnerIdx : 0);
         setPhase("locked");
-        setStatusLine("Quest company found");
+        setStatusLine(
+          controlledDemoReveal ? NVDA_ONBOARDING.matchLocked : "Quest company found"
+        );
         setWinner(chosen);
         onWinnerChosenRef.current(chosen);
 
-        completeTimer = window.setTimeout(() => setPhase("complete"), 700);
-      }, 1400);
-    }, 2200);
+        completeTimer = window.setTimeout(() => setPhase("complete"), completeMs);
+      }, lockMs);
+    }, scanMs);
 
     return () => {
       window.clearInterval(fast);
@@ -154,7 +168,7 @@ export function QuestMatchReveal({
       if (lockTimer) window.clearTimeout(lockTimer);
       if (completeTimer) window.clearTimeout(completeTimer);
     };
-  }, [pool, reduceMotion]);
+  }, [pool, reduceMotion, controlledDemoReveal]);
   const gridCols =
     pool.length <= 4 ? "grid-cols-2" : pool.length <= 6 ? "grid-cols-3" : "grid-cols-3";
 
@@ -170,7 +184,28 @@ export function QuestMatchReveal({
               exit={{ opacity: 0, y: -4 }}
               className="text-xl font-[var(--font-grotesk)] font-extrabold text-ink-0 sm:text-2xl"
             >
-              Scanning your investor interests…
+              {controlledDemoReveal
+                ? NVDA_ONBOARDING.matchScan
+                : "Scanning your investor interests…"}
+            </motion.div>
+          ) : controlledDemoReveal ? (
+            <motion.div
+              key="complete-headline-demo"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-1.5"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[rgba(245,197,71,0.9)]">
+                {NVDA_ONBOARDING.matchUnlock}
+              </p>
+              <p className="text-lg font-[var(--font-grotesk)] font-bold text-ink-0 sm:text-xl">
+                {NVDA_ONBOARDING.matchPick}
+              </p>
+              <p className="text-sm text-ink-2">{NVDA_ONBOARDING.matchStart}</p>
+              <p className="text-2xl font-[var(--font-grotesk)] font-extrabold text-ink-0 sm:text-3xl">
+                {winner?.companyName}
+              </p>
+              <p className="text-sm text-ink-2">{winner?.ticker}</p>
             </motion.div>
           ) : (
             <motion.div
@@ -278,13 +313,23 @@ export function QuestMatchReveal({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
         >
-          <NeonButton className="w-full justify-center" onClick={onEnterQuest}>
-            Enter Quest
+          <NeonButton
+            className="w-full justify-center"
+            onClick={onEnterQuest}
+            disabled={enterQuestDisabled}
+          >
+            {enterQuestDisabled
+              ? "Loading your progress…"
+              : controlledDemoReveal
+                ? NVDA_ONBOARDING.matchCta
+                : "Enter Quest"}
           </NeonButton>
         </motion.div>
       ) : (
         <p className="text-center text-[11px] text-ink-2">
-          Investor Quest is matching your first company quest…
+          {controlledDemoReveal
+            ? NVDA_ONBOARDING.questMatchWaiting
+            : "Investor Quest is matching your first company quest…"}
         </p>
       )}
     </motion.div>

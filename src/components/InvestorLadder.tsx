@@ -9,6 +9,7 @@ import {
   type InvestorRung,
   type InvestorTierId
 } from "@/data/progression/investorLadder";
+import { formatAnalyticsNumber } from "@/lib/analytics/formatDisplay";
 
 const GOLD = "#F5C547";
 const GOLD_DIM = "rgba(245, 197, 71, 0.35)";
@@ -177,7 +178,7 @@ export function InvestorLadder({ xp }: { xp: number }) {
                   className="mt-0.5 text-[12px] tabular-nums tracking-wide text-ink-2"
                   style={!isLocked ? { color: VIOLET } : undefined}
                 >
-                  {r.xp.toLocaleString()} XP threshold
+                  {formatAnalyticsNumber(r.xp)} XP threshold
                 </p>
               </div>
               <div className="shrink-0 text-[10px] font-bold uppercase tracking-[0.18em]">

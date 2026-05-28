@@ -6,6 +6,7 @@ import {
 } from "@/lib/sec/resolveQuestSectionIds";
 import { resolvePayloadStatus } from "@/lib/quests/questPayloadProgress";
 import { fetchQuestCardAnswersForSlug } from "@/lib/supabase/questCardAnswers/storage";
+import { formatPlayerQuestSourceLabel } from "@/lib/quests/questSourceLabel";
 import type { PillarQuestAnswersPayload } from "@/lib/supabase/questCardAnswers/types";
 import type { SecFilingFormType } from "@/lib/sec/types";
 
@@ -51,11 +52,10 @@ export async function loadPillarQuestAnswersPayload(params: {
   });
 
   const first = Object.values(cards)[0];
-  const sourceLabel = first?.sourceAccession
-    ? `SEC ${first.sourceForm} · ${first.sourceAccession}`
-    : first
-      ? `SEC ${first.sourceForm}`
-      : null;
+  const sourceLabel = formatPlayerQuestSourceLabel(
+    first?.sourceForm,
+    first?.sourceAccession
+  );
 
   const status = resolvePayloadStatus(expectedCardIds, cards, true);
 
