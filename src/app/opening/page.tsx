@@ -8,7 +8,6 @@ import { useDemoStory } from "@/components/demo/DemoStoryProvider";
 import { useGame } from "@/components/GameProvider";
 import { clearDemoFreshStart } from "@/lib/demo/demoSessionReset";
 import {
-  resolveHomeEntryRoute,
   shouldShowOpeningScreen
 } from "@/lib/opening/shouldShowOpeningScreen";
 import {
@@ -41,34 +40,16 @@ export default function OpeningPage() {
     }
 
     clearDemoFreshStart();
-    const playIntro = shouldShowOpeningScreen(raw);
-    const target = playIntro ? "/welcome" : resolveHomeEntryRoute(raw);
-    const next = target === "/opening" ? "/welcome" : target;
-
-    const transition =
-      next === "/welcome"
-        ? "welcome"
-        : next === "/map"
-          ? "map"
-          : next.startsWith("/onboarding")
-            ? "onboarding"
-            : "welcome";
-    markFunnelTransition(transition);
-    router.replace(next);
+    // `/opening` is a cinematic intro surface. Even when a user revisits it via
+    // the local preview sidebar, run the full intro sequence and then continue
+    // the funnel: Opening → Welcome → Onboarding.
+    markFunnelTransition("welcome");
+    router.replace("/welcome");
 
     queueMicrotask(() => {
-      if (playIntro) {
-        actions.completeOpeningScreen();
-      }
+      actions.completeOpeningScreen();
     });
   }, [actions, raw, router]);
-
-  useEffect(() => {
-    if (demoStory.active) return;
-    if (shouldShowOpeningScreen(raw)) return;
-    const target = resolveHomeEntryRoute(raw);
-    if (target !== "/opening") router.replace(target);
-  }, [demoStory.active, raw, router]);
 
   return <GameOpeningScreen onComplete={finishIntro} />;
 }

@@ -15,6 +15,13 @@ export const ISLAND_NAV = PILLAR_META.map((p) => ({
 }));
 
 export const PRIMARY_NAV = [
+  // Local preview/testing links — keep production presenter flow at `/demo`.
+  ...(process.env.NODE_ENV !== "production"
+    ? ([
+        { href: "/opening", label: "Opening Logo" },
+        { href: "/welcome", label: "Welcome Intro" }
+      ] as const)
+    : []),
   { href: "/onboarding", label: "Onboarding" },
   { href: "/mission-brief", label: "Mission brief" },
   { href: "/map", label: "Map" },

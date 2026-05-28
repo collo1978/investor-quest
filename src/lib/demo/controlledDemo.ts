@@ -124,6 +124,13 @@ export function getControlledDemoIslandNav() {
 
 export function getControlledDemoPrimaryNav() {
   return [
+    // Local preview/testing links — keep production presenter flow at `/demo`.
+    ...(process.env.NODE_ENV !== "production"
+      ? ([
+          { href: "/opening", label: "Opening Logo" },
+          { href: "/welcome", label: "Welcome Intro" }
+        ] as const)
+      : []),
     { href: "/onboarding", label: "Onboarding" },
     { href: "/map", label: "Map" },
     { href: "/profile", label: "Profile" }
