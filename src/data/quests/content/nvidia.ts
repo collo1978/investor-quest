@@ -43,7 +43,7 @@ export const NVIDIA_CONTENT: CompanyContent = {
         "card-2": {
           investorQuestion: "What customer problem does NVIDIA fix?",
           plainEnglishAnswer:
-            "You know when ChatGPT takes forever to answer, or a game starts lagging right when things get exciting? Companies hate that too — if apps feel slow or laggy, people stop using them.\n\nNVIDIA builds the chips helping those apps run much faster and smoother. Their hardware does the heavy work so answers land in seconds and games don't stutter — that's the customer problem they solve."
+            "When AI tools, games, or apps run slowly, people get frustrated and stop using them.\n\nCompanies need huge computing power to process graphics, AI, and massive amounts of data quickly.\n\nSlow performance can mean lost users, unhappy customers, and lost revenue.\n\nNVIDIA builds the powerful chips and technology that help AI tools, games, and data centers run faster and more smoothly."
         },
         "card-3": {
           investorQuestion: "How important is NVIDIA in the AI chip market?",

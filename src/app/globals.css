@@ -214,3 +214,137 @@ h3 {
   will-change: opacity;
 }
 
+/* =======================================================================
+ * Schools variant: "SCHOOL EDITION" stamp (only used on `/schools/opening`)
+ * ======================================================================= */
+@keyframes iq-schools-stamp-slam {
+  0% {
+    opacity: 0;
+    transform: rotate(-8deg) scale(1.6) translate3d(0, -2px, 0);
+    filter: blur(0.2px);
+  }
+  58% {
+    opacity: 1;
+    transform: rotate(-8deg) scale(0.92) translate3d(0, 0, 0);
+  }
+  78% {
+    transform: rotate(-8deg) scale(1.04) translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-8deg) scale(1) translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+@keyframes iq-schools-stamp-impact {
+  0%,
+  54% {
+    transform: translate3d(0, 0, 0);
+  }
+  62% {
+    transform: translate3d(-1px, 0.5px, 0);
+  }
+  70% {
+    transform: translate3d(1px, -0.5px, 0);
+  }
+  78% {
+    transform: translate3d(-0.5px, 0.25px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.iq-schools-seal {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background:
+    radial-gradient(ellipse 115% 115% at 40% 35%, rgba(245, 197, 71, 0.18), rgba(0, 0, 0, 0.62) 62%),
+    radial-gradient(ellipse 95% 85% at 60% 60%, rgba(139, 92, 246, 0.18), transparent 62%);
+  border: 1px solid rgba(245, 197, 71, 0.32);
+  box-shadow:
+    inset 0 0 0 1px rgba(139, 92, 246, 0.22),
+    inset 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+
+.iq-schools-seal::before {
+  content: "";
+  position: absolute;
+  inset: 7%;
+  border-radius: 9999px;
+  border: 1px dashed rgba(245, 197, 71, 0.38);
+  opacity: 0.85;
+}
+
+.iq-schools-seal::after {
+  content: "";
+  position: absolute;
+  inset: -2%;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 35% 32%, rgba(255, 255, 255, 0.08), transparent 45%),
+    radial-gradient(circle at 65% 70%, rgba(139, 92, 246, 0.10), transparent 52%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.iq-schools-seal-inner {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding: 10%;
+}
+
+.iq-schools-seal-cap {
+  margin-top: 2%;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 10px rgba(245, 197, 71, 0.25));
+}
+
+.iq-schools-seal-ribbon {
+  margin-top: 6%;
+  width: 92%;
+  border-radius: 9999px;
+  background: linear-gradient(
+    180deg,
+    rgba(245, 197, 71, 0.78),
+    rgba(209, 165, 55, 0.70)
+  );
+  border: 1px solid rgba(245, 197, 71, 0.35);
+  box-shadow:
+    0 0 16px rgba(245, 197, 71, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  padding: 6% 8%;
+}
+
+.iq-schools-seal-ribbon-text {
+  display: block;
+  text-align: center;
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: rgba(12, 10, 4, 0.95);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.iq-schools-seal-sub {
+  margin-top: 7%;
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 229, 141, 0.88);
+  opacity: 0.92;
+  text-shadow:
+    0 0 14px rgba(245, 197, 71, 0.16),
+    0 0 16px rgba(139, 92, 246, 0.18);
+}
+

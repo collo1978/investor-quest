@@ -70,6 +70,11 @@ export type QuestQuizPanelProps = {
   /** True when the reading prerequisite is satisfied (quiz unlocked). */
   unlocked: boolean;
   /**
+   * When true, bypass the Ready screen and start playing immediately once unlocked.
+   * Use for in-flow "Quiz unlocked" CTAs (keeps momentum; fewer clicks).
+   */
+  autoStart?: boolean;
+  /**
    * Label shown in the panel header (e.g. "Snapshot Quiz",
    * "Revenue Quiz"). Defaults to "Quiz".
    */
@@ -134,6 +139,7 @@ export function QuestQuizPanel({
   slug,
   quiz: quizRaw,
   unlocked,
+  autoStart = false,
   title = "Quiz",
   rewardXp = 0,
   cardsRead,
@@ -188,7 +194,13 @@ export function QuestQuizPanel({
     [questions]
   );
 
-  const [order, setOrder] = useState<number[]>(initialOrder);
+  const [order, setOrder] = useState<number[]>(() => {
+    // Client-only panel. When `autoStart` is true, skip the Ready interstitial
+    // without a flash by starting in `playing` with a shuffled order.
+    if (alreadyCompleted) return initialOrder;
+    if (autoStart && unlocked) return shuffleArray(initialOrder);
+    return initialOrder;
+  });
   const [answers, setAnswers] = useState<AnswerMap>({});
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
@@ -198,7 +210,7 @@ export function QuestQuizPanel({
   /** First-time meta pass â€” show XP line even before parent re-renders. */
   const [showTenKXpBanner, setShowTenKXpBanner] = useState(false);
   const [phase, setPhase] = useState<Phase>(() =>
-    alreadyCompleted ? "summary" : unlocked ? "ready" : "locked"
+    alreadyCompleted ? "summary" : unlocked ? (autoStart ? "playing" : "ready") : "locked"
   );
 
   // Keep phase in sync with engine + unlock prop. Never demote out of
@@ -232,6 +244,16 @@ export function QuestQuizPanel({
     setShowTenKXpBanner(false);
     setPhase("playing");
   }
+
+  // In-flow handoff: when the quiz panel mounts after a "Quiz unlocked" CTA,
+  // skip the Ready interstitial and start immediately once unlocked.
+  useEffect(() => {
+    if (!autoStart) return;
+    if (alreadyCompleted) return;
+    if (!unlocked) return;
+    if (phase !== "ready") return;
+    startQuiz();
+  }, [autoStart, alreadyCompleted, unlocked, phase]);
 
   function setAnswer(qid: string, value: unknown) {
     setAnswers((prev) => ({ ...prev, [qid]: value }));

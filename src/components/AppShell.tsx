@@ -35,6 +35,8 @@ import {
 } from "@/lib/navConfig";
 import { isDemoPath, stripDemoPrefix } from "@/lib/demo/demoHref";
 
+type SidebarNavItem = { href: string; label: string };
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -56,6 +58,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isEntryFunnel =
     learnerPath === "/opening" || learnerPath === "/welcome";
   const showAppChrome = !isOnboarding && !isEntryFunnel;
+  const isDev = process.env.NODE_ENV !== "production";
+
+  const bankBrokerNav: readonly SidebarNavItem[] = [
+    { href: "/opening", label: "Opening Logo" },
+    { href: "/welcome", label: "Welcome Intro" },
+    { href: "/onboarding", label: "Onboarding" },
+    { href: "/map", label: "Map" },
+    { href: "/business", label: "Business" },
+    { href: "/forces", label: "Forces" },
+    { href: "/financials", label: "Financials" },
+    { href: "/management", label: "Management" },
+    { href: "/profile", label: "Profile" }
+  ] as const;
+
+  const schoolsNav: readonly SidebarNavItem[] = [
+    { href: "/schools/opening", label: "Opening Logo" },
+    { href: "/schools/welcome", label: "Welcome Intro" },
+    { href: "/schools/onboarding", label: "Onboarding" },
+    { href: "/schools/map", label: "Map" },
+    { href: "/schools/business", label: "Business" },
+    { href: "/schools/forces", label: "Forces" },
+    { href: "/schools/financials", label: "Financials" },
+    { href: "/schools/management", label: "Management" },
+    { href: "/schools/profile", label: "Profile" }
+  ] as const;
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -246,53 +273,108 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {!CONTROLLED_DEMO_MODE ? (
               <ExploreDesktopFlyout pathname={pathname} />
             ) : null}
-            <div className="pt-1">
-              <p className="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-2">
-                Islands
-              </p>
+            {isDev ? (
               <div className="grid gap-2">
-                {CONTROLLED_DEMO_MODE
-                  ? demoIslandNav.map((item) => {
-                      const active = islandLinkActive(pathname, item.href);
+                <details
+                  open
+                  className="rounded-2xl border border-panel-border bg-[rgba(255,255,255,0.02)] px-3 py-2"
+                >
+                  <summary className="cursor-pointer select-none py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-2">
+                    Bank / Broker
+                  </summary>
+                  <div className="mt-2 grid gap-2 pb-1">
+                    {bankBrokerNav.map((item) => {
+                      const active =
+                        learnerPath === item.href ||
+                        learnerPath.startsWith(`${item.href}/`);
                       return (
                         <Link
                           key={item.href}
                           href={item.href}
-                          prefetch
-                          className={linkClass(active)}
-                        >
-                          {item.label}
-                        </Link>
-                      );
-                    })
-                  : ISLAND_NAV.map((item) => {
-                      const active = islandLinkActive(pathname, item.href);
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          prefetch
+                          prefetch={item.href !== "/profile"}
                           className={linkClass(active)}
                         >
                           {item.label}
                         </Link>
                       );
                     })}
+                  </div>
+                </details>
+
+                <details className="rounded-2xl border border-panel-border bg-[rgba(255,255,255,0.02)] px-3 py-2">
+                  <summary className="cursor-pointer select-none py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-2">
+                    Schools
+                  </summary>
+                  <div className="mt-2 grid gap-2 pb-1">
+                    {schoolsNav.map((item) => {
+                      const active =
+                        learnerPath === item.href ||
+                        learnerPath.startsWith(`${item.href}/`);
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          prefetch={item.href !== "/schools/profile"}
+                          className={linkClass(active)}
+                        >
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </details>
               </div>
-            </div>
-            {primaryNav.map((item) => {
-              const active = linkActive(pathname, item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  prefetch={item.href !== "/profile"}
-                  className={linkClass(active)}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+            ) : (
+              <>
+                <div className="pt-1">
+                  <p className="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-2">
+                    Islands
+                  </p>
+                  <div className="grid gap-2">
+                    {CONTROLLED_DEMO_MODE
+                      ? demoIslandNav.map((item) => {
+                          const active = islandLinkActive(pathname, item.href);
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              prefetch
+                              className={linkClass(active)}
+                            >
+                              {item.label}
+                            </Link>
+                          );
+                        })
+                      : ISLAND_NAV.map((item) => {
+                          const active = islandLinkActive(pathname, item.href);
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              prefetch
+                              className={linkClass(active)}
+                            >
+                              {item.label}
+                            </Link>
+                          );
+                        })}
+                  </div>
+                </div>
+                {primaryNav.map((item) => {
+                  const active = linkActive(pathname, item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      prefetch={item.href !== "/profile"}
+                      className={linkClass(active)}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </>
+            )}
           </nav>
 
           <div className="mt-auto rounded-2xl border border-panel-border bg-[rgba(0,0,0,0.20)] p-4">

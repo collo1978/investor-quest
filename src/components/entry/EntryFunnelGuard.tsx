@@ -16,6 +16,7 @@ import {
 const FUNNEL_EXEMPT_PREFIXES = [
   "/admin",
   "/demo",
+  "/schools",
   "/opening",
   "/welcome",
   "/onboarding"

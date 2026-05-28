@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useGame } from "@/components/GameProvider";
-import { InvestorMasteryScreen } from "@/components/quest/InvestorMasteryScreen";
 import {
   islandQuizPassMessage,
   questCompleteHeadline
@@ -31,6 +30,7 @@ import {
   islandQuizStartCta,
   islandQuizUnlockedHeadline
 } from "@/lib/quests/islandQuizStyle";
+import { QuizUnlockedCtaButton } from "@/components/quest/QuizUnlockedCtaButton";
 
 type Props = {
   categoryId: ForcesCategoryId;
@@ -46,7 +46,6 @@ export function ForcesCategoryQuizSection({
   const { state } = useGame();
   const theme = getPillarQuestTheme("forces");
   const fastQuizHandoff = useControlledDemoFastQuizHandoff();
-  const masteryAutoOpened = useRef(false);
 
   const hubSlug = useMemo(
     () =>
@@ -95,26 +94,13 @@ export function ForcesCategoryQuizSection({
     ]
   );
 
-  const [screen, setScreen] = useState<"deck" | "mastery" | "quiz">("deck");
+  const [screen, setScreen] = useState<"deck" | "quiz">("deck");
 
   useEffect(() => {
-    masteryAutoOpened.current = false;
     setScreen("deck");
   }, [categoryId, hubSlug]);
 
-  useEffect(() => {
-    if (
-      !progress.quizUnlocked ||
-      !hasQuiz ||
-      progress.hubCompleted ||
-      fastQuizHandoff ||
-      masteryAutoOpened.current
-    ) {
-      return;
-    }
-    masteryAutoOpened.current = true;
-    setScreen("mastery");
-  }, [progress.quizUnlocked, hasQuiz, progress.hubCompleted, fastQuizHandoff]);
+  // Removed mastery interstitial — deck → quiz for a single, instant handoff.
 
   const lockMessage = forcesCategoryQuizUnlockMessage(progress);
   const quizTitle = forcesCategoryQuizTitle(categoryId);
@@ -132,24 +118,6 @@ export function ForcesCategoryQuizSection({
 
   if (!hasQuiz) return null;
 
-  if (screen === "mastery" && progress.quizUnlocked && !progress.hubCompleted) {
-    return (
-      <div className="mt-10">
-        <InvestorMasteryScreen
-          company={company}
-          pillarId="forces"
-          questSlug={hubSlug}
-          questTitle={hubTitle}
-          theme={theme}
-          cardsRead={progress.topicsRead}
-          cardsTotal={progress.topicsRequired}
-          onContinue={() => setScreen("quiz")}
-          onReviewCards={() => setScreen("deck")}
-        />
-      </div>
-    );
-  }
-
   if (screen === "quiz") {
     return (
       <div className="mt-10">
@@ -166,6 +134,7 @@ export function ForcesCategoryQuizSection({
               slug={hubSlug}
               quiz={quiz!}
               unlocked={progress.quizUnlocked}
+              autoStart
               title={quizTitle}
               rewardXp={hubQuest?.rewardXp ?? 100}
               cardsRead={progress.topicsRead}
@@ -238,21 +207,14 @@ export function ForcesCategoryQuizSection({
                 : "Pass the strategy checkpoint to earn XP and mark this category complete."}
             </p>
           </div>
-          <motion.button
-            type="button"
-            onClick={() => setScreen("quiz")}
-            whileHover={{ y: -2, scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="mx-auto block rounded-full border px-8 py-3.5 text-[12px] font-bold uppercase tracking-[0.2em] transition"
-            style={{
-              borderColor: theme.border,
-              background: `linear-gradient(135deg, ${theme.glowSoft}, rgba(0,0,0,0.35))`,
-              color: theme.hi,
-              boxShadow: `0 0 28px -6px ${theme.glow}`
-            }}
-          >
-            {islandQuizStartCta("forces")}
-          </motion.button>
+          <div className="mx-auto flex justify-center">
+            <QuizUnlockedCtaButton
+              unlocked
+              onClick={() => setScreen("quiz")}
+              theme={theme}
+              label="QUIZ UNLOCKED"
+            />
+          </div>
         </motion.div>
       ) : (
         <div

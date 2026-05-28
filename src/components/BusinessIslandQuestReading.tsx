@@ -26,10 +26,9 @@ import { filterGeographicSupportBlocks } from "@/lib/geographicRevenue/filterSup
 import { isGeographicRevenueCard } from "@/lib/geographicRevenue/isGeographicRevenueCard";
 import { filterProductSupportBlocks } from "@/lib/productService/filterSupportBlocks";
 import { isProductServiceCard } from "@/lib/productService/isProductServiceCard";
-import { ContinueToQuizCta } from "@/components/quest/ContinueToQuizCta";
-import { InvestorMasteryScreen } from "@/components/quest/InvestorMasteryScreen";
 import { QuestQuizUnlockStatus } from "@/components/quest/QuestQuizUnlockStatus";
 import { QuestSourceFooter } from "@/components/quest/QuestSourceFooter";
+import { QuizUnlockedCtaButton } from "@/components/quest/QuizUnlockedCtaButton";
 import { computeQuestCardReadProgress } from "@/lib/quests/questCardReadProgress";
 import {
   QUIZ_PAGER_READY_LABEL,
@@ -479,26 +478,13 @@ function BusinessCardPager({
           <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-2">
             {index + 1} / {total}
           </span>
-          <button
-            type="button"
-            disabled={!quizReady}
-            onClick={quizReady ? onStartQuiz : undefined}
-            aria-disabled={!quizReady}
-            title={
-              quizReady
-                ? QUIZ_PAGER_READY_TOOLTIP
-                : quizPagerLockTooltip(missingCardCount)
-            }
-            className="rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] transition disabled:cursor-not-allowed disabled:opacity-50"
-            style={{
-              borderColor: quizReady ? theme.border : "rgba(255,255,255,0.12)",
-              color: theme.hi,
-              background: quizReady ? theme.glowSoft : "transparent",
-              boxShadow: quizReady ? `0 0 20px -8px ${theme.glow}` : undefined
-            }}
-          >
-            {quizReady ? QUIZ_PAGER_READY_LABEL : "Next"}
-          </button>
+          <QuizUnlockedCtaButton
+            unlocked={quizReady}
+            onClick={onStartQuiz}
+            theme={theme}
+            label="QUIZ UNLOCKED"
+            lockedTitle={quizPagerLockTooltip(missingCardCount)}
+          />
         </div>
         {!quizReady && missingCardCount > 0 ? (
           <p className="text-center text-[11.5px] leading-snug text-ink-2">
@@ -598,8 +584,7 @@ export function BusinessIslandQuestReading(
 
   const theme = getPillarQuestTheme(pillarId);
   const [cardIndex, setCardIndex] = useState(0);
-  const [screen, setScreen] = useState<"cards" | "mastery" | "quiz">("cards");
-  const masteryAutoOpened = useRef(false);
+  const [screen, setScreen] = useState<"cards" | "quiz">("cards");
   const quiz = useMemo(
     () => normalizeQuizConfig(quest.quizConfig),
     [quest.quizConfig]
@@ -621,7 +606,6 @@ export function BusinessIslandQuestReading(
   useEffect(() => {
     setCardIndex(0);
     setScreen("cards");
-    masteryAutoOpened.current = false;
   }, [slug]);
 
   useEffect(() => {
@@ -636,12 +620,7 @@ export function BusinessIslandQuestReading(
 
   const fastQuizHandoff = useControlledDemoFastQuizHandoff();
 
-  useEffect(() => {
-    if (!allCardsRead || !hasQuiz || masteryAutoOpened.current) return;
-    if (fastQuizHandoff) return;
-    masteryAutoOpened.current = true;
-    setScreen("mastery");
-  }, [allCardsRead, hasQuiz, fastQuizHandoff]);
+  // Removed mastery interstitial — keep momentum (cards → quiz).
 
   useEffect(() => {
     onQuizScreenChange?.(screen === "quiz");
@@ -723,28 +702,6 @@ export function BusinessIslandQuestReading(
 
   const sourceLine = <QuestSourceFooter source={source} theme={theme} />;
 
-  if (screen === "mastery" && hasQuiz) {
-    return (
-      <motion.div className={shellClass}>
-        <AnimatePresence mode="wait" initial={false}>
-          <InvestorMasteryScreen
-            key={`${slug}-mastery`}
-            company={company}
-            pillarId={pillarId}
-            questSlug={slug}
-            questTitle={quest.title}
-            theme={theme}
-            cardsRead={cardReadFlags.filter(Boolean).length}
-            cardsTotal={cards.length || 1}
-            onContinue={() => setScreen("quiz")}
-            onReviewCards={() => setScreen("cards")}
-          />
-        </AnimatePresence>
-        {sourceLine}
-      </motion.div>
-    );
-  }
-
   if (screen === "quiz" && quiz) {
     return (
       <motion.div className={shellClass}>
@@ -762,6 +719,7 @@ export function BusinessIslandQuestReading(
               slug={slug}
               quiz={quiz}
               unlocked
+              autoStart
               title={islandQuizSectionTitle(pillarId, quest.type)}
               rewardXp={quest.rewardXp}
               cardsRead={cardReadFlags.filter(Boolean).length}
@@ -847,7 +805,7 @@ export function BusinessIslandQuestReading(
           hasQuiz={hasQuiz}
           quizReady={quizReady}
           missingCardCount={missingCardCount}
-          onStartQuiz={() => setScreen(fastQuizHandoff ? "quiz" : "mastery")}
+          onStartQuiz={() => setScreen("quiz")}
           onPrev={() => setCardIndex((i) => Math.max(0, i - 1))}
           onNext={() =>
             setCardIndex((i) => Math.min(cards.length - 1, i + 1))
@@ -865,13 +823,7 @@ export function BusinessIslandQuestReading(
         />
       ) : null}
 
-      {allCardsRead && hasQuiz && screen === "cards" ? (
-        <ContinueToQuizCta
-          onClick={() => setScreen(fastQuizHandoff ? "quiz" : "mastery")}
-          theme={theme}
-          cardsTotal={cards.length || 1}
-        />
-      ) : null}
+      {/* Removed duplicate Continue/Start CTA — pager button becomes the single quiz handoff. */}
 
       {sourceLine}
     </motion.div>
