@@ -1,52 +1,147 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 import { useDemoStory } from "@/components/demo/DemoStoryProvider";
 import { useGame } from "@/components/GameProvider";
-import { useDeterministicIntro } from "@/hooks/useDeterministicIntro";
+import {
+  INVESTOR_MASTERY_HERO_SRC,
+  InvestorMasteryHeroScreen
+} from "@/components/opening/InvestorMasteryHeroScreen";
 import { clearDemoFreshStart } from "@/lib/demo/demoSessionReset";
 import { markFunnelTransition, releaseFunnelTransition } from "@/lib/startup/funnelTransition";
 
 const OPENING_LOGO_SRC = "/logos/investor-quest-logo.png";
 
-// Match the Bank/Broker cinematic feel, but add a schools-only stamp beat.
+/** Screen 1: logo power-on + Academy Edition stamp beside logo. */
 const OPENING_BLANK_MS = 800;
 const OPENING_FADE_IN_MS = 1100;
 const OPENING_HOLD_MS = 520;
 const STAMP_PAUSE_MS = 400;
-const STAMP_HOLD_MS = 700;
+const STAMP_ANIM_MS = 620;
+const STAMP_HOLD_MS = 900;
 
-function SchoolSealCapIcon() {
+/** Screen 2: full-bleed mastery hero. */
+const CROSSFADE_MS = 800;
+const MASTERY_FADE_MS = 920;
+const MASTERY_HOLD_MS = 4500;
+
+/** Fixed particle field — hydration-safe (no Math.random). */
+const INTRO_PARTICLES = [
+  { left: "8%", top: "18%", size: 3, delay: "0s", dur: "12s", dx: "10px", dy: "-26px" },
+  { left: "22%", top: "72%", size: 2, delay: "-2s", dur: "10s", dx: "-8px", dy: "-22px" },
+  { left: "78%", top: "24%", size: 3, delay: "-4s", dur: "11s", dx: "6px", dy: "-30px" },
+  { left: "88%", top: "58%", size: 2, delay: "-1s", dur: "13s", dx: "-12px", dy: "-18px" },
+  { left: "48%", top: "12%", size: 2, delay: "-3s", dur: "9s", dx: "4px", dy: "-20px" },
+  { left: "62%", top: "82%", size: 3, delay: "-5s", dur: "14s", dx: "8px", dy: "-24px" },
+  { left: "14%", top: "44%", size: 2, delay: "-6s", dur: "11s", dx: "-6px", dy: "-28px" },
+  { left: "92%", top: "36%", size: 2, delay: "-2.5s", dur: "10s", dx: "10px", dy: "-16px" }
+] as const;
+
+type IntroPhase = "logo" | "mastery";
+
+function IntroBackdrop() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-4 w-4"
-      fill="none"
+    <>
+      <div aria-hidden className="pointer-events-none absolute inset-0 iq-opening-vignette" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[min(88vw,520px)] w-[min(88vw,520px)] -translate-x-1/2 -translate-y-1/2 rounded-full iq-schools-intro-pulse"
+      />
+      {INTRO_PARTICLES.map((p, i) => (
+        <span
+          key={i}
+          aria-hidden
+          className="premium-particle pointer-events-none"
+          style={{
+            left: p.left,
+            top: p.top,
+            width: p.size,
+            height: p.size,
+            ["--pp-delay" as string]: p.delay,
+            ["--pp-dur" as string]: p.dur,
+            ["--pp-dx" as string]: p.dx,
+            ["--pp-dy" as string]: p.dy
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
+type AcademyStampProps = {
+  reduceMotion: boolean | null;
+  stampDelayS: number;
+};
+
+/** Academy Edition badge — sits beside the logo on screen 1 (not its own screen). */
+function AcademyEditionStamp({ reduceMotion, stampDelayS }: AcademyStampProps) {
+  return (
+    <motion.div
       aria-hidden
+      className={[
+        "pointer-events-none absolute top-1/2 z-[2] -translate-y-1/2",
+        "-right-[4.5rem] sm:-right-[5.25rem] md:-right-[6rem]",
+        "w-[5.25rem] sm:w-[6.25rem] md:w-[7rem]"
+      ].join(" ")}
+      initial={
+        reduceMotion
+          ? { opacity: 1, scale: 1, rotate: -2 }
+          : { opacity: 0, scale: 1.55, rotate: -6, y: -8 }
+      }
+      animate={
+        reduceMotion
+          ? undefined
+          : {
+              opacity: [0, 1, 1],
+              scale: [1.55, 0.94, 1.02, 1],
+              rotate: [-6, -2, -2, -2],
+              y: [-8, 0, 0, 0],
+              filter: ["blur(1px)", "blur(0px)", "blur(0px)", "blur(0px)"]
+            }
+      }
+      transition={
+        reduceMotion
+          ? undefined
+          : {
+              delay: stampDelayS,
+              duration: STAMP_ANIM_MS / 1000,
+              ease: [0.16, 1, 0.3, 1],
+              times: [0, 0.48, 0.78, 1]
+            }
+      }
     >
-      <path
-        d="M3.2 9.1 12 4.7l8.8 4.4L12 13.5 3.2 9.1Z"
-        fill="rgba(245,197,71,0.9)"
-        stroke="rgba(245,197,71,0.95)"
-        strokeWidth="0.6"
-        strokeLinejoin="round"
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-1/2 h-24 w-[110%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-violet-400/25 iq-schools-stamp-ripple"
+        initial={reduceMotion ? false : { opacity: 0, scale: 0.75 }}
+        animate={
+          reduceMotion
+            ? undefined
+            : {
+                opacity: [0, 0.55, 0],
+                scale: [0.75, 2.15, 2.35]
+              }
+        }
+        transition={
+          reduceMotion
+            ? undefined
+            : {
+                delay: stampDelayS + 0.42,
+                duration: 0.95,
+                ease: [0.22, 1, 0.36, 1]
+              }
+        }
       />
-      <path
-        d="M6.2 11.2v4.1c0 .6.35 1.15.9 1.4 1.45.7 3.1 1.05 4.9 1.05 1.8 0 3.45-.35 4.9-1.05.55-.25.9-.8.9-1.4v-4.1"
-        stroke="rgba(245,197,71,0.95)"
-        strokeWidth="0.9"
-        strokeLinecap="round"
-      />
-      <path
-        d="M20.8 9.4v4.2"
-        stroke="rgba(245,197,71,0.95)"
-        strokeWidth="0.9"
-        strokeLinecap="round"
-      />
-    </svg>
+      <div className="iq-academy-stamp">
+        <span className="iq-academy-stamp-line">ACADEMY</span>
+        <span className="iq-academy-stamp-line iq-academy-stamp-line--edition">
+          EDITION
+        </span>
+      </div>
+    </motion.div>
   );
 }
 
@@ -56,9 +151,15 @@ export default function SchoolsOpeningPage() {
   const demoStory = useDemoStory();
   const leavingRef = useRef(false);
   const reduceMotion = useReducedMotion();
+  const [phase, setPhase] = useState<IntroPhase>("logo");
 
   useEffect(() => {
     releaseFunnelTransition();
+  }, []);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = INVESTOR_MASTERY_HERO_SRC;
   }, []);
 
   const demoStoryActiveRef = useRef(demoStory.active);
@@ -70,7 +171,6 @@ export default function SchoolsOpeningPage() {
     if (leavingRef.current) return;
     leavingRef.current = true;
 
-    // Schools routes are dev-only for now; keep story behavior consistent if ever enabled.
     if (demoStoryActiveRef.current) {
       advanceStoryRef.current("welcome");
       return;
@@ -84,102 +184,91 @@ export default function SchoolsOpeningPage() {
     });
   }, [actions, router]);
 
-  useDeterministicIntro(
-    finishIntro,
-    OPENING_BLANK_MS +
-      OPENING_FADE_IN_MS +
-      OPENING_HOLD_MS +
-      STAMP_PAUSE_MS +
-      STAMP_HOLD_MS
-  );
-
   const stampDelayS = useMemo(() => {
     const ms =
       OPENING_BLANK_MS + OPENING_FADE_IN_MS + OPENING_HOLD_MS + STAMP_PAUSE_MS;
     return ms / 1000;
   }, []);
 
+  const logoPhaseMs = useMemo(
+    () =>
+      OPENING_BLANK_MS +
+      OPENING_FADE_IN_MS +
+      OPENING_HOLD_MS +
+      STAMP_PAUSE_MS +
+      STAMP_ANIM_MS +
+      STAMP_HOLD_MS,
+    []
+  );
+
+  const masteryPhaseMs = CROSSFADE_MS + MASTERY_FADE_MS + MASTERY_HOLD_MS;
+
+  useEffect(() => {
+    if (reduceMotion) {
+      const masteryTimer = window.setTimeout(() => setPhase("mastery"), 900);
+      const leaveTimer = window.setTimeout(finishIntro, 2800);
+      return () => {
+        window.clearTimeout(masteryTimer);
+        window.clearTimeout(leaveTimer);
+      };
+    }
+
+    const toMastery = window.setTimeout(() => setPhase("mastery"), logoPhaseMs);
+    const toWelcome = window.setTimeout(
+      finishIntro,
+      logoPhaseMs + masteryPhaseMs
+    );
+
+    return () => {
+      window.clearTimeout(toMastery);
+      window.clearTimeout(toWelcome);
+    };
+  }, [finishIntro, logoPhaseMs, masteryPhaseMs, reduceMotion]);
+
   return (
     <div
-      className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#030308] px-4 py-8"
+      className="relative min-h-[100dvh] overflow-hidden bg-[#030308]"
       role="main"
-      aria-label="Investor Quest opening (schools edition)"
+      aria-label="Investor Quest opening (Academy Edition)"
     >
-      <div aria-hidden className="pointer-events-none absolute inset-0 iq-opening-vignette" />
-
-      <div className="relative z-10 flex w-full justify-center px-2 iq-opening-logo-sequence">
-        {/* Keep the Investor Quest logo exactly as-is (same src + classes). */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[min(70vw,420px)] w-[min(92vw,680px)] -translate-x-1/2 -translate-y-1/2 rounded-full iq-opening-logo-bloom"
-        />
-
-        <div className="relative inline-flex items-center justify-center">
-          <img
-            src={OPENING_LOGO_SRC}
-            alt="Investor Quest"
-            width={520}
-            height={160}
-            decoding="async"
-            fetchPriority="high"
-            className="h-auto w-[min(94vw,40rem)] max-w-none object-contain object-center select-none sm:w-[min(88vw,44rem)] lg:w-[min(78vw,48rem)] [filter:drop-shadow(0_0_22px_rgba(167,139,250,0.34))_drop-shadow(0_0_54px_rgba(139,92,246,0.22))]"
-          />
-
-          {/* Schools-only seal — attached to the right side of the logo. */}
+      <AnimatePresence mode="wait">
+        {phase === "logo" ? (
           <motion.div
-            aria-hidden
-            className={[
-              "pointer-events-none absolute top-1/2 -translate-y-1/2",
-              "-right-8 sm:-right-10 md:-right-12",
-              "w-[92px] sm:w-[108px] md:w-[120px] aspect-square"
-            ].join(" ")}
-            initial={
-              reduceMotion
-                ? { opacity: 1, scale: 1, rotate: -8 }
-                : { opacity: 0, scale: 1.6, rotate: -16 }
-            }
-            animate={
-              reduceMotion
-                ? undefined
-                : {
-                    opacity: [0, 1, 1],
-                    scale: [1.6, 0.94, 1.03, 1],
-                    rotate: [-16, -8, -8, -8],
-                    filter: ["blur(0.8px)", "blur(0px)", "blur(0px)", "blur(0px)"],
-                    boxShadow: [
-                      "0 0 0 rgba(0,0,0,0)",
-                      "0 0 32px rgba(245,197,71,0.22), 0 0 22px rgba(139,92,246,0.22)",
-                      "0 0 18px rgba(245,197,71,0.16), 0 0 16px rgba(139,92,246,0.18)",
-                      "0 0 14px rgba(245,197,71,0.12), 0 0 14px rgba(139,92,246,0.16)"
-                    ]
-                  }
-            }
-            transition={
-              reduceMotion
-                ? undefined
-                : {
-                    delay: stampDelayS,
-                    duration: 0.56,
-                    ease: [0.16, 1, 0.3, 1],
-                    times: [0, 0.45, 0.75, 1]
-                  }
-            }
+            key="logo-phase"
+            className="relative z-10 flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#030308] px-4 py-8"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.985, filter: "blur(8px)" }}
+            transition={{ duration: CROSSFADE_MS / 1000, ease: [0.4, 0, 0.2, 1] }}
           >
-            <div className="iq-schools-seal">
-              <div className="iq-schools-seal-inner">
-                <div className="iq-schools-seal-cap">
-                  <SchoolSealCapIcon />
-                </div>
-                <div className="iq-schools-seal-ribbon">
-                  <span className="iq-schools-seal-ribbon-text">SCHOOL</span>
-                </div>
-                <div className="iq-schools-seal-sub">EDITION</div>
+            <IntroBackdrop />
+
+            <div className="relative flex w-full max-w-5xl flex-col items-center iq-opening-logo-sequence">
+              <span
+                aria-hidden
+                className="pointer-events-none absolute left-1/2 top-1/2 h-[min(70vw,420px)] w-[min(92vw,680px)] -translate-x-1/2 -translate-y-1/2 rounded-full iq-opening-logo-bloom"
+              />
+
+              <div className="relative inline-flex items-center justify-center px-6 sm:px-10 md:px-14">
+                <img
+                  src={OPENING_LOGO_SRC}
+                  alt="Investor Quest"
+                  width={520}
+                  height={160}
+                  decoding="async"
+                  fetchPriority="high"
+                  className="relative z-[1] h-auto w-[min(82vw,36rem)] max-w-none object-contain object-center select-none sm:w-[min(76vw,40rem)] lg:w-[min(70vw,44rem)] [filter:drop-shadow(0_0_22px_rgba(167,139,250,0.34))_drop-shadow(0_0_54px_rgba(139,92,246,0.22))]"
+                />
+                <AcademyEditionStamp
+                  reduceMotion={reduceMotion}
+                  stampDelayS={stampDelayS}
+                />
               </div>
             </div>
           </motion.div>
-        </div>
-      </div>
+        ) : (
+          <InvestorMasteryHeroScreen reduceMotion={reduceMotion} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
-

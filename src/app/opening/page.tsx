@@ -8,9 +8,6 @@ import { useDemoStory } from "@/components/demo/DemoStoryProvider";
 import { useGame } from "@/components/GameProvider";
 import { clearDemoFreshStart } from "@/lib/demo/demoSessionReset";
 import {
-  shouldShowOpeningScreen
-} from "@/lib/opening/shouldShowOpeningScreen";
-import {
   markFunnelTransition,
   releaseFunnelTransition
 } from "@/lib/startup/funnelTransition";

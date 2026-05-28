@@ -215,136 +215,152 @@ h3 {
 }
 
 /* =======================================================================
- * Schools variant: "SCHOOL EDITION" stamp (only used on `/schools/opening`)
+ * Schools variant intro (`/schools/opening` only)
  * ======================================================================= */
-@keyframes iq-schools-stamp-slam {
-  0% {
-    opacity: 0;
-    transform: rotate(-8deg) scale(1.6) translate3d(0, -2px, 0);
-    filter: blur(0.2px);
-  }
-  58% {
-    opacity: 1;
-    transform: rotate(-8deg) scale(0.92) translate3d(0, 0, 0);
-  }
-  78% {
-    transform: rotate(-8deg) scale(1.04) translate3d(0, 0, 0);
-  }
-  100% {
-    opacity: 1;
-    transform: rotate(-8deg) scale(1) translate3d(0, 0, 0);
-    filter: blur(0);
-  }
-}
-
-@keyframes iq-schools-stamp-impact {
+@keyframes iq-schools-intro-pulse {
   0%,
-  54% {
-    transform: translate3d(0, 0, 0);
+  100% {
+    opacity: 0.28;
+    transform: translate3d(-50%, -50%, 0) scale(1);
   }
-  62% {
-    transform: translate3d(-1px, 0.5px, 0);
+  50% {
+    opacity: 0.52;
+    transform: translate3d(-50%, -50%, 0) scale(1.08);
   }
-  70% {
-    transform: translate3d(1px, -0.5px, 0);
-  }
-  78% {
-    transform: translate3d(-0.5px, 0.25px, 0);
+}
+
+@keyframes iq-schools-mastery-kenburns {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
   }
   100% {
-    transform: translate3d(0, 0, 0);
+    transform: scale(1.06) translate3d(0, -0.75%, 0);
   }
 }
 
-.iq-schools-seal {
+@keyframes iq-schools-mastery-parallax-drift {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: translate3d(-1.2%, 0.4%, 0) scale(1.02);
+  }
+  50% {
+    opacity: 0.38;
+    transform: translate3d(1.2%, -0.5%, 0) scale(1.04);
+  }
+}
+
+.iq-schools-intro-pulse {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(139, 92, 246, 0.22),
+    rgba(109, 40, 217, 0.08) 42%,
+    transparent 68%
+  );
+  filter: blur(28px);
+  animation: iq-schools-intro-pulse 4.2s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+.iq-academy-stamp {
   position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 9999px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.65rem 1.35rem 0.72rem;
+  min-width: min(92vw, 16.5rem);
+  border-radius: 0.35rem;
+  border: 1px solid rgba(167, 139, 250, 0.42);
   background:
-    radial-gradient(ellipse 115% 115% at 40% 35%, rgba(245, 197, 71, 0.18), rgba(0, 0, 0, 0.62) 62%),
-    radial-gradient(ellipse 95% 85% at 60% 60%, rgba(139, 92, 246, 0.18), transparent 62%);
-  border: 1px solid rgba(245, 197, 71, 0.32);
+    linear-gradient(
+      165deg,
+      rgba(24, 16, 48, 0.92) 0%,
+      rgba(8, 6, 18, 0.96) 48%,
+      rgba(18, 10, 36, 0.94) 100%
+    );
   box-shadow:
-    inset 0 0 0 1px rgba(139, 92, 246, 0.22),
-    inset 0 10px 24px rgba(0, 0, 0, 0.45);
+    0 0 28px rgba(139, 92, 246, 0.28),
+    0 0 48px rgba(109, 40, 217, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -12px 28px rgba(0, 0, 0, 0.45);
+  transform: rotate(-2deg);
 }
 
-.iq-schools-seal::before {
+.iq-academy-stamp::before {
   content: "";
   position: absolute;
-  inset: 7%;
-  border-radius: 9999px;
-  border: 1px dashed rgba(245, 197, 71, 0.38);
-  opacity: 0.85;
-}
-
-.iq-schools-seal::after {
-  content: "";
-  position: absolute;
-  inset: -2%;
-  border-radius: 9999px;
-  background:
-    radial-gradient(circle at 35% 32%, rgba(255, 255, 255, 0.08), transparent 45%),
-    radial-gradient(circle at 65% 70%, rgba(139, 92, 246, 0.10), transparent 52%);
-  opacity: 0.9;
+  inset: 3px;
+  border-radius: 0.25rem;
+  border: 1px solid rgba(139, 92, 246, 0.22);
   pointer-events: none;
 }
 
-.iq-schools-seal-inner {
+.iq-academy-stamp::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 0.4rem;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.07) 50%,
+    transparent 62%
+  );
+  pointer-events: none;
+}
+
+.iq-academy-stamp-line {
   position: relative;
   z-index: 1;
-  height: 100%;
-  width: 100%;
-  display: grid;
-  place-items: center;
-  padding: 10%;
-}
-
-.iq-schools-seal-cap {
-  margin-top: 2%;
-  opacity: 0.95;
-  filter: drop-shadow(0 0 10px rgba(245, 197, 71, 0.25));
-}
-
-.iq-schools-seal-ribbon {
-  margin-top: 6%;
-  width: 92%;
-  border-radius: 9999px;
-  background: linear-gradient(
-    180deg,
-    rgba(245, 197, 71, 0.78),
-    rgba(209, 165, 55, 0.70)
-  );
-  border: 1px solid rgba(245, 197, 71, 0.35);
-  box-shadow:
-    0 0 16px rgba(245, 197, 71, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  padding: 6% 8%;
-}
-
-.iq-schools-seal-ribbon-text {
   display: block;
-  text-align: center;
   font-family: var(--font-grotesk), ui-sans-serif, system-ui;
   font-weight: 900;
-  font-size: 12px;
-  letter-spacing: 0.18em;
-  color: rgba(12, 10, 4, 0.95);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
+  font-size: clamp(0.72rem, 2.8vw, 0.92rem);
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+  color: rgba(237, 233, 254, 0.96);
+  text-shadow:
+    0 0 18px rgba(167, 139, 250, 0.45),
+    0 0 32px rgba(139, 92, 246, 0.28);
 }
 
-.iq-schools-seal-sub {
-  margin-top: 7%;
-  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
-  font-weight: 800;
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(255, 229, 141, 0.88);
-  opacity: 0.92;
-  text-shadow:
-    0 0 14px rgba(245, 197, 71, 0.16),
-    0 0 16px rgba(139, 92, 246, 0.18);
+.iq-academy-stamp-line--edition {
+  margin-top: 0.05rem;
+  font-size: clamp(0.62rem, 2.4vw, 0.78rem);
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  color: rgba(196, 181, 253, 0.88);
+}
+
+.iq-schools-stamp-ripple {
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.2);
+}
+
+.iq-schools-mastery-kenburns {
+  animation: iq-schools-mastery-kenburns 9.5s ease-in-out forwards;
+  will-change: transform;
+}
+
+.iq-schools-mastery-parallax {
+  background:
+    radial-gradient(ellipse 55% 42% at 50% 48%, rgba(139, 92, 246, 0.14), transparent 68%),
+    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(109, 40, 217, 0.12), transparent 58%);
+  mix-blend-mode: screen;
+  animation: iq-schools-mastery-parallax-drift 11s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.iq-schools-mastery-vignette {
+  background:
+    radial-gradient(ellipse 85% 70% at 50% 50%, transparent 42%, rgba(3, 3, 8, 0.35) 78%, rgba(3, 3, 8, 0.72) 100%),
+    linear-gradient(180deg, rgba(3, 3, 8, 0.18) 0%, transparent 12%, transparent 88%, rgba(3, 3, 8, 0.28) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-schools-mastery-kenburns,
+  .iq-schools-mastery-parallax {
+    animation: none !important;
+  }
 }
 
