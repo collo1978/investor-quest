@@ -30,6 +30,7 @@ import { QuestQuizUnlockStatus } from "@/components/quest/QuestQuizUnlockStatus"
 import { QuestSourceFooter } from "@/components/quest/QuestSourceFooter";
 import { QuizUnlockedCtaButton } from "@/components/quest/QuizUnlockedCtaButton";
 import { computeQuestCardReadProgress } from "@/lib/quests/questCardReadProgress";
+import { useQuestProgressDebug } from "@/hooks/useQuestProgressDebug";
 import {
   QUIZ_PAGER_READY_LABEL,
   QUIZ_PAGER_READY_TOOLTIP,
@@ -360,10 +361,12 @@ function MarkAsReadGlowWrap({
 function MarkAsReadCheckbox({
   isRead,
   onClick,
+  allowToggle,
   theme
 }: {
   isRead: boolean;
   onClick: () => void;
+  allowToggle?: boolean;
   theme: PillarQuestTheme;
 }) {
   const GREEN_HI = "#22C58B";
@@ -372,20 +375,24 @@ function MarkAsReadCheckbox({
   return (
     <motion.button
       type="button"
-      onClick={isRead ? undefined : onClick}
-      disabled={isRead}
+      onClick={isRead && !allowToggle ? undefined : onClick}
+      disabled={isRead && !allowToggle}
       aria-pressed={isRead}
       aria-label={
-        isRead ? "Card already marked as read" : "Mark this card as read"
+        isRead
+          ? allowToggle
+            ? "Unmark this card as read"
+            : "Card already marked as read"
+          : "Mark this card as read"
       }
-      whileHover={isRead ? undefined : { y: -1 }}
-      whileTap={isRead ? undefined : { scale: 0.98 }}
+      whileHover={isRead && !allowToggle ? undefined : { y: -1 }}
+      whileTap={isRead && !allowToggle ? undefined : { scale: 0.98 }}
       className="group relative inline-flex items-center gap-3 rounded-2xl border px-3.5 py-2.5 text-[13.5px] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/75"
       style={{
         borderColor: isRead ? GREEN_BORDER : theme.border,
         background: isRead ? "rgba(34,197,139,0.10)" : `${theme.glowSoft}`,
         color: isRead ? GREEN_HI : theme.hi,
-        cursor: isRead ? "default" : "pointer",
+        cursor: isRead && !allowToggle ? "default" : "pointer",
         boxShadow: isRead
           ? "0 0 24px -10px rgba(34,197,139,0.55)"
           : `0 0 24px -10px ${theme.glow}`
@@ -483,6 +490,7 @@ function BusinessCardPager({
             onClick={onStartQuiz}
             theme={theme}
             label="QUIZ UNLOCKED"
+            lockedLabel="COMPLETE ALL CARDS TO UNLOCK"
             lockedTitle={quizPagerLockTooltip(missingCardCount)}
           />
         </div>
@@ -549,6 +557,7 @@ export type BusinessIslandQuestReadingProps = {
   allCardsRead: boolean;
   source: string | null;
   onMarkRead: (markSlug: string) => void;
+  onMarkUnread: (markSlug: string) => void;
   /** Fires when the visible card changes (reading analytics). */
   onCardView?: (cardId: string | null, cardIndex: number) => void;
   onQuizScreenChange?: (onQuizScreen: boolean) => void;
@@ -573,6 +582,7 @@ export function BusinessIslandQuestReading(
     allCardsRead,
     source,
     onMarkRead,
+    onMarkUnread,
     onCardView,
     onQuizScreenChange,
     nextQuest,
@@ -583,6 +593,10 @@ export function BusinessIslandQuestReading(
   const questPipeline = questPipelineProp ?? financialPipeline;
 
   const theme = getPillarQuestTheme(pillarId);
+  // Host / demo / testing needs reversible progress to reset flows quickly.
+  // Enable in non-production by default, and also when explicitly requested via query params.
+  const allowReadToggle =
+    process.env.NODE_ENV !== "production" || useQuestProgressDebug();
   const [cardIndex, setCardIndex] = useState(0);
   const [screen, setScreen] = useState<"cards" | "quiz">("cards");
   const quiz = useMemo(
@@ -789,7 +803,14 @@ export function BusinessIslandQuestReading(
                 <MarkAsReadCheckbox
                   isRead={cardView.isRead}
                   theme={theme}
-                  onClick={() => onMarkRead(cardView.markReadSlug)}
+                  allowToggle={allowReadToggle}
+                  onClick={() => {
+                    if (allowReadToggle && cardView.isRead) {
+                      onMarkUnread(cardView.markReadSlug);
+                    } else {
+                      onMarkRead(cardView.markReadSlug);
+                    }
+                  }}
                 />
               </MarkAsReadGlowWrap>
             }

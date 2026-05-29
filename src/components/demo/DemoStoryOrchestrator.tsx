@@ -10,6 +10,7 @@ import {
   getRouteForDemoStoryStep
 } from "@/lib/demo/demoStoryMode";
 import { stripDemoPrefix } from "@/lib/demo/demoHref";
+import { isSchoolsDemoStoryModeActive } from "@/lib/schools/schoolsDemoStoryMode";
 
 function stepIndex(step: (typeof DEMO_STORY_STEPS)[number]): number {
   return DEMO_STORY_STEPS.indexOf(step);
@@ -28,6 +29,7 @@ export function DemoStoryOrchestrator() {
   routerRef.current = router;
 
   useEffect(() => {
+    if (isSchoolsDemoStoryModeActive()) return;
     if (!active) {
       prevStepRef.current = null;
       return;
@@ -40,6 +42,7 @@ export function DemoStoryOrchestrator() {
   }, [active, step]);
 
   useEffect(() => {
+    if (isSchoolsDemoStoryModeActive()) return;
     if (!active) return;
     const path = stripDemoPrefix(pathname);
     if (path === "/business" && stepIndex(step) < stepIndex("business-island")) {

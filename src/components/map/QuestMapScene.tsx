@@ -65,9 +65,10 @@ import {
   type MotionValue
 } from "framer-motion";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGame } from "@/components/GameProvider";
-import { toDemoHref } from "@/lib/demo/demoHref";
+import { resolveMapIslandHref } from "@/lib/schools/schoolsDemoHref";
 import { MapForcesRocketEmblem } from "@/components/map/MapForcesRocketEmblem";
 import { companyById, type CompanyId } from "@/data/companies";
 import { isPillarComingSoon } from "@/lib/demo/playableDemo";
@@ -1136,6 +1137,7 @@ function QuestMapHotspot({
   parallaxX: MotionValue<number>;
   parallaxY: MotionValue<number>;
 }) {
+  const pathname = usePathname();
   const accent = questMapHoverAccent(spot.id, island.completed);
   const locked = !island.unlocked;
   const comingSoon = island.comingSoon;
@@ -1161,7 +1163,7 @@ function QuestMapHotspot({
       }}
     >
       <Link
-        href={locked ? "#" : toDemoHref(island.route)}
+        href={locked ? "#" : resolveMapIslandHref(island.route, pathname)}
         aria-disabled={locked}
         aria-label={`${island.title} island${
           locked

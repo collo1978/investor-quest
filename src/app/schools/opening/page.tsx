@@ -1,21 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 import { useDemoStory } from "@/components/demo/DemoStoryProvider";
+import { useSchoolsDemoStory } from "@/components/schools/SchoolsDemoStoryProvider";
 import { useGame } from "@/components/GameProvider";
 import {
   INVESTOR_MASTERY_HERO_SRC,
   InvestorMasteryHeroScreen
 } from "@/components/opening/InvestorMasteryHeroScreen";
 import { clearDemoFreshStart } from "@/lib/demo/demoSessionReset";
+import { resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
+import { isSchoolsDemoStoryModeActive } from "@/lib/schools/schoolsDemoStoryMode";
 import { markFunnelTransition, releaseFunnelTransition } from "@/lib/startup/funnelTransition";
 
 const OPENING_LOGO_SRC = "/logos/investor-quest-logo.png";
 
-/** Screen 1: logo power-on + Academy Edition stamp beside logo. */
+/** Screen 1: logo power-on + EDU stamp beside logo. */
 const OPENING_BLANK_MS = 800;
 const OPENING_FADE_IN_MS = 1100;
 const OPENING_HOLD_MS = 520;
@@ -76,15 +79,15 @@ type AcademyStampProps = {
   stampDelayS: number;
 };
 
-/** Academy Edition badge — sits beside the logo on screen 1 (not its own screen). */
+/** EDU badge — sits beside the logo on screen 1 (not its own screen). */
 function AcademyEditionStamp({ reduceMotion, stampDelayS }: AcademyStampProps) {
   return (
     <motion.div
       aria-hidden
       className={[
         "pointer-events-none absolute top-1/2 z-[2] -translate-y-1/2",
-        "-right-[4.5rem] sm:-right-[5.25rem] md:-right-[6rem]",
-        "w-[5.25rem] sm:w-[6.25rem] md:w-[7rem]"
+        "-right-[2.75rem] sm:-right-[3rem] md:-right-[3.25rem]",
+        "w-[3.75rem] sm:w-[4.25rem] md:w-[4.75rem]"
       ].join(" ")}
       initial={
         reduceMotion
@@ -135,11 +138,8 @@ function AcademyEditionStamp({ reduceMotion, stampDelayS }: AcademyStampProps) {
               }
         }
       />
-      <div className="iq-academy-stamp">
-        <span className="iq-academy-stamp-line">ACADEMY</span>
-        <span className="iq-academy-stamp-line iq-academy-stamp-line--edition">
-          EDITION
-        </span>
+      <div className="iq-academy-stamp iq-academy-stamp--edu">
+        <span className="iq-academy-stamp-line">EDU</span>
       </div>
     </motion.div>
   );
@@ -147,8 +147,10 @@ function AcademyEditionStamp({ reduceMotion, stampDelayS }: AcademyStampProps) {
 
 export default function SchoolsOpeningPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { actions } = useGame();
   const demoStory = useDemoStory();
+  const schoolsDemo = useSchoolsDemoStory();
   const leavingRef = useRef(false);
   const reduceMotion = useReducedMotion();
   const [phase, setPhase] = useState<IntroPhase>("logo");
@@ -164,25 +166,35 @@ export default function SchoolsOpeningPage() {
 
   const demoStoryActiveRef = useRef(demoStory.active);
   demoStoryActiveRef.current = demoStory.active;
-  const advanceStoryRef = useRef(demoStory.advance);
-  advanceStoryRef.current = demoStory.advance;
+  const schoolsDemoActiveRef = useRef(schoolsDemo.active);
+  schoolsDemoActiveRef.current = schoolsDemo.active;
+  const advanceSchoolsStoryRef = useRef(schoolsDemo.advance);
+  advanceSchoolsStoryRef.current = schoolsDemo.advance;
 
   const finishIntro = useCallback(() => {
     if (leavingRef.current) return;
     leavingRef.current = true;
 
-    if (demoStoryActiveRef.current) {
-      advanceStoryRef.current("welcome");
+    if (schoolsDemoActiveRef.current || isSchoolsDemoStoryModeActive()) {
+      queueMicrotask(() => {
+        actions.completeOpeningScreen();
+        actions.completeWelcomeScreen();
+      });
+      advanceSchoolsStoryRef.current("avatar");
       return;
     }
 
-    clearDemoFreshStart();
-    markFunnelTransition("welcome");
-    router.replace("/schools/welcome");
+    if (!demoStoryActiveRef.current) {
+      clearDemoFreshStart();
+    }
+
+    markFunnelTransition("avatar");
+    router.replace(resolveSchoolsLearnerHref("/schools/avatar", pathname));
     queueMicrotask(() => {
       actions.completeOpeningScreen();
+      actions.completeWelcomeScreen();
     });
-  }, [actions, router]);
+  }, [actions, pathname, router]);
 
   const stampDelayS = useMemo(() => {
     const ms =
@@ -214,14 +226,14 @@ export default function SchoolsOpeningPage() {
     }
 
     const toMastery = window.setTimeout(() => setPhase("mastery"), logoPhaseMs);
-    const toWelcome = window.setTimeout(
+    const toAvatar = window.setTimeout(
       finishIntro,
       logoPhaseMs + masteryPhaseMs
     );
 
     return () => {
       window.clearTimeout(toMastery);
-      window.clearTimeout(toWelcome);
+      window.clearTimeout(toAvatar);
     };
   }, [finishIntro, logoPhaseMs, masteryPhaseMs, reduceMotion]);
 
@@ -229,7 +241,7 @@ export default function SchoolsOpeningPage() {
     <div
       className="relative min-h-[100dvh] overflow-hidden bg-[#030308]"
       role="main"
-      aria-label="Investor Quest opening (Academy Edition)"
+      aria-label="Investor Quest opening (EDU)"
     >
       <AnimatePresence mode="wait">
         {phase === "logo" ? (

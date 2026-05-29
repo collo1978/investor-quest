@@ -67,7 +67,7 @@ import {
   CONTROLLED_DEMO_COMPANY_ID,
   CONTROLLED_DEMO_MODE
 } from "@/lib/demo/controlledDemo";
-import { isDemoStoryModeActive } from "@/lib/demo/demoStoryMode";
+import { isIsolatedDemoStoryModeActive } from "@/lib/demo/isolatedDemoStoryMode";
 
 type Toast = {
   id: string;
@@ -331,7 +331,7 @@ export function GameProvider({
     let cancelled = false;
 
     const reconcileFromStore = async () => {
-      if (isDemoStoryModeActive()) return;
+      if (isIsolatedDemoStoryModeActive()) return;
       const loaded = await store.load();
       if (cancelled) return;
       setState((prev) => {
@@ -339,7 +339,7 @@ export function GameProvider({
           logQuestProgress("hydrate.empty", summarizeReadProgress(prev));
           return prev;
         }
-        if (isDemoStoryModeActive() || Date.now() < bootstrapLockUntilRef.current) {
+        if (isIsolatedDemoStoryModeActive() || Date.now() < bootstrapLockUntilRef.current) {
           return prev;
         }
         const merged = mergeLoadedGameState(prev, loaded);
@@ -363,7 +363,7 @@ export function GameProvider({
       : window.setTimeout(() => void reconcileFromStore(), 50);
 
     const unsub = store.subscribe?.((next) => {
-      if (isDemoStoryModeActive() || Date.now() < bootstrapLockUntilRef.current) {
+      if (isIsolatedDemoStoryModeActive() || Date.now() < bootstrapLockUntilRef.current) {
         return;
       }
       logQuestProgress("hydrate.subscribe", summarizeReadProgress(next));
@@ -381,7 +381,7 @@ export function GameProvider({
   }, [store, corruptSaveBlocked]);
 
   useEffect(() => {
-    if (isDemoStoryModeActive()) return;
+    if (isIsolatedDemoStoryModeActive()) return;
     if (!persistReadyRef.current || corruptSaveBlocked) return;
     void store.save(state).then(() => {
       logQuestProgress("persist.saved", summarizeReadProgress(state));
@@ -394,7 +394,7 @@ export function GameProvider({
       if (
         !hydrated &&
         isProgressPersistAction(action.type) &&
-        !isDemoStoryModeActive()
+        !isIsolatedDemoStoryModeActive()
       ) {
         logQuestProgress("persist.gated", { type: action.type });
         return;
@@ -521,7 +521,7 @@ export function GameProvider({
           lastActivityAt: Date.now()
         };
         bootstrapLockUntilRef.current = Date.now() + 4000;
-        if (!isDemoStoryModeActive()) {
+        if (!isIsolatedDemoStoryModeActive()) {
           clearPersistedSnapshots();
           savePersistedSnapshot(stamped, { mergeIfDiskNewer: false });
         }

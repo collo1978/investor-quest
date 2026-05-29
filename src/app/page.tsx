@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { useGame } from "@/components/GameProvider";
-import { isDemoStoryModeActive } from "@/lib/demo/demoStoryMode";
+import { isIsolatedDemoStoryModeActive } from "@/lib/demo/isolatedDemoStoryMode";
 import { resolveHomeEntryRoute } from "@/lib/opening/shouldShowOpeningScreen";
 
 /** Routes first-time players to opening → welcome → onboarding → map. */
@@ -13,7 +13,7 @@ export default function HomePage() {
   const { raw, persistenceReady } = useGame();
 
   useEffect(() => {
-    if (isDemoStoryModeActive()) return;
+    if (isIsolatedDemoStoryModeActive()) return;
     if (!persistenceReady) return;
     router.replace(resolveHomeEntryRoute(raw));
   }, [persistenceReady, raw, router]);

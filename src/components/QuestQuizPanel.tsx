@@ -1015,7 +1015,7 @@ function SummaryBody({
         onReviewQuestCards={onReviewQuestCards}
         primary={
           didPass && nextQuest && !isTenK
-            ? { kind: "link", href: nextQuest.href, label: nextQuest.label }
+            ? { kind: "link", href: nextQuest.href, label: "NEXT QUEST UNLOCKED" }
             : didPass && islandFinaleCta && !isTenK
               ? {
                   kind: "link",
@@ -1294,7 +1294,11 @@ function QuizCompleteReward({
         primaryVariant={pillarId === "business" && trailCta ? "hero" : "trail"}
         primary={
           trailCta
-            ? { kind: "link", href: trailCta.href, label: trailCta.label }
+            ? {
+                kind: "link",
+                href: trailCta.href,
+                label: trailCta === nextQuest ? "NEXT QUEST UNLOCKED" : trailCta.label
+              }
             : { kind: "button", label: "Retry quiz" }
         }
       />

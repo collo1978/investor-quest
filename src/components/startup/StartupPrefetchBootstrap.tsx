@@ -7,14 +7,14 @@ import {
   prefetchStartupAssets,
   prefetchStartupRoutes
 } from "@/lib/startup/prefetchStartupAssets";
-import { isDemoStoryModeActive } from "@/lib/demo/demoStoryMode";
+import { isIsolatedDemoStoryModeActive } from "@/lib/demo/isolatedDemoStoryMode";
 
 /** Runs once per tab — warms logo, funnel routes, and quest detail chunks. */
 export function StartupPrefetchBootstrap() {
   const router = useRouter();
 
   useRunOnceOnMount(() => {
-    if (isDemoStoryModeActive()) return;
+    if (isIsolatedDemoStoryModeActive()) return;
     prefetchStartupAssets();
     prefetchStartupRoutes((href) => {
       try {

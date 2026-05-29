@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { useGame } from "@/components/GameProvider";
 import { isDemoFreshStart } from "@/lib/demo/demoSessionReset";
-import { isDemoStoryModeActive } from "@/lib/demo/demoStoryMode";
+import { isIsolatedDemoStoryModeActive } from "@/lib/demo/isolatedDemoStoryMode";
 import { isFunnelTransitionActive } from "@/lib/startup/funnelTransition";
 import {
   shouldShowOnboarding,
@@ -31,7 +31,7 @@ export function EntryFunnelGuard() {
   const { raw, persistenceReady } = useGame();
 
   useEffect(() => {
-    if (isDemoStoryModeActive()) return;
+    if (isIsolatedDemoStoryModeActive()) return;
     if (!persistenceReady) return;
     if (isFunnelTransitionActive()) return;
     if (FUNNEL_EXEMPT_PREFIXES.some((p) => pathname.startsWith(p))) return;

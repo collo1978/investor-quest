@@ -34,6 +34,7 @@ import {
   PRIMARY_NAV
 } from "@/lib/navConfig";
 import { isDemoPath, stripDemoPrefix } from "@/lib/demo/demoHref";
+import { isSchoolsDemoPath, stripSchoolsDemoPrefix } from "@/lib/schools/schoolsDemoHref";
 
 type SidebarNavItem = { href: string; label: string };
 
@@ -53,7 +54,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     : MOBILE_TAB_NAV;
   const demoIslandNav = getControlledDemoIslandNav();
   const isDemoProduction = isDemoPath(pathname);
-  const learnerPath = isDemoProduction ? stripDemoPrefix(pathname) : pathname;
+  const isSchoolsDemoProduction = isSchoolsDemoPath(pathname);
+  const learnerPath = isDemoProduction
+    ? stripDemoPrefix(pathname)
+    : isSchoolsDemoProduction
+      ? stripSchoolsDemoPrefix(pathname)
+      : pathname;
   const isOnboarding = learnerPath.startsWith("/onboarding");
   const isEntryFunnel =
     learnerPath === "/opening" || learnerPath === "/welcome";
@@ -73,8 +79,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   ] as const;
 
   const schoolsNav: readonly SidebarNavItem[] = [
+    { href: "/schools/demo", label: "Schools Live Demo" },
     { href: "/schools/opening", label: "Opening Logo" },
-    { href: "/schools/welcome", label: "Welcome Intro" },
+    { href: "/schools/avatar", label: "Choose Avatar" },
     { href: "/schools/onboarding", label: "Onboarding" },
     { href: "/schools/map", label: "Map" },
     { href: "/schools/business", label: "Business" },
@@ -91,7 +98,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isPlatformSurface =
     pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
 
-  if (isDemoProduction) {
+  if (isDemoProduction || isSchoolsDemoProduction) {
     return (
       <div className="pointer-events-auto min-h-[100dvh] bg-[#030308]">
         {children}

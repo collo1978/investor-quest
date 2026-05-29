@@ -10,6 +10,7 @@ type Props = {
   onClick?: () => void;
   theme: PillarQuestTheme;
   label?: string;
+  lockedLabel?: string;
   /** For tooltips when locked */
   lockedTitle?: string;
 };
@@ -114,6 +115,7 @@ export function QuizUnlockedCtaButton({
   onClick,
   theme,
   label = "QUIZ UNLOCKED",
+  lockedLabel = "COMPLETE ALL CARDS TO UNLOCK",
   lockedTitle
 }: Props) {
   const reduceMotion = !!useReducedMotion();
@@ -142,7 +144,7 @@ export function QuizUnlockedCtaButton({
       ].join(" ")}
       style={{
         borderColor: unlocked ? theme.border : "rgba(255,255,255,0.14)",
-        color: theme.hi,
+        color: unlocked ? theme.hi : "rgba(226,232,240,0.70)",
         background: unlocked
           ? `linear-gradient(135deg, rgba(0,0,0,0.20), ${theme.glowSoft})`
           : "transparent"
@@ -214,7 +216,7 @@ export function QuizUnlockedCtaButton({
 
       <span className="relative inline-flex items-center gap-2">
         <LockToUnlockIcon unlocked={unlocked} />
-        {label}
+        {unlocked ? label : lockedLabel}
       </span>
     </motion.button>
   );

@@ -624,6 +624,9 @@ export function QuestDetailScreen({
               pillarHasQuestPipeline(pillarId) ? questPipeline : undefined
             }
             onMarkRead={(markSlug) => actions.markQuestRead(pillarId, markSlug)}
+            onMarkUnread={(markSlug) =>
+              actions.markQuestUnread(pillarId, markSlug)
+            }
             onCardView={(cardId) => {
               if (cardId) {
                 trackCardOpened(raw, pillarId, slug, cardId);

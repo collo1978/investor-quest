@@ -15,6 +15,7 @@ import { useGame } from "@/components/GameProvider";
 import { MapQuestMissionBriefOverlay } from "@/components/map/MapQuestMissionBriefOverlay";
 import { QuestMapScene } from "@/components/map/QuestMapScene";
 import { useDemoStory } from "@/components/demo/DemoStoryProvider";
+import { useSchoolsDemoStory } from "@/components/schools/SchoolsDemoStoryProvider";
 import { shouldShowQuestMapBrief } from "@/lib/map/shouldShowQuestMapBrief";
 import {
   BUSINESS_HUB_IMG_SRC,
@@ -46,17 +47,24 @@ export default function MapPageClient() {
   const [hydrationReady, setHydrationReady] = useState(false);
   const { raw, persistenceReady, actions } = useGame();
   const demoStory = useDemoStory();
+  const schoolsDemo = useSchoolsDemoStory();
   const showMissionBrief = demoStory.active
     ? demoStory.step === "map-brief"
-    : persistenceReady && shouldShowQuestMapBrief(raw);
+    : schoolsDemo.active
+      ? schoolsDemo.step === "map-brief"
+      : persistenceReady && shouldShowQuestMapBrief(raw);
 
   const dismissMissionBrief = useCallback(() => {
     if (demoStory.active) {
       demoStory.advance("map");
       return;
     }
+    if (schoolsDemo.active) {
+      schoolsDemo.advance("map");
+      return;
+    }
     actions.dismissQuestMapBrief();
-  }, [actions, demoStory]);
+  }, [actions, demoStory, schoolsDemo]);
 
   useEffect(() => {
     setHydrationReady(true);

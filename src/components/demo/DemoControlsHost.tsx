@@ -32,6 +32,7 @@ import {
 
 import { launchProductionDemo } from "@/lib/demo/launchProductionDemo";
 import { isDemoPath } from "@/lib/demo/demoHref";
+import { isSchoolsDemoPath } from "@/lib/schools/schoolsDemoHref";
 
 import { deactivateDemoStory } from "@/lib/demo/demoStoryMode";
 
@@ -157,6 +158,7 @@ export function DemoControlsHost() {
 
   if (pathname.startsWith("/admin")) return null;
   if (isDemoPath(pathname)) return null;
+  if (isSchoolsDemoPath(pathname)) return null;
 
 
 

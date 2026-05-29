@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { NeonButton } from "@/components/NeonButton";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import { useGame } from "@/components/GameProvider";
@@ -31,7 +31,12 @@ import {
   type CompanyId
 } from "@/lib/demoData";
 import { useDemoStory } from "@/components/demo/DemoStoryProvider";
+import { useSchoolsDemoStory } from "@/components/schools/SchoolsDemoStoryProvider";
 import { isDemoStoryModeActive } from "@/lib/demo/demoStoryMode";
+import { resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
+import {
+  isSchoolsDemoStoryModeActive
+} from "@/lib/schools/schoolsDemoStoryMode";
 import { useRunOnceOnMount } from "@/hooks/useRunOnceOnMount";
 import { releaseFunnelTransition } from "@/lib/startup/funnelTransition";
 import { prefetchStartupAssets } from "@/lib/startup/prefetchStartupAssets";
@@ -77,8 +82,13 @@ function InterestTags({
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const mapRoute = pathname.startsWith("/schools")
+    ? resolveSchoolsLearnerHref("/schools/map", pathname)
+    : "/map";
   const { state, actions, persistenceReady, raw } = useGame();
   const demoStory = useDemoStory();
+  const schoolsDemo = useSchoolsDemoStory();
 
   useRunOnceOnMount(() => {
     releaseFunnelTransition("onboarding");
@@ -95,11 +105,19 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     if (demoStory.active || isDemoStoryModeActive()) return;
+    if (schoolsDemo.active || isSchoolsDemoStoryModeActive()) return;
     if (!persistenceReady) return;
     if (raw.onboarding.completedAt != null) {
-      router.replace("/map");
+      router.replace(mapRoute);
     }
-  }, [demoStory.active, persistenceReady, raw.onboarding.completedAt, router]);
+  }, [
+    demoStory.active,
+    mapRoute,
+    persistenceReady,
+    raw.onboarding.completedAt,
+    router,
+    schoolsDemo.active
+  ]);
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [interests, setInterests] = useState<string[]>([]);
@@ -224,14 +242,22 @@ export default function OnboardingPage() {
       return;
     }
 
+    if (schoolsDemo.active || isSchoolsDemoStoryModeActive()) {
+      actions.completeOnboarding();
+      schoolsDemo.advance("map-brief");
+      return;
+    }
+
     if (!persistenceReady) return;
     actions.completeOnboarding();
-    router.replace("/map");
+    router.replace(mapRoute);
   }, [
     actions,
     demoStory,
+    mapRoute,
     persistenceReady,
     router,
+    schoolsDemo,
     selectedCard,
     state.goal,
     state.playerName
@@ -291,7 +317,11 @@ export default function OnboardingPage() {
     return () => window.clearTimeout(timer);
   }, [interests, loadRecommendations]);
 
-  const storyActive = demoStory.active || isDemoStoryModeActive();
+  const storyActive =
+    demoStory.active ||
+    isDemoStoryModeActive() ||
+    schoolsDemo.active ||
+    isSchoolsDemoStoryModeActive();
 
   if (!storyActive && !persistenceReady) {
     return (

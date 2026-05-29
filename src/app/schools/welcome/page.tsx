@@ -1,9 +1,20 @@
 "use client";
 
-/**
- * Schools variant — welcome intro.
- * Starts as a copy of Bank/Broker welcome, but lives on its own route so
- * future school-specific changes won't touch `/welcome` or production `/demo`.
- */
-export { default } from "@/app/welcome/page";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
+import { useGame } from "@/components/GameProvider";
+import { resolveSchoolsHomeEntryRoute } from "@/lib/schools/schoolsFunnel";
+
+/** Legacy route — schools funnel skips the welcome intro. */
+export default function SchoolsWelcomePage() {
+  const router = useRouter();
+  const { raw, persistenceReady } = useGame();
+
+  useEffect(() => {
+    if (!persistenceReady) return;
+    router.replace(resolveSchoolsHomeEntryRoute(raw));
+  }, [raw, persistenceReady, router]);
+
+  return null;
+}

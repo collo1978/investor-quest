@@ -1,12 +1,6 @@
 import { clearPersistedSnapshots } from "@/engine/progression/persistence";
+import { deactivateDemoStory } from "@/lib/demo/demoStoryMode";
 import { buildDemoGameState, DEMO_PROFILE_NEW_USER } from "@/lib/demo/demoProfiles";
-import {
-  activateDemoStory,
-  DEMO_STORY_PREFETCH_ROUTES,
-  setDemoStoryStep
-} from "@/lib/demo/demoStoryMode";
-import { deactivateSchoolsDemoStory } from "@/lib/schools/schoolsDemoStoryMode";
-import { DEMO_ROUTE_PREFIX } from "@/lib/demo/demoHref";
 import {
   clearDemoSessionFlags,
   rotateOnboardingGuestId,
@@ -14,6 +8,13 @@ import {
 } from "@/lib/demo/demoSessionReset";
 import { prefetchStartupAssets } from "@/lib/startup/prefetchStartupAssets";
 import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
+import {
+  activateSchoolsDemoStory,
+  getRouteForSchoolsDemoStoryStep,
+  SCHOOLS_DEMO_STORY_PREFETCH_ROUTES,
+  setSchoolsDemoStoryStep
+} from "@/lib/schools/schoolsDemoStoryMode";
+import { SCHOOLS_DEMO_ROUTE_PREFIX } from "@/lib/schools/schoolsDemoHref";
 
 type LaunchActions = {
   replaceGameState: (state: ReturnType<typeof buildDemoGameState>) => void;
@@ -33,27 +34,27 @@ function scheduleIdle(fn: () => void, timeoutMs = 2500): void {
 }
 
 /**
- * Production presenter demo at `/demo/*` — isolated from localStorage funnel state.
+ * Production presenter demo at `/schools/demo/*` — isolated from bank/broker `/demo`.
  */
-export function launchProductionDemo(
+export function launchSchoolsProductionDemo(
   router: DemoRouter,
   actions: LaunchActions
 ): void {
-  deactivateSchoolsDemoStory();
+  deactivateDemoStory();
   clearPersistedSnapshots();
   clearDemoSessionFlags();
   rotateOnboardingGuestId();
   setActiveDemoProfileLabel(DEMO_PROFILE_NEW_USER);
 
-  activateDemoStory({ productionRoutes: true });
-  setDemoStoryStep("logo");
+  activateSchoolsDemoStory({ productionRoutes: true });
+  setSchoolsDemoStoryStep("logo");
 
   actions.replaceGameState(buildDemoGameState(DEMO_PROFILE_NEW_USER));
 
   prefetchStartupAssets();
   preloadQuestDetailChunks();
 
-  const opening = `${DEMO_ROUTE_PREFIX}/opening`;
+  const opening = getRouteForSchoolsDemoStoryStep("logo");
   try {
     router.prefetch(opening);
   } catch {
@@ -61,8 +62,8 @@ export function launchProductionDemo(
   }
 
   scheduleIdle(() => {
-    for (const href of DEMO_STORY_PREFETCH_ROUTES) {
-      const demoHref = `${DEMO_ROUTE_PREFIX}${href}`;
+    for (const href of SCHOOLS_DEMO_STORY_PREFETCH_ROUTES) {
+      const demoHref = href.replace("/schools", SCHOOLS_DEMO_ROUTE_PREFIX);
       try {
         router.prefetch(demoHref);
       } catch {

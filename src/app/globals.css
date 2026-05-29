@@ -325,6 +325,17 @@ h3 {
     0 0 32px rgba(139, 92, 246, 0.28);
 }
 
+.iq-academy-stamp--edu {
+  min-width: 0;
+  padding: 0.55rem 0.85rem 0.62rem;
+}
+
+.iq-academy-stamp--edu .iq-academy-stamp-line {
+  font-size: clamp(0.82rem, 3vw, 1.05rem);
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+}
+
 .iq-academy-stamp-line--edition {
   margin-top: 0.05rem;
   font-size: clamp(0.62rem, 2.4vw, 0.78rem);
@@ -362,5 +373,100 @@ h3 {
   .iq-schools-mastery-parallax {
     animation: none !important;
   }
+}
+
+/* Schools avatar select (`/schools/avatar`) */
+.iq-schools-armor-bg {
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 18%, rgba(139, 92, 246, 0.16), transparent 62%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(109, 40, 217, 0.12), transparent 58%),
+    linear-gradient(180deg, #05050f 0%, #030308 48%, #020206 100%);
+}
+
+.iq-schools-armor-vignette {
+  background:
+    radial-gradient(ellipse 90% 75% at 50% 45%, transparent 35%, rgba(3, 3, 8, 0.55) 72%, rgba(3, 3, 8, 0.9) 100%);
+}
+
+.iq-schools-armor-title {
+  text-shadow:
+    0 0 28px rgba(167, 139, 250, 0.45),
+    0 0 64px rgba(139, 92, 246, 0.28);
+}
+
+.iq-schools-avatar-frame-pulse {
+  box-shadow: inset 0 0 24px rgba(167, 139, 250, 0.22);
+}
+
+.iq-schools-avatar-nav-btn {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  background: rgba(12, 10, 24, 0.75);
+  color: rgba(237, 233, 254, 0.92);
+  font-size: 1.65rem;
+  line-height: 1;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.18);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.iq-schools-avatar-nav-btn:hover {
+  border-color: rgba(196, 181, 253, 0.55);
+  box-shadow: 0 0 28px rgba(139, 92, 246, 0.32);
+  transform: translateY(-1px);
+}
+
+.iq-schools-armor-cta {
+  border-radius: 9999px !important;
+  border-width: 2px !important;
+  box-shadow:
+    0 0 32px rgba(139, 92, 246, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+.iq-schools-avatar-name--violet {
+  color: #ede9fe;
+  text-shadow: 0 0 18px rgba(167, 139, 250, 0.5);
+}
+.iq-schools-avatar-name--emerald {
+  color: #d1fae5;
+  text-shadow: 0 0 18px rgba(52, 211, 153, 0.45);
+}
+.iq-schools-avatar-name--amber {
+  color: #fef3c7;
+  text-shadow: 0 0 18px rgba(251, 191, 36, 0.45);
+}
+.iq-schools-avatar-name--cyan {
+  color: #cffafe;
+  text-shadow: 0 0 18px rgba(34, 211, 238, 0.45);
+}
+.iq-schools-avatar-name--fuchsia {
+  color: #fae8ff;
+  text-shadow: 0 0 18px rgba(232, 121, 249, 0.45);
+}
+.iq-schools-avatar-name--rose {
+  color: #ffe4e6;
+  text-shadow: 0 0 18px rgba(251, 113, 133, 0.45);
+}
+.iq-schools-avatar-name--sky {
+  color: #e0f2fe;
+  text-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
+}
+
+.iq-schools-avatar-zone--idle:hover {
+  border-color: rgba(167, 139, 250, 0.55);
+  box-shadow:
+    0 0 20px rgba(139, 92, 246, 0.34),
+    inset 0 0 14px rgba(139, 92, 246, 0.12);
+}
+
+.iq-schools-avatar-zone--selected {
+  border-color: rgba(196, 181, 253, 0.82);
+  box-shadow:
+    0 0 24px rgba(139, 92, 246, 0.46),
+    inset 0 0 18px rgba(139, 92, 246, 0.14);
 }
 
