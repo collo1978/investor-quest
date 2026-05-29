@@ -394,6 +394,13 @@ h3 {
     0 0 64px rgba(139, 92, 246, 0.28);
 }
 
+.iq-schools-avatar-swipe-hint {
+  color: rgba(237, 233, 254, 0.52);
+  text-shadow:
+    0 0 14px rgba(196, 181, 253, 0.28),
+    0 0 28px rgba(139, 92, 246, 0.14);
+}
+
 .iq-schools-avatar-frame-pulse {
   box-shadow: inset 0 0 24px rgba(167, 139, 250, 0.22);
 }

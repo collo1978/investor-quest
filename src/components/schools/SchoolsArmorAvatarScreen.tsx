@@ -4,6 +4,9 @@ import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { NeonButton } from "@/components/NeonButton";
+import { SchoolsMobileAvatarPicker } from "@/components/schools/SchoolsMobileAvatarPicker";
+import { SchoolsTabletAvatarPicker } from "@/components/schools/SchoolsTabletAvatarPicker";
+import { SCHOOLS_DEVICE } from "@/lib/schools/schoolsResponsive";
 import { getSchoolsAvatarById, type SchoolsAvatarId } from "@/lib/schools/avatars";
 import {
   AVATAR_IMAGE_ZONES,
@@ -18,23 +21,26 @@ export type SchoolsArmorAvatarScreenProps = {
   onContinue: (avatarId: SchoolsAvatarId) => void;
 };
 
-/**
- * Schools avatar pick — artwork + overlays share one aspect-ratio stage so
- * hit targets stay locked to the visible image (no object-contain box mismatch).
- */
-export function SchoolsArmorAvatarScreen({ onContinue }: SchoolsArmorAvatarScreenProps) {
+function SchoolsDesktopAvatarPicker({
+  selectedId,
+  onSelect,
+  onContinue
+}: {
+  selectedId: SchoolsAvatarId | null;
+  onSelect: (id: SchoolsAvatarId) => void;
+  onContinue: (avatarId: SchoolsAvatarId) => void;
+}) {
   const reduceMotion = useReducedMotion();
-  const [selectedId, setSelectedId] = useState<SchoolsAvatarId | null>(null);
 
   return (
     <main
-      className="relative h-[100dvh] w-full overflow-hidden bg-[#030308]"
+      className={`relative h-[100dvh] w-full overflow-hidden bg-[#030308] ${SCHOOLS_DEVICE.desktopOnly}`}
       role="application"
       aria-label="Choose your avatar"
     >
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="iq-schools-avatar-stage-wrap absolute inset-0 flex items-center justify-center">
         <div
-          className="relative shrink-0"
+          className="iq-schools-avatar-art-stage relative shrink-0"
           style={{
             aspectRatio: `${ART_W} / ${ART_H}`,
             height: `min(100dvh, calc(100vw / ${ART_ASPECT}))`,
@@ -59,7 +65,7 @@ export function SchoolsArmorAvatarScreen({ onContinue }: SchoolsArmorAvatarScree
                 type="button"
                 aria-label={`Select ${getSchoolsAvatarById(zone.id).name}`}
                 aria-pressed={selected}
-                onClick={() => setSelectedId(zone.id)}
+                onClick={() => onSelect(zone.id)}
                 className={[
                   "absolute box-border rounded-[8px] border-2 border-transparent bg-transparent p-0",
                   "cursor-pointer transition-[box-shadow,border-color] duration-200 ease-out",
@@ -100,14 +106,14 @@ export function SchoolsArmorAvatarScreen({ onContinue }: SchoolsArmorAvatarScree
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-28 bg-gradient-to-t from-[#030308]/85 to-transparent" />
 
       <motion.div
-        className="absolute bottom-5 right-4 z-30 sm:bottom-7 sm:right-7"
+        className="absolute bottom-7 right-7 z-30"
         initial={reduceMotion ? false : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
       >
         <NeonButton
           type="button"
-          className="pointer-events-auto min-w-[9.5rem] px-6 py-3 text-xs font-black uppercase tracking-[0.28em] sm:text-sm"
+          className="pointer-events-auto min-w-[9.5rem] px-6 py-3 text-sm font-black uppercase tracking-[0.28em]"
           onClick={() => {
             if (selectedId) onContinue(selectedId);
           }}
@@ -116,5 +122,33 @@ export function SchoolsArmorAvatarScreen({ onContinue }: SchoolsArmorAvatarScree
         </NeonButton>
       </motion.div>
     </main>
+  );
+}
+
+/**
+ * Schools avatar pick — three intentional layouts:
+ * mobile (<768), tablet (768–1023), desktop widescreen (1024+).
+ */
+export function SchoolsArmorAvatarScreen({ onContinue }: SchoolsArmorAvatarScreenProps) {
+  const [selectedId, setSelectedId] = useState<SchoolsAvatarId | null>(null);
+
+  return (
+    <>
+      <SchoolsMobileAvatarPicker
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+        onContinue={onContinue}
+      />
+      <SchoolsTabletAvatarPicker
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+        onContinue={onContinue}
+      />
+      <SchoolsDesktopAvatarPicker
+        selectedId={selectedId}
+        onSelect={setSelectedId}
+        onContinue={onContinue}
+      />
+    </>
   );
 }

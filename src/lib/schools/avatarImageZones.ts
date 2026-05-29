@@ -117,3 +117,18 @@ export const AVATAR_IMAGE_ZONES: readonly AvatarImageZone[] = [
     );
   })
 ] as const;
+
+/** Pixel crop of one avatar card on the master artwork. */
+export function getAvatarCardCropPixels(id: SchoolsAvatarId): PixelRect {
+  const zone = AVATAR_IMAGE_ZONES.find((z) => z.id === id);
+  if (!zone) {
+    return { x: 0, y: 0, w: CARD_W, h: CARD_H };
+  }
+  const { width: W, height: H } = SCHOOLS_CHOOSE_AVATAR_NATURAL;
+  return {
+    x: (zone.left / 100) * W,
+    y: (zone.top / 100) * H,
+    w: (zone.width / 100) * W,
+    h: (zone.height / 100) * H
+  };
+}
