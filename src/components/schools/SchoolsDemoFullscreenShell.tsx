@@ -7,18 +7,13 @@ import {
   configureCapacitorNativeShell,
   isCapacitorNativeApp
 } from "@/lib/capacitor/nativeShell";
+import {
+  isIosStandaloneDisplayMode,
+  registerSchoolsDemoServiceWorker
+} from "@/lib/schools/schoolsDemoPwa";
 import { SCHOOLS_DEVICE } from "@/lib/schools/schoolsResponsive";
 
 const ROOT_CLASS = "iq-schools-demo-fullscreen";
-
-function detectStandalone(): boolean {
-  if (typeof window === "undefined") return false;
-  const nav = window.navigator as Navigator & { standalone?: boolean };
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    nav.standalone === true
-  );
-}
 
 /**
  * Locks html/body for immersive mobile demo + optional Add-to-Home-Screen hint.
@@ -31,11 +26,12 @@ export function SchoolsDemoFullscreenShell({ children }: { children: ReactNode }
     document.body.classList.add(ROOT_CLASS);
 
     void configureCapacitorNativeShell();
+    registerSchoolsDemoServiceWorker();
 
     const mq = window.matchMedia("(display-mode: standalone)");
     const refreshHint = async () => {
       const native = await isCapacitorNativeApp();
-      setShowPwaHint(!native && !detectStandalone());
+      setShowPwaHint(!native && !isIosStandaloneDisplayMode());
     };
     void refreshHint();
     mq.addEventListener("change", refreshHint);
@@ -55,7 +51,8 @@ export function SchoolsDemoFullscreenShell({ children }: { children: ReactNode }
         <p
           className={`pointer-events-none absolute inset-x-0 bottom-[max(0.4rem,env(safe-area-inset-bottom))] z-[5] mx-auto max-w-[18rem] px-4 text-center text-[0.62rem] leading-snug tracking-[0.02em] text-violet-200/42 ${SCHOOLS_DEVICE.mobileOnly}`}
         >
-          For true fullscreen on iPhone, open in Safari, tap Share, then Add to Home Screen.
+          For fullscreen on iPhone: open investor-quest.vercel.app/schools/demo/ in Safari,
+          tap Share, then Add to Home Screen (remove any old icon first).
         </p>
       ) : null}
     </div>
