@@ -4,18 +4,18 @@ import { LOCKED_BUSINESS_HUB_TOWER_EMBLEM } from "@/lib/hub/lockedCompanyEmblemP
 
 /**
  * Master scene — all overlays use % of this box (never viewport edges).
- * @see BusinessQuestMap scene container
+ * @see BusinessQuestHubScene scene container
  */
 export const BUSINESS_SCENE_STYLE: CSSProperties = {
   position: "relative",
-  width: "min(92vw, 1600px)",
+  width: "100%",
   aspectRatio: "16 / 9",
   marginLeft: "auto",
   marginRight: "auto",
   overflow: "visible"
 };
 
-/** Quest card slots — symmetric orbit around the island. */
+/** Quest card slots — symmetric orbit around the island (desktop / wide). */
 export const BUSINESS_MAP_CARD_POSITIONS: Record<number, CSSProperties> = {
   1: {
     top: "2.5%",
@@ -40,6 +40,36 @@ export const BUSINESS_MAP_CARD_POSITIONS: Record<number, CSSProperties> = {
   },
   6: {
     top: "78%",
+    left: "50%",
+    transform: "translateX(-50%)"
+  }
+};
+
+/** Same orbit layout, tighter insets for narrow portrait screens. */
+export const BUSINESS_MAP_CARD_POSITIONS_MOBILE: Record<number, CSSProperties> = {
+  1: {
+    top: "1%",
+    left: "50%",
+    transform: "translateX(-50%)"
+  },
+  2: {
+    top: "32%",
+    left: "1%"
+  },
+  3: {
+    top: "32%",
+    right: "1%"
+  },
+  4: {
+    top: "58%",
+    left: "1%"
+  },
+  5: {
+    top: "56%",
+    right: "1%"
+  },
+  6: {
+    top: "74%",
     left: "50%",
     transform: "translateX(-50%)"
   }

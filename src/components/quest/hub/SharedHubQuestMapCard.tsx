@@ -81,6 +81,7 @@ type Props = {
   hubProgressPct?: number;
   /** When true, slot 1 shows category icon beside order badge (Forces). */
   showCategoryIcon?: boolean;
+  cardSlotClassName?: string;
 };
 
 export function SharedHubQuestMapCard({
@@ -93,7 +94,8 @@ export function SharedHubQuestMapCard({
   userId,
   staggerIndex = 0,
   hubProgressPct = 0,
-  showCategoryIcon = false
+  showCategoryIcon = false,
+  cardSlotClassName
 }: Props) {
   const pulseLo = pulseShadow(theme, false);
   const pulsePeak = pulseShadow(theme, true);
@@ -194,7 +196,7 @@ export function SharedHubQuestMapCard({
     <CardSlot
       position={position}
       cardWidth={cardWidth}
-      className={slotClass}
+      className={[slotClass, cardSlotClassName].filter(Boolean).join(" ")}
       title={state === "locked" ? lockedHint : undefined}
       ariaLabel={
         state === "locked"
