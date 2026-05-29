@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useGame } from "@/components/GameProvider";
+import { isSchoolsDemoPath } from "@/lib/schools/schoolsDemoHref";
 import { BusinessIslandMissionBriefModal } from "@/components/business/BusinessIslandMissionBriefModal";
 import { BusinessQuestMap } from "@/components/business/BusinessQuestMap";
 import { BusinessQuestRouteLoading } from "@/components/business/BusinessQuestRouteLoading";
@@ -27,6 +29,8 @@ type Props = {
 };
 
 export default function BusinessPageClient({ showDevPanel = false }: Props) {
+  const pathname = usePathname();
+  const schoolsDemoFullscreen = isSchoolsDemoPath(pathname);
   const { state, actions, raw, hydrated } = useGame();
   const [hydrationReady, setHydrationReady] = useState(false);
   const [briefDismissedLocal, setBriefDismissedLocal] = useState(false);
@@ -101,7 +105,13 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
         onDismiss={handleDismissBrief}
       />
 
-      <div className="flex items-center justify-center px-1 py-3 sm:px-3 sm:py-5 md:py-6">
+      <div
+        className={[
+          schoolsDemoFullscreen
+            ? "flex h-full min-h-0 w-full items-stretch justify-center"
+            : "flex items-center justify-center px-1 py-3 sm:px-3 sm:py-5 md:py-6"
+        ].join(" ")}
+      >
         {!hydrated ? (
           <BusinessQuestRouteLoading />
         ) : (
