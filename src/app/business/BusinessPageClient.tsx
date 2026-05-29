@@ -110,9 +110,10 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
 
       <div
         className={[
+          "w-full",
           schoolsDemoFullscreen
-            ? "flex min-h-0 flex-1 w-full flex-col overflow-hidden max-md:overflow-hidden"
-            : "flex w-full items-center justify-center px-0 py-0 max-md:overflow-hidden md:px-3 md:py-5 lg:py-6"
+            ? "flex min-h-0 flex-1 flex-col overflow-hidden"
+            : "flex items-center justify-center max-lg:min-h-[100dvh] max-lg:overflow-hidden md:px-3 md:py-5 lg:py-6"
         ].join(" ")}
       >
         {!hydrated ? (

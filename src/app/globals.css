@@ -132,29 +132,60 @@ h3 {
   padding-bottom: max(7rem, env(safe-area-inset-bottom, 0px));
 }
 
-/* Business hub fills the PWA shell — no extra scroll padding */
-.iq-schools-demo-scroll-host .iq-schools-business-hub-main {
-  padding-bottom: 0;
+/* ── Business hub: mobile-first quest picker (never show desktop orbit on phones) ── */
+@media (max-width: 1023px) {
+  [data-business-scene],
+  [data-business-quest-hub-desktop] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+  }
 }
 
-/* Business hub mobile — lock to viewport, no desktop scene bleed */
-.iq-schools-demo-scroll-host .iq-schools-business-hub-main,
 .iq-business-hub-mobile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   height: 100dvh;
   max-height: 100dvh;
   overflow: hidden;
+  background-color: #050508;
 }
 
-@media (min-width: 768px) {
-  .iq-schools-demo-scroll-host .iq-business-hub-mobile {
-    display: none;
-  }
+.iq-schools-demo-scroll-host .iq-schools-business-hub-main {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  padding-bottom: 0;
 }
 
-@media (min-width: 1024px) {
-  .iq-schools-demo-scroll-host [data-business-quest-hub] > .lg\:block {
-    min-height: 0;
-  }
+.iq-business-hub-mobile-header {
+  padding-top: max(0.55rem, env(safe-area-inset-top));
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(245, 197, 71, 0.1);
+}
+
+.iq-business-hub-mobile-scroller {
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: y mandatory;
+}
+
+.iq-business-hub-mobile-slide {
+  height: 52dvh;
+  min-height: 220px;
+  max-height: 420px;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+.iq-business-hub-mobile-footer {
+  padding: 0.65rem 1rem max(0.7rem, env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(245, 197, 71, 0.08);
+  background: linear-gradient(180deg, transparent, rgba(5, 5, 8, 0.92) 24%);
 }
 
 /* Cinematic intro: deterministic motion (no JS random) */

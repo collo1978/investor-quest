@@ -4,6 +4,7 @@ import { BusinessHubEmptyState } from "@/components/business/hub/BusinessHubEmpt
 import { BusinessQuestHubMobilePicker } from "@/components/business/hub/BusinessQuestHubMobilePicker";
 import { BusinessQuestHubTabletPicker } from "@/components/business/hub/BusinessQuestHubTabletPicker";
 import { BusinessQuestMapDesktop } from "@/components/business/hub/BusinessQuestMapDesktop";
+import { useBusinessHubBreakpoint } from "@/lib/business/businessHubResponsive";
 import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
 import type { Company } from "@/data/companies";
 
@@ -17,20 +18,20 @@ type Props = {
 };
 
 /**
- * Business island quest picker — CSS breakpoints gate layouts so mobile
- * never falls through to the desktop orbit scene (PWA / coarse pointer safe).
+ * Business island quest picker — exactly one layout mounted (mobile / tablet / desktop).
  */
 export function BusinessQuestMap(props: Props) {
+  const breakpoint = useBusinessHubBreakpoint();
+
   if (props.cards.length === 0) {
     return <BusinessHubEmptyState />;
   }
 
-  return (
-    <div className="relative h-full min-h-0 w-full" data-business-quest-hub>
-      <div className="h-full min-h-0 w-full md:hidden">
-        <BusinessQuestHubMobilePicker {...props} />
-      </div>
-      <div className="hidden h-full min-h-0 w-full md:flex lg:hidden">
+  switch (breakpoint) {
+    case "desktop":
+      return <BusinessQuestMapDesktop {...props} />;
+    case "tablet":
+      return (
         <BusinessQuestHubTabletPicker
           cards={props.cards}
           company={props.company}
@@ -38,10 +39,8 @@ export function BusinessQuestMap(props: Props) {
           partnerId={props.partnerId}
           userId={props.userId}
         />
-      </div>
-      <div className="hidden w-full lg:block">
-        <BusinessQuestMapDesktop {...props} />
-      </div>
-    </div>
-  );
+      );
+    default:
+      return <BusinessQuestHubMobilePicker {...props} />;
+  }
 }
