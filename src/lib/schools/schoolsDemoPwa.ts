@@ -1,4 +1,7 @@
 /** Shared PWA identity for `/schools/demo` (iOS Add to Home Screen + Android install). */
+/** Bump when shipping Schools demo fixes so installed PWAs pick up new SW + assets. */
+export const SCHOOLS_DEMO_SW_VERSION = "3";
+
 export const SCHOOLS_DEMO_PWA = {
   appName: "Investor Quest",
   shortName: "IQ Schools",
@@ -41,7 +44,26 @@ export function registerSchoolsDemoServiceWorker(): void {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
   if (!window.location.pathname.startsWith("/schools/demo")) return;
 
-  void navigator.serviceWorker.register("/sw-schools-demo.js", {
-    scope: "/schools/demo"
-  });
+  const swUrl = `/sw-schools-demo.js?v=${SCHOOLS_DEMO_SW_VERSION}`;
+
+  void (async () => {
+    try {
+      const existing = await navigator.serviceWorker.getRegistrations();
+      for (const reg of existing) {
+        const scriptUrl = reg.active?.scriptURL ?? reg.installing?.scriptURL ?? "";
+        if (
+          scriptUrl.includes("/sw-schools-demo.js") &&
+          !scriptUrl.includes(`v=${SCHOOLS_DEMO_SW_VERSION}`)
+        ) {
+          await reg.unregister();
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+
+    await navigator.serviceWorker.register(swUrl, {
+      scope: "/schools/demo"
+    });
+  })();
 }

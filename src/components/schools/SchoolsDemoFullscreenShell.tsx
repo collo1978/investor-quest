@@ -44,9 +44,11 @@ export function SchoolsDemoFullscreenShell({ children }: { children: ReactNode }
   }, []);
 
   return (
-    <div className="relative h-[100dvh] max-h-[100dvh] w-full overflow-hidden bg-[#05010f]">
+    <div className="relative flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-[#05010f]">
       <SchoolsDemoRouteBootstrap />
-      {children}
+      <div className="iq-schools-demo-scroll-host relative min-h-0 flex-1">
+        {children}
+      </div>
       {showPwaHint ? (
         <p
           className={`pointer-events-none absolute inset-x-0 bottom-[max(0.4rem,env(safe-area-inset-bottom))] z-[5] mx-auto max-w-[18rem] px-4 text-center text-[0.62rem] leading-snug tracking-[0.02em] text-violet-200/42 ${SCHOOLS_DEVICE.mobileOnly}`}

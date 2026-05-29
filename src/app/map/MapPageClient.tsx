@@ -11,6 +11,7 @@
  */
 
 import { Component, type ReactNode, useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useGame } from "@/components/GameProvider";
 import { MapQuestMissionBriefOverlay } from "@/components/map/MapQuestMissionBriefOverlay";
 import { QuestMapScene } from "@/components/map/QuestMapScene";
@@ -26,6 +27,9 @@ import {
   QUEST_MAP_PATH
 } from "@/lib/screenAssetUrls";
 import { preloadImage } from "@/lib/preloadImage";
+import { isSchoolsDemoPath } from "@/lib/schools/schoolsDemoHref";
+import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
+import { isSchoolsDemoStoryModeActive } from "@/lib/schools/schoolsDemoStoryMode";
 
 function QuestMapStaticFallback() {
   return (
@@ -44,6 +48,9 @@ function QuestMapStaticFallback() {
 }
 
 export default function MapPageClient() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const schoolsDemoFullscreen = isSchoolsDemoPath(pathname);
   const [hydrationReady, setHydrationReady] = useState(false);
   const { raw, persistenceReady, actions } = useGame();
   const demoStory = useDemoStory();
@@ -59,12 +66,12 @@ export default function MapPageClient() {
       demoStory.advance("map");
       return;
     }
-    if (schoolsDemo.active) {
-      schoolsDemo.advance("map");
+    if (schoolsDemo.active || schoolsDemoFullscreen || isSchoolsDemoStoryModeActive()) {
+      navigateSchoolsDemoStep("map", pathname, router);
       return;
     }
     actions.dismissQuestMapBrief();
-  }, [actions, demoStory, schoolsDemo]);
+  }, [actions, demoStory, pathname, router, schoolsDemo, schoolsDemoFullscreen]);
 
   useEffect(() => {
     setHydrationReady(true);
@@ -91,7 +98,9 @@ export default function MapPageClient() {
       <div
         className={[
           "relative z-[1] mx-auto w-full overflow-hidden",
-          "quest-map-stage-height",
+          schoolsDemoFullscreen
+            ? "schools-demo-map-stage-height"
+            : "quest-map-stage-height",
           "px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-2.5 md:py-2",
           showMissionBrief ? "pointer-events-none" : "pointer-events-auto"
         ].join(" ")}

@@ -64,6 +64,27 @@ export function isSchoolsDemoStoryModeActive(): boolean {
   return snapshot.active;
 }
 
+/** Restore in-memory story flag after refresh / PWA relaunch (sessionStorage only). */
+export function hydrateSchoolsDemoStoryFromSession(): void {
+  if (typeof window === "undefined") return;
+  if (snapshot.active) return;
+  try {
+    if (sessionStorage.getItem(SCHOOLS_DEMO_STORY_SESSION_KEY) !== "1") return;
+  } catch {
+    return;
+  }
+  snapshot = {
+    active: true,
+    step: "logo",
+    productionRoutes: true
+  };
+  emit();
+}
+
+if (typeof window !== "undefined") {
+  hydrateSchoolsDemoStoryFromSession();
+}
+
 export function isSchoolsDemoStoryProductionRoutes(): boolean {
   return snapshot.active && snapshot.productionRoutes;
 }
@@ -97,6 +118,9 @@ export function setSchoolsDemoStoryStep(step: SchoolsDemoStoryStep): void {
 }
 
 export function advanceSchoolsDemoStoryStep(next: SchoolsDemoStoryStep): void {
+  if (!snapshot.active) {
+    hydrateSchoolsDemoStoryFromSession();
+  }
   if (!snapshot.active) return;
   const currentIdx = SCHOOLS_DEMO_STORY_STEPS.indexOf(snapshot.step);
   const nextIdx = SCHOOLS_DEMO_STORY_STEPS.indexOf(next);

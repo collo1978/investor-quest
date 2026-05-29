@@ -1,29 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { SchoolsArmorAvatarScreen } from "@/components/schools/SchoolsArmorAvatarScreen";
-import { useSchoolsDemoStory } from "@/components/schools/SchoolsDemoStoryProvider";
 import { useGame } from "@/components/GameProvider";
 import { getSchoolsAvatarById, type SchoolsAvatarId } from "@/lib/schools/avatars";
-import { resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
+import { isSchoolsDemoPath, resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
+import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
 import { isSchoolsDemoStoryModeActive } from "@/lib/schools/schoolsDemoStoryMode";
-import {
-  saveSchoolsAvatar
-} from "@/lib/schools/schoolsAvatarStorage";
+import { saveSchoolsAvatar } from "@/lib/schools/schoolsAvatarStorage";
 import { markFunnelTransition, releaseFunnelTransition } from "@/lib/startup/funnelTransition";
 
 export default function SchoolsAvatarPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { state, actions } = useGame();
-  const schoolsDemo = useSchoolsDemoStory();
-  const leavingRef = useRef(false);
-  const schoolsDemoActiveRef = useRef(schoolsDemo.active);
-  schoolsDemoActiveRef.current = schoolsDemo.active;
-  const advanceSchoolsStoryRef = useRef(schoolsDemo.advance);
-  advanceSchoolsStoryRef.current = schoolsDemo.advance;
 
   useEffect(() => {
     releaseFunnelTransition("avatar");
@@ -31,9 +23,6 @@ export default function SchoolsAvatarPage() {
 
   const onContinue = useCallback(
     (avatarId: SchoolsAvatarId) => {
-      if (leavingRef.current) return;
-      leavingRef.current = true;
-
       const avatar = getSchoolsAvatarById(avatarId);
       saveSchoolsAvatar(avatarId);
       actions.setProfile({
@@ -41,8 +30,11 @@ export default function SchoolsAvatarPage() {
         goal: state.goal ?? "Build investing mastery"
       });
 
-      if (schoolsDemoActiveRef.current || isSchoolsDemoStoryModeActive()) {
-        advanceSchoolsStoryRef.current("onboarding");
+      const onSchoolsDemo =
+        isSchoolsDemoPath(pathname) || isSchoolsDemoStoryModeActive();
+
+      if (onSchoolsDemo) {
+        navigateSchoolsDemoStep("onboarding", pathname, router);
         return;
       }
 

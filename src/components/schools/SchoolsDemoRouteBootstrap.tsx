@@ -1,16 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-import { useRunOnceOnMount } from "@/hooks/useRunOnceOnMount";
 import {
   isSchoolsDemoPath,
   SCHOOLS_DEMO_ROUTE_PREFIX
 } from "@/lib/schools/schoolsDemoHref";
-import {
-  ensureProductionSchoolsDemoFromPath,
-  isSchoolsDemoStoryModeActive
-} from "@/lib/schools/schoolsDemoStoryMode";
+import { ensureProductionSchoolsDemoFromPath } from "@/lib/schools/schoolsDemoStoryMode";
 
 /**
  * Deep links to `/schools/demo/opening` etc. still activate scripted Schools mode.
@@ -18,13 +15,12 @@ import {
 export function SchoolsDemoRouteBootstrap() {
   const pathname = usePathname();
 
-  useRunOnceOnMount(() => {
+  useEffect(() => {
     if (!isSchoolsDemoPath(pathname) || pathname === SCHOOLS_DEMO_ROUTE_PREFIX) {
       return;
     }
-    if (isSchoolsDemoStoryModeActive()) return;
     ensureProductionSchoolsDemoFromPath(pathname);
-  });
+  }, [pathname]);
 
   return null;
 }

@@ -33,10 +33,9 @@ import {
 import { useDemoStory } from "@/components/demo/DemoStoryProvider";
 import { useSchoolsDemoStory } from "@/components/schools/SchoolsDemoStoryProvider";
 import { isDemoStoryModeActive } from "@/lib/demo/demoStoryMode";
-import { resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
-import {
-  isSchoolsDemoStoryModeActive
-} from "@/lib/schools/schoolsDemoStoryMode";
+import { isSchoolsDemoPath, resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
+import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
+import { isSchoolsDemoStoryModeActive } from "@/lib/schools/schoolsDemoStoryMode";
 import { useRunOnceOnMount } from "@/hooks/useRunOnceOnMount";
 import { releaseFunnelTransition } from "@/lib/startup/funnelTransition";
 import { prefetchStartupAssets } from "@/lib/startup/prefetchStartupAssets";
@@ -242,9 +241,13 @@ export default function OnboardingPage() {
       return;
     }
 
-    if (schoolsDemo.active || isSchoolsDemoStoryModeActive()) {
+    if (
+      schoolsDemo.active ||
+      isSchoolsDemoStoryModeActive() ||
+      isSchoolsDemoPath(pathname)
+    ) {
       actions.completeOnboarding();
-      schoolsDemo.advance("map-brief");
+      navigateSchoolsDemoStep("map-brief", pathname, router);
       return;
     }
 
@@ -255,6 +258,7 @@ export default function OnboardingPage() {
     actions,
     demoStory,
     mapRoute,
+    pathname,
     persistenceReady,
     router,
     schoolsDemo,
@@ -339,8 +343,17 @@ export default function OnboardingPage() {
     );
   }
 
+  const schoolsDemoFlow = pathname.includes("/schools");
+
   return (
-    <main className="static-ui relative min-h-screen overflow-hidden bg-[#05050F]">
+    <main
+      className={[
+        "static-ui relative bg-[#05050F]",
+        schoolsDemoFlow
+          ? "flex min-h-[100dvh] flex-col overflow-y-auto overscroll-y-contain"
+          : "min-h-screen overflow-hidden"
+      ].join(" ")}
+    >
       <div className="pointer-events-none absolute inset-0 bg-[#05050F]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_520px_at_30%_18%,rgba(139,92,246,0.18),transparent_62%),radial-gradient(880px_560px_at_70%_30%,rgba(168,85,247,0.12),transparent_62%)]" />
       <div className="pointer-events-none absolute inset-0 opacity-25 [mask-image:radial-gradient(720px_520px_at_50%_30%,black,transparent_75%)]">
@@ -348,7 +361,14 @@ export default function OnboardingPage() {
       </div>
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_70%_at_50%_35%,transparent_55%,rgba(0,0,0,0.85)_100%)]" />
 
-      <div className="relative mx-auto w-full max-w-[720px] px-5 pt-6 sm:px-6">
+      <div
+        className={[
+          "relative mx-auto w-full max-w-[720px] px-5 pt-6 sm:px-6",
+          schoolsDemoFlow
+            ? "pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+            : ""
+        ].join(" ")}
+      >
         <div className="flex items-center justify-between gap-3">
           <div className="relative flex min-w-0 flex-1 items-center py-1">
             <InvestorQuestBrandLogo

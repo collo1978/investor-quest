@@ -61,10 +61,11 @@ export function SchoolsTabletAvatarPicker({ selectedId, onSelect, onContinue }: 
           />
           <NeonButton
             type="button"
-            className="mb-1 shrink-0 min-w-[10rem] px-7 py-3.5 text-sm font-black uppercase tracking-[0.28em]"
-            disabled={!selectedId}
+            className="mb-1 min-h-[44px] shrink-0 min-w-[10rem] px-7 py-3.5 text-sm font-black uppercase tracking-[0.28em]"
             onClick={() => {
-              if (selectedId) onContinue(selectedId);
+              const id = selectedId ?? carousel.focusedAvatar.id;
+              if (!selectedId) onSelect(id);
+              onContinue(id);
             }}
           >
             CONTINUE

@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { GlassCard } from "@/components/GlassCard";
@@ -12,6 +13,7 @@ import { companyById, type CompanyId } from "@/data/companies";
 import { formatAnalyticsNumber } from "@/lib/analytics/formatDisplay";
 import { isPillarComplete } from "@/engine/progression/unlocks";
 import { levelProgress } from "@/engine";
+import { resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
 
 const GOLD = "#F5C547";
 const VIOLET = "#C4B5FD";
@@ -55,6 +57,9 @@ function schoolsTitleFromXp(xp: number): string {
 type ArmorPieceStatus = "locked" | "partial" | "earned";
 
 export default function SchoolsProfileHub() {
+  const pathname = usePathname();
+  const mapHref = resolveSchoolsLearnerHref("/schools/map", pathname);
+  const businessHref = resolveSchoolsLearnerHref("/schools/business", pathname);
   const { state, raw } = useGame();
   const company = companyById(state.activeCompanyId as CompanyId);
   const lp = levelProgress(state.xp);
@@ -97,10 +102,10 @@ export default function SchoolsProfileHub() {
         className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(168,85,247,0.26),transparent_55%),radial-gradient(ellipse_60%_40%_at_100%_0%,rgba(245,197,71,0.10),transparent_50%),radial-gradient(ellipse_50%_50%_at_0%_100%,rgba(59,130,246,0.08),transparent_45%)]"
       />
 
-      <main className="relative z-[1] mx-auto max-w-6xl px-5 pb-16 pt-8 md:px-8 md:pt-10">
+      <main className="relative z-[1] mx-auto max-w-6xl px-5 pb-[max(4rem,env(safe-area-inset-bottom))] pt-[max(2rem,env(safe-area-inset-top))] md:px-8 md:pt-10">
         <header className="mb-8 flex flex-col gap-6 border-b border-white/[0.08] pb-7 md:flex-row md:items-start md:justify-between">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:gap-8">
-            <Link href="/schools/map" className="relative z-10 shrink-0">
+            <Link href={mapHref} className="relative z-10 shrink-0">
               <InvestorQuestBrandLogo className="h-10 w-auto sm:h-11" sizes="(max-width: 640px) 240px, 280px" />
               <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.28em] text-ink-2">
                 School Edition
@@ -123,10 +128,12 @@ export default function SchoolsProfileHub() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <NeonButton variant="ghost" href="/schools/map">
+            <NeonButton variant="ghost" href={mapHref} className="min-h-[44px]">
               Quest map
             </NeonButton>
-            <NeonButton href="/schools/business">Continue</NeonButton>
+            <NeonButton href={businessHref} className="min-h-[44px]">
+              Continue
+            </NeonButton>
           </div>
         </header>
 

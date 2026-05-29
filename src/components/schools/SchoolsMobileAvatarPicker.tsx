@@ -26,6 +26,14 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
     selectOnSnap: false
   });
 
+  const handleContinue = () => {
+    const id = selectedId ?? carousel.focusedAvatar.id;
+    if (!selectedId) {
+      onSelect(id);
+    }
+    onContinue(id);
+  };
+
   return (
     <main
       className={`relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#030308] ${SCHOOLS_DEVICE.mobileOnly}`}
@@ -54,18 +62,15 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
 
       <SchoolsAvatarCarouselMeta activeAvatar={carousel.focusedAvatar} />
 
-      <div className="relative z-10 shrink-0 bg-gradient-to-t from-[#030308] via-[#030308]/90 to-transparent px-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] pt-3">
+      <div className="relative z-20 shrink-0 bg-gradient-to-t from-[#030308] via-[#030308]/90 to-transparent px-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] pt-3">
         <div className="flex justify-end">
           <NeonButton
             type="button"
             className={[
-              "min-w-[9.5rem] px-6 py-3 text-xs font-black uppercase tracking-[0.28em] transition-[box-shadow,opacity,transform] duration-300",
+              "min-h-[44px] min-w-[9.5rem] px-6 py-3 text-xs font-black uppercase tracking-[0.28em] transition-[box-shadow,opacity,transform] duration-300",
               selectedId ? "iq-schools-armor-cta" : ""
             ].join(" ")}
-            disabled={!selectedId}
-            onClick={() => {
-              if (selectedId) onContinue(selectedId);
-            }}
+            onClick={handleContinue}
           >
             CONTINUE
           </NeonButton>

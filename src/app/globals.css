@@ -105,6 +105,33 @@ h3 {
   }
 }
 
+/* Schools PWA map — no app header / bottom nav chrome */
+.schools-demo-map-stage-height {
+  height: calc(
+    100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+  );
+  min-height: 280px;
+}
+@media (min-width: 768px) {
+  .schools-demo-map-stage-height {
+    height: calc(100dvh - 1.5rem);
+  }
+}
+
+/* Scrollable Schools demo flow pages inside fullscreen shell */
+.iq-schools-demo-scroll-host {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.iq-schools-demo-scroll-host main {
+  padding-bottom: max(7rem, env(safe-area-inset-bottom, 0px));
+}
+
 /* Cinematic intro: deterministic motion (no JS random) */
 @keyframes intro-fog-drift {
   0%,
