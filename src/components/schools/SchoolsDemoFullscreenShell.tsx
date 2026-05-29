@@ -3,6 +3,10 @@
 import { useEffect, useState, type ReactNode } from "react";
 
 import { SchoolsDemoRouteBootstrap } from "@/components/schools/SchoolsDemoRouteBootstrap";
+import {
+  configureCapacitorNativeShell,
+  isCapacitorNativeApp
+} from "@/lib/capacitor/nativeShell";
 import { SCHOOLS_DEVICE } from "@/lib/schools/schoolsResponsive";
 
 const ROOT_CLASS = "iq-schools-demo-fullscreen";
@@ -26,9 +30,14 @@ export function SchoolsDemoFullscreenShell({ children }: { children: ReactNode }
     document.documentElement.classList.add(ROOT_CLASS);
     document.body.classList.add(ROOT_CLASS);
 
+    void configureCapacitorNativeShell();
+
     const mq = window.matchMedia("(display-mode: standalone)");
-    const refreshHint = () => setShowPwaHint(!detectStandalone());
-    refreshHint();
+    const refreshHint = async () => {
+      const native = await isCapacitorNativeApp();
+      setShowPwaHint(!native && !detectStandalone());
+    };
+    void refreshHint();
     mq.addEventListener("change", refreshHint);
 
     return () => {

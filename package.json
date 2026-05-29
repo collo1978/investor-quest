@@ -14,9 +14,19 @@
     "start": "next start",
     "lint": "next lint",
     "optimize:screens": "node scripts/optimize-screen-images.mjs",
-    "regenerate:demo-quests": "node scripts/regenerate-all-demo-quests.mjs"
+    "regenerate:demo-quests": "node scripts/regenerate-all-demo-quests.mjs",
+    "cap:sync": "npx cap sync",
+    "cap:sync:local": "cross-env CAPACITOR_SERVER_URL=http://localhost:3003/schools/demo npx cap sync",
+    "cap:sync:android-local": "cross-env CAPACITOR_SERVER_URL=http://10.0.2.2:3003/schools/demo npx cap sync",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android",
+    "cap:run:ios": "npx cap run ios",
+    "cap:run:android": "npx cap run android"
   },
   "dependencies": {
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",
     "framer-motion": "^12.23.12",
@@ -25,6 +35,9 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/ios": "^8.3.4",
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/postcss": "^4.1.10",
     "@types/node": "^22.15.21",

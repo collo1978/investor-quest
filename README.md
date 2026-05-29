@@ -38,6 +38,18 @@ Press **Ctrl+Shift+B** (default build task: **Investor Quest: dev server**). The
 | `npm run build` | Production build |
 | `npm run lint` | ESLint |
 
+### Mobile app (Capacitor — iOS / Android)
+
+Native wrappers around the **same** Next.js app (Schools demo entry). Vercel web demo is unchanged.
+
+See **[docs/CAPACITOR.md](docs/CAPACITOR.md)** for setup, simulators, and local dev against `npm run dev`.
+
+```bash
+npm run cap:sync          # production → Vercel /schools/demo
+npm run cap:open:ios      # Xcode (Mac)
+npm run cap:open:android  # Android Studio
+```
+
 ### Port busy (Windows)
 
 ```powershell

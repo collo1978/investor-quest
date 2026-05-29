@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="viewport-fit=cover, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#05010f" />
+    <title>Investor Quest</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        min-height: 100dvh;
+        overflow: hidden;
+        background: #05010f;
+        color: rgba(237, 233, 254, 0.88);
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+      }
+      body {
+        display: grid;
+        place-items: center;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right)
+          env(safe-area-inset-bottom) env(safe-area-inset-left);
+      }
+      p {
+        margin: 0;
+        font-size: 0.9rem;
+        letter-spacing: 0.04em;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Loading Investor Quest…</p>
+    <script>
+      // Fallback if native server.url is not applied (should not happen in normal use).
+      window.location.replace("https://investor-quest.vercel.app/schools/demo");
+    </script>
+  </body>
+</html>

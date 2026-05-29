@@ -48,3 +48,11 @@ Thumbs.db
 
 # Vercel
 .vercel
+
+# Capacitor native build artifacts (commit ios/ and android/ project sources)
+ios/App/Pods/
+ios/DerivedData/
+android/.gradle/
+android/app/build/
+android/build/
+*.xcuserdata
