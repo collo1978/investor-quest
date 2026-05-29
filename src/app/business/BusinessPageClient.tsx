@@ -96,7 +96,10 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
   return (
     <main
       className={[
-        "pointer-events-auto relative -mb-24 w-full bg-bg-0 pb-10 pt-2",
+        "pointer-events-auto relative w-full bg-bg-0",
+        schoolsDemoFullscreen
+          ? "iq-schools-business-hub-main flex min-h-0 flex-1 flex-col overflow-hidden"
+          : "-mb-24 pb-10 pt-2",
         hydrationReady ? "" : "static-ui"
       ].join(" ")}
     >
@@ -108,7 +111,7 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
       <div
         className={[
           schoolsDemoFullscreen
-            ? "flex h-full min-h-0 w-full items-stretch justify-center"
+            ? "flex min-h-0 flex-1 w-full flex-col overflow-hidden"
             : "flex items-center justify-center px-1 py-3 sm:px-3 sm:py-5 md:py-6"
         ].join(" ")}
       >

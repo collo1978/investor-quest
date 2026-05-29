@@ -11,7 +11,6 @@ import {
 import { BusinessCompanyEmblem } from "@/components/business/BusinessCompanyEmblem";
 import { BusinessQuestMapCard } from "@/components/business/BusinessQuestMapCard";
 import { HubTrailBridgeBeacon } from "@/components/quest/hub/HubTrailBridgeBeacon";
-import { BUSINESS_HUB_DEVICE } from "@/lib/business/businessHubResponsive";
 import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
 import { resolveCompanyLogoUrl } from "@/lib/business/buildBusinessHubCards";
 import type { Company } from "@/data/companies";
@@ -40,7 +39,7 @@ export function BusinessQuestMapDesktop({
 
   return (
     <motion.div
-      className={`relative mx-auto w-full py-1 ${BUSINESS_HUB_DEVICE.desktopOnly}`}
+      className="relative mx-auto w-full py-1"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}

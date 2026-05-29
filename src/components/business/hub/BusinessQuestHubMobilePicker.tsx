@@ -12,7 +12,6 @@ import {
 import Image from "next/image";
 import { hubMapCardThemeFromPillar } from "@/components/quest/hub/hubMapCardTheme";
 import { useHubQuestCarousel } from "@/hooks/useHubQuestCarousel";
-import { BUSINESS_HUB_DEVICE } from "@/lib/business/businessHubResponsive";
 import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
 import { resolveCompanyLogoUrl } from "@/lib/business/buildBusinessHubCards";
 import type { Company } from "@/data/companies";
@@ -53,7 +52,7 @@ export function BusinessQuestHubMobilePicker({
 
   return (
     <section
-      className={`relative flex h-[min(100dvh,calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)))] w-full flex-col overflow-hidden bg-[#050508] ${BUSINESS_HUB_DEVICE.mobileOnly}`}
+      className="relative flex h-full min-h-[min(100dvh,calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)))] w-full flex-col overflow-hidden bg-[#050508]"
       aria-label="Business island quests"
     >
       <div
@@ -79,10 +78,10 @@ export function BusinessQuestHubMobilePicker({
 
       <div
         ref={carousel.trackRef}
-        className="relative z-10 min-h-0 flex-1 touch-pan-y overflow-hidden px-0"
+        className="relative z-10 min-h-[14rem] flex-1 touch-pan-y overflow-hidden px-0"
       >
         <motion.div
-          className="absolute inset-y-4 left-0 flex items-stretch will-change-transform"
+          className="absolute inset-y-0 left-0 flex h-full items-center will-change-transform"
           style={{ x: carousel.x, gap: SLIDE_GAP }}
           drag="x"
           dragConstraints={{ left: carousel.dragMin, right: carousel.dragMax }}

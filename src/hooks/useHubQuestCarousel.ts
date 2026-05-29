@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { animate, useMotionValue, useReducedMotion, type PanInfo } from "framer-motion";
 
 export type HubQuestCarouselConfig = {
@@ -46,10 +46,21 @@ export function useHubQuestCarousel(
     [itemCount, reduceMotion, snapX, x]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = trackRef.current;
     if (!el) return;
-    const measure = () => setViewportWidth(el.clientWidth);
+
+    const measure = () => {
+      const w = el.clientWidth;
+      if (w > 0) {
+        setViewportWidth(w);
+        return;
+      }
+      if (typeof window !== "undefined") {
+        setViewportWidth(window.innerWidth);
+      }
+    };
+
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);

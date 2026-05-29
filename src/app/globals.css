@@ -128,8 +128,13 @@ h3 {
   -webkit-overflow-scrolling: touch;
 }
 
-.iq-schools-demo-scroll-host main {
+.iq-schools-demo-scroll-host main:not(.iq-schools-business-hub-main) {
   padding-bottom: max(7rem, env(safe-area-inset-bottom, 0px));
+}
+
+/* Business hub fills the PWA shell — no extra scroll padding */
+.iq-schools-demo-scroll-host .iq-schools-business-hub-main {
+  padding-bottom: 0;
 }
 
 /* Cinematic intro: deterministic motion (no JS random) */
