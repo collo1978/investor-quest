@@ -16,11 +16,6 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/schools/demo",
-        destination: "/schools/demo/",
-        permanent: false
-      },
-      {
         source: "/forces/positive-inside-business-strength",
         destination: "/forces/positive-inside-brand-strength",
         permanent: true

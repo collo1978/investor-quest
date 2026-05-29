@@ -51,7 +51,7 @@ export function SchoolsDemoFullscreenShell({ children }: { children: ReactNode }
         <p
           className={`pointer-events-none absolute inset-x-0 bottom-[max(0.4rem,env(safe-area-inset-bottom))] z-[5] mx-auto max-w-[18rem] px-4 text-center text-[0.62rem] leading-snug tracking-[0.02em] text-violet-200/42 ${SCHOOLS_DEVICE.mobileOnly}`}
         >
-          For fullscreen on iPhone: open investor-quest.vercel.app/schools/demo/ in Safari,
+          For fullscreen on iPhone: open investor-quest.vercel.app/schools/demo in Safari,
           tap Share, then Add to Home Screen (remove any old icon first).
         </p>
       ) : null}

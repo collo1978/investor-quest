@@ -5,8 +5,8 @@ export const SCHOOLS_DEMO_PWA = {
   themeColor: "#05010f",
   backgroundColor: "#05010f",
   /** Add to Home Screen from this URL for correct standalone launch on iOS. */
-  startPath: "/schools/demo/",
-  scopePath: "/schools/demo/",
+  startPath: "/schools/demo",
+  scopePath: "/schools/demo",
   manifestPath: "/schools/demo/manifest.webmanifest",
   appleTouchIconPath: "/schools/demo/apple-touch-icon.png",
   iconPath: "/logos/investor-quest-logo.png"
@@ -42,6 +42,6 @@ export function registerSchoolsDemoServiceWorker(): void {
   if (!window.location.pathname.startsWith("/schools/demo")) return;
 
   void navigator.serviceWorker.register("/sw-schools-demo.js", {
-    scope: "/schools/demo/"
+    scope: "/schools/demo"
   });
 }
