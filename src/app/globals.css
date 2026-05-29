@@ -137,6 +137,26 @@ h3 {
   padding-bottom: 0;
 }
 
+/* Business hub mobile — lock to viewport, no desktop scene bleed */
+.iq-schools-demo-scroll-host .iq-schools-business-hub-main,
+.iq-business-hub-mobile {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .iq-schools-demo-scroll-host .iq-business-hub-mobile {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .iq-schools-demo-scroll-host [data-business-quest-hub] > .lg\:block {
+    min-height: 0;
+  }
+}
+
 /* Cinematic intro: deterministic motion (no JS random) */
 @keyframes intro-fog-drift {
   0%,

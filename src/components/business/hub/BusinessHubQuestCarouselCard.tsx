@@ -51,27 +51,34 @@ export function BusinessHubQuestCarouselCard({
   const isPrimary = !locked && card.isPrimaryActive;
   const href = resolveMapIslandHref(card.route, pathname);
 
-  let scale = 0.82;
-  if (distance === 1) scale = variant === "tablet" ? 0.9 : 0.88;
-  if (focused && !locked) scale = variant === "tablet" ? 1 : 1.02;
+  const isMobile = variant === "mobile";
+
+  let scale = isMobile ? 0.86 : 0.82;
+  if (distance === 1) scale = variant === "tablet" ? 0.92 : isMobile ? 0.9 : 0.88;
+  if (focused && !locked) scale = variant === "tablet" ? 1 : isMobile ? 1 : 1.02;
   if (focused && locked) scale = 0.9;
 
-  let opacity = 0.38;
-  if (distance === 1) opacity = 0.58;
+  let opacity = isMobile ? 0.32 : 0.38;
+  if (distance === 1) opacity = isMobile ? 0.5 : 0.58;
   if (focused) opacity = 1;
 
   const frameClass = locked
-    ? "border border-[rgba(88,74,42,0.35)] bg-[rgba(10,8,6,0.94)] saturate-[0.8]"
+    ? "border border-[rgba(88,74,42,0.32)] bg-[rgba(10,8,6,0.94)] saturate-[0.78]"
     : state === "completed"
-      ? "border border-[rgba(255,229,141,0.55)] bg-[rgba(14,11,7,0.96)]"
+      ? "border border-[rgba(255,229,141,0.48)] bg-[rgba(14,11,7,0.96)]"
       : isPrimary
-        ? "border border-[rgba(255,215,90,0.72)] bg-[rgba(18,14,8,0.97)] shadow-[0_8px_28px_rgba(0,0,0,0.5),0_0_20px_rgba(245,197,71,0.18)]"
-        : "border border-[rgba(245,197,71,0.38)] bg-[rgba(12,10,7,0.94)] shadow-[0_6px_22px_rgba(0,0,0,0.48)]";
+        ? isMobile
+          ? "border border-[rgba(255,215,90,0.58)] bg-[rgba(16,13,8,0.97)] shadow-[0_6px_20px_rgba(0,0,0,0.45)]"
+          : "border border-[rgba(255,215,90,0.72)] bg-[rgba(18,14,8,0.97)] shadow-[0_8px_28px_rgba(0,0,0,0.5),0_0_20px_rgba(245,197,71,0.18)]"
+        : isMobile
+          ? "border border-[rgba(245,197,71,0.32)] bg-[rgba(12,10,7,0.94)] shadow-[0_4px_16px_rgba(0,0,0,0.42)]"
+          : "border border-[rgba(245,197,71,0.38)] bg-[rgba(12,10,7,0.94)] shadow-[0_6px_22px_rgba(0,0,0,0.48)]";
 
   const inner = (
   <article
     className={[
-      "flex h-full min-h-[11.5rem] flex-col rounded-2xl px-4 py-3.5 sm:min-h-[12rem] sm:px-5 sm:py-4",
+      "flex h-full flex-col rounded-2xl px-4 py-3",
+      isMobile ? "min-h-0 justify-between" : "min-h-[11.5rem] py-3.5 sm:min-h-[12rem] sm:px-5 sm:py-4",
       frameClass
     ].join(" ")}
   >
@@ -160,10 +167,16 @@ export function BusinessHubQuestCarouselCard({
       animate={{ scale, opacity }}
       transition={{ type: "spring", stiffness: 400, damping: 32 }}
     >
-      {focused && isPrimary && !locked && !reduceMotion ? (
+      {focused && isPrimary && !locked && !reduceMotion && !isMobile ? (
         <span
           aria-hidden
           className="pointer-events-none absolute -inset-1 rounded-[1.1rem] bg-[radial-gradient(ellipse_85%_65%_at_50%_40%,rgba(245,197,71,0.14),transparent_72%)]"
+        />
+      ) : null}
+      {focused && isPrimary && !locked && isMobile ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -inset-0.5 rounded-[1.05rem] bg-[radial-gradient(ellipse_80%_55%_at_50%_38%,rgba(245,197,71,0.08),transparent_70%)]"
         />
       ) : null}
       {locked ? (

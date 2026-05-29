@@ -1,10 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { animate, useMotionValue, useReducedMotion, type PanInfo } from "framer-motion";
 
+export type HubQuestCarouselAxis = "horizontal" | "vertical";
+
 export type HubQuestCarouselConfig = {
-  slideVw: number;
+  axis?: HubQuestCarouselAxis;
+  /** Fraction of viewport width per slide (horizontal). */
+  slideVw?: number;
+  /** Fraction of viewport height per slide (vertical). */
+  slideVh?: number;
   slideGap: number;
   velocityThreshold?: number;
 };
@@ -12,21 +18,33 @@ export type HubQuestCarouselConfig = {
 export function useHubQuestCarousel(
   itemCount: number,
   initialIndex: number,
-  { slideVw, slideGap, velocityThreshold = 280 }: HubQuestCarouselConfig
+  {
+    axis = "horizontal",
+    slideVw = 0.86,
+    slideVh = 0.52,
+    slideGap,
+    velocityThreshold = 280
+  }: HubQuestCarouselConfig
 ) {
   const reduceMotion = useReducedMotion();
   const trackRef = useRef<HTMLDivElement>(null);
-  const [viewportWidth, setViewportWidth] = useState(0);
+  const [viewportSize, setViewportSize] = useState(0);
   const [index, setIndex] = useState(() =>
-    Math.max(0, Math.min(itemCount - 1, initialIndex))
+    Math.max(0, Math.min(Math.max(itemCount - 1, 0), initialIndex))
   );
-  const x = useMotionValue(0);
+  const offset = useMotionValue(0);
 
-  const slideWidth = viewportWidth > 0 ? viewportWidth * slideVw : 280;
-  const slideStep = slideWidth + slideGap;
-  const sideInset = viewportWidth > 0 ? (viewportWidth - slideWidth) / 2 : 0;
+  const vertical = axis === "vertical";
+  const slideSize =
+    viewportSize > 0
+      ? viewportSize * (vertical ? slideVh : slideVw)
+      : vertical
+        ? 220
+        : 280;
+  const slideStep = slideSize + slideGap;
+  const sideInset = viewportSize > 0 ? (viewportSize - slideSize) / 2 : 0;
 
-  const snapX = useCallback(
+  const snapOffset = useCallback(
     (i: number) => sideInset - i * slideStep,
     [sideInset, slideStep]
   );
@@ -36,14 +54,14 @@ export function useHubQuestCarousel(
       if (itemCount <= 0) return;
       const clamped = Math.max(0, Math.min(itemCount - 1, next));
       setIndex(clamped);
-      const target = snapX(clamped);
+      const target = snapOffset(clamped);
       if (animateSnap && !reduceMotion) {
-        animate(x, target, { type: "spring", stiffness: 420, damping: 38 });
+        animate(offset, target, { type: "spring", stiffness: 420, damping: 38 });
       } else {
-        x.set(target);
+        offset.set(target);
       }
     },
-    [itemCount, reduceMotion, snapX, x]
+    [itemCount, offset, reduceMotion, snapOffset]
   );
 
   useLayoutEffect(() => {
@@ -51,13 +69,13 @@ export function useHubQuestCarousel(
     if (!el) return;
 
     const measure = () => {
-      const w = el.clientWidth;
-      if (w > 0) {
-        setViewportWidth(w);
+      const size = vertical ? el.clientHeight : el.clientWidth;
+      if (size > 0) {
+        setViewportSize(size);
         return;
       }
       if (typeof window !== "undefined") {
-        setViewportWidth(window.innerWidth);
+        setViewportSize(vertical ? window.innerHeight : window.innerWidth);
       }
     };
 
@@ -65,48 +83,50 @@ export function useHubQuestCarousel(
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [vertical]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (itemCount <= 0) return;
     const clamped = Math.max(0, Math.min(itemCount - 1, initialIndex));
     setIndex(clamped);
   }, [initialIndex, itemCount]);
 
-  useEffect(() => {
-    if (viewportWidth <= 0 || itemCount <= 0) return;
-    x.set(snapX(index));
-  }, [index, itemCount, snapX, viewportWidth, x]);
+  useLayoutEffect(() => {
+    if (viewportSize <= 0 || itemCount <= 0) return;
+    offset.set(snapOffset(index));
+  }, [index, itemCount, offset, snapOffset, viewportSize]);
 
   const onDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const current = x.get();
+    const current = offset.get();
     const raw = (sideInset - current) / slideStep;
     let next = Math.round(raw);
-    if (info.velocity.x < -velocityThreshold) next += 1;
-    if (info.velocity.x > velocityThreshold) next -= 1;
+    const velocity = vertical ? info.velocity.y : info.velocity.x;
+    if (velocity < -velocityThreshold) next += 1;
+    if (velocity > velocityThreshold) next -= 1;
     snapToIndex(next);
   };
 
   const onDrag = useCallback(() => {
     if (slideStep <= 0 || itemCount <= 0) return;
-    const raw = (sideInset - x.get()) / slideStep;
+    const raw = (sideInset - offset.get()) / slideStep;
     const next = Math.max(0, Math.min(itemCount - 1, Math.round(raw)));
     setIndex((prev) => (prev === next ? prev : next));
-  }, [itemCount, sideInset, slideStep, x]);
+  }, [itemCount, offset, sideInset, slideStep]);
 
-  const dragMin = itemCount > 0 ? snapX(itemCount - 1) : 0;
-  const dragMax = itemCount > 0 ? snapX(0) : 0;
+  const dragMin = itemCount > 0 ? snapOffset(itemCount - 1) : 0;
+  const dragMax = itemCount > 0 ? snapOffset(0) : 0;
 
   return {
     trackRef,
-    x,
+    offset,
     index,
-    slideWidth,
+    slideSize,
     slideGap,
     snapToIndex,
     onDrag,
     onDragEnd,
     dragMin,
-    dragMax
+    dragMax,
+    vertical
   };
 }
