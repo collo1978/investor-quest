@@ -98,7 +98,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isPlatformSurface =
     pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
 
-  if (isDemoProduction || isSchoolsDemoProduction) {
+  if (isSchoolsDemoProduction) {
+    return (
+      <div className="pointer-events-auto h-[100dvh] max-h-[100dvh] w-full overflow-hidden bg-[#05010f]">
+        {children}
+      </div>
+    );
+  }
+
+  if (isDemoProduction) {
     return (
       <div className="pointer-events-auto min-h-[100dvh] bg-[#030308]">
         {children}

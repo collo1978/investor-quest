@@ -29,7 +29,7 @@ export default function SchoolsDemoEntryPage() {
 
   return (
     <div
-      className="flex min-h-[100dvh] items-center justify-center bg-[#030308]"
+      className="flex h-[100dvh] max-h-[100dvh] items-center justify-center bg-[#05010f]"
       aria-busy="true"
       aria-label="Starting Schools demo"
     >
