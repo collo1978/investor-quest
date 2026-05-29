@@ -174,6 +174,7 @@ export function SchoolsAvatarCarouselTrack({ slideGap, carousel, mobileSelection
     index,
     slideWidth,
     snapToIndex,
+    onDrag,
     onDragEnd,
     dragMin,
     dragMax
@@ -187,6 +188,7 @@ export function SchoolsAvatarCarouselTrack({ slideGap, carousel, mobileSelection
         drag="x"
         dragConstraints={{ left: dragMin, right: dragMax }}
         dragElastic={0.08}
+        onDrag={onDrag}
         onDragEnd={onDragEnd}
       >
         {SCHOOLS_AVATARS.map((avatar, i) =>

@@ -68,13 +68,13 @@ export function useSchoolsAvatarCarousel(
     return () => ro.disconnect();
   }, []);
 
+  // Sync carousel position when selection changes (tap), not when user swipes away from it.
   useEffect(() => {
     if (selectedId == null) return;
     const match = SCHOOLS_AVATARS.findIndex((a) => a.id === selectedId);
-    if (match >= 0 && match !== index) {
-      setIndex(match);
-    }
-  }, [index, selectedId]);
+    if (match < 0) return;
+    setIndex(match);
+  }, [selectedId]);
 
   useEffect(() => {
     if (viewportWidth <= 0) return;
@@ -89,6 +89,13 @@ export function useSchoolsAvatarCarousel(
     if (info.velocity.x > velocityThreshold) next -= 1;
     snapToIndex(next);
   };
+
+  const onDrag = useCallback(() => {
+    if (slideStep <= 0) return;
+    const raw = (sideInset - x.get()) / slideStep;
+    const next = Math.max(0, Math.min(SCHOOLS_AVATARS.length - 1, Math.round(raw)));
+    setIndex((prev) => (prev === next ? prev : next));
+  }, [sideInset, slideStep, x]);
 
   const activeAvatar: SchoolsAvatar =
     SCHOOLS_AVATARS.find((a) => a.id === selectedId) ?? SCHOOLS_AVATARS[index];
@@ -105,6 +112,7 @@ export function useSchoolsAvatarCarousel(
     slideWidth,
     slideGap,
     snapToIndex,
+    onDrag,
     onDragEnd,
     dragMin,
     dragMax,
