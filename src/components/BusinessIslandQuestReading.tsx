@@ -591,12 +591,13 @@ export function BusinessIslandQuestReading(
     financialPipeline
   } = props;
   const questPipeline = questPipelineProp ?? financialPipeline;
+  const questProgressDebug = useQuestProgressDebug();
 
   const theme = getPillarQuestTheme(pillarId);
   // Host / demo / testing needs reversible progress to reset flows quickly.
   // Enable in non-production by default, and also when explicitly requested via query params.
   const allowReadToggle =
-    process.env.NODE_ENV !== "production" || useQuestProgressDebug();
+    process.env.NODE_ENV !== "production" || questProgressDebug;
   const [cardIndex, setCardIndex] = useState(0);
   const [screen, setScreen] = useState<"cards" | "quiz">("cards");
   const quiz = useMemo(
