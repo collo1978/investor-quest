@@ -11,6 +11,7 @@ import {
   INVESTOR_MASTERY_HERO_SRC,
   InvestorMasteryHeroScreen
 } from "@/components/opening/InvestorMasteryHeroScreen";
+import { SchoolsOpeningMasteryCTAs } from "@/components/schools/SchoolsOpeningMasteryCTAs";
 import { clearDemoFreshStart } from "@/lib/demo/demoSessionReset";
 import { resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
 import { isSchoolsDemoStoryModeActive } from "@/lib/schools/schoolsDemoStoryMode";
@@ -26,10 +27,9 @@ const STAMP_PAUSE_MS = 400;
 const STAMP_ANIM_MS = 620;
 const STAMP_HOLD_MS = 900;
 
-/** Screen 2: full-bleed mastery hero — quick fade, brief hold, advance. */
+/** Screen 2: full-bleed mastery hero — user taps START YOUR QUEST to continue. */
 const CROSSFADE_MS = 600;
 const MASTERY_FADE_MS = 650;
-const MASTERY_HOLD_MS = 1100;
 const MASTERY_FADE_S = MASTERY_FADE_MS / 1000;
 
 /** Fixed particle field — hydration-safe (no Math.random). */
@@ -215,29 +215,18 @@ export default function SchoolsOpeningPage() {
     []
   );
 
-  const masteryPhaseMs = CROSSFADE_MS + MASTERY_FADE_MS + MASTERY_HOLD_MS;
-
   useEffect(() => {
     if (reduceMotion) {
       const masteryTimer = window.setTimeout(() => setPhase("mastery"), 900);
-      const leaveTimer = window.setTimeout(finishIntro, 1900);
-      return () => {
-        window.clearTimeout(masteryTimer);
-        window.clearTimeout(leaveTimer);
-      };
+      return () => window.clearTimeout(masteryTimer);
     }
 
     const toMastery = window.setTimeout(() => setPhase("mastery"), logoPhaseMs);
-    const toAvatar = window.setTimeout(
-      finishIntro,
-      logoPhaseMs + masteryPhaseMs
-    );
 
     return () => {
       window.clearTimeout(toMastery);
-      window.clearTimeout(toAvatar);
     };
-  }, [finishIntro, logoPhaseMs, masteryPhaseMs, reduceMotion]);
+  }, [logoPhaseMs, reduceMotion]);
 
   return (
     <div
@@ -295,6 +284,7 @@ export default function SchoolsOpeningPage() {
           <InvestorMasteryHeroScreen
             reduceMotion={reduceMotion}
             fadeDurationS={MASTERY_FADE_S}
+            footer={<SchoolsOpeningMasteryCTAs onStartQuest={finishIntro} />}
           />
         )}
       </AnimatePresence>

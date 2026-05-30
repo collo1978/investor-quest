@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 
 export const INVESTOR_MASTERY_HERO_SRC =
@@ -11,6 +12,8 @@ export type InvestorMasteryHeroScreenProps = {
   reduceMotion: boolean | null;
   /** Fade-in duration in seconds (default 0.92). Schools opening uses a snappier pace. */
   fadeDurationS?: number;
+  /** Optional bottom dock (e.g. Schools onboarding CTAs). */
+  footer?: ReactNode;
 };
 
 /**
@@ -19,12 +22,13 @@ export type InvestorMasteryHeroScreenProps = {
  */
 export function InvestorMasteryHeroScreen({
   reduceMotion,
-  fadeDurationS = MASTERY_FADE_S
+  fadeDurationS = MASTERY_FADE_S,
+  footer
 }: InvestorMasteryHeroScreenProps) {
   return (
     <motion.div
       key="mastery"
-      className="fixed inset-0 z-20 bg-[#030308]"
+      className="fixed inset-0 z-20 flex flex-col bg-[#030308]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{
@@ -33,7 +37,7 @@ export function InvestorMasteryHeroScreen({
       }}
     >
       <div
-        className="absolute inset-0 overflow-hidden"
+        className="relative min-h-0 flex-1 overflow-hidden"
         role="img"
         aria-label="Your epic path to investing mastery starts now"
       >
@@ -51,7 +55,12 @@ export function InvestorMasteryHeroScreen({
             height={1080}
             decoding="async"
             fetchPriority="high"
-            className="h-[100dvh] w-[100vw] min-h-[100dvh] min-w-[100vw] max-h-none max-w-none object-cover object-center select-none max-sm:object-contain"
+            className={[
+              "max-h-none max-w-none object-cover object-center select-none",
+              footer
+                ? "h-full w-full"
+                : "h-[100dvh] w-[100vw] min-h-[100dvh] min-w-[100vw] max-sm:object-contain"
+            ].join(" ")}
           />
         </div>
 
@@ -61,12 +70,16 @@ export function InvestorMasteryHeroScreen({
             className="pointer-events-none absolute inset-0 iq-schools-mastery-parallax"
           />
         ) : null}
+
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 iq-schools-mastery-vignette"
+        />
       </div>
 
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 iq-schools-mastery-vignette"
-      />
+      {footer ? (
+        <div className="relative z-30 shrink-0 pointer-events-auto">{footer}</div>
+      ) : null}
     </motion.div>
   );
 }

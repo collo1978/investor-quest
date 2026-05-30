@@ -571,12 +571,93 @@ h3 {
 .iq-schools-mastery-vignette {
   background:
     radial-gradient(ellipse 85% 70% at 50% 50%, transparent 42%, rgba(3, 3, 8, 0.35) 78%, rgba(3, 3, 8, 0.72) 100%),
-    linear-gradient(180deg, rgba(3, 3, 8, 0.18) 0%, transparent 12%, transparent 88%, rgba(3, 3, 8, 0.28) 100%);
+    linear-gradient(180deg, rgba(3, 3, 8, 0.18) 0%, transparent 12%, transparent 72%, rgba(3, 3, 8, 0.42) 100%);
+}
+
+.iq-schools-opening-cta-dock {
+  padding:
+    1.75rem 1.25rem
+    max(1rem, calc(0.65rem + env(safe-area-inset-bottom, 0px)));
+  padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(3, 3, 8, 0.45) 28%,
+    rgba(3, 3, 8, 0.92) 72%,
+    rgba(3, 3, 8, 0.98) 100%
+  );
+}
+
+.iq-schools-opening-cta-primary {
+  border-radius: 9999px !important;
+  background:
+    linear-gradient(
+      165deg,
+      rgba(139, 92, 246, 0.55) 0%,
+      rgba(109, 40, 217, 0.42) 52%,
+      rgba(88, 28, 180, 0.48) 100%
+    ) !important;
+  color: #faf5ff !important;
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.35),
+    0 0 40px rgba(139, 92, 246, 0.55),
+    0 0 64px rgba(109, 40, 217, 0.28),
+    0 10px 32px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -8px 20px rgba(0, 0, 0, 0.25) !important;
+  animation: iq-schools-opening-cta-pulse 4.2s ease-in-out infinite;
+}
+
+.iq-schools-opening-cta-primary:hover {
+  box-shadow:
+    0 0 0 1px rgba(221, 214, 254, 0.45),
+    0 0 48px rgba(139, 92, 246, 0.62),
+    0 0 72px rgba(109, 40, 217, 0.32),
+    0 10px 32px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -8px 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+.iq-schools-opening-cta-secondary {
+  border: 1.5px solid rgba(196, 181, 253, 0.32);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(237, 233, 254, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 0 0 1px rgba(139, 92, 246, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  cursor: default;
+  opacity: 0.92;
+}
+
+@keyframes iq-schools-opening-cta-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(196, 181, 253, 0.32),
+      0 0 36px rgba(139, 92, 246, 0.48),
+      0 0 56px rgba(109, 40, 217, 0.22),
+      0 10px 32px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -8px 20px rgba(0, 0, 0, 0.25);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(221, 214, 254, 0.42),
+      0 0 46px rgba(139, 92, 246, 0.58),
+      0 0 72px rgba(109, 40, 217, 0.3),
+      0 10px 32px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -8px 20px rgba(0, 0, 0, 0.25);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .iq-schools-mastery-kenburns,
-  .iq-schools-mastery-parallax {
+  .iq-schools-mastery-parallax,
+  .iq-schools-opening-cta-primary {
     animation: none !important;
   }
 }
