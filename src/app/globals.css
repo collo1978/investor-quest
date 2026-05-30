@@ -462,46 +462,62 @@ h3 {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
 }
 
+.iq-schools-mastery-opening-hero-stage {
+  align-items: stretch;
+}
+
 .iq-schools-mastery-opening-bridge {
-  background: linear-gradient(180deg, transparent 0%, rgba(3, 3, 8, 0.55) 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(3, 3, 8, 0.45) 100%);
 }
 
 .iq-schools-mastery-vignette--opening {
   background:
-    radial-gradient(ellipse 88% 72% at 50% 38%, transparent 40%, rgba(3, 3, 8, 0.28) 74%, rgba(3, 3, 8, 0.48) 100%),
-    linear-gradient(180deg, rgba(3, 3, 8, 0.08) 0%, transparent 10%, transparent 92%, rgba(3, 3, 8, 0.28) 100%);
+    radial-gradient(ellipse 92% 78% at 50% 36%, transparent 48%, rgba(3, 3, 8, 0.22) 78%, rgba(3, 3, 8, 0.38) 100%),
+    linear-gradient(180deg, rgba(3, 3, 8, 0.06) 0%, transparent 8%, transparent 94%, rgba(3, 3, 8, 0.22) 100%);
 }
 
 .iq-schools-mastery-hero-img--opening {
   display: block;
   width: 100%;
-  max-width: 100%;
-  height: auto;
-  margin-inline: auto;
-  object-fit: contain;
+  height: 100%;
+  max-width: none;
+  margin-inline: 0;
+  object-fit: cover;
   object-position: center top;
-  max-height: calc(
-    100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 9.25rem
-  );
 }
 
 @media (max-width: 767px) {
-  .iq-schools-mastery-hero-img--opening {
-    width: 100%;
+  .iq-schools-mastery-opening-hero-stage {
+    flex: 1 1 auto;
     max-height: calc(
-      100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 8.75rem
+      100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 8.5rem
     );
+  }
+
+  .iq-schools-mastery-hero-img--opening {
+    object-fit: cover;
+    object-position: center 6%;
+    transform: scale(1.02);
+    transform-origin: center top;
   }
 }
 
 @media (min-width: 768px) {
+  .iq-schools-mastery-opening-hero-stage {
+    max-height: calc(100dvh - 10rem);
+  }
+
   .iq-schools-mastery-hero-img--opening {
-    width: min(100%, 24rem);
-    max-height: min(68vh, calc(100dvh - 10rem));
+    object-fit: contain;
+    object-position: center top;
+    max-width: min(100%, 26rem);
+    margin-inline: auto;
+    height: auto;
+    max-height: calc(100dvh - 10rem);
   }
 }
 
@@ -744,6 +760,10 @@ h3 {
   .iq-schools-mastery-parallax,
   .iq-schools-opening-cta-primary {
     animation: none !important;
+  }
+
+  .iq-schools-mastery-hero-img--opening {
+    transform: none;
   }
 }
 

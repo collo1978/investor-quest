@@ -52,7 +52,7 @@ export function InvestorMasteryHeroScreen({
           >
             <div
               className={[
-                "relative flex min-h-0 w-full flex-1 justify-center",
+                "iq-schools-mastery-opening-hero-stage relative flex min-h-0 w-full flex-1 justify-center overflow-hidden",
                 reduceMotion ? "" : "iq-schools-mastery-kenburns--subtle"
               ].join(" ")}
             >
