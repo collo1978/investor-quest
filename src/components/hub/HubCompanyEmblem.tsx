@@ -17,6 +17,8 @@ type Props = {
   position: CSSProperties;
   /** Classes on the inner logo bounds container. */
   innerSizeClass: string;
+  /** Optional class on the absolute anchor (e.g. portrait CSS overrides). */
+  emblemClassName?: string;
   imageWidth?: number;
   imageSizes?: string;
   altLabel?: string;
@@ -34,6 +36,7 @@ export function HubCompanyEmblem({
   companyName,
   position,
   innerSizeClass,
+  emblemClassName,
   imageWidth = 56,
   imageSizes = "72px",
   altLabel
@@ -58,7 +61,12 @@ export function HubCompanyEmblem({
 
   return (
     <motion.div
-      className="pointer-events-none absolute z-[12] flex items-center justify-center"
+      className={[
+        "pointer-events-none absolute z-[12] flex items-center justify-center",
+        emblemClassName
+      ]
+        .filter(Boolean)
+        .join(" ")}
       style={position}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}

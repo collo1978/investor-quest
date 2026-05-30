@@ -9,7 +9,9 @@ type Props = {
   src: string;
   /** CSS background shown until the optimized image loads. */
   placeholderBg: string;
-  objectPosition?: ObjectPosition;
+  /** Preset crop anchors, or any valid CSS `object-position` (e.g. `center 32%`). */
+  objectPosition?: ObjectPosition | (string & {});
+  imageClassName?: string;
 };
 
 /**
@@ -19,11 +21,18 @@ type Props = {
 export function IslandHubSceneImage({
   src,
   placeholderBg,
-  objectPosition = "center"
+  objectPosition = "center",
+  imageClassName = ""
 }: Props) {
   const [loaded, setLoaded] = useState(false);
-  const objectClass =
-    objectPosition === "top" ? "object-top" : "object-center";
+  const preset =
+    objectPosition === "top"
+      ? "object-top"
+      : objectPosition === "center" || objectPosition == null
+        ? "object-center"
+        : "";
+  const customObjectPosition =
+    preset === "" && objectPosition ? objectPosition : undefined;
 
   return (
     <>
@@ -45,10 +54,18 @@ export function IslandHubSceneImage({
         draggable={false}
         onLoad={() => setLoaded(true)}
         onError={() => setLoaded(true)}
+        style={
+          customObjectPosition
+            ? { objectPosition: customObjectPosition }
+            : undefined
+        }
         className={[
-          `select-none object-cover ${objectClass} transition-opacity duration-500`,
+          `select-none object-cover ${preset} transition-opacity duration-500`,
+          imageClassName,
           loaded ? "opacity-100" : "opacity-0"
-        ].join(" ")}
+        ]
+          .filter(Boolean)
+          .join(" ")}
       />
     </>
   );

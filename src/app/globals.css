@@ -132,7 +132,7 @@ h3 {
   padding-bottom: max(7rem, env(safe-area-inset-bottom, 0px));
 }
 
-/* Business island hub — same scene on mobile, scaled + scroll when needed */
+/* Business island hub — wide 16:9 desktop; tall portrait stage on phones */
 .business-hub-scene-scroll {
   overflow-x: hidden;
   overflow-y: auto;
@@ -144,13 +144,14 @@ h3 {
 }
 
 .business-hub-scene-frame {
-  /* Room for orbit cards that extend below the 16:9 art box */
+  /* Desktop: room for orbit cards that extend below the 16:9 art box */
   padding-bottom: clamp(2.5rem, 14vw, 5.5rem);
 }
 
 .business-hub-scene-stage {
   width: 100%;
   max-width: 100%;
+  aspect-ratio: 16 / 9;
 }
 
 .iq-schools-demo-scroll-host .iq-schools-business-hub-main {
@@ -159,29 +160,137 @@ h3 {
 }
 
 @media (max-width: 767px) {
-  .business-hub-scene-root .business-hub-quest-card {
-    width: clamp(6.75rem, 29vw, 9.75rem) !important;
-    max-width: 42vw;
+  .business-hub-page-stage,
+  .iq-schools-business-hub-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 
-  .business-hub-scene-root .business-hub-quest-card a,
-  .business-hub-scene-root .business-hub-quest-card [data-hub-locked="true"] {
+  .business-hub-scene-root {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    width: 100%;
+  }
+
+  .business-hub-scene-scroll {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .business-hub-scene-frame {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding-bottom: 0;
+    padding-top: 0;
+  }
+
+  .business-hub-scene-shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    border-radius: 0.75rem;
+  }
+
+  .business-hub-scene-stage {
+    flex: 1 1 auto;
+    aspect-ratio: auto;
+    min-height: calc(
+      100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 0.75rem
+    );
+    height: auto;
+  }
+
+  .iq-schools-demo-scroll-host .business-hub-scene-stage {
+    min-height: calc(
+      100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 0.5rem
+    );
+  }
+
+  .business-hub-scene-art {
+    object-position: center 26%;
+  }
+
+  .business-hub-company-emblem {
+    top: 36% !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translate(-50%, -50%) !important;
+    height: clamp(2.65rem, 7.5%, 3.85rem) !important;
+    width: clamp(2.45rem, 7%, 3.55rem) !important;
+    max-height: 68px !important;
+    max-width: 64px !important;
+  }
+
+  /* Portrait orbit — matches BUSINESS_MAP_CARD_POSITIONS_PORTRAIT */
+  .business-hub-orbit-slot-1 {
+    top: 3% !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .business-hub-orbit-slot-2 {
+    top: 17% !important;
+    left: 1% !important;
+    right: auto !important;
+    transform: none !important;
+  }
+
+  .business-hub-orbit-slot-3 {
+    top: 17% !important;
+    right: 1% !important;
+    left: auto !important;
+    transform: none !important;
+  }
+
+  .business-hub-orbit-slot-4 {
+    top: 41% !important;
+    left: 1% !important;
+    right: auto !important;
+    transform: none !important;
+  }
+
+  .business-hub-orbit-slot-5 {
+    top: 41% !important;
+    right: 1% !important;
+    left: auto !important;
+    transform: none !important;
+  }
+
+  .business-hub-orbit-slot-6 {
+    top: 67% !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .business-hub-quest-card {
+    width: clamp(7rem, 31vw, 10.25rem) !important;
+    max-width: 44vw;
+  }
+
+  .business-hub-quest-card a,
+  .business-hub-quest-card [data-hub-locked="true"] {
     min-height: 44px;
     touch-action: manipulation;
   }
 
-  .business-hub-scene-root .business-hub-quest-card h3 {
-    font-size: 0.82rem;
-    line-height: 1.25;
+  .business-hub-quest-card h3 {
+    font-size: 0.84rem;
+    line-height: 1.28;
   }
 
-  .business-hub-scene-root .business-hub-quest-card p {
-    font-size: 0.68rem;
-    line-height: 1.3;
-  }
-
-  .business-hub-scene-frame {
-    padding-bottom: clamp(3rem, 22vw, 6rem);
+  .business-hub-quest-card p {
+    font-size: 0.7rem;
+    line-height: 1.32;
   }
 }
 

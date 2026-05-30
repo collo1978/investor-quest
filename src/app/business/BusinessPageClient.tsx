@@ -98,8 +98,8 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
       className={[
         "pointer-events-auto relative w-full bg-bg-0",
         schoolsDemoFullscreen
-          ? "iq-schools-business-hub-main flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto"
-          : "-mb-24 pb-10 pt-2",
+          ? "iq-schools-business-hub-main flex min-h-0 flex-1 flex-col overflow-x-hidden max-md:overflow-y-hidden md:overflow-y-auto"
+          : "-mb-24 pb-10 pt-2 max-md:flex max-md:min-h-[100dvh] max-md:flex-col",
         hydrationReady ? "" : "static-ui"
       ].join(" ")}
     >
@@ -112,8 +112,8 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
         className={[
           "w-full",
           schoolsDemoFullscreen
-            ? "flex min-h-0 w-full flex-1 flex-col"
-            : "flex w-full items-center justify-center px-1 py-2 sm:px-3 sm:py-5 md:py-6"
+            ? "iq-schools-business-hub-stage flex min-h-0 w-full flex-1 flex-col"
+            : "business-hub-page-stage flex w-full flex-col max-md:min-h-0 max-md:flex-1 md:items-center md:justify-center md:px-1 md:py-2 sm:px-3 sm:py-5 md:py-6",
         ].join(" ")}
       >
         {!hydrated ? (

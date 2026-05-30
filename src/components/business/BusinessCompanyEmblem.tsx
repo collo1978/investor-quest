@@ -14,6 +14,7 @@ export function BusinessCompanyEmblem({ logoUrl, companyName }: Props) {
       logoUrl={logoUrl}
       companyName={companyName}
       position={BUSINESS_MAP_COMPANY_LOGO_POSITION}
+      emblemClassName="business-hub-company-emblem"
       innerSizeClass="h-[68%] w-[72%] max-h-[3.25rem] max-w-[3.75rem] sm:max-h-[3.5rem] sm:max-w-[4rem]"
       imageWidth={64}
       imageSizes="80px"

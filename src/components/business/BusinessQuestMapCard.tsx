@@ -45,7 +45,11 @@ export function BusinessQuestMapCard(props: Props) {
       card={toHubCard(props.card)}
       position={props.position}
       cardWidth={BUSINESS_MAP_CARD_WIDTH}
-      cardSlotClassName="business-hub-quest-card"
+      cardSlotClassName={[
+        "business-hub-quest-card",
+        "business-hub-orbit-slot",
+        `business-hub-orbit-slot-${props.card.orderNumber}`
+      ].join(" ")}
       theme={hubMapCardThemeFromPillar("business")}
       company={props.company}
       partnerId={props.partnerId}

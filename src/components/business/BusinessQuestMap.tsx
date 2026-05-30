@@ -14,7 +14,7 @@ type Props = {
   userId?: string;
 };
 
-/** Business island — responsive cinematic scene (same layout on mobile + desktop). */
+/** Business island — wide scene on desktop; CSS portrait stage on phones. */
 export function BusinessQuestMap(props: Props) {
   if (props.cards.length === 0) {
     return <BusinessHubEmptyState />;

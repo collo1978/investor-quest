@@ -9,6 +9,7 @@ export function BusinessHubSceneImage() {
     <IslandHubSceneImage
       src={BUSINESS_HUB_IMG_SRC}
       placeholderBg={BUSINESS_HUB_PLACEHOLDER_BG}
+      imageClassName="business-hub-scene-art"
     />
   );
 }

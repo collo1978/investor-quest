@@ -6,13 +6,11 @@ import { BusinessHubSceneImage } from "@/components/business/BusinessHubSceneIma
 import {
   BUSINESS_MAP_AMBIENT_PARTICLES,
   BUSINESS_MAP_CARD_POSITIONS,
-  BUSINESS_MAP_CARD_POSITIONS_MOBILE,
   BUSINESS_SCENE_STYLE
 } from "@/app/business/businessQuestMapPositions";
 import { BusinessCompanyEmblem } from "@/components/business/BusinessCompanyEmblem";
 import { BusinessQuestMapCard } from "@/components/business/BusinessQuestMapCard";
 import { HubTrailBridgeBeacon } from "@/components/quest/hub/HubTrailBridgeBeacon";
-import { useBusinessHubNarrowViewport } from "@/lib/business/businessHubResponsive";
 import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
 import { resolveCompanyLogoUrl } from "@/lib/business/buildBusinessHubCards";
 import type { Company } from "@/data/companies";
@@ -27,8 +25,8 @@ type Props = {
 };
 
 /**
- * Business island hub — same cinematic scene + orbit cards on all breakpoints.
- * Narrow viewports scale card size and insets; outer shell scrolls when needed.
+ * Business island hub — wide 16:9 scene on desktop; tall portrait stage on phones.
+ * Portrait layout is CSS-driven (`globals.css`) so SSR and hydration stay aligned.
  */
 export function BusinessQuestMapDesktop({
   cards,
@@ -38,10 +36,6 @@ export function BusinessQuestMapDesktop({
   partnerId,
   userId
 }: Props) {
-  const narrow = useBusinessHubNarrowViewport();
-  const slotPositions = narrow
-    ? BUSINESS_MAP_CARD_POSITIONS_MOBILE
-    : BUSINESS_MAP_CARD_POSITIONS;
   const logo = resolveCompanyLogoUrl(company, companyLogoUrl);
   const pct = Math.max(0, Math.min(100, Math.round(hubProgressPct)));
   const reduceMotion = useReducedMotion();
@@ -50,13 +44,13 @@ export function BusinessQuestMapDesktop({
     <div className="business-hub-scene-root w-full" data-business-quest-hub>
       <div className="business-hub-scene-scroll w-full">
         <motion.div
-          className="business-hub-scene-frame relative mx-auto w-full max-w-[1600px] py-1"
+          className="business-hub-scene-frame relative mx-auto flex w-full max-w-[1600px] flex-col py-1 max-md:min-h-0 max-md:flex-1 max-md:py-0"
           data-business-quest-hub-desktop
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="relative overflow-visible rounded-2xl border border-[rgba(245,197,71,0.2)] shadow-[0_32px_100px_rgba(0,0,0,0.62)] sm:rounded-3xl">
+          <div className="business-hub-scene-shell relative flex min-h-0 flex-1 flex-col overflow-visible rounded-2xl border border-[rgba(245,197,71,0.2)] shadow-[0_32px_100px_rgba(0,0,0,0.62)] sm:rounded-3xl">
             <div
               className="business-hub-scene-stage"
               style={BUSINESS_SCENE_STYLE}
@@ -122,7 +116,7 @@ export function BusinessQuestMapDesktop({
               <div className="business-hub-cards-layer pointer-events-none absolute inset-0 z-[2] overflow-visible">
                 <div className="pointer-events-auto absolute inset-0">
                   {cards.map((card, i) => {
-                    const slot = slotPositions[card.orderNumber];
+                    const slot = BUSINESS_MAP_CARD_POSITIONS[card.orderNumber];
                     if (!slot) return null;
                     return (
                       <BusinessQuestMapCard
