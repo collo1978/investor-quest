@@ -1,11 +1,14 @@
 "use client";
 
-import { motion, useReducedMotion, useTransform, type MotionValue } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, useTransform, type MotionValue } from "framer-motion";
 
 import type { SchoolsAvatar, SchoolsAvatarId } from "@/lib/schools/avatars";
 import { SCHOOLS_AVATARS } from "@/lib/schools/avatars";
 import { SchoolsAvatarPortraitCard } from "@/components/schools/SchoolsAvatarPortraitCard";
 import { useSchoolsAvatarCarousel } from "@/components/schools/useSchoolsAvatarCarousel";
+
+const MOBILE_SLIDE_SPRING = { type: "spring" as const, stiffness: 260, damping: 34, mass: 0.95 };
+const MOBILE_META_EASE = [0.16, 1, 0.3, 1] as const;
 
 const SELECTED_AVATAR_SPARKS = [
   { top: "6%", left: "10%", delay: 0 },
@@ -93,7 +96,8 @@ function MobileCarouselSlide({
   });
 
   const shouldFloat = (focused || selected) && !reduceMotion;
-  const floatY = selected && focused ? -7 : selected ? -5 : -6;
+  const floatY = selected && focused ? -4 : selected ? -3 : -5;
+  const floatDuration = selected ? 4.4 : 3.8;
 
   return (
     <motion.div
@@ -114,7 +118,7 @@ function MobileCarouselSlide({
         rotateY: tiltY
       }}
       animate={{ scale, opacity }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      transition={MOBILE_SLIDE_SPRING}
     >
       <motion.div
         className="relative"
@@ -123,8 +127,8 @@ function MobileCarouselSlide({
         }
         transition={
           shouldFloat
-            ? { duration: selected ? 2.8 : 3.4, repeat: Infinity, ease: "easeInOut" }
-            : { duration: 0.2 }
+            ? { duration: floatDuration, repeat: Infinity, ease: [0.45, 0, 0.55, 1] }
+            : { duration: 0.28, ease: MOBILE_META_EASE }
         }
       >
         {focused || selected ? (
@@ -357,52 +361,66 @@ export function SchoolsAvatarCarouselMeta({
       className={[
         "shrink-0 text-center md:text-left",
         mobile
-          ? "iq-schools-avatar-mobile-meta px-5 pb-0 pt-0"
+          ? "iq-schools-avatar-mobile-meta px-4 pb-0 pt-0"
           : "px-6 pb-2 pt-1",
         className
       ].join(" ")}
       aria-live="polite"
     >
-      <div className="relative mx-auto inline-block max-w-full">
-        {mobile ? (
-          <span
-            aria-hidden
-            className={[
-              "pointer-events-none absolute inset-[-0.45rem_-0.9rem] iq-schools-avatar-name-glow",
-              selected ? "iq-schools-avatar-name-glow--active" : ""
-            ].join(" ")}
-          />
-        ) : null}
-        <motion.h2
-          key={`name-${activeAvatar.id}`}
-          initial={reduceMotion ? false : { opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={activeAvatar.id}
+          initial={
+            reduceMotion
+              ? false
+              : { opacity: 0, y: 10, filter: "blur(5px)" }
+          }
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={
+            reduceMotion
+              ? undefined
+              : { opacity: 0, y: -6, filter: "blur(3px)" }
+          }
+          transition={{ duration: 0.38, ease: MOBILE_META_EASE }}
           className={[
-            "relative",
-            mobile ? "iq-schools-avatar-mobile-name" : "",
-            mobile
-              ? "font-black uppercase tracking-[0.16em]"
-              : "text-xl font-black uppercase tracking-[0.2em] md:text-2xl",
-            `iq-schools-avatar-name--${activeAvatar.accent}`
+            "mx-auto max-w-[19rem]",
+            mobile ? "iq-schools-avatar-mobile-identity-plate" : ""
           ].join(" ")}
         >
-          {activeAvatar.name}
-        </motion.h2>
-      </div>
-      <motion.p
-        key={`tag-${activeAvatar.id}`}
-        initial={reduceMotion ? false : { opacity: 0, y: 2 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.24, delay: 0.02, ease: [0.22, 1, 0.36, 1] }}
-        className={[
-          mobile
-            ? "iq-schools-avatar-identity-desc iq-schools-avatar-identity-desc--mobile mx-auto mt-0.5 max-w-[18rem] font-medium leading-snug tracking-[0.025em]"
-            : "mt-1.5 text-sm leading-relaxed text-violet-100/78 md:max-w-md md:text-base"
-        ].join(" ")}
-      >
-        {activeAvatar.tagline}
-      </motion.p>
+          <div className="relative mx-auto inline-block max-w-full">
+            {mobile ? (
+              <span
+                aria-hidden
+                className={[
+                  "pointer-events-none absolute inset-[-0.5rem_-1rem] iq-schools-avatar-name-glow",
+                  selected ? "iq-schools-avatar-name-glow--active" : ""
+                ].join(" ")}
+              />
+            ) : null}
+            <h2
+              className={[
+                "relative",
+                mobile ? "iq-schools-avatar-mobile-name" : "",
+                mobile
+                  ? "font-black uppercase tracking-[0.14em]"
+                  : "text-xl font-black uppercase tracking-[0.2em] md:text-2xl",
+                `iq-schools-avatar-name--${activeAvatar.accent}`
+              ].join(" ")}
+            >
+              {activeAvatar.name}
+            </h2>
+          </div>
+          <p
+            className={[
+              mobile
+                ? "iq-schools-avatar-identity-desc iq-schools-avatar-identity-desc--mobile mx-auto max-w-[18.5rem] font-semibold leading-relaxed tracking-[0.03em]"
+                : "mt-1.5 text-sm leading-relaxed text-violet-100/78 md:max-w-md md:text-base"
+            ].join(" ")}
+          >
+            {activeAvatar.tagline}
+          </p>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

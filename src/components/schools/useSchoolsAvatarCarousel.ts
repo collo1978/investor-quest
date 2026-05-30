@@ -48,7 +48,7 @@ export function useSchoolsAvatarCarousel(
       }
       const target = snapX(clamped);
       if (animateSnap && !reduceMotion) {
-        animate(x, target, { type: "spring", stiffness: 420, damping: 38 });
+        animate(x, target, { type: "spring", stiffness: 290, damping: 36, mass: 0.96 });
       } else {
         x.set(target);
       }
