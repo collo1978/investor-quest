@@ -368,7 +368,7 @@ export function SchoolsAvatarCarouselMeta({
           <span
             aria-hidden
             className={[
-              "pointer-events-none absolute inset-[-0.35rem_-0.75rem] iq-schools-avatar-name-glow",
+              "pointer-events-none absolute inset-[-0.45rem_-0.9rem] iq-schools-avatar-name-glow",
               selected ? "iq-schools-avatar-name-glow--active" : ""
             ].join(" ")}
           />
@@ -380,8 +380,9 @@ export function SchoolsAvatarCarouselMeta({
           transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
           className={[
             "relative",
+            mobile ? "iq-schools-avatar-mobile-name" : "",
             mobile
-              ? "text-[1.02rem] font-black uppercase tracking-[0.17em]"
+              ? "font-black uppercase tracking-[0.16em]"
               : "text-xl font-black uppercase tracking-[0.2em] md:text-2xl",
             `iq-schools-avatar-name--${activeAvatar.accent}`
           ].join(" ")}
@@ -396,7 +397,7 @@ export function SchoolsAvatarCarouselMeta({
         transition={{ duration: 0.24, delay: 0.02, ease: [0.22, 1, 0.36, 1] }}
         className={[
           mobile
-            ? "iq-schools-avatar-identity-desc mx-auto mt-0.5 max-w-[17rem] text-[0.78rem] font-medium leading-snug tracking-[0.02em]"
+            ? "iq-schools-avatar-identity-desc iq-schools-avatar-identity-desc--mobile mx-auto mt-0.5 max-w-[18rem] font-medium leading-snug tracking-[0.025em]"
             : "mt-1.5 text-sm leading-relaxed text-violet-100/78 md:max-w-md md:text-base"
         ].join(" ")}
       >

@@ -23,6 +23,16 @@ const AVATAR_BG_PARTICLES = [
   { left: "6%", top: "52%", size: 3, delay: "-5s", dur: "14s" }
 ] as const;
 
+/** Faint particles clustered around the avatar reveal zone */
+const AVATAR_STAGE_PARTICLES = [
+  { left: "16%", top: "36%", size: 2, delay: "0s", dur: "9s" },
+  { left: "84%", top: "40%", size: 2, delay: "-1.2s", dur: "11s" },
+  { left: "74%", top: "56%", size: 3, delay: "-2.8s", dur: "12s" },
+  { left: "26%", top: "52%", size: 2, delay: "-1.8s", dur: "10s" },
+  { left: "48%", top: "44%", size: 2, delay: "-3.5s", dur: "13s" },
+  { left: "58%", top: "60%", size: 2, delay: "-0.6s", dur: "10s" }
+] as const;
+
 type Props = {
   selectedId: SchoolsAvatarId | null;
   onSelect: (id: SchoolsAvatarId) => void;
@@ -94,6 +104,30 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
       </header>
 
       <div className="iq-schools-avatar-mobile-body relative z-10 flex min-h-0 flex-1 flex-col justify-start">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 bottom-[26%] iq-schools-avatar-mobile-stage-glow"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-[16%] h-[50%] iq-schools-avatar-mobile-stage-hologram"
+        />
+        {AVATAR_STAGE_PARTICLES.map((p, i) => (
+          <span
+            key={`stage-${i}`}
+            aria-hidden
+            className="iq-schools-avatar-mobile-particle iq-schools-avatar-mobile-stage-particle pointer-events-none absolute rounded-full bg-violet-100/80"
+            style={{
+              left: p.left,
+              top: p.top,
+              width: p.size,
+              height: p.size,
+              animationDelay: p.delay,
+              animationDuration: p.dur
+            }}
+          />
+        ))}
+
         <SchoolsAvatarCarouselTrack
           slideGap={SLIDE_GAP}
           carousel={carousel}
