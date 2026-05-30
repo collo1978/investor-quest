@@ -71,19 +71,19 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
         />
       ))}
 
-      <header className="relative z-10 shrink-0 px-4 pb-0 pt-[max(0.7rem,env(safe-area-inset-top))]">
-        <div className="relative mx-auto max-w-[21rem] px-1 py-0.5">
+      <header className="iq-schools-avatar-mobile-header relative z-10 shrink-0 px-4 pb-0 pt-[max(0.85rem,env(safe-area-inset-top))]">
+        <div className="iq-schools-avatar-mobile-hero-wrap relative mx-auto max-w-[22rem] px-2 py-1">
           <span
             aria-hidden
             className="pointer-events-none absolute inset-0 iq-schools-avatar-hero-glow"
           />
-          <p className="iq-schools-avatar-identity-tagline relative text-center text-[1.06rem] font-bold leading-snug tracking-[0.012em] text-violet-50 sm:text-[1.12rem]">
+          <p className="iq-schools-avatar-mobile-hero-title iq-schools-avatar-identity-tagline relative text-center text-violet-50">
             Pick your Investor Quest identity.
           </p>
         </div>
         <p
           aria-hidden
-          className="iq-schools-avatar-swipe-nudge mx-auto mt-1.5 flex items-center justify-center gap-2.5"
+          className="iq-schools-avatar-swipe-nudge mx-auto flex items-center justify-center gap-2.5"
         >
           <span className="iq-schools-avatar-swipe-nudge-arrow">‹</span>
           Swipe to browse

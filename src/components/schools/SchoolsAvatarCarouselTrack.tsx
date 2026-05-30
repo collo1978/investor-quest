@@ -293,7 +293,10 @@ export function SchoolsAvatarCarouselTrack({
       style={{ perspective: 900 }}
     >
       <motion.div
-        className="absolute inset-y-0 left-0 flex items-center will-change-transform"
+        className={[
+          "absolute inset-y-0 left-0 flex will-change-transform",
+          mobileSelection ? "items-end pb-[3%]" : "items-center"
+        ].join(" ")}
         style={{ x, gap: slideGap }}
         drag="x"
         dragConstraints={{ left: dragMin, right: dragMax }}
