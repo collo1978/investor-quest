@@ -8,7 +8,7 @@ export const INVESTOR_MASTERY_HERO_SRC =
 
 /** Portrait-first hero for Schools onboarding Screen 2 (mobile). */
 export const SCHOOLS_OPENING_SCREEN2_HERO_SRC =
-  "/images/schools/screen-2.png";
+  "/images/schools/screen-2.png?v=2";
 
 const MASTERY_FADE_S = 0.92;
 
