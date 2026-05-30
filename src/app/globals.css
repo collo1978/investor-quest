@@ -452,8 +452,12 @@ h3 {
   min-height: 100dvh;
   flex: 1;
   flex-direction: column;
-  justify-content: flex-end;
-  padding-top: max(0.35rem, env(safe-area-inset-top, 0px));
+  justify-content: flex-start;
+  padding-top: max(0.15rem, env(safe-area-inset-top, 0px));
+}
+
+.iq-schools-mastery-opening-tail {
+  pointer-events: none;
 }
 
 .iq-schools-mastery-opening-hero {
@@ -475,13 +479,13 @@ h3 {
   height: auto;
   margin-inline: auto;
   object-fit: contain;
-  object-position: center bottom;
+  object-position: center top;
 }
 
 @media (max-width: 767px) {
   .iq-schools-mastery-hero-img--opening {
-    max-height: min(46dvh, 22rem);
-    width: min(94vw, 26rem);
+    max-height: min(48dvh, 23rem);
+    width: min(96vw, 26rem);
   }
 }
 

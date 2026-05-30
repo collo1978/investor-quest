@@ -82,6 +82,7 @@ export function InvestorMasteryHeroScreen({
           </div>
 
           <div className="relative z-30 shrink-0 pointer-events-auto">{footer}</div>
+          <div aria-hidden className="iq-schools-mastery-opening-tail min-h-0 flex-1" />
         </div>
       ) : (
         <>
