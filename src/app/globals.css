@@ -646,9 +646,55 @@ body.iq-schools-demo-fullscreen {
 
 .iq-schools-avatar-identity-tagline {
   text-shadow:
-    0 0 24px rgba(167, 139, 250, 0.55),
-    0 0 48px rgba(139, 92, 246, 0.32),
-    0 2px 12px rgba(0, 0, 0, 0.45);
+    0 0 28px rgba(167, 139, 250, 0.62),
+    0 0 56px rgba(139, 92, 246, 0.38),
+    0 2px 14px rgba(0, 0, 0, 0.5);
+}
+
+.iq-schools-avatar-hero-glow {
+  background:
+    radial-gradient(ellipse 92% 88% at 50% 52%, rgba(139, 92, 246, 0.26), transparent 68%),
+    radial-gradient(ellipse 70% 55% at 50% 48%, rgba(196, 181, 253, 0.12), transparent 72%);
+  filter: blur(10px);
+  opacity: 0.95;
+}
+
+.iq-schools-avatar-swipe-nudge {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  text-transform: uppercase;
+  color: rgba(237, 233, 254, 0.78);
+  text-shadow:
+    0 0 18px rgba(196, 181, 253, 0.48),
+    0 0 32px rgba(139, 92, 246, 0.22);
+}
+
+.iq-schools-avatar-mobile-body {
+  min-height: 0;
+  gap: 0.15rem;
+}
+
+.iq-schools-avatar-mobile-carousel {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(44dvh, 360px);
+}
+
+.iq-schools-avatar-mobile-meta {
+  min-height: 3.1rem;
+}
+
+.iq-schools-avatar-identity-desc {
+  color: rgba(221, 214, 254, 0.9);
+  text-shadow:
+    0 0 16px rgba(139, 92, 246, 0.28),
+    0 1px 8px rgba(0, 0, 0, 0.35);
+}
+
+.iq-schools-avatar-mobile-footer {
+  padding-bottom: max(0.65rem, calc(0.25rem + env(safe-area-inset-bottom, 0px)));
 }
 
 .iq-schools-avatar-mobile-nebula {
@@ -699,7 +745,9 @@ body.iq-schools-demo-fullscreen {
 
 .iq-schools-avatar-swipe-nudge-arrow {
   display: inline-block;
-  opacity: 0.55;
+  opacity: 0.72;
+  font-size: 0.85rem;
+  line-height: 1;
   animation: iq-schools-avatar-swipe-nudge 2.2s ease-in-out infinite;
 }
 
@@ -743,12 +791,12 @@ body.iq-schools-demo-fullscreen {
 @keyframes iq-schools-avatar-swipe-nudge {
   0%,
   100% {
-    opacity: 0.35;
+    opacity: 0.55;
     transform: translateX(0);
   }
   50% {
-    opacity: 0.85;
-    transform: translateX(3px);
+    opacity: 1;
+    transform: translateX(4px);
   }
 }
 

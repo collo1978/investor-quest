@@ -44,6 +44,8 @@ type Props = {
   width: number;
   active?: boolean;
   selected?: boolean;
+  /** Scales portrait height (mobile carousel uses ~0.88). */
+  heightScale?: number;
   className?: string;
 };
 
@@ -54,9 +56,10 @@ export function SchoolsAvatarPortraitCard({
   width,
   active = false,
   selected = false,
+  heightScale = 1,
   className = ""
 }: Props) {
-  const height = width / SCHOOLS_AVATAR_PORTRAIT_ASPECT;
+  const height = (width / SCHOOLS_AVATAR_PORTRAIT_ASPECT) * heightScale;
   const ring = selected
     ? SCHOOLS_AVATAR_ACCENT_RING_SELECTED[accent]
     : active

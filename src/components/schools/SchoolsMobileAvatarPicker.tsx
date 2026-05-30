@@ -10,8 +10,9 @@ import { SCHOOLS_DEVICE } from "@/lib/schools/schoolsResponsive";
 import type { SchoolsAvatarId } from "@/lib/schools/avatars";
 
 const SLIDE_GAP = 10;
-/** ~10% wider slides + neighbor peek for swipe affordance */
-const SLIDE_VW = 0.92;
+const SLIDE_VW = 0.88;
+/** ~10% shorter cards — keeps width hero-sized without pushing CTA down */
+const PORTRAIT_HEIGHT_SCALE = 0.88;
 
 const AVATAR_BG_PARTICLES = [
   { left: "12%", top: "22%", size: 2, delay: "0s", dur: "11s" },
@@ -70,13 +71,19 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
         />
       ))}
 
-      <header className="relative z-10 shrink-0 px-5 pb-1 pt-[max(0.85rem,env(safe-area-inset-top))]">
-        <p className="iq-schools-avatar-identity-tagline mx-auto max-w-[20rem] text-center text-[1.08rem] font-bold leading-snug tracking-[0.015em] text-violet-50/95 sm:text-[1.15rem]">
-          Pick your Investor Quest identity.
-        </p>
+      <header className="relative z-10 shrink-0 px-4 pb-0 pt-[max(0.7rem,env(safe-area-inset-top))]">
+        <div className="relative mx-auto max-w-[21rem] px-1 py-0.5">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 iq-schools-avatar-hero-glow"
+          />
+          <p className="iq-schools-avatar-identity-tagline relative text-center text-[1.06rem] font-bold leading-snug tracking-[0.012em] text-violet-50 sm:text-[1.12rem]">
+            Pick your Investor Quest identity.
+          </p>
+        </div>
         <p
           aria-hidden
-          className="iq-schools-avatar-swipe-nudge mx-auto mt-2 flex items-center justify-center gap-2 text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-violet-200/45"
+          className="iq-schools-avatar-swipe-nudge mx-auto mt-1.5 flex items-center justify-center gap-2.5"
         >
           <span className="iq-schools-avatar-swipe-nudge-arrow">‹</span>
           Swipe to browse
@@ -86,24 +93,28 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
         </p>
       </header>
 
-      <SchoolsAvatarCarouselTrack
-        slideGap={SLIDE_GAP}
-        carousel={carousel}
-        mobileSelection={{ selectedId, onSelectAvatar: onSelect }}
-      />
+      <div className="iq-schools-avatar-mobile-body relative z-10 flex min-h-0 flex-1 flex-col">
+        <SchoolsAvatarCarouselTrack
+          slideGap={SLIDE_GAP}
+          carousel={carousel}
+          className="iq-schools-avatar-mobile-carousel"
+          portraitHeightScale={PORTRAIT_HEIGHT_SCALE}
+          mobileSelection={{ selectedId, onSelectAvatar: onSelect }}
+        />
 
-      <SchoolsAvatarCarouselMeta
-        activeAvatar={carousel.focusedAvatar}
-        className="pb-1 pt-0"
-      />
+        <SchoolsAvatarCarouselMeta
+          activeAvatar={carousel.focusedAvatar}
+          variant="mobile"
+        />
+      </div>
 
-      <div className="relative z-20 shrink-0 px-4 pb-[max(0.55rem,env(safe-area-inset-bottom))] pt-1">
+      <div className="iq-schools-avatar-mobile-footer relative z-20 shrink-0 px-4 pt-1">
         <div className="flex justify-center">
           <NeonButton
             type="button"
             className={[
               "iq-schools-armor-cta iq-schools-armor-cta-premium w-full max-w-[18.5rem]",
-              "min-h-[48px] px-8 py-3.5 text-xs font-black uppercase tracking-[0.26em]",
+              "min-h-[46px] px-8 py-3 text-xs font-black uppercase tracking-[0.26em]",
               "transition-[box-shadow,opacity,transform] duration-300",
               selectedId ? "iq-schools-armor-cta--armed" : ""
             ].join(" ")}

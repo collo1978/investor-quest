@@ -10,6 +10,8 @@ import { useSchoolsAvatarCarousel } from "@/components/schools/useSchoolsAvatarC
 type Props = {
   slideGap: number;
   carousel: ReturnType<typeof useSchoolsAvatarCarousel>;
+  className?: string;
+  portraitHeightScale?: number;
   /** Mobile-only: tap locks selection; swipe browses without auto-selecting. */
   mobileSelection?: {
     selectedId: SchoolsAvatarId | null;
@@ -46,7 +48,8 @@ function MobileCarouselSlide({
   onTap,
   trackX,
   sideInset,
-  slideStep
+  slideStep,
+  portraitHeightScale = 1
 }: {
   avatar: SchoolsAvatar;
   slideWidth: number;
@@ -58,6 +61,7 @@ function MobileCarouselSlide({
   trackX: MotionValue<number>;
   sideInset: number;
   slideStep: number;
+  portraitHeightScale?: number;
 }) {
   const reduceMotion = useReducedMotion();
 
@@ -126,6 +130,7 @@ function MobileCarouselSlide({
           avatarId={avatar.id}
           accent={avatar.accent}
           width={slideWidth}
+          heightScale={portraitHeightScale}
           active={focused && !selected}
           selected={selected}
           className={focused ? "iq-schools-avatar-portrait--focused" : undefined}
@@ -197,7 +202,13 @@ function CarouselSlide({
   );
 }
 
-export function SchoolsAvatarCarouselTrack({ slideGap, carousel, mobileSelection }: Props) {
+export function SchoolsAvatarCarouselTrack({
+  slideGap,
+  carousel,
+  className = "",
+  portraitHeightScale = 1,
+  mobileSelection
+}: Props) {
   const {
     trackRef,
     x,
@@ -215,7 +226,7 @@ export function SchoolsAvatarCarouselTrack({ slideGap, carousel, mobileSelection
   return (
     <div
       ref={trackRef}
-      className="relative min-h-0 flex-1 touch-pan-y overflow-hidden"
+      className={["relative min-h-0 flex-1 touch-pan-y overflow-hidden", className].join(" ")}
       style={{ perspective: 900 }}
     >
       <motion.div
@@ -240,6 +251,7 @@ export function SchoolsAvatarCarouselTrack({ slideGap, carousel, mobileSelection
               trackX={x}
               sideInset={sideInset}
               slideStep={slideStep}
+              portraitHeightScale={portraitHeightScale}
               onTap={() => {
                 mobileSelection.onSelectAvatar(avatar.id);
                 if (i !== index) {
@@ -265,30 +277,51 @@ export function SchoolsAvatarCarouselTrack({ slideGap, carousel, mobileSelection
 
 export function SchoolsAvatarCarouselMeta({
   activeAvatar,
-  className = ""
+  className = "",
+  variant = "default"
 }: {
   activeAvatar: SchoolsAvatar;
   className?: string;
+  variant?: "default" | "mobile";
 }) {
   const reduceMotion = useReducedMotion();
+  const mobile = variant === "mobile";
 
   return (
-    <div className={["shrink-0 px-6 pb-2 pt-1 text-center md:text-left", className].join(" ")}>
+    <div
+      className={[
+        "shrink-0 text-center md:text-left",
+        mobile
+          ? "iq-schools-avatar-mobile-meta px-5 pb-0 pt-0"
+          : "px-6 pb-2 pt-1",
+        className
+      ].join(" ")}
+      aria-live="polite"
+    >
       <motion.h2
         key={`name-${activeAvatar.id}`}
-        initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-        className={`text-xl font-black uppercase tracking-[0.2em] md:text-2xl iq-schools-avatar-name--${activeAvatar.accent}`}
+        transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+        className={[
+          mobile
+            ? "text-[1.05rem] font-black uppercase tracking-[0.18em]"
+            : "text-xl font-black uppercase tracking-[0.2em] md:text-2xl",
+          `iq-schools-avatar-name--${activeAvatar.accent}`
+        ].join(" ")}
       >
         {activeAvatar.name}
       </motion.h2>
       <motion.p
         key={`tag-${activeAvatar.id}`}
-        initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 3 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, delay: 0.04, ease: [0.22, 1, 0.36, 1] }}
-        className="mt-1.5 text-sm leading-relaxed text-violet-100/78 md:max-w-md md:text-base"
+        transition={{ duration: 0.26, delay: 0.03, ease: [0.22, 1, 0.36, 1] }}
+        className={[
+          mobile
+            ? "iq-schools-avatar-identity-desc mx-auto mt-1 max-w-[17rem] text-[0.8rem] font-medium leading-snug tracking-[0.02em]"
+            : "mt-1.5 text-sm leading-relaxed text-violet-100/78 md:max-w-md md:text-base"
+        ].join(" ")}
       >
         {activeAvatar.tagline}
       </motion.p>
