@@ -525,6 +525,18 @@ h3 {
   text-indent: 0.22em;
 }
 
+@media (max-width: 767px) {
+  .iq-academy-stamp--edu {
+    padding: 0.48rem 0.72rem 0.54rem;
+  }
+
+  .iq-academy-stamp--edu .iq-academy-stamp-line {
+    font-size: clamp(0.74rem, 2.6vw, 0.88rem);
+    letter-spacing: 0.18em;
+    text-indent: 0.18em;
+  }
+}
+
 .iq-academy-stamp-line--edition {
   margin-top: 0.05rem;
   font-size: clamp(0.62rem, 2.4vw, 0.78rem);

@@ -79,15 +79,15 @@ type AcademyStampProps = {
   stampDelayS: number;
 };
 
-/** EDU badge — sits beside the logo on screen 1 (not its own screen). */
+/** EDU badge — beside the logo on screen 1 (in-flow on mobile, absolute on md+). */
 function AcademyEditionStamp({ reduceMotion, stampDelayS }: AcademyStampProps) {
   return (
     <motion.div
       aria-hidden
       className={[
-        "pointer-events-none absolute top-1/2 z-[2] -translate-y-1/2",
-        "-right-[2.75rem] sm:-right-[3rem] md:-right-[3.25rem]",
-        "w-[3.75rem] sm:w-[4.25rem] md:w-[4.75rem]"
+        "pointer-events-none z-[2] shrink-0",
+        "w-[3.1rem] sm:w-[3.75rem]",
+        "md:absolute md:top-1/2 md:w-[4.75rem] md:-translate-y-1/2 md:-right-[3.25rem]"
       ].join(" ")}
       initial={
         reduceMotion
@@ -239,7 +239,7 @@ export default function SchoolsOpeningPage() {
 
   return (
     <div
-      className="relative min-h-[100dvh] overflow-hidden bg-[#030308]"
+      className="relative min-h-[100dvh] overflow-x-hidden bg-[#030308]"
       role="main"
       aria-label="Investor Quest opening (EDU)"
     >
@@ -247,7 +247,13 @@ export default function SchoolsOpeningPage() {
         {phase === "logo" ? (
           <motion.div
             key="logo-phase"
-            className="relative z-10 flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#030308] px-4 py-8"
+            className={[
+              "relative z-10 flex min-h-[100dvh] w-full flex-col items-center justify-center bg-[#030308]",
+              "px-[max(1rem,env(safe-area-inset-left))]",
+              "pr-[max(1rem,env(safe-area-inset-right))]",
+              "pt-[max(2rem,calc(0.75rem+env(safe-area-inset-top)))]",
+              "pb-[max(2rem,calc(0.75rem+env(safe-area-inset-bottom)))]"
+            ].join(" ")}
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 0.985, filter: "blur(8px)" }}
             transition={{ duration: CROSSFADE_MS / 1000, ease: [0.4, 0, 0.2, 1] }}
@@ -260,7 +266,12 @@ export default function SchoolsOpeningPage() {
                 className="pointer-events-none absolute left-1/2 top-1/2 h-[min(70vw,420px)] w-[min(92vw,680px)] -translate-x-1/2 -translate-y-1/2 rounded-full iq-opening-logo-bloom"
               />
 
-              <div className="relative inline-flex items-center justify-center px-6 sm:px-10 md:px-14">
+              <div
+                className={[
+                  "relative flex max-w-full flex-row items-center justify-center gap-1 sm:gap-1.5",
+                  "md:inline-flex md:px-14"
+                ].join(" ")}
+              >
                 <img
                   src={OPENING_LOGO_SRC}
                   alt="Investor Quest"
@@ -268,7 +279,7 @@ export default function SchoolsOpeningPage() {
                   height={160}
                   decoding="async"
                   fetchPriority="high"
-                  className="relative z-[1] h-auto w-[min(82vw,36rem)] max-w-none object-contain object-center select-none sm:w-[min(76vw,40rem)] lg:w-[min(70vw,44rem)] [filter:drop-shadow(0_0_22px_rgba(167,139,250,0.34))_drop-shadow(0_0_54px_rgba(139,92,246,0.22))]"
+                  className="relative z-[1] h-auto w-[min(58vw,28rem)] max-w-none shrink object-contain object-center select-none sm:w-[min(68vw,36rem)] md:w-[min(76vw,40rem)] lg:w-[min(70vw,44rem)] [filter:drop-shadow(0_0_22px_rgba(167,139,250,0.34))_drop-shadow(0_0_54px_rgba(139,92,246,0.22))]"
                 />
                 <AcademyEditionStamp
                   reduceMotion={reduceMotion}
