@@ -111,6 +111,8 @@ export function useSchoolsAvatarCarousel(
     index,
     slideWidth,
     slideGap,
+    slideStep,
+    sideInset,
     snapToIndex,
     onDrag,
     onDragEnd,

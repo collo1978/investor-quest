@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, useTransform, type MotionValue } from "framer-motion";
 
 import type { SchoolsAvatar, SchoolsAvatarId } from "@/lib/schools/avatars";
 import { SCHOOLS_AVATARS } from "@/lib/schools/avatars";
@@ -39,30 +39,45 @@ function SelectionCheckmark() {
 function MobileCarouselSlide({
   avatar,
   slideWidth,
+  slideIndex,
   focused,
   selected,
   distance,
-  onTap
+  onTap,
+  trackX,
+  sideInset,
+  slideStep
 }: {
   avatar: SchoolsAvatar;
   slideWidth: number;
+  slideIndex: number;
   focused: boolean;
   selected: boolean;
   distance: number;
   onTap: () => void;
+  trackX: MotionValue<number>;
+  sideInset: number;
+  slideStep: number;
 }) {
   const reduceMotion = useReducedMotion();
 
-  let scale = 0.78;
-  if (distance === 1) scale = 0.88;
-  if (focused && !selected) scale = 1;
-  if (focused && selected) scale = 1.06;
-  if (!focused && selected) scale = distance === 1 ? 0.93 : 0.82;
+  let scale = 0.84;
+  if (distance === 1) scale = 0.94;
+  if (focused && !selected) scale = 1.04;
+  if (focused && selected) scale = 1.08;
+  if (!focused && selected) scale = distance === 1 ? 0.96 : 0.86;
 
-  let opacity = 0.35;
-  if (distance === 1) opacity = 0.62;
+  let opacity = 0.42;
+  if (distance === 1) opacity = 0.72;
   if (focused) opacity = 1;
-  if (selected && !focused) opacity = distance === 1 ? 0.78 : 0.48;
+  if (selected && !focused) opacity = distance === 1 ? 0.82 : 0.52;
+
+  const tiltY = useTransform(trackX, (latest) => {
+    if (reduceMotion || slideStep <= 0) return 0;
+    const target = sideInset - slideIndex * slideStep;
+    const delta = latest - target;
+    return Math.max(-7, Math.min(7, delta * 0.038));
+  });
 
   return (
     <motion.div
@@ -78,17 +93,45 @@ function MobileCarouselSlide({
         }
       }}
       className="relative shrink-0 cursor-pointer touch-pan-y border-0 bg-transparent p-0 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet-400"
-      style={{ width: slideWidth }}
+      style={{
+        width: slideWidth,
+        rotateY: tiltY
+      }}
       animate={{ scale, opacity }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
     >
-      <SchoolsAvatarPortraitCard
-        avatarId={avatar.id}
-        accent={avatar.accent}
-        width={slideWidth}
-        active={focused && !selected}
-        selected={selected}
-      />
+      <motion.div
+        className="relative"
+        animate={
+          focused && !reduceMotion
+            ? { y: [0, -9, 0] }
+            : { y: 0 }
+        }
+        transition={
+          focused && !reduceMotion
+            ? { duration: 3.4, repeat: Infinity, ease: "easeInOut" }
+            : { duration: 0.2 }
+        }
+      >
+        {focused ? (
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute -inset-3 rounded-[1.35rem] iq-schools-avatar-glow-pulse"
+            animate={reduceMotion ? undefined : { opacity: [0.45, 0.85, 0.45], scale: [0.96, 1.04, 0.96] }}
+            transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
+          />
+        ) : null}
+
+        <SchoolsAvatarPortraitCard
+          avatarId={avatar.id}
+          accent={avatar.accent}
+          width={slideWidth}
+          active={focused && !selected}
+          selected={selected}
+          className={focused ? "iq-schools-avatar-portrait--focused" : undefined}
+        />
+      </motion.div>
+
       {selected ? (
         <motion.div
           initial={reduceMotion ? false : { opacity: 0, scale: 0.6 }}
@@ -97,19 +140,6 @@ function MobileCarouselSlide({
         >
           <SelectionCheckmark />
         </motion.div>
-      ) : null}
-      {focused && selected ? (
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute -inset-2 rounded-[1.15rem] bg-[radial-gradient(ellipse_85%_65%_at_50%_38%,rgba(139,92,246,0.32),transparent_72%)]"
-          animate={reduceMotion ? undefined : { opacity: [0.55, 1, 0.55] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-        />
-      ) : focused ? (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -inset-1 rounded-[1.1rem] bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(139,92,246,0.14),transparent_70%)]"
-        />
       ) : null}
     </motion.div>
   );
@@ -173,6 +203,8 @@ export function SchoolsAvatarCarouselTrack({ slideGap, carousel, mobileSelection
     x,
     index,
     slideWidth,
+    slideStep,
+    sideInset,
     snapToIndex,
     onDrag,
     onDragEnd,
@@ -181,13 +213,17 @@ export function SchoolsAvatarCarouselTrack({ slideGap, carousel, mobileSelection
   } = carousel;
 
   return (
-    <div ref={trackRef} className="relative min-h-0 flex-1 touch-pan-y overflow-hidden">
+    <div
+      ref={trackRef}
+      className="relative min-h-0 flex-1 touch-pan-y overflow-hidden"
+      style={{ perspective: 900 }}
+    >
       <motion.div
         className="absolute inset-y-0 left-0 flex items-center will-change-transform"
         style={{ x, gap: slideGap }}
         drag="x"
         dragConstraints={{ left: dragMin, right: dragMax }}
-        dragElastic={0.08}
+        dragElastic={0.1}
         onDrag={onDrag}
         onDragEnd={onDragEnd}
       >
@@ -197,9 +233,13 @@ export function SchoolsAvatarCarouselTrack({ slideGap, carousel, mobileSelection
               key={avatar.id}
               avatar={avatar}
               slideWidth={slideWidth}
+              slideIndex={i}
               focused={i === index}
               selected={mobileSelection.selectedId === avatar.id}
               distance={Math.abs(i - index)}
+              trackX={x}
+              sideInset={sideInset}
+              slideStep={slideStep}
               onTap={() => {
                 mobileSelection.onSelectAvatar(avatar.id);
                 if (i !== index) {
@@ -248,7 +288,7 @@ export function SchoolsAvatarCarouselMeta({
         initial={reduceMotion ? false : { opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, delay: 0.04, ease: [0.22, 1, 0.36, 1] }}
-        className="mt-2 text-sm leading-relaxed text-violet-100/78 md:max-w-md md:text-base"
+        className="mt-1.5 text-sm leading-relaxed text-violet-100/78 md:max-w-md md:text-base"
       >
         {activeAvatar.tagline}
       </motion.p>

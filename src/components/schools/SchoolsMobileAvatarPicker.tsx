@@ -9,8 +9,18 @@ import { useSchoolsAvatarCarousel } from "@/components/schools/useSchoolsAvatarC
 import { SCHOOLS_DEVICE } from "@/lib/schools/schoolsResponsive";
 import type { SchoolsAvatarId } from "@/lib/schools/avatars";
 
-const SLIDE_GAP = 14;
-const SLIDE_VW = 0.84;
+const SLIDE_GAP = 10;
+/** ~10% wider slides + neighbor peek for swipe affordance */
+const SLIDE_VW = 0.92;
+
+const AVATAR_BG_PARTICLES = [
+  { left: "12%", top: "22%", size: 2, delay: "0s", dur: "11s" },
+  { left: "78%", top: "18%", size: 3, delay: "-2s", dur: "13s" },
+  { left: "88%", top: "62%", size: 2, delay: "-4s", dur: "10s" },
+  { left: "24%", top: "78%", size: 2, delay: "-1s", dur: "12s" },
+  { left: "52%", top: "8%", size: 2, delay: "-3s", dur: "9s" },
+  { left: "6%", top: "52%", size: 3, delay: "-5s", dur: "14s" }
+] as const;
 
 type Props = {
   selectedId: SchoolsAvatarId | null;
@@ -36,21 +46,43 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
 
   return (
     <main
-      className={`relative flex h-[100dvh] w-full flex-col overflow-hidden bg-[#030308] ${SCHOOLS_DEVICE.mobileOnly}`}
+      className={`relative flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-[#030308] ${SCHOOLS_DEVICE.mobileOnly}`}
       role="application"
-      aria-label="Choose your avatar"
+      aria-label="Pick your Investor Quest identity"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_520px_at_50%_18%,rgba(139,92,246,0.16),transparent_62%),radial-gradient(720px_480px_at_80%_72%,rgba(168,85,247,0.1),transparent_60%)]"
-      />
+      <div aria-hidden className="pointer-events-none absolute inset-0 iq-schools-armor-bg" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 iq-schools-avatar-mobile-nebula" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 iq-schools-avatar-mobile-hologram" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 iq-schools-armor-vignette" />
+      {AVATAR_BG_PARTICLES.map((p, i) => (
+        <span
+          key={i}
+          aria-hidden
+          className="iq-schools-avatar-mobile-particle pointer-events-none absolute rounded-full bg-violet-200/70"
+          style={{
+            left: p.left,
+            top: p.top,
+            width: p.size,
+            height: p.size,
+            animationDelay: p.delay,
+            animationDuration: p.dur
+          }}
+        />
+      ))}
 
-      <header className="relative z-10 flex shrink-0 flex-col items-center px-5 pb-2 pt-[max(1.15rem,env(safe-area-inset-top))]">
-        <h1 className="iq-schools-armor-title text-center text-[0.68rem] font-black uppercase tracking-[0.34em] text-violet-100/95 sm:text-xs">
-          Choose your avatar
-        </h1>
-        <p className="iq-schools-avatar-swipe-hint mt-3 max-w-[16rem] text-center text-[0.72rem] font-medium leading-relaxed tracking-[0.04em]">
-          Swipe to find your favorite avatar.
+      <header className="relative z-10 shrink-0 px-5 pb-1 pt-[max(0.85rem,env(safe-area-inset-top))]">
+        <p className="iq-schools-avatar-identity-tagline mx-auto max-w-[20rem] text-center text-[1.08rem] font-bold leading-snug tracking-[0.015em] text-violet-50/95 sm:text-[1.15rem]">
+          Pick your Investor Quest identity.
+        </p>
+        <p
+          aria-hidden
+          className="iq-schools-avatar-swipe-nudge mx-auto mt-2 flex items-center justify-center gap-2 text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-violet-200/45"
+        >
+          <span className="iq-schools-avatar-swipe-nudge-arrow">‹</span>
+          Swipe to browse
+          <span className="iq-schools-avatar-swipe-nudge-arrow iq-schools-avatar-swipe-nudge-arrow--right">
+            ›
+          </span>
         </p>
       </header>
 
@@ -60,15 +92,20 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
         mobileSelection={{ selectedId, onSelectAvatar: onSelect }}
       />
 
-      <SchoolsAvatarCarouselMeta activeAvatar={carousel.focusedAvatar} />
+      <SchoolsAvatarCarouselMeta
+        activeAvatar={carousel.focusedAvatar}
+        className="pb-1 pt-0"
+      />
 
-      <div className="relative z-20 shrink-0 bg-gradient-to-t from-[#030308] via-[#030308]/90 to-transparent px-4 pb-[max(0.85rem,env(safe-area-inset-bottom))] pt-3">
-        <div className="flex justify-end">
+      <div className="relative z-20 shrink-0 px-4 pb-[max(0.55rem,env(safe-area-inset-bottom))] pt-1">
+        <div className="flex justify-center">
           <NeonButton
             type="button"
             className={[
-              "min-h-[44px] min-w-[9.5rem] px-6 py-3 text-xs font-black uppercase tracking-[0.28em] transition-[box-shadow,opacity,transform] duration-300",
-              selectedId ? "iq-schools-armor-cta" : ""
+              "iq-schools-armor-cta iq-schools-armor-cta-premium w-full max-w-[18.5rem]",
+              "min-h-[48px] px-8 py-3.5 text-xs font-black uppercase tracking-[0.26em]",
+              "transition-[box-shadow,opacity,transform] duration-300",
+              selectedId ? "iq-schools-armor-cta--armed" : ""
             ].join(" ")}
             onClick={handleContinue}
           >

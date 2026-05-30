@@ -644,6 +644,186 @@ body.iq-schools-demo-fullscreen {
     0 0 28px rgba(139, 92, 246, 0.14);
 }
 
+.iq-schools-avatar-identity-tagline {
+  text-shadow:
+    0 0 24px rgba(167, 139, 250, 0.55),
+    0 0 48px rgba(139, 92, 246, 0.32),
+    0 2px 12px rgba(0, 0, 0, 0.45);
+}
+
+.iq-schools-avatar-mobile-nebula {
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 0%, rgba(139, 92, 246, 0.14), transparent 58%),
+    radial-gradient(ellipse 90% 60% at 20% 85%, rgba(59, 130, 246, 0.08), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 88% 72%, rgba(168, 85, 247, 0.1), transparent 52%);
+  animation: iq-schools-avatar-nebula-drift 18s ease-in-out infinite;
+}
+
+.iq-schools-avatar-mobile-hologram {
+  background:
+    repeating-linear-gradient(
+      118deg,
+      transparent 0,
+      transparent 42px,
+      rgba(139, 92, 246, 0.035) 42px,
+      rgba(139, 92, 246, 0.035) 43px
+    ),
+    radial-gradient(ellipse 55% 42% at 50% 38%, rgba(167, 139, 250, 0.12), transparent 72%);
+  opacity: 0.85;
+  mix-blend-mode: screen;
+  animation: iq-schools-avatar-hologram-shift 14s linear infinite;
+}
+
+.iq-schools-avatar-mobile-particle {
+  filter: blur(0.5px);
+  box-shadow: 0 0 8px rgba(196, 181, 253, 0.45);
+  animation-name: iq-schools-avatar-particle-drift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.iq-schools-avatar-glow-pulse {
+  background: radial-gradient(
+    ellipse 88% 72% at 50% 42%,
+    rgba(139, 92, 246, 0.38),
+    rgba(109, 40, 217, 0.12) 48%,
+    transparent 72%
+  );
+}
+
+.iq-schools-avatar-portrait--focused {
+  box-shadow:
+    0 0 40px rgba(139, 92, 246, 0.35),
+    0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.iq-schools-avatar-swipe-nudge-arrow {
+  display: inline-block;
+  opacity: 0.55;
+  animation: iq-schools-avatar-swipe-nudge 2.2s ease-in-out infinite;
+}
+
+.iq-schools-avatar-swipe-nudge-arrow--right {
+  animation-delay: 0.35s;
+}
+
+@keyframes iq-schools-avatar-nebula-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate3d(0, -1.5%, 0) scale(1.03);
+    opacity: 1;
+  }
+}
+
+@keyframes iq-schools-avatar-hologram-shift {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: 120px 80px, 0 0;
+  }
+}
+
+@keyframes iq-schools-avatar-particle-drift {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    opacity: 0.52;
+    transform: translate3d(4px, -10px, 0);
+  }
+}
+
+@keyframes iq-schools-avatar-swipe-nudge {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateX(3px);
+  }
+}
+
+.iq-schools-armor-cta-premium {
+  border-radius: 9999px !important;
+  border-width: 2px !important;
+  border-color: rgba(196, 181, 253, 0.55) !important;
+  background:
+    linear-gradient(
+      165deg,
+      rgba(139, 92, 246, 0.32) 0%,
+      rgba(88, 28, 180, 0.22) 48%,
+      rgba(109, 40, 217, 0.28) 100%
+    ) !important;
+  box-shadow:
+    0 0 0 1px rgba(167, 139, 250, 0.28),
+    0 0 36px rgba(139, 92, 246, 0.42),
+    0 8px 28px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -10px 24px rgba(0, 0, 0, 0.28) !important;
+  overflow: hidden;
+}
+
+.iq-schools-armor-cta-premium::after {
+  content: "";
+  position: absolute;
+  inset: -40% -60%;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 62%
+  );
+  animation: iq-schools-armor-cta-shimmer 3.2s ease-in-out infinite;
+}
+
+.iq-schools-armor-cta--armed {
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.42),
+    0 0 48px rgba(139, 92, 246, 0.55),
+    0 0 72px rgba(109, 40, 217, 0.28),
+    0 10px 32px rgba(0, 0, 0, 0.58),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -10px 24px rgba(0, 0, 0, 0.28) !important;
+}
+
+@keyframes iq-schools-armor-cta-shimmer {
+  0%,
+  100% {
+    transform: translateX(-30%) rotate(8deg);
+    opacity: 0;
+  }
+  45% {
+    opacity: 0.55;
+  }
+  55% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateX(30%) rotate(8deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-schools-avatar-mobile-nebula,
+  .iq-schools-avatar-mobile-hologram,
+  .iq-schools-avatar-mobile-particle,
+  .iq-schools-avatar-swipe-nudge-arrow,
+  .iq-schools-armor-cta-premium::after {
+    animation: none !important;
+  }
+}
+
 .iq-schools-avatar-frame-pulse {
   box-shadow: inset 0 0 24px rgba(167, 139, 250, 0.22);
 }
