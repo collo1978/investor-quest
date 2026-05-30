@@ -19,14 +19,14 @@ export function SchoolsOpeningMasteryCTAs({ onStartQuest }: Props) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div className="mx-auto flex w-full max-w-[22rem] flex-col gap-3">
+      <div className="mx-auto flex w-full max-w-[22rem] flex-col gap-2.5">
         <NeonButton
           type="button"
           className={[
             "iq-schools-opening-cta-primary w-full",
             "min-h-[52px] rounded-full px-6 py-3.5",
             "text-xs font-black uppercase tracking-[0.22em]",
-            "border-2 border-violet-300/55"
+            "border-2 border-violet-300/45"
           ].join(" ")}
           onClick={onStartQuest}
         >
@@ -36,12 +36,7 @@ export function SchoolsOpeningMasteryCTAs({ onStartQuest }: Props) {
           type="button"
           aria-disabled="true"
           tabIndex={-1}
-          className={[
-            "iq-schools-opening-cta-secondary w-full",
-            "min-h-[48px] rounded-full px-6 py-3",
-            "text-[0.68rem] font-bold uppercase tracking-[0.18em]",
-            "transition-[border-color,background-color] duration-200"
-          ].join(" ")}
+          className="iq-schools-opening-cta-secondary w-full"
         >
           I ALREADY HAVE AN ACCOUNT
         </button>

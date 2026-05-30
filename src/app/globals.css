@@ -427,6 +427,51 @@ h3 {
   }
 }
 
+@keyframes iq-schools-mastery-kenburns-subtle {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.015) translate3d(0, -0.25%, 0);
+  }
+}
+
+.iq-schools-mastery-kenburns--subtle {
+  animation: iq-schools-mastery-kenburns-subtle 14s ease-in-out forwards;
+  will-change: transform;
+}
+
+.iq-schools-mastery-hero-frame--opening {
+  padding-top: max(0.4rem, env(safe-area-inset-top, 0px));
+}
+
+.iq-schools-mastery-hero-img--opening {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center top;
+}
+
+@media (max-width: 767px) {
+  .iq-schools-mastery-hero-frame--opening {
+    padding-top: max(0.25rem, env(safe-area-inset-top, 0px));
+  }
+
+  .iq-schools-mastery-hero-img--opening {
+    width: min(100%, 28rem);
+    max-height: min(100%, 52dvh);
+    object-position: center 4%;
+  }
+}
+
+@media (min-width: 768px) {
+  .iq-schools-mastery-hero-img--opening {
+    max-height: min(100%, 62vh);
+    object-position: center 8%;
+  }
+}
+
 @keyframes iq-schools-mastery-parallax-drift {
   0%,
   100% {
@@ -594,68 +639,74 @@ h3 {
   background:
     linear-gradient(
       165deg,
-      rgba(139, 92, 246, 0.55) 0%,
-      rgba(109, 40, 217, 0.42) 52%,
-      rgba(88, 28, 180, 0.48) 100%
+      rgba(139, 92, 246, 0.48) 0%,
+      rgba(109, 40, 217, 0.36) 52%,
+      rgba(88, 28, 180, 0.4) 100%
     ) !important;
   color: #faf5ff !important;
   box-shadow:
-    0 0 0 1px rgba(196, 181, 253, 0.35),
-    0 0 40px rgba(139, 92, 246, 0.55),
-    0 0 64px rgba(109, 40, 217, 0.28),
-    0 10px 32px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    inset 0 -8px 20px rgba(0, 0, 0, 0.25) !important;
-  animation: iq-schools-opening-cta-pulse 4.2s ease-in-out infinite;
+    0 0 0 1px rgba(196, 181, 253, 0.28),
+    0 0 28px rgba(139, 92, 246, 0.38),
+    0 0 44px rgba(109, 40, 217, 0.16),
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -8px 20px rgba(0, 0, 0, 0.22) !important;
+  animation: iq-schools-opening-cta-pulse 5.8s ease-in-out infinite;
 }
 
 .iq-schools-opening-cta-primary:hover {
   box-shadow:
-    0 0 0 1px rgba(221, 214, 254, 0.45),
-    0 0 48px rgba(139, 92, 246, 0.62),
-    0 0 72px rgba(109, 40, 217, 0.32),
-    0 10px 32px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24),
-    inset 0 -8px 20px rgba(0, 0, 0, 0.25) !important;
+    0 0 0 1px rgba(196, 181, 253, 0.34),
+    0 0 34px rgba(139, 92, 246, 0.44),
+    0 0 52px rgba(109, 40, 217, 0.2),
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -8px 20px rgba(0, 0, 0, 0.22) !important;
 }
 
 .iq-schools-opening-cta-secondary {
-  border: 1.5px solid rgba(196, 181, 253, 0.32);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(237, 233, 254, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow:
-    0 0 0 1px rgba(139, 92, 246, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  min-height: 42px;
+  padding: 0.65rem 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(196, 181, 253, 0.16);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(237, 233, 254, 0.52);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: none;
   cursor: default;
-  opacity: 0.92;
+  opacity: 0.78;
 }
 
 @keyframes iq-schools-opening-cta-pulse {
   0%,
   100% {
     box-shadow:
-      0 0 0 1px rgba(196, 181, 253, 0.32),
-      0 0 36px rgba(139, 92, 246, 0.48),
-      0 0 56px rgba(109, 40, 217, 0.22),
-      0 10px 32px rgba(0, 0, 0, 0.55),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      inset 0 -8px 20px rgba(0, 0, 0, 0.25);
+      0 0 0 1px rgba(196, 181, 253, 0.26),
+      0 0 26px rgba(139, 92, 246, 0.34),
+      0 0 40px rgba(109, 40, 217, 0.14),
+      0 8px 24px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      inset 0 -8px 20px rgba(0, 0, 0, 0.22);
   }
   50% {
     box-shadow:
-      0 0 0 1px rgba(221, 214, 254, 0.42),
-      0 0 46px rgba(139, 92, 246, 0.58),
-      0 0 72px rgba(109, 40, 217, 0.3),
-      0 10px 32px rgba(0, 0, 0, 0.55),
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      inset 0 -8px 20px rgba(0, 0, 0, 0.25);
+      0 0 0 1px rgba(196, 181, 253, 0.32),
+      0 0 32px rgba(139, 92, 246, 0.4),
+      0 0 48px rgba(109, 40, 217, 0.18),
+      0 8px 24px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.17),
+      inset 0 -8px 20px rgba(0, 0, 0, 0.22);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .iq-schools-mastery-kenburns,
+  .iq-schools-mastery-kenburns--subtle,
   .iq-schools-mastery-parallax,
   .iq-schools-opening-cta-primary {
     animation: none !important;

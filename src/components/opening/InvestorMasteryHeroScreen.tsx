@@ -43,8 +43,15 @@ export function InvestorMasteryHeroScreen({
       >
         <div
           className={[
-            "absolute inset-0 flex items-center justify-center",
-            reduceMotion ? "" : "iq-schools-mastery-kenburns"
+            "absolute inset-0 flex justify-center",
+            footer
+              ? "iq-schools-mastery-hero-frame--opening items-start"
+              : "items-center",
+            reduceMotion
+              ? ""
+              : footer
+                ? "iq-schools-mastery-kenburns--subtle"
+                : "iq-schools-mastery-kenburns"
           ].join(" ")}
         >
           <img
@@ -56,10 +63,10 @@ export function InvestorMasteryHeroScreen({
             decoding="async"
             fetchPriority="high"
             className={[
-              "max-h-none max-w-none object-cover object-center select-none",
+              "max-h-none max-w-none select-none",
               footer
-                ? "h-full w-full"
-                : "h-[100dvh] w-[100vw] min-h-[100dvh] min-w-[100vw] max-sm:object-contain"
+                ? "iq-schools-mastery-hero-img--opening"
+                : "h-[100dvh] w-[100vw] min-h-[100dvh] min-w-[100vw] object-cover object-center max-sm:object-contain"
             ].join(" ")}
           />
         </div>
