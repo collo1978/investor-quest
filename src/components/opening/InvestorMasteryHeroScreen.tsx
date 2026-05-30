@@ -9,6 +9,8 @@ const MASTERY_FADE_S = 0.92;
 
 export type InvestorMasteryHeroScreenProps = {
   reduceMotion: boolean | null;
+  /** Fade-in duration in seconds (default 0.92). Schools opening uses a snappier pace. */
+  fadeDurationS?: number;
 };
 
 /**
@@ -16,7 +18,8 @@ export type InvestorMasteryHeroScreenProps = {
  * Shared by Bank/Broker `/opening` and Schools `/schools/opening`.
  */
 export function InvestorMasteryHeroScreen({
-  reduceMotion
+  reduceMotion,
+  fadeDurationS = MASTERY_FADE_S
 }: InvestorMasteryHeroScreenProps) {
   return (
     <motion.div
@@ -25,7 +28,7 @@ export function InvestorMasteryHeroScreen({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{
-        duration: reduceMotion ? 0.35 : MASTERY_FADE_S,
+        duration: reduceMotion ? 0.35 : fadeDurationS,
         ease: [0.22, 1, 0.36, 1]
       }}
     >

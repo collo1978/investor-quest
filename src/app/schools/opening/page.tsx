@@ -26,10 +26,11 @@ const STAMP_PAUSE_MS = 400;
 const STAMP_ANIM_MS = 620;
 const STAMP_HOLD_MS = 900;
 
-/** Screen 2: full-bleed mastery hero. */
-const CROSSFADE_MS = 800;
-const MASTERY_FADE_MS = 920;
-const MASTERY_HOLD_MS = 4500;
+/** Screen 2: full-bleed mastery hero — quick fade, brief hold, advance. */
+const CROSSFADE_MS = 600;
+const MASTERY_FADE_MS = 650;
+const MASTERY_HOLD_MS = 1100;
+const MASTERY_FADE_S = MASTERY_FADE_MS / 1000;
 
 /** Fixed particle field — hydration-safe (no Math.random). */
 const INTRO_PARTICLES = [
@@ -79,15 +80,16 @@ type AcademyStampProps = {
   stampDelayS: number;
 };
 
-/** EDU badge — beside the logo on screen 1 (in-flow on mobile, absolute on md+). */
+/** EDU badge — corner overlay on mobile; beside logo on md+. */
 function AcademyEditionStamp({ reduceMotion, stampDelayS }: AcademyStampProps) {
   return (
     <motion.div
       aria-hidden
       className={[
         "pointer-events-none z-[2] shrink-0",
-        "w-[3.1rem] sm:w-[3.75rem]",
-        "md:absolute md:top-1/2 md:w-[4.75rem] md:-translate-y-1/2 md:-right-[3.25rem]"
+        "w-[2.85rem] sm:w-[3.75rem]",
+        "max-md:absolute max-md:bottom-0 max-md:right-0 max-md:translate-x-[6%] max-md:translate-y-[22%]",
+        "md:absolute md:top-1/2 md:w-[4.75rem] md:-translate-y-1/2 md:translate-x-0 md:translate-y-0 md:-right-[3.25rem]"
       ].join(" ")}
       initial={
         reduceMotion
@@ -218,7 +220,7 @@ export default function SchoolsOpeningPage() {
   useEffect(() => {
     if (reduceMotion) {
       const masteryTimer = window.setTimeout(() => setPhase("mastery"), 900);
-      const leaveTimer = window.setTimeout(finishIntro, 2800);
+      const leaveTimer = window.setTimeout(finishIntro, 1900);
       return () => {
         window.clearTimeout(masteryTimer);
         window.clearTimeout(leaveTimer);
@@ -268,8 +270,9 @@ export default function SchoolsOpeningPage() {
 
               <div
                 className={[
-                  "relative flex max-w-full flex-row items-center justify-center gap-1 sm:gap-1.5",
-                  "md:inline-flex md:px-14"
+                  "relative w-[min(88vw,36rem)] max-w-full overflow-visible",
+                  "max-md:mx-auto max-md:pb-3",
+                  "md:inline-flex md:w-auto md:items-center md:justify-center md:px-14 md:pb-0"
                 ].join(" ")}
               >
                 <img
@@ -279,7 +282,7 @@ export default function SchoolsOpeningPage() {
                   height={160}
                   decoding="async"
                   fetchPriority="high"
-                  className="relative z-[1] h-auto w-[min(58vw,28rem)] max-w-none shrink object-contain object-center select-none sm:w-[min(68vw,36rem)] md:w-[min(76vw,40rem)] lg:w-[min(70vw,44rem)] [filter:drop-shadow(0_0_22px_rgba(167,139,250,0.34))_drop-shadow(0_0_54px_rgba(139,92,246,0.22))]"
+                  className="relative z-[1] block h-auto w-full max-w-full object-contain object-center select-none sm:w-[min(78vw,40rem)] md:w-[min(76vw,40rem)] lg:w-[min(70vw,44rem)] [filter:drop-shadow(0_0_22px_rgba(167,139,250,0.34))_drop-shadow(0_0_54px_rgba(139,92,246,0.22))]"
                 />
                 <AcademyEditionStamp
                   reduceMotion={reduceMotion}
@@ -289,7 +292,10 @@ export default function SchoolsOpeningPage() {
             </div>
           </motion.div>
         ) : (
-          <InvestorMasteryHeroScreen reduceMotion={reduceMotion} />
+          <InvestorMasteryHeroScreen
+            reduceMotion={reduceMotion}
+            fadeDurationS={MASTERY_FADE_S}
+          />
         )}
       </AnimatePresence>
     </div>

@@ -527,13 +527,18 @@ h3 {
 
 @media (max-width: 767px) {
   .iq-academy-stamp--edu {
-    padding: 0.48rem 0.72rem 0.54rem;
+    padding: 0.45rem 0.65rem 0.52rem;
+    box-shadow:
+      0 0 20px rgba(139, 92, 246, 0.32),
+      0 0 36px rgba(109, 40, 217, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -10px 22px rgba(0, 0, 0, 0.45);
   }
 
   .iq-academy-stamp--edu .iq-academy-stamp-line {
-    font-size: clamp(0.74rem, 2.6vw, 0.88rem);
-    letter-spacing: 0.18em;
-    text-indent: 0.18em;
+    font-size: clamp(0.72rem, 2.4vw, 0.86rem);
+    letter-spacing: 0.16em;
+    text-indent: 0.16em;
   }
 }
 
