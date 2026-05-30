@@ -6,6 +6,10 @@ import { motion } from "framer-motion";
 export const INVESTOR_MASTERY_HERO_SRC =
   "/images/schools/Investor-mastery-screen.png";
 
+/** Portrait-first hero for Schools onboarding Screen 2 (mobile). */
+export const SCHOOLS_OPENING_SCREEN2_HERO_SRC =
+  "/images/schools/screen-2.png";
+
 const MASTERY_FADE_S = 0.92;
 
 export type InvestorMasteryHeroScreenProps = {
@@ -48,16 +52,16 @@ export function InvestorMasteryHeroScreen({
           >
             <div
               className={[
-                "relative flex justify-center",
+                "relative flex min-h-0 w-full flex-1 justify-center",
                 reduceMotion ? "" : "iq-schools-mastery-kenburns--subtle"
               ].join(" ")}
             >
               <img
-                src={INVESTOR_MASTERY_HERO_SRC}
+                src={SCHOOLS_OPENING_SCREEN2_HERO_SRC}
                 alt=""
                 aria-hidden
-                width={1920}
-                height={1080}
+                width={1080}
+                height={1920}
                 decoding="async"
                 fetchPriority="high"
                 className="iq-schools-mastery-hero-img--opening max-h-none max-w-none select-none"
@@ -82,7 +86,6 @@ export function InvestorMasteryHeroScreen({
           </div>
 
           <div className="relative z-30 shrink-0 pointer-events-auto">{footer}</div>
-          <div aria-hidden className="iq-schools-mastery-opening-tail min-h-0 flex-1" />
         </div>
       ) : (
         <>

@@ -8,8 +8,8 @@ import { useDemoStory } from "@/components/demo/DemoStoryProvider";
 import { useSchoolsDemoStory } from "@/components/schools/SchoolsDemoStoryProvider";
 import { useGame } from "@/components/GameProvider";
 import {
-  INVESTOR_MASTERY_HERO_SRC,
-  InvestorMasteryHeroScreen
+  InvestorMasteryHeroScreen,
+  SCHOOLS_OPENING_SCREEN2_HERO_SRC
 } from "@/components/opening/InvestorMasteryHeroScreen";
 import { SchoolsOpeningMasteryCTAs } from "@/components/schools/SchoolsOpeningMasteryCTAs";
 import { clearDemoFreshStart } from "@/lib/demo/demoSessionReset";
@@ -163,7 +163,7 @@ export default function SchoolsOpeningPage() {
 
   useEffect(() => {
     const img = new Image();
-    img.src = INVESTOR_MASTERY_HERO_SRC;
+    img.src = SCHOOLS_OPENING_SCREEN2_HERO_SRC;
   }, []);
 
   const demoStoryActiveRef = useRef(demoStory.active);
