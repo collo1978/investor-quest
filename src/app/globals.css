@@ -441,34 +441,54 @@ h3 {
   will-change: transform;
 }
 
-.iq-schools-mastery-hero-frame--opening {
-  padding-top: max(0.4rem, env(safe-area-inset-top, 0px));
+.iq-schools-mastery-opening-shell {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+}
+
+.iq-schools-mastery-opening-stack {
+  display: flex;
+  min-height: 100dvh;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-top: max(0.35rem, env(safe-area-inset-top, 0px));
+}
+
+.iq-schools-mastery-opening-hero {
+  overflow: hidden;
+}
+
+.iq-schools-mastery-opening-bridge {
+  background: linear-gradient(180deg, transparent 0%, rgba(3, 3, 8, 0.72) 100%);
+}
+
+.iq-schools-mastery-vignette--opening {
+  background:
+    radial-gradient(ellipse 88% 72% at 50% 42%, transparent 38%, rgba(3, 3, 8, 0.32) 72%, rgba(3, 3, 8, 0.55) 100%),
+    linear-gradient(180deg, rgba(3, 3, 8, 0.12) 0%, transparent 14%, transparent 88%, rgba(3, 3, 8, 0.35) 100%);
 }
 
 .iq-schools-mastery-hero-img--opening {
-  width: 100%;
+  width: min(100%, 28rem);
   height: auto;
-  max-height: 100%;
+  margin-inline: auto;
   object-fit: contain;
-  object-position: center top;
+  object-position: center bottom;
 }
 
 @media (max-width: 767px) {
-  .iq-schools-mastery-hero-frame--opening {
-    padding-top: max(0.25rem, env(safe-area-inset-top, 0px));
-  }
-
   .iq-schools-mastery-hero-img--opening {
-    width: min(100%, 28rem);
-    max-height: min(100%, 52dvh);
-    object-position: center 4%;
+    max-height: min(46dvh, 22rem);
+    width: min(94vw, 26rem);
   }
 }
 
 @media (min-width: 768px) {
   .iq-schools-mastery-hero-img--opening {
-    max-height: min(100%, 62vh);
-    object-position: center 8%;
+    max-height: min(50vh, 24rem);
+    width: min(100%, 32rem);
   }
 }
 
@@ -620,16 +640,17 @@ h3 {
 }
 
 .iq-schools-opening-cta-dock {
+  margin-top: -0.5rem;
   padding:
-    1.75rem 1.25rem
-    max(1rem, calc(0.65rem + env(safe-area-inset-bottom, 0px)));
+    0.55rem 1.25rem
+    max(0.85rem, calc(0.5rem + env(safe-area-inset-bottom, 0px)));
   padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
   padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
   background: linear-gradient(
     180deg,
-    transparent 0%,
-    rgba(3, 3, 8, 0.45) 28%,
-    rgba(3, 3, 8, 0.92) 72%,
+    rgba(3, 3, 8, 0) 0%,
+    rgba(3, 3, 8, 0.62) 22%,
+    rgba(3, 3, 8, 0.94) 58%,
     rgba(3, 3, 8, 0.98) 100%
   );
 }

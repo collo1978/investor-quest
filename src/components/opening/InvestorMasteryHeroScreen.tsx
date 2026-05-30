@@ -28,7 +28,10 @@ export function InvestorMasteryHeroScreen({
   return (
     <motion.div
       key="mastery"
-      className="fixed inset-0 z-20 flex flex-col bg-[#030308]"
+      className={[
+        "fixed inset-0 z-20 bg-[#030308]",
+        footer ? "iq-schools-mastery-opening-shell" : "flex flex-col"
+      ].join(" ")}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{
@@ -36,57 +39,89 @@ export function InvestorMasteryHeroScreen({
         ease: [0.22, 1, 0.36, 1]
       }}
     >
-      <div
-        className="relative min-h-0 flex-1 overflow-hidden"
-        role="img"
-        aria-label="Your epic path to investing mastery starts now"
-      >
-        <div
-          className={[
-            "absolute inset-0 flex justify-center",
-            footer
-              ? "iq-schools-mastery-hero-frame--opening items-start"
-              : "items-center",
-            reduceMotion
-              ? ""
-              : footer
-                ? "iq-schools-mastery-kenburns--subtle"
-                : "iq-schools-mastery-kenburns"
-          ].join(" ")}
-        >
-          <img
-            src={INVESTOR_MASTERY_HERO_SRC}
-            alt=""
-            aria-hidden
-            width={1920}
-            height={1080}
-            decoding="async"
-            fetchPriority="high"
-            className={[
-              "max-h-none max-w-none select-none",
-              footer
-                ? "iq-schools-mastery-hero-img--opening"
-                : "h-[100dvh] w-[100vw] min-h-[100dvh] min-w-[100vw] object-cover object-center max-sm:object-contain"
-            ].join(" ")}
-          />
-        </div>
-
-        {!reduceMotion ? (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 iq-schools-mastery-parallax"
-          />
-        ) : null}
-
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 iq-schools-mastery-vignette"
-        />
-      </div>
-
       {footer ? (
-        <div className="relative z-30 shrink-0 pointer-events-auto">{footer}</div>
-      ) : null}
+        <div className="iq-schools-mastery-opening-stack">
+          <div
+            className="iq-schools-mastery-opening-hero relative w-full shrink-0"
+            role="img"
+            aria-label="Your epic path to investing mastery starts now"
+          >
+            <div
+              className={[
+                "relative flex justify-center",
+                reduceMotion ? "" : "iq-schools-mastery-kenburns--subtle"
+              ].join(" ")}
+            >
+              <img
+                src={INVESTOR_MASTERY_HERO_SRC}
+                alt=""
+                aria-hidden
+                width={1920}
+                height={1080}
+                decoding="async"
+                fetchPriority="high"
+                className="iq-schools-mastery-hero-img--opening max-h-none max-w-none select-none"
+              />
+            </div>
+
+            {!reduceMotion ? (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 iq-schools-mastery-parallax"
+              />
+            ) : null}
+
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 iq-schools-mastery-vignette iq-schools-mastery-vignette--opening"
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-16 iq-schools-mastery-opening-bridge"
+            />
+          </div>
+
+          <div className="relative z-30 shrink-0 pointer-events-auto">{footer}</div>
+        </div>
+      ) : (
+        <>
+          <div
+            className="relative min-h-0 flex-1 overflow-hidden"
+            role="img"
+            aria-label="Your epic path to investing mastery starts now"
+          >
+            <div
+              className={[
+                "absolute inset-0 flex items-center justify-center",
+                reduceMotion ? "" : "iq-schools-mastery-kenburns"
+              ].join(" ")}
+            >
+              <img
+                src={INVESTOR_MASTERY_HERO_SRC}
+                alt=""
+                aria-hidden
+                width={1920}
+                height={1080}
+                decoding="async"
+                fetchPriority="high"
+                className="h-[100dvh] w-[100vw] min-h-[100dvh] min-w-[100vw] max-h-none max-w-none object-cover object-center select-none max-sm:object-contain"
+              />
+            </div>
+
+            {!reduceMotion ? (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 iq-schools-mastery-parallax"
+              />
+            ) : null}
+
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 iq-schools-mastery-vignette"
+            />
+          </div>
+        </>
+      )}
     </motion.div>
   );
 }
