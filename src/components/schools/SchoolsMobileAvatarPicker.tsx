@@ -11,8 +11,8 @@ import type { SchoolsAvatarId } from "@/lib/schools/avatars";
 
 const SLIDE_GAP = 10;
 const SLIDE_VW = 0.88;
-/** ~10% shorter cards — keeps width hero-sized without pushing CTA down */
-const PORTRAIT_HEIGHT_SCALE = 0.88;
+/** Shorter portrait — compact cinematic stack on phone */
+const PORTRAIT_HEIGHT_SCALE = 0.82;
 
 const AVATAR_BG_PARTICLES = [
   { left: "12%", top: "22%", size: 2, delay: "0s", dur: "11s" },
@@ -93,7 +93,7 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
         </p>
       </header>
 
-      <div className="iq-schools-avatar-mobile-body relative z-10 flex min-h-0 flex-1 flex-col">
+      <div className="iq-schools-avatar-mobile-body relative z-10 flex min-h-0 flex-1 flex-col justify-start">
         <SchoolsAvatarCarouselTrack
           slideGap={SLIDE_GAP}
           carousel={carousel}
@@ -102,26 +102,29 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
           mobileSelection={{ selectedId, onSelectAvatar: onSelect }}
         />
 
-        <SchoolsAvatarCarouselMeta
-          activeAvatar={carousel.focusedAvatar}
-          variant="mobile"
-        />
-      </div>
+        <div className="iq-schools-avatar-mobile-identity-stack shrink-0">
+          <SchoolsAvatarCarouselMeta
+            activeAvatar={carousel.focusedAvatar}
+            variant="mobile"
+            selected={selectedId === carousel.focusedAvatar.id}
+          />
 
-      <div className="iq-schools-avatar-mobile-footer relative z-20 shrink-0 px-4 pt-1">
-        <div className="flex justify-center">
-          <NeonButton
-            type="button"
-            className={[
-              "iq-schools-armor-cta iq-schools-armor-cta-premium w-full max-w-[18.5rem]",
-              "min-h-[46px] px-8 py-3 text-xs font-black uppercase tracking-[0.26em]",
-              "transition-[box-shadow,opacity,transform] duration-300",
-              selectedId ? "iq-schools-armor-cta--armed" : ""
-            ].join(" ")}
-            onClick={handleContinue}
-          >
-            CONTINUE
-          </NeonButton>
+          <div className="iq-schools-avatar-mobile-footer relative z-20 px-4">
+            <div className="flex justify-center">
+              <NeonButton
+                type="button"
+                className={[
+                  "iq-schools-armor-cta iq-schools-armor-cta-premium w-full max-w-[18.5rem]",
+                  "min-h-[46px] px-8 py-3 text-xs font-black uppercase tracking-[0.26em]",
+                  "transition-[box-shadow,opacity,transform] duration-300",
+                  selectedId ? "iq-schools-armor-cta--armed" : ""
+                ].join(" ")}
+                onClick={handleContinue}
+              >
+                CONTINUE
+              </NeonButton>
+            </div>
+          </div>
         </div>
       </div>
     </main>
