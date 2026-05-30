@@ -12,7 +12,7 @@ import type { SchoolsAvatarId } from "@/lib/schools/avatars";
 const SLIDE_GAP = 10;
 const SLIDE_VW = 0.88;
 /** Shorter portrait — compact cinematic stack on phone */
-const PORTRAIT_HEIGHT_SCALE = 0.82;
+const PORTRAIT_HEIGHT_SCALE = 0.8;
 
 const AVATAR_BG_PARTICLES = [
   { left: "12%", top: "22%", size: 2, delay: "0s", dur: "11s" },
@@ -71,8 +71,8 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
         />
       ))}
 
-      <header className="iq-schools-avatar-mobile-header relative z-10 shrink-0 px-4 pb-0 pt-[max(0.85rem,env(safe-area-inset-top))]">
-        <div className="iq-schools-avatar-mobile-hero-wrap relative mx-auto max-w-[22rem] px-2 py-1">
+      <header className="iq-schools-avatar-mobile-header relative z-10 shrink-0 px-4 pb-0 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <div className="iq-schools-avatar-mobile-hero-wrap relative mx-auto max-w-[22rem] px-2 py-0.5">
           <span
             aria-hidden
             className="pointer-events-none absolute inset-0 iq-schools-avatar-hero-glow"
