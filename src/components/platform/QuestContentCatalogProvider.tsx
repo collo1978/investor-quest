@@ -17,6 +17,7 @@ import {
   type QuestContentCatalogSource
 } from "@/platform/quests/questContentRegistry";
 import { getAnalyticsPartnerId } from "@/lib/analytics/identity";
+import { isSchoolsFunnelPath } from "@/lib/schools/schoolsDemoProtection";
 import {
   DEFAULT_PARTNER_ID
 } from "@/platform/partners/partnerRegistry";
@@ -33,6 +34,7 @@ const QuestContentCatalogContext = createContext<CatalogContextValue | null>(
 );
 
 function shouldHydrateCatalog(pathname: string): boolean {
+  if (isSchoolsFunnelPath(pathname)) return false;
   if (!pathname.startsWith("/admin")) return true;
   return (
     pathname === "/admin/quests" || pathname.startsWith("/admin/quests/")

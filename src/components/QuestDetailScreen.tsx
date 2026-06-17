@@ -37,8 +37,11 @@
  */
 
 import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   Fragment,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -84,6 +87,14 @@ import {
   CONTINUE_LABEL,
   MARK_AS_READ_LABEL
 } from "@/lib/quests/gameActionCopy";
+import {
+  resolveMapIslandHref,
+  resolveSchoolsBusinessHubHref
+} from "@/lib/schools/schoolsDemoHref";
+import {
+  isSchoolsDemoPlaythroughActive,
+  SCHOOLS_DEMO_BUSINESS_TILE
+} from "@/lib/schools/schoolsDemoPlaythrough";
 
 import type { QuestPipelineProgress } from "@/lib/quests/questPayloadProgress";
 
@@ -253,6 +264,7 @@ export function QuestDetailScreen({
   financialPipeline,
   questPipeline: questPipelineProp
 }: QuestDetailScreenProps) {
+  const pathname = usePathname();
   const questPipeline = questPipelineProp ?? financialPipeline;
   const { state, actions, raw } = useGame();
   const companyId = state.activeCompanyId as CompanyId;
@@ -282,7 +294,10 @@ export function QuestDetailScreen({
   const parentSelfRead = useIsQuestRead(pillarId, slug);
 
   // In multi-card mode, the parent is "read" iff every sub-card is read.
-  const cards: readonly QuestSubCard[] = quest?.cards ?? [];
+  const cards = useMemo<readonly QuestSubCard[]>(
+    () => quest?.cards ?? [],
+    [quest?.cards]
+  );
   const cardReadFlags = useMemo(
     () =>
       cards.length > 0
@@ -322,10 +337,20 @@ export function QuestDetailScreen({
     usePillarQuestCardTemplate && quest
       ? getPillarQuestTheme(pillarId)
       : null;
-  const [pillarOnQuizScreen, setPillarOnQuizScreen] = useState(false);
+  const [quizHeaderProgress, setQuizHeaderProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
+
+  const handleQuizScreenChange = useCallback(
+    (_active: boolean, progress?: { current: number; total: number }) => {
+      setQuizHeaderProgress(progress ?? null);
+    },
+    []
+  );
 
   useEffect(() => {
-    setPillarOnQuizScreen(false);
+    setQuizHeaderProgress(null);
   }, [slug]);
 
   const parsedSingleCard = useMemo(
@@ -367,7 +392,7 @@ export function QuestDetailScreen({
       quest
         ? keyInsightHookFromBlocks(parsedSingleCard.blocks, quest.objective)
         : "",
-    [parsedSingleCard.blocks, quest?.objective, quest]
+    [parsedSingleCard.blocks, quest]
   );
 
   if (!quest) {
@@ -403,24 +428,53 @@ export function QuestDetailScreen({
   const questNumber = questIdx >= 0 ? questIdx + 1 : 1;
   const totalQuests = quests.length || 1;
   const progressPct = Math.min(100, (questNumber / totalQuests) * 100);
+  const showQuizHeaderProgress = quizHeaderProgress !== null;
+  const headerProgressCurrent = showQuizHeaderProgress
+    ? quizHeaderProgress.current
+    : questNumber;
+  const headerProgressTotal = showQuizHeaderProgress
+    ? quizHeaderProgress.total
+    : totalQuests;
+  const headerProgressPct = showQuizHeaderProgress
+    ? Math.min(
+        100,
+        (quizHeaderProgress.current / quizHeaderProgress.total) * 100
+      )
+    : progressPct;
   const nextQuestInPillar =
     questIdx >= 0 && questIdx < quests.length - 1 ? quests[questIdx + 1] : null;
+  const schoolsBusinessHub = resolveSchoolsBusinessHubHref(pathname);
   const islandBackHref =
     pillarId === "forces" && quest.forcesCategory
       ? `/forces/category/${quest.forcesCategory}`
-      : pillar.route;
+      : pillarId === "business" && schoolsBusinessHub
+        ? schoolsBusinessHub
+        : pillar.route;
 
-  const nextQuestCta = nextQuestInPillar
+  const schoolsDemoTileFinale =
+    isSchoolsDemoPlaythroughActive() &&
+    pillarId === "business" &&
+    slug === SCHOOLS_DEMO_BUSINESS_TILE;
+
+  const nextQuestCta =
+    schoolsDemoTileFinale || !nextQuestInPillar
+      ? undefined
+      : {
+          href: resolveMapIslandHref(
+            `${pillar.route}/${nextQuestInPillar.slug}`,
+            pathname
+          ),
+          label: `Next quest → ${nextQuestInPillar.title}`
+        };
+  const islandFinaleCta = schoolsDemoTileFinale
     ? {
-        href: `${pillar.route}/${nextQuestInPillar.slug}`,
-        label: `Next quest → ${nextQuestInPillar.title}`
+        href: resolveMapIslandHref(pillar.route, pathname),
+        label: "Back to Business island"
       }
-    : undefined;
-  const islandFinaleCta =
-    questIdx >= 0 && questIdx === quests.length - 1
+    : questIdx >= 0 && questIdx === quests.length - 1
       ? {
-          href: pillar.route,
-          label: `Island cleared — chart conviction`
+          href: resolveMapIslandHref(pillar.route, pathname),
+          label: "Island cleared — chart conviction"
         }
       : undefined;
 
@@ -430,7 +484,12 @@ export function QuestDetailScreen({
       : formatPlayerQuestSourceFromSection(quest.secSection, company.name);
 
   return (
-    <main className="pointer-events-auto relative mx-auto w-full max-w-4xl px-4 pb-28 pt-6 md:px-6 md:pt-8">
+    <main
+      className={[
+        "pointer-events-auto relative mx-auto w-full max-w-4xl px-4 pb-28 pt-6 md:px-6 md:pt-8",
+        usePillarQuestCardTemplate ? "bg-[#010104]" : ""
+      ].join(" ")}
+    >
       {/* Top bar: back link + quest progress */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
@@ -442,12 +501,18 @@ export function QuestDetailScreen({
           }
           className="group inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.16em] transition hover:brightness-110"
           style={{
-            borderColor: pillarQuestTheme?.border ?? GOLD_BORDER_SOFT,
+            borderColor: usePillarQuestCardTemplate
+              ? "rgba(255,255,255,0.1)"
+              : pillarQuestTheme?.border ?? GOLD_BORDER_SOFT,
             background: "rgba(7,7,18,0.55)",
-            color: pillarQuestTheme?.hi ?? GOLD_HI,
-            boxShadow: pillarQuestTheme
-              ? `0 0 18px -6px ${pillarQuestTheme.glow}`
-              : undefined
+            color: usePillarQuestCardTemplate
+              ? "rgba(220,220,230,0.88)"
+              : pillarQuestTheme?.hi ?? GOLD_HI,
+            boxShadow: usePillarQuestCardTemplate
+              ? undefined
+              : pillarQuestTheme
+                ? `0 0 18px -6px ${pillarQuestTheme.glow}`
+                : undefined
           }}
         >
           <span aria-hidden className="text-[14px] leading-none">
@@ -460,13 +525,13 @@ export function QuestDetailScreen({
 
         <div className="flex items-center gap-3">
           <span className="text-[10.5px] uppercase tracking-[0.20em] text-ink-2">
-            Quest Progress
+            {showQuizHeaderProgress ? "Question" : "Quest Progress"}
           </span>
           <span
             className="font-[var(--font-grotesk)] text-[14px] font-semibold tabular-nums"
             style={{ color: pillarQuestTheme?.hi ?? GOLD_HI }}
           >
-            {questNumber} / {totalQuests}
+            {headerProgressCurrent} / {headerProgressTotal}
           </span>
         </div>
       </div>
@@ -475,24 +540,35 @@ export function QuestDetailScreen({
       <div
         role="progressbar"
         aria-valuemin={0}
-        aria-valuemax={totalQuests}
-        aria-valuenow={questNumber}
-        aria-label={`Quest ${questNumber} of ${totalQuests} in ${pillar.title}`}
-        className="relative mt-3 h-1.5 w-full overflow-hidden rounded-full"
+        aria-valuemax={headerProgressTotal}
+        aria-valuenow={headerProgressCurrent}
+        aria-label={
+          showQuizHeaderProgress
+            ? `Question ${headerProgressCurrent} of ${headerProgressTotal}`
+            : `Quest ${headerProgressCurrent} of ${headerProgressTotal} in ${pillar.title}`
+        }
+        className={[
+          "relative mt-3 w-full overflow-hidden rounded-full",
+          usePillarQuestCardTemplate ? "h-1" : "h-1.5"
+        ].join(" ")}
         style={{
-          background: pillarQuestTheme?.glowSoft ?? GOLD_WASH
+          background: usePillarQuestCardTemplate
+            ? "rgba(255,255,255,0.06)"
+            : pillarQuestTheme?.glowSoft ?? GOLD_WASH
         }}
       >
         <motion.div
           initial={{ width: 0 }}
-          animate={{ width: `${progressPct}%` }}
+          animate={{ width: `${headerProgressPct}%` }}
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="h-full rounded-full"
           style={{
             background: pillarQuestTheme
               ? `linear-gradient(90deg, ${pillarQuestTheme.hi} 0%, ${pillarQuestTheme.lo} 100%)`
               : `linear-gradient(90deg, ${GOLD_HI} 0%, ${GOLD_LO} 100%)`,
-            boxShadow: `0 0 20px ${pillarQuestTheme?.glow ?? GOLD_GLOW}`
+            boxShadow: usePillarQuestCardTemplate
+              ? "none"
+              : `0 0 20px ${pillarQuestTheme?.glow ?? GOLD_GLOW}`
           }}
         />
       </div>
@@ -501,31 +577,45 @@ export function QuestDetailScreen({
       <motion.article
         initial={false}
         animate={{
-          boxShadow: parentRead
-            ? pillarQuestTheme
-              ? `0 24px 80px -36px rgba(0,0,0,0.75), 0 0 0 1px ${pillarQuestTheme.border}, 0 0 48px -28px ${pillarQuestTheme.glowSoft}`
-              : `0 24px 80px -36px rgba(0,0,0,0.75), 0 0 0 1px rgba(245,197,71,0.22), 0 0 48px -28px rgba(245,197,71,0.12)`
-            : `0 20px 70px -40px rgba(0,0,0,0.72), 0 0 0 1px rgba(255,255,255,0.08)`,
+          boxShadow: usePillarQuestCardTemplate
+            ? "0 22px 52px -36px rgba(0,0,0,0.92), inset 0 1px 0 rgba(255, 228, 170, 0.14)"
+            : parentRead
+              ? pillarQuestTheme
+                ? `0 24px 80px -36px rgba(0,0,0,0.75), 0 0 0 1px ${pillarQuestTheme.border}, 0 0 48px -28px ${pillarQuestTheme.glowSoft}`
+                : `0 24px 80px -36px rgba(0,0,0,0.75), 0 0 0 1px rgba(245,197,71,0.22), 0 0 48px -28px rgba(245,197,71,0.12)`
+              : `0 20px 70px -40px rgba(0,0,0,0.72), 0 0 0 1px rgba(255,255,255,0.08)`,
           scale: celebrate ? [1, 1.015, 1] : 1
         }}
         transition={{
           boxShadow: { duration: 0.45, ease: "easeOut" },
           scale: { duration: 0.55, ease: "easeOut" }
         }}
-        className="relative mt-5 overflow-hidden rounded-2xl border border-white/[0.08] bg-[rgba(10,10,14,0.94)] backdrop-blur-xl"
+        className={[
+          "relative mt-5 overflow-hidden rounded-2xl border backdrop-blur-xl",
+          usePillarQuestCardTemplate
+            ? "border-2 bg-[rgba(4,4,10,0.99)]"
+            : "border-white/[0.08] bg-[rgba(10,10,14,0.94)]"
+        ].join(" ")}
         style={{
-          borderTopColor: pillarQuestTheme?.border ?? "rgba(245,197,71,0.28)"
+          borderColor: usePillarQuestCardTemplate
+            ? "rgba(210, 175, 85, 0.55)"
+            : undefined,
+          borderTopColor: usePillarQuestCardTemplate
+            ? "rgba(228, 196, 110, 0.62)"
+            : pillarQuestTheme?.border ?? "rgba(245,197,71,0.28)"
         }}
         aria-label={`${quest.title} — quest detail`}
       >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(100% 70% at 100% 0%, rgba(245,197,71,0.06), transparent 45%), radial-gradient(90% 60% at 0% 100%, rgba(139,92,246,0.05), transparent 50%)"
-          }}
-        />
+        {!usePillarQuestCardTemplate ? (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(100% 70% at 100% 0%, rgba(245,197,71,0.06), transparent 45%), radial-gradient(90% 60% at 0% 100%, rgba(139,92,246,0.05), transparent 50%)"
+            }}
+          />
+        ) : null}
 
         {/* Completion sweep — only when parent just flipped to fully read */}
         <AnimatePresence>
@@ -634,7 +724,7 @@ export function QuestDetailScreen({
                 trackCardOpened(raw, pillarId, slug, "main");
               }
             }}
-            onQuizScreenChange={setPillarOnQuizScreen}
+            onQuizScreenChange={handleQuizScreenChange}
             nextQuest={nextQuestCta}
             islandFinaleCta={islandFinaleCta}
           />
@@ -2353,11 +2443,13 @@ function PillarCrest({
         boxShadow: `inset 0 0 26px rgba(245,197,71,0.20)`
       }}
     >
-      <img
+      <Image
         src={meta.screenImage}
         alt=""
         aria-hidden
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-35"
+        fill
+        sizes="160px"
+        className="pointer-events-none object-cover opacity-35"
       />
       <div
         aria-hidden

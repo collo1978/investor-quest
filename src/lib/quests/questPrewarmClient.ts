@@ -2,6 +2,7 @@
 
 import type { PillarId } from "@/data/pillars";
 import { isClientFastQuestMode } from "@/lib/quests/questGenerationModeClient";
+import { isSchoolsDemoProtectedPath } from "@/lib/schools/schoolsDemoProtection";
 import { getPillarQuestPipelineConfig } from "@/lib/quests/pillarQuestPipelineConfig";
 import {
   getMissingCardIds,
@@ -35,6 +36,7 @@ export async function prewarmQuestAnswers(
   questSlug: string,
   options?: { cardIds?: string[] }
 ): Promise<void> {
+  if (isSchoolsDemoProtectedPath()) return;
   if (isClientFastQuestMode()) return;
 
   const config = getPillarQuestPipelineConfig(pillarId);

@@ -20,9 +20,9 @@ export function isHubPriorSlotComplete(
   const work = view?.work;
 
   if (rule.kind === "quiz") {
-    const passPct = rule.passPct ?? 0.66;
-    const best = work?.mini?.quiz?.bestScore ?? 0;
-    return Boolean(work?.mini?.quiz?.passed) || best >= passPct;
+    // Chain unlock follows engine completion (`complete-quest` on quiz pass),
+    // not stale questWork.passed / bestScore from merges or partial sessions.
+    return false;
   }
 
   if (rule.kind === "checklist") {

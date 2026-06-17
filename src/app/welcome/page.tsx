@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { useDemoStory } from "@/components/demo/DemoStoryProvider";
 import { useGame } from "@/components/GameProvider";
+import { useMobilePreviewEmbed } from "@/hooks/useMobilePreviewEmbed";
+import { isDemoPath } from "@/lib/demo/demoHref";
 import {
   resolveHomeEntryRoute,
   shouldShowWelcomeScreen
@@ -17,8 +19,10 @@ import {
 
 export default function WelcomePage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { raw, actions } = useGame();
   const demoStory = useDemoStory();
+  const isPreviewEmbed = useMobilePreviewEmbed();
   const leavingRef = useRef(false);
 
   useEffect(() => {
@@ -31,6 +35,7 @@ export default function WelcomePage() {
   advanceStoryRef.current = demoStory.advance;
 
   const startOnboarding = useCallback(() => {
+    if (isPreviewEmbed) return;
     if (leavingRef.current) return;
     leavingRef.current = true;
 
@@ -44,15 +49,17 @@ export default function WelcomePage() {
     queueMicrotask(() => {
       actions.completeWelcomeScreen();
     });
-  }, [actions, router]);
+  }, [actions, isPreviewEmbed, router]);
 
   useEffect(() => {
+    if (isPreviewEmbed) return;
+    if (isDemoPath(pathname)) return;
     if (demoStory.active) return;
     if (leavingRef.current) return;
     if (shouldShowWelcomeScreen(raw)) return;
     const target = resolveHomeEntryRoute(raw);
     if (target !== "/welcome") router.replace(target);
-  }, [demoStory.active, raw, router]);
+  }, [demoStory.active, isPreviewEmbed, pathname, raw, router]);
 
   return <WelcomeScreen onStartQuest={startOnboarding} />;
 }

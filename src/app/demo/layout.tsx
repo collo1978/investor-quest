@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { DemoProductionLayout } from "@/components/demo/DemoProductionLayout";
 
@@ -8,10 +9,23 @@ export const metadata: Metadata = {
     "Scripted product tour: logo intro, welcome, onboarding, quest map, and business island."
 };
 
+function DemoLayoutFallback() {
+  return (
+    <div
+      className="pointer-events-auto min-h-[100dvh] bg-[#030308]"
+      aria-busy="true"
+    />
+  );
+}
+
 export default function DemoLayout({
   children
 }: {
   children: React.ReactNode;
 }) {
-  return <DemoProductionLayout>{children}</DemoProductionLayout>;
+  return (
+    <Suspense fallback={<DemoLayoutFallback />}>
+      <DemoProductionLayout>{children}</DemoProductionLayout>
+    </Suspense>
+  );
 }

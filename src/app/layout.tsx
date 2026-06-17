@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import { ClientAppRoot } from "@/components/ClientAppRoot";
+import { REQUEST_PATHNAME_HEADER } from "@/lib/requestPathname";
 
 const grotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -26,11 +28,14 @@ export const viewport: Viewport = {
   themeColor: "#070712"
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headerStore = await headers();
+  const initialPathname = headerStore.get(REQUEST_PATHNAME_HEADER) ?? "";
+
   return (
     <html
       lang="en"
@@ -46,7 +51,9 @@ export default function RootLayout({
         />
       </head>
       <body className="grain font-[var(--font-inter)]" suppressHydrationWarning>
-        <ClientAppRoot>{children}</ClientAppRoot>
+        <ClientAppRoot initialPathname={initialPathname}>
+          {children}
+        </ClientAppRoot>
       </body>
     </html>
   );

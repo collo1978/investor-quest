@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import type { BusinessQuestSlug } from "@/app/business/businessQuestSlugs";
 import { useGame } from "@/components/GameProvider";
@@ -14,6 +14,7 @@ import { usePillarQuestGeneratedContent } from "@/hooks/usePillarQuestGeneratedC
 import { markBusinessIslandBriefSeen } from "@/lib/businessIslandBriefSession";
 import { resolveBusinessHubCardBySlug } from "@/lib/business/resolveBusinessHubCardBySlug";
 import { mergeGeneratedQuestContent } from "@/lib/quests/mergeGeneratedQuestContent";
+import { resolveSchoolsBusinessHubHref } from "@/lib/schools/schoolsDemoHref";
 
 type Props = {
   slug: BusinessQuestSlug;
@@ -70,6 +71,9 @@ function BusinessQuestWithPipeline({ slug }: { slug: BusinessQuestSlug }) {
 export default function BusinessQuestClient({ slug }: Props) {
   const { actions, state, hydrated } = useGame();
   const router = useRouter();
+  const pathname = usePathname();
+  const businessHubHref =
+    resolveSchoolsBusinessHubHref(pathname) ?? "/business";
   const companyId = state.activeCompanyId as CompanyId;
 
   const { quests, readSet, questViewBySlug } = usePillarHubQuestData(
@@ -89,8 +93,8 @@ export default function BusinessQuestClient({ slug }: Props) {
 
   useEffect(() => {
     if (!hydrated || !hubCard?.locked) return;
-    router.replace("/business");
-  }, [hydrated, hubCard?.locked, router]);
+    router.replace(businessHubHref);
+  }, [businessHubHref, hydrated, hubCard?.locked, router]);
 
   if (hubCard?.locked) {
     return <BusinessQuestRouteLoading />;

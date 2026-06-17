@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+
+import { useStablePathname } from "@/hooks/useStablePathname";
 
 import { ToastHost } from "@/components/ToastHost";
 import { ConvictionQueueHost } from "@/components/conviction";
@@ -35,11 +37,66 @@ import {
 } from "@/lib/navConfig";
 import { isDemoPath, stripDemoPrefix } from "@/lib/demo/demoHref";
 import { isSchoolsDemoPath, stripSchoolsDemoPrefix } from "@/lib/schools/schoolsDemoHref";
+import { deactivateSchoolsDemoStory } from "@/lib/schools/schoolsDemoStoryMode";
+import {
+  prefetchSchoolsDevNav,
+  prefetchSchoolsDevRoute
+} from "@/lib/schools/prefetchSchoolsDevRoutes";
 
 type SidebarNavItem = { href: string; label: string };
 
-export function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+/**
+ * Dev sidebar accordion — `open` is applied after mount so SSR and hydration
+ * never fight browser-persisted `<details open>` state.
+ */
+function DevSidebarSection({
+  title,
+  defaultOpen = false,
+  onOpen,
+  children
+}: {
+  title: string;
+  defaultOpen?: boolean;
+  onOpen?: () => void;
+  children: ReactNode;
+}) {
+  /** `undefined` until mount — avoids SSR/client fighting on `<details open>`. */
+  const [isOpen, setIsOpen] = useState<boolean | undefined>(undefined);
+  const wasOpenRef = useRef(false);
+
+  useEffect(() => {
+    setIsOpen(defaultOpen);
+  }, [defaultOpen]);
+
+  useEffect(() => {
+    if (isOpen && !wasOpenRef.current) onOpen?.();
+    wasOpenRef.current = Boolean(isOpen);
+  }, [isOpen, onOpen]);
+
+  return (
+    <details
+      {...(isOpen !== undefined ? { open: isOpen } : {})}
+      onToggle={(e) => setIsOpen(e.currentTarget.open)}
+      suppressHydrationWarning
+      className="rounded-2xl border border-panel-border bg-[rgba(255,255,255,0.02)] px-3 py-2"
+    >
+      <summary className="cursor-pointer select-none py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-2">
+        {title}
+      </summary>
+      <div className="mt-2 grid gap-2 pb-1">{children}</div>
+    </details>
+  );
+}
+
+export function AppShell({
+  children,
+  initialPathname = ""
+}: {
+  children: React.ReactNode;
+  initialPathname?: string;
+}) {
+  const pathname = useStablePathname(initialPathname);
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { state, actions, fx } = useGame();
   const lp = levelProgress(state.xp);
@@ -63,26 +120,44 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isOnboarding = learnerPath.startsWith("/onboarding");
   const isEntryFunnel =
     learnerPath === "/opening" || learnerPath === "/welcome";
-  const showAppChrome = !isOnboarding && !isEntryFunnel;
+  const isSchoolsOpeningScreen =
+    learnerPath === "/schools" || learnerPath === "/schools/opening";
+  const isSchoolsAvatarScreen = learnerPath === "/schools/avatar";
+  const isSchoolsPosterScreen =
+    learnerPath === "/schools/profile" || learnerPath === "/schools/armor-guide";
+  const isSchoolsPickCompanyScreen = learnerPath === "/schools/pick-company";
+  const isSchoolsOnboardingFunnelScreen =
+    learnerPath === "/schools/screen5-onboarding" ||
+    learnerPath === "/schools/pick-interests" ||
+    learnerPath === "/schools/company-reveal";
+  const isSchoolsImmersiveScreen =
+    isSchoolsOpeningScreen ||
+    isSchoolsAvatarScreen ||
+    isSchoolsOnboardingFunnelScreen ||
+    isSchoolsPosterScreen ||
+    isSchoolsPickCompanyScreen;
+  const showAppChrome =
+    !isOnboarding && !isEntryFunnel && !isSchoolsImmersiveScreen;
+  const hideMobileChrome = learnerPath.startsWith("/business");
   const isDev = process.env.NODE_ENV !== "production";
 
   const bankBrokerNav: readonly SidebarNavItem[] = [
-    { href: "/opening", label: "Opening Logo" },
-    { href: "/welcome", label: "Welcome Intro" },
-    { href: "/onboarding", label: "Onboarding" },
-    { href: "/map", label: "Map" },
-    { href: "/business", label: "Business" },
-    { href: "/forces", label: "Forces" },
-    { href: "/financials", label: "Financials" },
-    { href: "/management", label: "Management" },
-    { href: "/profile", label: "Profile" }
+    { href: "/bank/mobile-preview", label: "Mobile Preview" },
+    { href: "/demo", label: "Demo start" },
+    { href: "/demo/opening", label: "Opening Logo" },
+    { href: "/demo/welcome", label: "Welcome Intro" },
+    { href: "/demo/screen4-onboarding", label: "Onboarding" },
+    { href: "/demo/map", label: "Map" },
+    { href: "/demo/business", label: "Business" },
+    { href: "/demo/business/what-they-do", label: "Business Quest" }
   ] as const;
 
   const schoolsNav: readonly SidebarNavItem[] = [
     { href: "/schools/demo", label: "Schools Live Demo" },
     { href: "/schools/opening", label: "Opening Logo" },
-    { href: "/schools/avatar", label: "Choose Avatar" },
-    { href: "/schools/onboarding", label: "Onboarding" },
+    { href: "/schools/avatar", label: "Choose Identity" },
+    { href: "/schools/screen5-onboarding", label: "Stocks Experience" },
+    { href: "/schools/preview/mission-brief", label: "Mission Brief" },
     { href: "/schools/map", label: "Map" },
     { href: "/schools/business", label: "Business" },
     { href: "/schools/forces", label: "Forces" },
@@ -91,17 +166,56 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: "/schools/profile", label: "Profile" }
   ] as const;
 
+  const warmSchoolsDevNav = useCallback(() => {
+    prefetchSchoolsDevNav(router.prefetch);
+  }, [router]);
+
+  /** Sidebar dev links — leave presenter demo; only "Schools Live Demo" starts it. */
+  const handleSchoolsSidebarClick = useCallback((href: string) => {
+    if (href !== "/schools/demo") {
+      deactivateSchoolsDemoStory();
+    }
+  }, []);
+
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
   const isPlatformSurface =
     pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
+  const isMobilePreviewSurface =
+    pathname === "/mobile-preview" || pathname.startsWith("/bank/mobile-preview");
+  const isSchoolsPreviewSurface = pathname.startsWith("/schools/preview");
+
+  if (isMobilePreviewSurface) {
+    return (
+      <div className="pointer-events-auto min-h-[100dvh] bg-[#030308]">
+        {children}
+      </div>
+    );
+  }
+
+  if (isSchoolsPreviewSurface) {
+    return (
+      <div className="pointer-events-auto h-[100vh] w-[100vw] overflow-hidden bg-[#05010f]">
+        {children}
+      </div>
+    );
+  }
 
   if (isSchoolsDemoProduction) {
     return (
+      <div className="pointer-events-auto flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-[#05010f]">
+        {children}
+      </div>
+    );
+  }
+
+  if (isSchoolsImmersiveScreen) {
+    return (
       <div className="pointer-events-auto h-[100dvh] max-h-[100dvh] w-full overflow-hidden bg-[#05010f]">
         {children}
+        <ToastHost />
       </div>
     );
   }
@@ -290,54 +404,52 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ) : null}
             {isDev ? (
               <div className="grid gap-2">
-                <details
-                  open
-                  className="rounded-2xl border border-panel-border bg-[rgba(255,255,255,0.02)] px-3 py-2"
-                >
-                  <summary className="cursor-pointer select-none py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-2">
-                    Bank / Broker
-                  </summary>
-                  <div className="mt-2 grid gap-2 pb-1">
-                    {bankBrokerNav.map((item) => {
-                      const active =
-                        learnerPath === item.href ||
-                        learnerPath.startsWith(`${item.href}/`);
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          prefetch={item.href !== "/profile"}
-                          className={linkClass(active)}
-                        >
-                          {item.label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </details>
+                <DevSidebarSection title="Bank / Broker" defaultOpen>
+                  {bankBrokerNav.map((item) => {
+                    const active =
+                      learnerPath === item.href ||
+                      learnerPath.startsWith(`${item.href}/`);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        prefetch={item.href !== "/profile"}
+                        className={linkClass(active)}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </DevSidebarSection>
 
-                <details className="rounded-2xl border border-panel-border bg-[rgba(255,255,255,0.02)] px-3 py-2">
-                  <summary className="cursor-pointer select-none py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-2">
-                    Schools
-                  </summary>
-                  <div className="mt-2 grid gap-2 pb-1">
-                    {schoolsNav.map((item) => {
-                      const active =
-                        learnerPath === item.href ||
-                        learnerPath.startsWith(`${item.href}/`);
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          prefetch={item.href !== "/schools/profile"}
-                          className={linkClass(active)}
-                        >
-                          {item.label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </details>
+                <DevSidebarSection
+                  title="Schools"
+                  defaultOpen={learnerPath.startsWith("/schools")}
+                  onOpen={warmSchoolsDevNav}
+                >
+                  {schoolsNav.map((item) => {
+                    const active =
+                      learnerPath === item.href ||
+                      learnerPath.startsWith(`${item.href}/`);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        prefetch
+                        onClick={() => handleSchoolsSidebarClick(item.href)}
+                        onMouseEnter={() =>
+                          prefetchSchoolsDevRoute(router.prefetch, item.href)
+                        }
+                        onFocus={() =>
+                          prefetchSchoolsDevRoute(router.prefetch, item.href)
+                        }
+                        className={linkClass(active)}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </DevSidebarSection>
               </div>
             ) : (
               <>
@@ -404,7 +516,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Main content — pointer-events-auto so clicks reach page links (sidebars stay pointer-events-auto) */}
       <div className="relative z-0 pointer-events-auto md:pl-[280px]">
-        {showAppChrome ? (
+        {showAppChrome && !hideMobileChrome ? (
           <Header
             onOpenMenu={() => setMobileMenuOpen(true)}
             menuOpen={mobileMenuOpen}
@@ -414,7 +526,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* mobile bottom nav */}
-      {showAppChrome && (
+      {showAppChrome && !hideMobileChrome && (
         <nav className="pointer-events-auto fixed bottom-0 left-0 right-0 z-[100] h-[var(--mobile-nav-h)] border-t border-panel-border bg-[rgba(7,7,18,0.78)] backdrop-blur-xl md:hidden">
           <div className="mx-auto h-full max-w-6xl px-3 py-2">
             <div className="mb-2 flex items-center justify-between gap-3">

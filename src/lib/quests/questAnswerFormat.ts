@@ -1,5 +1,10 @@
 import { sanitizeQuestAnswerText } from "@/lib/quests/sanitizeQuestAnswer";
 import { formatQuestCardCopy } from "@/lib/quests/questAnswerFormatter";
+import {
+  buildTakeawayAnswerBody,
+  hasLabeledTakeawayFormat,
+  resolveTakeawayAnswer
+} from "@/lib/quests/takeawayAnswer";
 
 export {
   QUEST_BEGINNER_VOICE,
@@ -12,6 +17,8 @@ export {
 
 export type RelatableAnswerSections = {
   paragraphs: string[];
+  takeaway: string | null;
+  supporting: string | null;
   whyInvestorsCare: string | null;
 };
 
@@ -80,10 +87,13 @@ export function parseRelatableQuestAnswer(
   body = stripAnalystHeadings(body);
 
   const paragraphs = splitParagraphs(body);
-  if (paragraphs.length === 0 && !why) return null;
+  const takeawayParts = resolveTakeawayAnswer(body, paragraphs);
+  if (paragraphs.length === 0 && !why && !takeawayParts?.takeaway) return null;
 
   return {
     paragraphs,
+    takeaway: takeawayParts?.takeaway ?? null,
+    supporting: takeawayParts?.supporting ?? null,
     whyInvestorsCare: why
   };
 }
@@ -95,7 +105,8 @@ export function questAnswerPreviewText(
 ): string {
   const parsed = parseRelatableQuestAnswer(plainEnglishAnswer, investorInsight);
   const combined = parsed
-    ? parsed.paragraphs.join(" ")
+    ? [parsed.takeaway, parsed.supporting].filter(Boolean).join(" ") ||
+      parsed.paragraphs.join(" ")
     : plainEnglishAnswer;
   const t = combined.replace(/\s+/g, " ").trim();
   return t.length > maxLen ? `${t.slice(0, maxLen - 1).trim()}…` : t;
@@ -131,8 +142,18 @@ export function splitQuestAnswer(
     }
   }
 
+  if (hasLabeledTakeawayFormat(cleaned)) {
+    return {
+      plainEnglishAnswer: cleaned.trim(),
+      investorInsight: why
+    };
+  }
+
   const paragraphs = splitParagraphs(cleaned);
-  const plainEnglishAnswer = paragraphs.join("\n\n").trim();
+  const takeawayParts = resolveTakeawayAnswer(cleaned, paragraphs);
+  const plainEnglishAnswer = takeawayParts
+    ? buildTakeawayAnswerBody(takeawayParts)
+    : paragraphs.join("\n\n").trim();
 
   return {
     plainEnglishAnswer,

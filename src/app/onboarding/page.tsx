@@ -4,32 +4,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { NeonButton } from "@/components/NeonButton";
-import { CompanyLogo } from "@/components/CompanyLogo";
 import { useGame } from "@/components/GameProvider";
 import { InvestorQuestBrandLogo } from "@/components/InvestorQuestBrandLogo";
-import { QuestMatchReveal } from "@/app/onboarding/QuestMatchReveal";
+import dynamic from "next/dynamic";
+import { useMobilePreviewEmbed } from "@/hooks/useMobilePreviewEmbed";
+import { hrefForBankMissionBrief } from "@/lib/bank/bankBrokerMissionBriefNavigation";
 import { getOrCreateOnboardingGuestId } from "@/lib/onboarding/guestId";
 import {
   CONTROLLED_DEMO_MODE,
   CONTROLLED_DEMO_COMPANY_ID
 } from "@/lib/demo/controlledDemo";
 import { NVDA_ONBOARDING } from "@/lib/demo/nvidiaDemoVoice";
-import {
-  buildControlledDemoOnboardingShowcase,
-  buildControlledDemoQuestMatchPool,
-  mergeRecommendationsForControlledDemo,
-  shuffleOnboardingDeck
-} from "@/lib/demo/controlledOnboarding";
-import { buildQuestMatchFallbackCards } from "@/lib/onboarding/questMatchFallback";
-import type {
-  OnboardingInterest,
-  RecommendedCompanyCard
-} from "@/lib/onboarding/types";
-import {
-  DEFAULT_COMPANY_ID,
-  isCompanyId,
-  type CompanyId
-} from "@/lib/demoData";
+import type { OnboardingInterest } from "@/lib/onboarding/types";
+import { DEFAULT_COMPANY_ID } from "@/lib/demoData";
 import { useDemoStory } from "@/components/demo/DemoStoryProvider";
 import { useSchoolsDemoStory } from "@/components/schools/SchoolsDemoStoryProvider";
 import { isDemoStoryModeActive } from "@/lib/demo/demoStoryMode";
@@ -40,6 +27,20 @@ import { useRunOnceOnMount } from "@/hooks/useRunOnceOnMount";
 import { releaseFunnelTransition } from "@/lib/startup/funnelTransition";
 import { prefetchStartupAssets } from "@/lib/startup/prefetchStartupAssets";
 import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
+
+const BankBrokerQuestMatchReveal = dynamic(
+  () =>
+    import("@/components/bank/BankBrokerQuestMatchReveal").then((m) => ({
+      default: m.BankBrokerQuestMatchReveal
+    })),
+  {
+    loading: () => (
+      <main className="static-ui relative flex min-h-screen items-center justify-center bg-[#05050F]">
+        <p className="text-sm text-ink-2">Loading match…</p>
+      </main>
+    )
+  }
+);
 
 const FALLBACK_INTERESTS: OnboardingInterest[] = [
   { id: "ai", label: "AI & Robotics", icon: "⌬", sortOrder: 10 },
@@ -52,33 +53,6 @@ const FALLBACK_INTERESTS: OnboardingInterest[] = [
   { id: "music", label: "Music & Media", icon: "♫", sortOrder: 80 }
 ];
 
-function resolveGameCompanyId(cardId: string): CompanyId {
-  if (CONTROLLED_DEMO_MODE) return CONTROLLED_DEMO_COMPANY_ID;
-  return isCompanyId(cardId) ? cardId : DEFAULT_COMPANY_ID;
-}
-
-function InterestTags({
-  ids,
-  labelById
-}: {
-  ids: string[];
-  labelById: Map<string, string>;
-}) {
-  if (!ids.length) return null;
-  return (
-    <div className="mt-2 flex flex-wrap justify-center gap-1">
-      {ids.slice(0, 3).map((id) => (
-        <span
-          key={id}
-          className="rounded-full border border-[rgba(139,92,246,0.35)] bg-[rgba(139,92,246,0.12)] px-2 py-0.5 text-[9px] font-semibold text-neon-300"
-        >
-          {labelById.get(id) ?? id}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 export default function OnboardingPage() {
   const router = useRouter();
   const pathname = usePathname();
@@ -88,11 +62,14 @@ export default function OnboardingPage() {
   const { state, actions, persistenceReady, raw } = useGame();
   const demoStory = useDemoStory();
   const schoolsDemo = useSchoolsDemoStory();
+  const isPreviewEmbed = useMobilePreviewEmbed();
 
   useRunOnceOnMount(() => {
     releaseFunnelTransition("onboarding");
-    prefetchStartupAssets();
-    preloadQuestDetailChunks();
+    if (!isPreviewEmbed) {
+      prefetchStartupAssets();
+      preloadQuestDetailChunks();
+    }
     try {
       router.prefetch("/business");
       router.prefetch("/business/what-they-do");
@@ -103,6 +80,7 @@ export default function OnboardingPage() {
   });
 
   useEffect(() => {
+    if (isPreviewEmbed) return;
     if (demoStory.active || isDemoStoryModeActive()) return;
     if (schoolsDemo.active || isSchoolsDemoStoryModeActive()) return;
     if (!persistenceReady) return;
@@ -110,6 +88,7 @@ export default function OnboardingPage() {
       router.replace(mapRoute);
     }
   }, [
+    isPreviewEmbed,
     demoStory.active,
     mapRoute,
     persistenceReady,
@@ -118,25 +97,10 @@ export default function OnboardingPage() {
     schoolsDemo.active
   ]);
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [interests, setInterests] = useState<string[]>([]);
   const [interestOptions, setInterestOptions] =
     useState<OnboardingInterest[]>(FALLBACK_INTERESTS);
-  const [recommendedCards, setRecommendedCards] = useState<RecommendedCompanyCard[]>(
-    []
-  );
-  const [recommendationsLoading, setRecommendationsLoading] = useState(false);
-  const [swipeLikes, setSwipeLikes] = useState<string[]>([]);
-  const [swipeNope, setSwipeNope] = useState<string[]>([]);
-  const [selectedCardId, setSelectedCardId] = useState<string>(state.activeCompanyId);
-  const [questMatchKey, setQuestMatchKey] = useState(0);
-
-  const interestLabelById = useMemo(() => {
-    const map = new Map<string, string>();
-    interestOptions.forEach((o) => map.set(o.id, o.label));
-    return map;
-  }, [interestOptions]);
-
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -156,48 +120,6 @@ export default function OnboardingPage() {
     };
   }, []);
 
-  const loadRecommendations = useCallback(async (selected: string[]) => {
-    if (CONTROLLED_DEMO_MODE) {
-      setRecommendedCards(
-        shuffleOnboardingDeck(buildControlledDemoOnboardingShowcase(selected))
-      );
-      setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID);
-      return;
-    }
-    if (!selected.length) {
-      setRecommendedCards([]);
-      return;
-    }
-    const qs = encodeURIComponent(selected.join(","));
-    const res = await fetch(`/api/onboarding/recommendations?interests=${qs}&limit=12`, {
-      cache: "no-store"
-    });
-    if (!res.ok) {
-      if (CONTROLLED_DEMO_MODE) {
-        setRecommendedCards(
-          shuffleOnboardingDeck(buildControlledDemoOnboardingShowcase(selected))
-        );
-        setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID);
-      }
-      return;
-    }
-    const body = (await res.json()) as { companies?: RecommendedCompanyCard[] };
-    if (Array.isArray(body.companies)) {
-      const companies = CONTROLLED_DEMO_MODE
-        ? shuffleOnboardingDeck(
-            mergeRecommendationsForControlledDemo(body.companies, selected)
-          )
-        : body.companies;
-      setRecommendedCards(companies);
-      setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID);
-    } else if (CONTROLLED_DEMO_MODE) {
-      setRecommendedCards(
-        shuffleOnboardingDeck(buildControlledDemoOnboardingShowcase(selected))
-      );
-      setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID);
-    }
-  }, []);
-
   const persistInterests = useCallback((selected: string[]) => {
     const guestId = getOrCreateOnboardingGuestId();
     void fetch("/api/onboarding/interests", {
@@ -207,29 +129,12 @@ export default function OnboardingPage() {
     });
   }, []);
 
-  const swipeDeck = recommendedCards;
-
-  const swipable = useMemo(() => {
-    const seen = new Set([...swipeLikes, ...swipeNope]);
-    return swipeDeck.filter((c) => !seen.has(c.id));
-  }, [swipeDeck, swipeLikes, swipeNope]);
-
-  const selectedCard = useMemo(
-    () => recommendedCards.find((c) => c.id === selectedCardId) ?? recommendedCards[0],
-    [recommendedCards, selectedCardId]
-  );
-
-
-  const progressIndex = useMemo(
-    () => (step === 1 ? 0 : step === 2 ? 1 : 2),
-    [step]
-  );
+  const progressIndex = useMemo(() => (step === 1 ? 0 : 1), [step]);
 
   const enterQuestFromMatch = useCallback(() => {
-    const gameId = selectedCard
-      ? resolveGameCompanyId(selectedCard.id)
-      : DEFAULT_COMPANY_ID;
-    actions.setActiveCompany(gameId);
+    actions.setActiveCompany(
+      CONTROLLED_DEMO_MODE ? CONTROLLED_DEMO_COMPANY_ID : DEFAULT_COMPANY_ID
+    );
     actions.setProfile({
       playerName: state.playerName ?? "Investor",
       goal: state.goal ?? "Build conviction"
@@ -251,77 +156,47 @@ export default function OnboardingPage() {
       return;
     }
 
+    if (isPreviewEmbed) {
+      router.replace(hrefForBankMissionBrief(true));
+      return;
+    }
+
     if (!persistenceReady) return;
     actions.completeOnboarding();
     router.replace(mapRoute);
   }, [
     actions,
     demoStory,
+    isPreviewEmbed,
     mapRoute,
     pathname,
     persistenceReady,
     router,
     schoolsDemo,
-    selectedCard,
     state.goal,
     state.playerName
   ]);
 
-  const questMatchPool = useMemo(() => {
-    if (CONTROLLED_DEMO_MODE) {
-      return buildControlledDemoQuestMatchPool(recommendedCards);
-    }
-    if (recommendedCards.length > 0) return recommendedCards;
-    return buildQuestMatchFallbackCards();
-  }, [recommendedCards]);
-
   const mapPrefetchedRef = useRef(false);
   useEffect(() => {
-    if (step === 3) {
-      setQuestMatchKey((k) => k + 1);
-      if (!mapPrefetchedRef.current) {
-        mapPrefetchedRef.current = true;
-        try {
-          router.prefetch("/map");
-        } catch {
-          /* ignore */
-        }
+    if (step >= 2 && !mapPrefetchedRef.current) {
+      mapPrefetchedRef.current = true;
+      try {
+        router.prefetch("/map");
+      } catch {
+        /* ignore */
       }
     }
   }, [step, router]);
 
   const continueFromInterests = () => {
-    if (CONTROLLED_DEMO_MODE) {
-      setRecommendedCards(
-        shuffleOnboardingDeck(buildControlledDemoOnboardingShowcase(interests))
-      );
-      setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID);
-    } else if (recommendedCards.length === 0) {
-      setRecommendationsLoading(true);
-      void loadRecommendations(interests).finally(() =>
-        setRecommendationsLoading(false)
-      );
-    }
+    if (CONTROLLED_DEMO_MODE && interests.length !== 2) return;
     persistInterests(interests);
     setStep(2);
   };
 
-  useEffect(() => {
-    if (interests.length === 0) return;
-    if (CONTROLLED_DEMO_MODE) {
-      setRecommendedCards(
-        shuffleOnboardingDeck(buildControlledDemoOnboardingShowcase(interests))
-      );
-      setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID);
-      return;
-    }
-    const timer = window.setTimeout(() => {
-      void loadRecommendations(interests);
-    }, 400);
-    return () => window.clearTimeout(timer);
-  }, [interests, loadRecommendations]);
-
   const storyActive =
+    isPreviewEmbed ||
     demoStory.active ||
     isDemoStoryModeActive() ||
     schoolsDemo.active ||
@@ -344,6 +219,17 @@ export default function OnboardingPage() {
   }
 
   const schoolsDemoFlow = pathname.includes("/schools");
+
+  if (step === 2) {
+    return (
+      <BankBrokerQuestMatchReveal
+        interestIds={interests}
+        onRevealComplete={() => enterQuestFromMatch()}
+        enterQuestDisabled={!storyActive && !persistenceReady}
+        continueLabel="BEGIN QUEST"
+      />
+    );
+  }
 
   return (
     <main
@@ -427,12 +313,16 @@ export default function OnboardingPage() {
           <section className="rounded-[28px] border border-panel-border bg-[rgba(7,7,18,0.55)] p-6 shadow-[0_0_0_1px_rgba(139,92,246,0.14),0_30px_70px_rgba(0,0,0,0.55)] backdrop-blur-xl">
             <div className="text-[44px] leading-[1.02] font-[var(--font-grotesk)] font-extrabold text-ink-0">
               {CONTROLLED_DEMO_MODE ? (
-                <>
-                  {NVDA_ONBOARDING.step1Title}{" "}
-                  <span className="bg-[linear-gradient(90deg,#a855f7,#7c3aed,#60a5fa)] bg-clip-text text-transparent">
-                    {NVDA_ONBOARDING.step1TitleAccent}
-                  </span>
-                </>
+                NVDA_ONBOARDING.step1TitleAccent ? (
+                  <>
+                    {NVDA_ONBOARDING.step1Title}{" "}
+                    <span className="bg-[linear-gradient(90deg,#a855f7,#7c3aed,#60a5fa)] bg-clip-text text-transparent">
+                      {NVDA_ONBOARDING.step1TitleAccent}
+                    </span>
+                  </>
+                ) : (
+                  NVDA_ONBOARDING.step1Title
+                )
               ) : (
                 <>
                   Discover{" "}
@@ -442,34 +332,55 @@ export default function OnboardingPage() {
                 </>
               )}
             </div>
-            <div className="mt-3 flex items-center gap-3 text-sm text-ink-2">
-              <span className="h-px w-10 bg-[linear-gradient(90deg,transparent,rgba(139,92,246,0.75),transparent)] shadow-[0_0_18px_rgba(139,92,246,0.22)]" />
-              {CONTROLLED_DEMO_MODE
-                ? NVDA_ONBOARDING.step1Subtitle
-                : "Choose topics you enjoy, we match companies from metadata first."}
+            <div className="mt-3 text-sm text-ink-2">
+              {CONTROLLED_DEMO_MODE ? (
+                NVDA_ONBOARDING.step1Subtitle
+              ) : (
+                <div className="flex items-center gap-3">
+                  <span className="h-px w-10 bg-[linear-gradient(90deg,transparent,rgba(139,92,246,0.75),transparent)] shadow-[0_0_18px_rgba(139,92,246,0.22)]" />
+                  Choose topics you enjoy, we match companies from metadata first.
+                </div>
+              )}
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {interestOptions.map((it) => {
                 const active = interests.includes(it.id);
+                const atMax = CONTROLLED_DEMO_MODE && interests.length >= 2;
+                const dimmed = CONTROLLED_DEMO_MODE && !active && atMax;
                 return (
                   <button
                     key={it.id}
                     type="button"
+                    aria-pressed={active}
                     onClick={() =>
-                      setInterests((prev) =>
-                        prev.includes(it.id)
-                          ? prev.filter((x) => x !== it.id)
-                          : [...prev, it.id]
-                      )
+                      setInterests((prev) => {
+                        if (prev.includes(it.id)) {
+                          return prev.filter((x) => x !== it.id);
+                        }
+                        if (CONTROLLED_DEMO_MODE && prev.length >= 2) {
+                          return prev;
+                        }
+                        return [...prev, it.id];
+                      })
                     }
                     className={[
-                      "group rounded-2xl border px-3 py-4 text-center transition",
+                      "group relative rounded-2xl border px-3 py-4 text-center transition-[box-shadow,background-color,border-color,opacity] duration-200",
                       active
-                        ? "border-[rgba(139,92,246,0.45)] bg-[rgba(139,92,246,0.12)] shadow-[0_0_22px_rgba(139,92,246,0.18)]"
-                        : "border-panel-border bg-[rgba(255,255,255,0.03)] hover:bg-[rgba(255,255,255,0.06)]"
+                        ? "border-[rgba(139,92,246,0.55)] bg-[rgba(139,92,246,0.14)] shadow-[0_0_0_1px_rgba(139,92,246,0.35),0_0_24px_rgba(139,92,246,0.28)]"
+                        : dimmed
+                          ? "border-panel-border/60 bg-[rgba(255,255,255,0.02)] opacity-45"
+                          : "border-panel-border bg-[rgba(255,255,255,0.03)] hover:border-violet-400/35 hover:bg-[rgba(139,92,246,0.08)] hover:shadow-[0_0_18px_rgba(139,92,246,0.16)]"
                     ].join(" ")}
                   >
+                    {active && CONTROLLED_DEMO_MODE ? (
+                      <span
+                        aria-hidden
+                        className="absolute right-2 top-2 text-[10px] font-bold text-violet-300"
+                      >
+                        ✓
+                      </span>
+                    ) : null}
                     <div className="text-neon-300 text-xl">{it.icon}</div>
                     <div className="mt-2 text-[11px] font-semibold text-ink-0">
                       {it.label}
@@ -483,7 +394,11 @@ export default function OnboardingPage() {
               <NeonButton
                 className="w-full justify-center"
                 onClick={() => void continueFromInterests()}
-                disabled={interests.length === 0}
+                disabled={
+                  CONTROLLED_DEMO_MODE
+                    ? interests.length !== 2
+                    : interests.length === 0
+                }
               >
                 {CONTROLLED_DEMO_MODE
                   ? NVDA_ONBOARDING.step1Continue
@@ -495,132 +410,6 @@ export default function OnboardingPage() {
                   : "Takes less than 30 seconds"}
               </div>
             </div>
-          </section>
-        ) : null}
-
-        {step === 2 ? (
-          <section className="rounded-[28px] border border-panel-border bg-[rgba(7,7,18,0.55)] p-6 shadow-[0_0_0_1px_rgba(139,92,246,0.14),0_30px_70px_rgba(0,0,0,0.55)] backdrop-blur-xl">
-            <div className="text-3xl font-[var(--font-grotesk)] font-extrabold text-ink-0">
-              {CONTROLLED_DEMO_MODE
-                ? NVDA_ONBOARDING.step2Title
-                : "Swipe to discover"}
-            </div>
-            <div className="mt-2 text-sm text-ink-2">
-              {CONTROLLED_DEMO_MODE
-                ? NVDA_ONBOARDING.step2Subtitle
-                : "Right if you like it, left if you don’t."}
-            </div>
-
-            {(() => {
-              const top = swipable[0] ?? null;
-              const next = swipable[1] ?? null;
-              return (
-                <>
-                  <div
-                    className="relative mx-auto mt-6 w-full overflow-visible"
-                    style={{ width: 420, maxWidth: "100%", height: 390 }}
-                  >
-                    {next ? (
-                      <div
-                        className="pointer-events-none absolute inset-0"
-                        style={{ zIndex: 10, transform: "translateY(10px) scale(0.96)" }}
-                        aria-hidden
-                      >
-                        <div className="h-full w-full rounded-3xl border border-panel-border bg-[rgba(255,255,255,0.03)] backdrop-blur-xl">
-                          <div className="relative flex h-full items-center justify-center p-10 opacity-60">
-                            <CompanyLogo
-                              src={next.logo}
-                              alt={next.companyName}
-                              className="h-20 w-20"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ) : null}
-
-                    {top ? (
-                      <div className="absolute inset-0" style={{ zIndex: 20 }}>
-                        <div className="h-full w-full rounded-3xl border border-[rgba(139,92,246,0.40)] bg-[rgba(255,255,255,0.05)] backdrop-blur-xl">
-                          <div className="flex h-full flex-col items-center justify-center px-10 py-10 text-center">
-                            <CompanyLogo
-                              src={top.logo}
-                              alt={top.companyName}
-                              className="h-24 w-24 rounded-3xl"
-                            />
-                            <div className="mt-6 text-2xl font-[var(--font-grotesk)] font-extrabold leading-tight text-ink-0">
-                              {top.companyName}
-                            </div>
-                            <div className="mt-2 text-sm text-ink-2">{top.ticker}</div>
-                            <div className="mt-1 text-[11px] text-ink-2">{top.sector}</div>
-                            <InterestTags ids={top.matchingInterests} labelById={interestLabelById} />
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="absolute inset-0 grid place-items-center text-sm text-ink-2">
-                        {recommendationsLoading
-                          ? "Loading matches…"
-                          : recommendedCards.length === 0
-                            ? "Pick interests and continue."
-                            : "No more cards."}
-                      </div>
-                    )}
-                  </div>
-
-                  {top ? (
-                    <div className="mt-4 flex items-center justify-center gap-6">
-                      <button
-                        type="button"
-                        onClick={() => setSwipeNope((p) => [...p, top.id])}
-                        className="grid h-14 w-14 place-items-center rounded-2xl border border-panel-border bg-[rgba(255,255,255,0.03)] text-ink-1 shadow-[0_0_24px_rgba(0,0,0,0.55)] hover:bg-[rgba(255,255,255,0.06)]"
-                        aria-label="Not interested"
-                      >
-                        ✕
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSwipeLikes((p) => [...p, top.id])}
-                        className="grid h-14 w-14 place-items-center rounded-2xl border border-[rgba(139,92,246,0.45)] bg-[rgba(139,92,246,0.12)] text-neon-300 shadow-[0_0_28px_rgba(139,92,246,0.22)] hover:bg-[rgba(139,92,246,0.18)]"
-                        aria-label="Interested"
-                      >
-                        ❤
-                      </button>
-                    </div>
-                  ) : null}
-
-                  <div className="mt-6 flex gap-3">
-                    <NeonButton
-                      variant="ghost"
-                      className="flex-1 justify-center"
-                      onClick={() => setStep(1)}
-                    >
-                      Back
-                    </NeonButton>
-                    <NeonButton
-                      className="flex-1 justify-center"
-                      onClick={() => setStep(3)}
-                      disabled={swipeLikes.length + swipeNope.length === 0}
-                    >
-                      Continue
-                    </NeonButton>
-                  </div>
-                </>
-              );
-            })()}
-          </section>
-        ) : null}
-
-        {step === 3 ? (
-          <section className="rounded-[28px] border border-panel-border bg-[rgba(7,7,18,0.55)] p-6 shadow-[0_0_0_1px_rgba(139,92,246,0.14),0_30px_70px_rgba(0,0,0,0.55)] backdrop-blur-xl">
-            <QuestMatchReveal
-              key={questMatchKey}
-              companies={questMatchPool}
-              interestLabelById={interestLabelById}
-              controlledDemoReveal={CONTROLLED_DEMO_MODE}
-              onWinnerChosen={() => setSelectedCardId(CONTROLLED_DEMO_COMPANY_ID)}
-              onEnterQuest={enterQuestFromMatch}
-              enterQuestDisabled={!persistenceReady}
-            />
           </section>
         ) : null}
 

@@ -18,7 +18,7 @@ export const BUSINESS_QUEST_QUIZZES: Record<BusinessQuestSlug, QuizConfig> = {
         prompt:
           "After this section, what should you be able to explain about {Company.name}?",
         choices: [
-          "What it makes, the problem it fixes, and why it matters now",
+          "What it makes and why customers buy",
           "Exact next-quarter EPS to the penny",
           "Only insider trades from last week",
           "Which colour the logo uses"

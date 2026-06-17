@@ -1,10 +1,12 @@
 import SchoolsProfileHub from "./SchoolsProfileHub";
+import { SCHOOLS_PROFILE_IMAGE_SRC } from "@/lib/schools/schoolsProfileConfig";
 
 /** Schools variant — student mastery + armor-forward profile. */
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export default function SchoolsProfilePage() {
-  return <SchoolsProfileHub />;
+  return (
+    <>
+      <link rel="preload" as="image" href={SCHOOLS_PROFILE_IMAGE_SRC} />
+      <SchoolsProfileHub />
+    </>
+  );
 }
-

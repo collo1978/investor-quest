@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 
 import { SchoolsDemoProductionLayout } from "@/components/schools/SchoolsDemoProductionLayout";
 import {
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
   metadataBase,
   title: "Investor Quest — Schools Live Demo",
   description:
-    "Scripted Schools tour: logo intro, avatar, onboarding, quest map, and business island.",
+    "Scripted Schools tour: opening through Business tile, conviction, profile, XP ladder, final challenge, and map.",
   applicationName: SCHOOLS_DEMO_PWA.appName,
   manifest: SCHOOLS_DEMO_PWA.manifestPath,
   appleWebApp: {
@@ -53,10 +54,23 @@ export const viewport: Viewport = {
   themeColor: SCHOOLS_DEMO_PWA.themeColor
 };
 
+function SchoolsDemoLayoutFallback() {
+  return (
+    <div
+      className="pointer-events-auto flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-[#05010f]"
+      aria-busy="true"
+    />
+  );
+}
+
 export default function SchoolsDemoLayout({
   children
 }: {
   children: React.ReactNode;
 }) {
-  return <SchoolsDemoProductionLayout>{children}</SchoolsDemoProductionLayout>;
+  return (
+    <Suspense fallback={<SchoolsDemoLayoutFallback />}>
+      <SchoolsDemoProductionLayout>{children}</SchoolsDemoProductionLayout>
+    </Suspense>
+  );
 }

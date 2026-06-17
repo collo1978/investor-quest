@@ -1,0 +1,19 @@
+﻿# Build & dependencies
+.next/
+node_modules/
+
+# Large binaries (keep code indexed; skip images/audio)
+public/**/*.png
+public/**/*.jpg
+public/**/*.webp
+public/**/*.avif
+public/sounds/
+
+# Lockfile noise for agents
+package-lock.json
+
+# Test / logs / temp
+coverage/
+*.log
+*.trace
+tmp-zone-*

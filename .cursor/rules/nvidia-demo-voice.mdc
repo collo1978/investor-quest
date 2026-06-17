@@ -1,0 +1,72 @@
+---
+description: NVIDIA controlled demo — question-matched conversational voice
+globs:
+  - src/data/quests/content/nvidia*.ts
+  - src/lib/demo/nvidiaDemo*.ts
+alwaysApply: false
+---
+
+# NVIDIA demo voice — human + question-matched
+
+## Two requirements (both required)
+
+1. **Feel human** — smart friend / YouTube explainer / game conversation  
+2. **Answer the actual question** — tone and examples fit the card purpose
+
+Do **not** use the same emotional opener on every card. Do **not** force ChatGPT, games, or “you know when…” where the question is about money, trust, risk, or leadership.
+
+## Complete loop (required — do not stop at the problem)
+
+Every card must **finish** the thought. Never end after pain/setup only.
+
+1. Relatable situation (when it fits)  
+2. Frustration / problem (mainly **problem** questions)  
+3. Simple explanation  
+4. **NVIDIA payoff** — what they do, what problem they solve, or why customers care  
+
+**Bad:** stops at "Companies hate that too…" with no solution.  
+**Good:** "NVIDIA builds the chips helping those apps run much faster and smoother."
+
+## Question types — different purpose, different feel
+
+| Question type | Goal | Opener style |
+|---------------|------|----------------|
+| What does the company do? | Simple WHAT + real-life tie-in | Lead with what they sell; then apps/games |
+| What problem do they solve? | Frustration → fix | “You know when…” lag/wait OK here |
+| Why choose them / advantage? | Trust, habit, reputation | Trusted by big names; hard to switch |
+| What could go wrong? | Risk in plain language | If X happened, they could lose… |
+| How do they make money? | Business model | Who pays, what they buy |
+| Growth / financials | Numbers story simply | What went up/down and why |
+| Management | People, pay, board | Who runs it, incentives, oversight |
+
+## Gold examples
+
+**What (snapshot card-1):**  
+Takeaway: “NVIDIA makes the brains behind AI and games.”  
+Supporting: “When you use ChatGPT or play a modern video game, there's a good chance NVIDIA technology is helping behind the scenes.”
+
+**Problem (snapshot card-2):**  
+“You know when ChatGPT spins forever…” → NVIDIA builds the parts that chew through that work.
+
+**Financials (growth):**  
+“Imagine every big tech company ordering gear for the next wave of AI — that order pile is why revenue shot up.”
+
+## Banned in white supporting text
+
+- 10-K, filings, SEC, proxy statements (ground facts in filings; never say so on screen)
+- CUDA, GeForce, hyperscale, fabless, inference, infrastructure
+- GPU / data center (prefer: server rooms, behind-the-scenes gear, apps and games)
+- Corporate product descriptions and segment names
+
+Goal: **“Now I get it.”** — not **“Now I know the terminology.”**
+
+## Banned everywhere
+
+- Same template on every card (repetitive AI copy)  
+- Narrator openers: “Their customers need…”, “The company’s business model…”  
+- Textbook / SEC / analyst / startup-pitch tone  
+- Jargon: enterprise, accelerated, workloads, AI boom  
+
+## Scope
+
+Quest cards (match template or override `investorQuestion`), quizzes, forces, onboarding, pass messages, pillar blurbs.

@@ -86,7 +86,29 @@ import {
   questMapBridgeColor,
   type QuestMapHoverAccent
 } from "@/components/map/islandTokens";
-import { QUEST_MAP_AVIF_PATH, QUEST_MAP_PATH } from "@/lib/screenAssetUrls";
+import { QuestMapMobileAtmosphere } from "@/components/map/QuestMapMobileAtmosphere";
+import { QuestMapMobileHud } from "@/components/map/QuestMapMobileHud";
+import {
+  BANK_MOBILE_MAP_ASPECT,
+  BANK_MOBILE_MAP_HOTSPOTS,
+  BANK_MOBILE_MAP_PATH,
+  BANK_MOBILE_REACTOR_CENTER
+} from "@/lib/bank/bankMobileMapConfig";
+import {
+  computeBankMobileImageBox,
+  BANK_MOBILE_MAP_CENTER_Y_PERCENT,
+  BANK_MOBILE_MAP_ZOOM,
+  BANK_MOBILE_REACTOR_WIDTH_PERCENT
+} from "@/lib/map/questMapMobileGameLayout";
+import {
+  DESKTOP_MAP_ASPECT,
+  DESKTOP_MAP_HOTSPOTS,
+  DESKTOP_MAP_PATH,
+  DESKTOP_REACTOR_CENTER
+} from "@/lib/map/questMapDesktopConfig";
+import { computeDesktopCoverImageBox } from "@/lib/map/questMapDesktopLayout";
+import { isQuestMapBusinessOnlyPlayable } from "@/lib/map/questMapProgression";
+import { useBankMobileGameMap } from "@/lib/map/useBankMobileGameMap";
 
 // ---------------------------------------------------------------------------
 // Hotspot map (percentages of the rendered image bounding box).
@@ -106,14 +128,6 @@ type Hotspot = {
   h: number;
 };
 
-/** Ellipses cover island + badge — kept tight so hover glow hugs the art. */
-const HOTSPOTS: ReadonlyArray<Hotspot> = [
-  { id: "business",   cx: 23, cy: 33, w: 23, h: 29 },
-  { id: "forces",     cx: 77, cy: 33, w: 23, h: 29 },
-  { id: "financials", cx: 23, cy: 67, w: 23, h: 28 },
-  { id: "management", cx: 77, cy: 67, w: 23, h: 28 }
-];
-
 /**
  * Top-row art has hex titles at the bottom of the island — lift the enter
  * CTA onto the structure so it does not cover BUSINESS / FORCES signs.
@@ -129,19 +143,24 @@ function enterCtaLayout(pillarId: PillarId): string {
  * Locked-island lock chip — centred on the rocky mass; top row sits higher
  * so it does not sit on the baked-in hex “BUSINESS / FORCES” plaques.
  */
-function lockBadgeLayout(pillarId: PillarId): string {
+function lockBadgeLayout(pillarId: PillarId, gameMapUi = false): string {
+  if (gameMapUi) {
+    switch (pillarId) {
+      case "forces":
+        return "right-[6%] left-auto top-[10%] translate-x-0 translate-y-0";
+      case "financials":
+        return "left-[6%] top-auto bottom-[22%] translate-x-0 translate-y-0";
+      case "management":
+        return "right-[6%] left-auto top-auto bottom-[22%] translate-x-0 translate-y-0";
+      default:
+        return "hidden";
+    }
+  }
   if (pillarId === "business" || pillarId === "forces") {
     return "left-1/2 top-[33%] -translate-x-1/2 -translate-y-1/2";
   }
   return "left-1/2 top-[44%] -translate-x-1/2 -translate-y-1/2";
 }
-
-/** Centre of the artwork — where the 10K reactor sits. */
-const REACTOR_CENTER = { x: 50, y: 50 } as const;
-
-const IMAGE_NATURAL_W = 1402;
-const IMAGE_NATURAL_H = 1122;
-const IMAGE_ASPECT = IMAGE_NATURAL_W / IMAGE_NATURAL_H;
 
 // ---------------------------------------------------------------------------
 // Bridge paths — INVISIBLE curves that approximate the energy bridges
@@ -311,7 +330,18 @@ function QuestMapOverallProgressHud({ progressPct }: { progressPct: number }) {
 // QuestMapScene
 // ===========================================================================
 export function QuestMapScene() {
+  const pathname = usePathname();
   const { state, raw } = useGame();
+  const bankMobileGame = useBankMobileGameMap();
+  const desktopGameMap = !bankMobileGame;
+  const gameMapUi = bankMobileGame || desktopGameMap;
+  const fullscreenPreview = pathname.startsWith("/schools/preview/");
+  const mapImageAspect = bankMobileGame
+    ? BANK_MOBILE_MAP_ASPECT
+    : DESKTOP_MAP_ASPECT;
+  const reactorCenter = bankMobileGame
+    ? BANK_MOBILE_REACTOR_CENTER
+    : DESKTOP_REACTOR_CENTER;
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [imageBox, setImageBox] = useState<{ w: number; h: number }>({
     w: 0,
@@ -328,17 +358,12 @@ export function QuestMapScene() {
     const compute = () => {
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) return;
-      const stageAspect = r.width / r.height;
-      let w: number;
-      let h: number;
-      if (stageAspect > IMAGE_ASPECT) {
-        h = r.height;
-        w = h * IMAGE_ASPECT;
-      } else {
-        w = r.width;
-        h = w / IMAGE_ASPECT;
+      if (bankMobileGame) {
+        const box = computeBankMobileImageBox(r.width, r.height, mapImageAspect);
+        setImageBox(box);
+        return;
       }
-      setImageBox({ w: Math.round(w), h: Math.round(h) });
+      setImageBox(computeDesktopCoverImageBox(r.width, r.height, mapImageAspect));
     };
     compute();
     const ro = new ResizeObserver(compute);
@@ -348,7 +373,12 @@ export function QuestMapScene() {
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, []);
+  }, [bankMobileGame, mapImageAspect]);
+
+  const mapHotspots = useMemo(
+    () => (bankMobileGame ? BANK_MOBILE_MAP_HOTSPOTS : DESKTOP_MAP_HOTSPOTS),
+    [bankMobileGame]
+  );
 
   // -------------------------------------------------------------------------
   // Pointer-driven parallax — three depth layers
@@ -406,9 +436,14 @@ export function QuestMapScene() {
       const progressPct = total > 0 ? (completedCount / total) * 100 : 0;
       const reading = getPillarReadingProgress(raw, meta.id);
       const comingSoon = isPillarComingSoon(companyId, meta.id);
-      const unlocked = !!ps?.unlocked && !comingSoon;
+      const engineUnlocked = !!ps?.unlocked && !comingSoon;
+      const unlocked = gameMapUi
+        ? isQuestMapBusinessOnlyPlayable(meta.id, engineUnlocked)
+        : engineUnlocked;
       const completed = isPillarComplete(state.pillars, meta.id);
-      const active = state.activePillarId === meta.id && unlocked;
+      const active = gameMapUi
+        ? meta.id === "business" && unlocked
+        : state.activePillarId === meta.id && unlocked;
       const inProgress =
         !completed && (reading.read > 0 || progressPct > 0) && unlocked;
       return {
@@ -426,7 +461,7 @@ export function QuestMapScene() {
         totalQuests: total
       };
     });
-  }, [state.pillars, state.activePillarId, state.activeCompanyId, raw]);
+  }, [gameMapUi, state.pillars, state.activePillarId, state.activeCompanyId, raw]);
 
   const overallProgressPct = useMemo(() => {
     if (islands.length === 0) return 0;
@@ -463,21 +498,44 @@ export function QuestMapScene() {
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
-          background:
-            "radial-gradient(120% 95% at 50% 35%, rgba(40,22,90,0.65) 0%, rgba(14,8,42,0.85) 45%, rgba(4,2,18,1) 80%)"
+          background: bankMobileGame
+            ? "radial-gradient(120% 90% at 50% 42%, rgba(28,16,62,0.55) 0%, rgba(5,3,14,0.92) 72%, rgba(4,2,12,1) 100%)"
+            : "radial-gradient(120% 95% at 50% 35%, rgba(40,22,90,0.65) 0%, rgba(14,8,42,0.85) 45%, rgba(4,2,18,1) 80%)"
         }}
       />
+
+      {bankMobileGame ? <QuestMapMobileAtmosphere /> : null}
+
+      {bankMobileGame ? (
+        <QuestMapMobileHud
+          progressPct={overallProgressPct}
+          xp={state.xp}
+        />
+      ) : null}
 
       {/* Image box — letterboxed to image aspect ratio. All overlays
           (particles, beams, reactor, hotspots) live inside so they stay
           aligned with the artwork at every viewport size. */}
       {hasBox ? (
         <div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          style={{ width: imageBox.w, height: imageBox.h }}
+          className="absolute"
+          style={{
+            left: "50%",
+            top: bankMobileGame
+              ? `${BANK_MOBILE_MAP_CENTER_Y_PERCENT}%`
+              : "50%",
+            width: imageBox.w,
+            height: imageBox.h,
+            transform: bankMobileGame
+              ? `translate(-50%, -50%) scale(${BANK_MOBILE_MAP_ZOOM})`
+              : "translate(-50%, -50%)",
+            transformOrigin: "center center"
+          }}
           data-quest-map-image-box
         >
-          <QuestMapOverallProgressHud progressPct={overallProgressPct} />
+          {desktopGameMap ? (
+            <QuestMapOverallProgressHud progressPct={overallProgressPct} />
+          ) : null}
 
           {futureArcTeaser ? (
             <div
@@ -500,45 +558,51 @@ export function QuestMapScene() {
 
           {/* (0) Artwork — the hero. Very subtle parallax drift. */}
           <motion.img
-            src={QUEST_MAP_PATH}
+            src={bankMobileGame ? BANK_MOBILE_MAP_PATH : DESKTOP_MAP_PATH}
             alt="Quest Map"
             draggable={false}
-            className="pointer-events-none absolute inset-0 h-full w-full select-none object-fill"
+            className={[
+              "pointer-events-none absolute inset-0 h-full w-full select-none",
+              bankMobileGame ? "object-contain" : "object-cover object-center"
+            ].join(" ")}
             style={{ x: imgPx, y: imgPy }}
           />
 
-          {companyLogo ? (
+          {companyLogo && desktopGameMap ? (
             <MapForcesRocketEmblem
               logoUrl={companyLogo}
               companyName={company.name}
             />
           ) : null}
 
-          {/* (1) Ambient particle field — drifts gently behind beams. */}
-          <AmbientParticles parallaxX={fgPx} parallaxY={fgPy} />
+          {desktopGameMap ? (
+            <AmbientParticles parallaxX={fgPx} parallaxY={fgPy} />
+          ) : null}
 
-          {/* (2) Bridge flow — particles travelling through the EXISTING
-              bridges in the artwork. No visible lines, only light moving
-              along invisible curved paths. */}
-          <BridgeFlows
-            islands={islands}
-            clickedId={clickedId}
-            parallaxX={midPx}
-            parallaxY={midPy}
-          />
+          {/* (2) Bridge flow — desktop widescreen map only */}
+          {desktopGameMap ? (
+            <BridgeFlows
+              islands={islands}
+              clickedId={clickedId}
+              parallaxX={midPx}
+              parallaxY={midPy}
+            />
+          ) : null}
 
-          {/* (3) Central 10K reactor — rings + bloom + orbiting motes. */}
-          <ReactorCore
-            overallProgressPct={overallProgressPct}
-            tenKUnlocked={tenKUnlocked}
-            tenKMastered={tenKMastered}
-            center={REACTOR_CENTER}
-            parallaxX={midPx}
-            parallaxY={midPy}
-          />
+          {/* (3) Central 10K reactor — desktop widescreen only */}
+          {desktopGameMap ? (
+            <ReactorCore
+              overallProgressPct={overallProgressPct}
+              tenKUnlocked={tenKUnlocked}
+              tenKMastered={tenKMastered}
+              center={reactorCenter}
+              parallaxX={midPx}
+              parallaxY={midPy}
+            />
+          ) : null}
 
           <TenKCenterPortal
-            center={REACTOR_CENTER}
+            center={reactorCenter}
             unlocked={tenKUnlocked}
             mastered={tenKMastered}
             parallaxX={midPx}
@@ -546,7 +610,7 @@ export function QuestMapScene() {
           />
 
           {/* (4) Hotspots — top layer, only interactive surface. */}
-          {HOTSPOTS.map((spot) => {
+          {mapHotspots.map((spot) => {
             const island = islands.find((i) => i.id === spot.id);
             if (!island) return null;
             return (
@@ -558,6 +622,8 @@ export function QuestMapScene() {
                 clicked={clickedId === spot.id}
                 parallaxX={imgPx}
                 parallaxY={imgPy}
+                gameMapUi={gameMapUi}
+                bankMobileGame={bankMobileGame}
               />
             );
           })}
@@ -811,7 +877,8 @@ function ReactorCore({
   tenKUnlocked,
   tenKMastered,
   parallaxX,
-  parallaxY
+  parallaxY,
+  mobileGame = false
 }: {
   center: { x: number; y: number };
   overallProgressPct: number;
@@ -819,8 +886,9 @@ function ReactorCore({
   tenKMastered: boolean;
   parallaxX: MotionValue<number>;
   parallaxY: MotionValue<number>;
+  mobileGame?: boolean;
 }) {
-  const energized = overallProgressPct > 0 || tenKUnlocked;
+  const energized = overallProgressPct > 0 || tenKUnlocked || mobileGame;
   const ringAccent = tenKMastered
     ? "rgba(255,229,141,0.95)"
     : energized
@@ -834,7 +902,7 @@ function ReactorCore({
       style={{
         left: `${center.x}%`,
         top: `${center.y}%`,
-        width: "18%",
+        width: mobileGame ? `${BANK_MOBILE_REACTOR_WIDTH_PERCENT}%` : "18%",
         aspectRatio: "1 / 1",
         translateX: "-50%",
         translateY: "-50%",
@@ -842,23 +910,52 @@ function ReactorCore({
         y: parallaxY
       }}
     >
+      {mobileGame ? (
+        <motion.div
+          aria-hidden
+          className="absolute inset-[-55%] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(255,229,141,0.35) 0%, rgba(168,85,247,0.28) 38%, transparent 72%)",
+            filter: "blur(14px)",
+            mixBlendMode: "screen"
+          }}
+          animate={{ opacity: [0.5, 0.85, 0.5], scale: [0.94, 1.1, 0.94] }}
+          transition={{
+            duration: 3.8,
+            repeat: Infinity,
+            ease: "easeInOut",
+            repeatType: "mirror"
+          }}
+        />
+      ) : null}
       {/* (a) Breathing bloom — wide soft glow that scales 0.96 ↔ 1.03. */}
       <motion.div
         className="absolute inset-[-40%] rounded-full"
         style={{
           background: tenKMastered
             ? "radial-gradient(circle, rgba(255,229,141,0.55) 0%, rgba(168,85,247,0.38) 32%, transparent 70%)"
-            : "radial-gradient(circle, rgba(255,229,141,0.40) 0%, rgba(168,85,247,0.30) 32%, transparent 70%)",
-          filter: "blur(10px)",
+            : mobileGame
+              ? "radial-gradient(circle, rgba(255,229,141,0.52) 0%, rgba(168,85,247,0.38) 32%, transparent 70%)"
+              : "radial-gradient(circle, rgba(255,229,141,0.40) 0%, rgba(168,85,247,0.30) 32%, transparent 70%)",
+          filter: mobileGame ? "blur(12px)" : "blur(10px)",
           mixBlendMode: "screen"
         }}
         initial={false}
         animate={{
-          opacity: tenKMastered ? [0.65, 1, 0.65] : [0.55, 0.95, 0.55],
-          scale: tenKMastered ? [0.98, 1.08, 0.98] : [0.96, 1.04, 0.96]
+          opacity: tenKMastered
+            ? [0.65, 1, 0.65]
+            : mobileGame
+              ? [0.62, 1, 0.62]
+              : [0.55, 0.95, 0.55],
+          scale: tenKMastered
+            ? [0.98, 1.08, 0.98]
+            : mobileGame
+              ? [0.94, 1.1, 0.94]
+              : [0.96, 1.04, 0.96]
         }}
         transition={{
-          duration: 4.6,
+          duration: mobileGame ? 3.6 : 4.6,
           repeat: Infinity,
           ease: "easeInOut",
           repeatType: "mirror"
@@ -1064,13 +1161,19 @@ function questMapHoverAccent(
 }
 
 /** Lock badge — readable size, pillar-tuned placement on island art. */
-function MapIslandLockGlyph({ pillarId }: { pillarId: PillarId }) {
+function MapIslandLockGlyph({
+  pillarId,
+  gameMapUi = false
+}: {
+  pillarId: PillarId;
+  gameMapUi?: boolean;
+}) {
   return (
     <motion.div
       aria-hidden
       className={[
         "pointer-events-none absolute z-[9] inline-flex justify-center",
-        lockBadgeLayout(pillarId)
+        lockBadgeLayout(pillarId, gameMapUi)
       ].join(" ")}
       initial={false}
       animate={{ opacity: [0.9, 1, 0.9] }}
@@ -1082,15 +1185,21 @@ function MapIslandLockGlyph({ pillarId }: { pillarId: PillarId }) {
       }}
     >
       <div
-        className="rounded-xl border border-[rgba(196,181,253,0.42)] bg-[rgba(10,9,22,0.78)] px-2.5 py-2 backdrop-blur-[3px]"
+        className={[
+          "rounded-lg border border-[rgba(196,181,253,0.42)] bg-[rgba(10,9,22,0.78)] backdrop-blur-[2px]",
+          gameMapUi ? "px-1.5 py-1" : "px-2.5 py-2"
+        ].join(" ")}
         style={{
           boxShadow:
-            "0 0 20px rgba(139,92,246,0.35), 0 10px 28px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.16)"
+            "0 0 16px rgba(139,92,246,0.3), 0 6px 20px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.12)"
         }}
       >
         <svg
           viewBox="0 0 24 24"
-          className="block h-[22px] w-[22px] sm:h-6 sm:w-6"
+          className={[
+            "block",
+            gameMapUi ? "h-4 w-4" : "h-[22px] w-[22px] sm:h-6 sm:w-6"
+          ].join(" ")}
           fill="none"
           stroke="rgba(236,233,252,0.95)"
           strokeWidth="1.5"
@@ -1128,7 +1237,9 @@ function QuestMapHotspot({
   onActivate,
   clicked,
   parallaxX,
-  parallaxY
+  parallaxY,
+  gameMapUi = false,
+  bankMobileGame = false
 }: {
   spot: Hotspot;
   island: IslandModel;
@@ -1136,6 +1247,8 @@ function QuestMapHotspot({
   clicked: boolean;
   parallaxX: MotionValue<number>;
   parallaxY: MotionValue<number>;
+  gameMapUi?: boolean;
+  bankMobileGame?: boolean;
 }) {
   const pathname = usePathname();
   const accent = questMapHoverAccent(spot.id, island.completed);
@@ -1196,11 +1309,16 @@ function QuestMapHotspot({
         }}
       >
         {/* Locked — light wash only; island silhouette stays recognizable. */}
-        {locked ? (
+        {locked && spot.id !== "business" ? (
           <>
             <span
               aria-hidden
-              className="pointer-events-none absolute inset-0 z-[2] bg-[linear-gradient(185deg,rgba(8,10,22,0.05)_0%,rgba(6,8,18,0.22)_52%,rgba(5,7,16,0.34)_100%)] mix-blend-multiply"
+              className={[
+                "pointer-events-none absolute inset-0 z-[2] mix-blend-multiply",
+                gameMapUi
+                  ? "bg-[linear-gradient(185deg,rgba(8,10,22,0.12)_0%,rgba(6,8,18,0.42)_52%,rgba(5,7,16,0.58)_100%)]"
+                  : "bg-[linear-gradient(185deg,rgba(8,10,22,0.05)_0%,rgba(6,8,18,0.22)_52%,rgba(5,7,16,0.34)_100%)]"
+              ].join(" ")}
             />
             <span
               aria-hidden
@@ -1214,24 +1332,85 @@ function QuestMapHotspot({
               <span
                 className={[
                   "pointer-events-none absolute left-1/2 z-[9] -translate-x-1/2 rounded-xl border border-[rgba(196,181,253,0.35)] bg-[rgba(10,9,22,0.82)] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-violet-200/90 backdrop-blur-sm",
-                  lockBadgeLayout(spot.id)
+                  lockBadgeLayout(spot.id, gameMapUi)
                 ].join(" ")}
               >
                 Coming soon
               </span>
             ) : (
-              <MapIslandLockGlyph pillarId={spot.id} />
+              <MapIslandLockGlyph pillarId={spot.id} gameMapUi={gameMapUi} />
             )}
           </>
         ) : null}
 
         {/* Unlocked baseline — no ring; state reads from progress + washes below. */}
 
-        {/* Active pillar — bottom-plane glow */}
-        {active ? (
+        {!locked && gameMapUi && spot.id === "business" ? (
+          <>
+            <motion.span
+              aria-hidden
+              className="pointer-events-none absolute inset-[2%] z-[1] rounded-[1.5rem]"
+              style={{
+                boxShadow:
+                  "0 0 48px rgba(245,197,71,0.48), 0 0 78px rgba(255,229,141,0.26), inset 0 0 32px rgba(245,197,71,0.16)",
+                border: "1px solid rgba(245,197,71,0.55)"
+              }}
+              animate={{ opacity: [0.5, 0.95, 0.5] }}
+              transition={{
+                duration: 2.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                repeatType: "mirror"
+              }}
+            />
+            <motion.span
+              aria-hidden
+              className="pointer-events-none absolute inset-x-[8%] bottom-[6%] top-[42%] z-[1] rounded-2xl"
+              style={{
+                background:
+                  "linear-gradient(to top, rgba(245,197,71,0.34) 0%, rgba(255,229,141,0.14) 55%, transparent 100%)",
+                mixBlendMode: "screen"
+              }}
+              animate={{ opacity: [0.45, 0.78, 0.45] }}
+              transition={{
+                duration: 2.4,
+                repeat: Infinity,
+                ease: "easeInOut",
+                repeatType: "mirror"
+              }}
+            />
+            {bankMobileGame ? (
+              <motion.span
+                aria-hidden
+                className="pointer-events-none absolute left-1/2 top-[68%] z-[10] -translate-x-1/2 rounded-full border px-3 py-1"
+                style={{
+                  borderColor: "rgba(245,197,71,0.62)",
+                  background: "rgba(10,9,18,0.78)",
+                  color: "rgba(255,244,204,0.98)",
+                  boxShadow:
+                    "0 0 18px rgba(245,197,71,0.28), 0 0 32px rgba(255,229,141,0.18)"
+                }}
+                animate={{ opacity: [0.55, 1, 0.55], scale: [0.98, 1.04, 0.98] }}
+                transition={{
+                  duration: 1.4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  repeatType: "mirror"
+                }}
+              >
+                <span className="font-[var(--font-grotesk)] text-[10px] font-extrabold uppercase tracking-[0.2em]">
+                  START
+                </span>
+              </motion.span>
+            ) : null}
+          </>
+        ) : null}
+
+        {/* Active pillar — island glow (non-game-map layouts). */}
+        {active && !gameMapUi ? (
           <motion.span
             aria-hidden
-            className="pointer-events-none absolute inset-x-[10%] bottom-[6%] top-[52%] z-[1] rounded-2xl"
+            className="pointer-events-none absolute inset-x-[6%] bottom-[4%] top-[38%] z-[1] rounded-2xl"
             style={{
               background: `linear-gradient(to top, color-mix(in srgb, ${accent.halo} 55%, transparent) 0%, transparent 92%)`,
               mixBlendMode: "screen",
@@ -1315,7 +1494,7 @@ function QuestMapHotspot({
           />
         ) : null}
 
-        {!locked ? (
+        {!locked && !gameMapUi ? (
           <span
             aria-hidden
             className={[
@@ -1335,7 +1514,6 @@ function QuestMapHotspot({
             {comingSoon ? "Coming soon" : `Enter ${island.title}`}
           </span>
         ) : null}
-
         {/* Activation flash — quick vertical flare on tap */}
         {clicked ? (
           <motion.span

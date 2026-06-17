@@ -1,0 +1,29 @@
+---
+description: Quiz question copy — investor judgment tone (all pillars)
+globs:
+  - src/data/quests/**/*Quiz*.ts
+  - src/data/quests/**/content/**/*.ts
+  - src/data/quests/tenKRookieFinalChallenge.ts
+  - src/lib/quests/quizCopy.ts
+alwaysApply: false
+---
+
+# Quiz copy standards
+
+When authoring or editing quest quizzes, follow `src/lib/quests/quizCopy.ts`:
+
+- **Mix:** ~70–80% company-specific (`{Company.name}` / `{Company.ticker}`) — filled at instantiate; ~20–30% investor lenses
+- **Feel:** “I’m understanding THIS company” — pillar-aligned (Business / Forces / Financials / Management)
+- **Prompts:** natural, investor-minded; never “After reading the cards…”
+- **Wrong answers:** realistic financial mistakes — not jokes
+- **Tokens:** use `{Company.name}` in default catalogs; `fillQuizConfigTokens` runs in `library.ts`
+
+Catalog files:
+
+- `businessQuestQuizzes.ts` — Business pillar defaults
+- `financialsQuestQuizzes.ts` — Financials pillar defaults
+- `managementQuestQuizzes.ts` — Management pillar defaults
+- `forcesQuestQuizzes.ts` — Forces hub (inside/outside) defaults
+- `content/*.ts` — company overrides (merge wins over template)
+
+Use `assertQuizCopyAllowed()` in dev when adding new strings.

@@ -8,12 +8,14 @@ import {
   QUEST_PREWARM_TARGETS,
   prewarmQuestAnswers
 } from "@/lib/quests/questPrewarmClient";
+import { isSchoolsFunnelPath } from "@/lib/schools/schoolsDemoProtection";
 
 /** Prewarm entry-quest answers when the active company changes (non-blocking). */
 export function useQuestPrewarm(companyId: string) {
   const lastTicker = useRef<string | null>(null);
 
   useEffect(() => {
+    if (isSchoolsFunnelPath()) return;
     if (isClientFastQuestMode()) return;
     const company = companyById(companyId);
     if (!company?.ticker) return;

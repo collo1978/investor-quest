@@ -344,7 +344,7 @@ export const BUSINESS_SECTION_QUIZ_RULES: Record<
     readyIntro: (required, total) =>
       `Explain it back in everyday words — ${required} of ${total} right to show you get what this company actually does.`,
     startCta: "Start understanding check",
-    lockedHint: "Read all three cards first — then prove you get what they do.",
+    lockedHint: "Read both cards first — then prove you get what they do.",
     defaultPassMessage:
       "You can explain what this company does in normal life terms — that's the foundation.",
     playingFeedback: {
@@ -458,7 +458,7 @@ export const BUSINESS_SECTION_RULES: Record<BusinessSectionId, SectionRule> = {
     teachingGoal: "Explain the company in normal life terms instantly.",
     emotionalTone: "Friendly, conversational, relatable.",
     answerStyle:
-      "WHAT they make first, then problem solved, then why they matter in AI today — different opener per card.",
+      "WHAT they sell first, then why customers buy — different opener per card.",
     presentationStyle: "Short story cards, one idea per card.",
     interactionStyle: "Read cards → understanding check.",
     avoid: ["opening every card the same way", "filing placeholders", "jargon before the WHAT"],

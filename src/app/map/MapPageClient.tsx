@@ -17,14 +17,14 @@ import { MapQuestMissionBriefOverlay } from "@/components/map/MapQuestMissionBri
 import { QuestMapScene } from "@/components/map/QuestMapScene";
 import { useDemoStory } from "@/components/demo/DemoStoryProvider";
 import { useSchoolsDemoStory } from "@/components/schools/SchoolsDemoStoryProvider";
+import { useMobilePreviewEmbed } from "@/hooks/useMobilePreviewEmbed";
 import { shouldShowQuestMapBrief } from "@/lib/map/shouldShowQuestMapBrief";
 import {
   BUSINESS_HUB_IMG_SRC,
   FINANCIAL_HUB_IMG_SRC,
   FORCES_HUB_IMG_SRC,
   MANAGEMENT_HUB_IMG_SRC,
-  QUEST_MAP_AVIF_PATH,
-  QUEST_MAP_PATH
+  DESKTOP_MAP_PATH
 } from "@/lib/screenAssetUrls";
 import { preloadImage } from "@/lib/preloadImage";
 import { isSchoolsDemoPath } from "@/lib/schools/schoolsDemoHref";
@@ -35,12 +35,10 @@ function QuestMapStaticFallback() {
   return (
     <div className="absolute inset-0 grid place-items-center overflow-hidden rounded-3xl bg-[#05050F]">
       <picture className="pointer-events-none flex max-h-full max-w-full items-center justify-center">
-        <source srcSet={QUEST_MAP_AVIF_PATH} type="image/avif" />
-        <source srcSet={QUEST_MAP_PATH} type="image/webp" />
         <img
-          src={QUEST_MAP_PATH}
+          src={DESKTOP_MAP_PATH}
           alt="Quest Map"
-          className="max-h-full max-w-full select-none object-contain"
+          className="h-full w-full select-none object-cover object-center"
         />
       </picture>
     </div>
@@ -51,15 +49,19 @@ export default function MapPageClient() {
   const router = useRouter();
   const pathname = usePathname();
   const schoolsDemoFullscreen = isSchoolsDemoPath(pathname);
+  const schoolsPreviewFullscreen = pathname.startsWith("/schools/preview/");
   const [hydrationReady, setHydrationReady] = useState(false);
   const { raw, persistenceReady, actions } = useGame();
   const demoStory = useDemoStory();
   const schoolsDemo = useSchoolsDemoStory();
-  const showMissionBrief = demoStory.active
-    ? demoStory.step === "map-brief"
-    : schoolsDemo.active
-      ? schoolsDemo.step === "map-brief"
-      : persistenceReady && shouldShowQuestMapBrief(raw);
+  const isPreviewEmbed = useMobilePreviewEmbed();
+  const showMissionBrief = isPreviewEmbed
+    ? false
+    : demoStory.active
+      ? demoStory.step === "map-brief"
+      : schoolsDemo.active
+        ? schoolsDemo.step === "map-brief"
+        : persistenceReady && shouldShowQuestMapBrief(raw);
 
   const dismissMissionBrief = useCallback(() => {
     if (demoStory.active) {
@@ -79,12 +81,14 @@ export default function MapPageClient() {
     preloadImage(FINANCIAL_HUB_IMG_SRC);
     preloadImage(MANAGEMENT_HUB_IMG_SRC);
     preloadImage(FORCES_HUB_IMG_SRC);
+    preloadImage(DESKTOP_MAP_PATH);
   }, []);
 
   return (
     <main
       className={[
-        "pointer-events-auto relative -mb-24 w-full overflow-hidden bg-bg-0",
+        "pointer-events-auto relative w-full overflow-hidden bg-bg-0",
+        isPreviewEmbed ? "bank-preview-map-page" : "-mb-24",
         hydrationReady ? "" : "static-ui"
       ].join(" ")}
     >
@@ -98,10 +102,14 @@ export default function MapPageClient() {
       <div
         className={[
           "relative z-[1] mx-auto w-full overflow-hidden",
-          schoolsDemoFullscreen
-            ? "schools-demo-map-stage-height"
-            : "quest-map-stage-height",
-          "px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-2.5 md:py-2",
+          isPreviewEmbed
+            ? "bank-preview-map-stage-height"
+            : schoolsPreviewFullscreen
+              ? "schools-preview-map-stage-height"
+              : schoolsDemoFullscreen
+              ? "schools-demo-map-stage-height"
+              : "quest-map-stage-height",
+          isPreviewEmbed ? "p-0" : "px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-2.5 md:py-2",
           showMissionBrief ? "pointer-events-none" : "pointer-events-auto"
         ].join(" ")}
         data-map-stage

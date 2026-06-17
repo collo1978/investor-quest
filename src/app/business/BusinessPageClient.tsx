@@ -1,10 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useGame } from "@/components/GameProvider";
-import { isSchoolsDemoPath } from "@/lib/schools/schoolsDemoHref";
-import { BusinessIslandMissionBriefModal } from "@/components/business/BusinessIslandMissionBriefModal";
+import {
+  isSchoolsDemoPath,
+  stripSchoolsDemoPrefix
+} from "@/lib/schools/schoolsDemoHref";
+import { BusinessIslandMissionBriefOverlay } from "@/components/business/BusinessIslandMissionBriefOverlay";
 import { BusinessQuestMap } from "@/components/business/BusinessQuestMap";
 import { BusinessQuestRouteLoading } from "@/components/business/BusinessQuestRouteLoading";
 import { initialCompanyProgress } from "@/engine/progression/state";
@@ -18,6 +21,7 @@ import {
   wasBusinessIslandBriefSeen
 } from "@/lib/businessIslandBriefSession";
 import { companyById, type CompanyId } from "@/data/companies";
+import { SCHOOLS_MISSION_BRIEF_IMG_SRC } from "@/lib/schools/schoolsMapConfig";
 import { BUSINESS_HUB_IMG_SRC } from "@/lib/screenAssetUrls";
 import { preloadImage } from "@/lib/preloadImage";
 import { prewarmQuestAnswers } from "@/lib/quests/questPrewarmClient";
@@ -31,6 +35,12 @@ type Props = {
 export default function BusinessPageClient({ showDevPanel = false }: Props) {
   const pathname = usePathname();
   const schoolsDemoFullscreen = isSchoolsDemoPath(pathname);
+  const learnerPath = schoolsDemoFullscreen
+    ? stripSchoolsDemoPrefix(pathname)
+    : pathname;
+  const isSchoolsBusinessHub =
+    learnerPath === "/schools/business" ||
+    learnerPath.startsWith("/schools/business/");
   const { state, actions, raw, hydrated } = useGame();
   const [hydrationReady, setHydrationReady] = useState(false);
   const [briefDismissedLocal, setBriefDismissedLocal] = useState(false);
@@ -38,10 +48,11 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
   const companyId = state.activeCompanyId as CompanyId;
   const company = companyById(companyId);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setHydrationReady(true);
     actions.setActivePillar("business");
     preloadImage(BUSINESS_HUB_IMG_SRC);
+    preloadImage(SCHOOLS_MISSION_BRIEF_IMG_SRC);
     preloadQuestDetailChunks();
   }, [actions]);
 
@@ -53,9 +64,23 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
   const { partnerId, quests, readSet, questViewBySlug } =
     usePillarHubQuestData("business", companyId);
 
+  const companyProgress =
+    raw.companies[raw.activeCompanyId] ?? initialCompanyProgress();
+
+  const questCompletedAtBySlug = useMemo(
+    () => companyProgress.pillars.business?.completedAt ?? {},
+    [companyProgress.pillars.business?.completedAt]
+  );
+
   const hubCards = useMemo(
-    () => buildBusinessHubCards(quests, questViewBySlug, readSet),
-    [quests, questViewBySlug, readSet]
+    () =>
+      buildBusinessHubCards(
+        quests,
+        questViewBySlug,
+        readSet,
+        questCompletedAtBySlug
+      ),
+    [quests, questViewBySlug, readSet, questCompletedAtBySlug]
   );
 
   /** Island badge — average of all five hub slots (locked slots count as 0%). */
@@ -70,9 +95,6 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
 
   useHubRoutePrefetch(hydrated ? hubCards : []);
 
-  const companyProgress =
-    raw.companies[raw.activeCompanyId] ?? initialCompanyProgress();
-
   useEffect(() => {
     if (companyProgress.businessIslandBriefDismissedAt != null) {
       markBusinessIslandBriefSeen();
@@ -85,7 +107,11 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
     briefDismissedLocal;
 
   const showIslandBrief =
-    hydrationReady && hydrated && !islandBriefDismissed;
+    hydrationReady &&
+    hydrated &&
+    !islandBriefDismissed &&
+    hubCards.length > 0 &&
+    !isSchoolsBusinessHub;
 
   const handleDismissBrief = useCallback(() => {
     setBriefDismissedLocal(true);
@@ -96,14 +122,15 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
   return (
     <main
       className={[
-        "pointer-events-auto relative w-full bg-bg-0",
+        "pointer-events-auto relative w-full",
+        showIslandBrief ? "bg-black" : "bg-bg-0",
         schoolsDemoFullscreen
-          ? "iq-schools-business-hub-main flex min-h-0 flex-1 flex-col overflow-x-hidden max-md:overflow-y-hidden md:overflow-y-auto"
+          ? "iq-schools-business-hub-main flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-hidden"
           : "-mb-24 pb-10 pt-2 max-md:flex max-md:min-h-[100dvh] max-md:flex-col",
         hydrationReady ? "" : "static-ui"
       ].join(" ")}
     >
-      <BusinessIslandMissionBriefModal
+      <BusinessIslandMissionBriefOverlay
         open={showIslandBrief}
         onDismiss={handleDismissBrief}
       />
@@ -111,6 +138,7 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
       <div
         className={[
           "w-full",
+          showIslandBrief ? "pointer-events-none" : "",
           schoolsDemoFullscreen
             ? "iq-schools-business-hub-stage flex min-h-0 w-full flex-1 flex-col"
             : "business-hub-page-stage flex w-full flex-col max-md:min-h-0 max-md:flex-1 md:items-center md:justify-center md:px-1 md:py-2 sm:px-3 sm:py-5 md:py-6",
@@ -127,8 +155,9 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
               hubProgressPct={islandProgressPct}
               partnerId={partnerId}
               userId={userId}
+              missionBriefOpen={showIslandBrief}
             />
-            {showDevPanel ? <BusinessIslandDevReset /> : null}
+            {showDevPanel && !showIslandBrief ? <BusinessIslandDevReset /> : null}
           </>
         )}
       </div>

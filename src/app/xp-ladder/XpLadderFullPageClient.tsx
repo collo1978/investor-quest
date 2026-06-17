@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useGame } from "@/components/GameProvider";
@@ -11,6 +11,12 @@ import {
   type InvestorRung
 } from "@/data/progression/investorLadder";
 import { formatAnalyticsNumber } from "@/lib/analytics/formatDisplay";
+import { NeonButton } from "@/components/NeonButton";
+import {
+  isSchoolsDemoPath,
+  resolveSchoolsDemoProfileHref,
+  resolveSchoolsLearnerHref
+} from "@/lib/schools/schoolsDemoHref";
 
 const GOLD = "#F5C547";
 const GOLD_SOFT = "rgba(245, 197, 71, 0.55)";
@@ -144,8 +150,16 @@ function HowXpWorksPanel() {
 }
 
 export function XpLadderFullPageClient() {
+  const pathname = usePathname();
   const { state } = useGame();
   const xp = state.xp;
+  /** Pathname-only — avoids sessionStorage mismatch during SSR hydration. */
+  const schoolsTour = isSchoolsDemoPath(pathname);
+  const profileHref = resolveSchoolsDemoProfileHref(pathname);
+  const finalChallengeHref = resolveSchoolsLearnerHref(
+    "/schools/final-challenge",
+    pathname
+  );
 
   const ordered = useMemo(
     () => [...INVESTOR_RUNGS].sort((a, b) => b.xp - a.xp),
@@ -160,7 +174,14 @@ export function XpLadderFullPageClient() {
   const n = ordered.length;
 
   return (
-    <div className="relative min-h-[calc(100vh-72px)] min-w-0 max-w-[100vw] overflow-x-hidden bg-[#050508] text-ink-0 md:min-h-screen">
+    <div
+      className={[
+        "relative min-w-0 max-w-[100vw] overflow-x-hidden bg-[#050508] text-ink-0",
+        schoolsTour
+          ? "iq-schools-xp-ladder-deck min-h-0 w-full"
+          : "min-h-[calc(100vh-72px)] md:min-h-screen"
+      ].join(" ")}
+    >
       {/* backdrop */}
       <div
         aria-hidden
@@ -227,11 +248,11 @@ export function XpLadderFullPageClient() {
         />
       </div>
 
-      <div className="relative z-[1] mx-auto max-w-3xl min-w-0 px-5 pb-28 pt-5 md:px-8 md:pb-16 md:pt-8">
+      <div className="iq-schools-xp-ladder-inner relative z-[1] mx-auto w-full min-w-0 max-w-3xl px-5 pb-28 pt-5 md:px-8 md:pb-16 md:pt-8">
         <header className="mb-10 flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-          <Link
-            href="/profile"
-            className="group order-2 inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-ink-1 transition hover:text-ink-0 sm:order-1"
+          <a
+            href={profileHref}
+            className="group order-2 inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-ink-1 no-underline transition hover:text-ink-0 sm:order-1"
           >
             <span
               className="text-violet-300 transition group-hover:text-violet-200"
@@ -240,13 +261,13 @@ export function XpLadderFullPageClient() {
               ←
             </span>
             Back to Profile
-          </Link>
+          </a>
           <div className="order-1 w-full min-w-0 sm:order-2 sm:w-auto sm:max-w-[min(100%,20rem)]">
             <HowXpWorksPanel />
           </div>
         </header>
 
-        <div className="mb-12 text-center">
+        <div className="iq-schools-xp-ladder-title-block mb-12 text-center">
           <p className="text-[10px] font-medium uppercase tracking-[0.42em] text-violet-400/50">
             ━━━━━━━━━━━━━━━━━━
           </p>
@@ -422,6 +443,14 @@ export function XpLadderFullPageClient() {
               {formatAnalyticsNumber(xp)}
             </span>
           </p>
+
+          {schoolsTour ? (
+            <div className="mt-8 flex justify-center">
+              <NeonButton href={finalChallengeHref} className="min-h-[44px]">
+                Final challenge →
+              </NeonButton>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

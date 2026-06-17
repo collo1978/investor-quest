@@ -2,6 +2,7 @@ import {
   hydrateQuestContentCatalog,
   type QuestContentCatalogSource
 } from "@/platform/quests/questContentRegistry";
+import { isSchoolsFunnelPath, isSchoolsDemoProtectedPath } from "@/lib/schools/schoolsDemoProtection";
 
 export type QuestContentHydrationResult = {
   source: QuestContentCatalogSource;
@@ -12,6 +13,10 @@ export type QuestContentHydrationResult = {
 export async function fetchAndHydrateQuestContentCatalog(
   partnerId?: string
 ): Promise<QuestContentHydrationResult> {
+  if (isSchoolsFunnelPath() || isSchoolsDemoProtectedPath()) {
+    hydrateQuestContentCatalog([], "demo", partnerId ?? null);
+    return { source: "demo", count: 0 };
+  }
   try {
     const qs = partnerId
       ? `?partner=${encodeURIComponent(partnerId)}`

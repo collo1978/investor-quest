@@ -74,7 +74,9 @@ export function buildBusinessHubCards(
 
   viewsBySlug: Record<string, QuestView | undefined>,
 
-  readSlugs: ReadonlySet<string>
+  readSlugs: ReadonlySet<string>,
+
+  questCompletedAtBySlug: Readonly<Record<string, number>> = {}
 
 ): BusinessHubQuestCard[] {
 
@@ -113,13 +115,9 @@ export function buildBusinessHubCards(
 
 
     const locked = resolveHubSlotLocked(
-
       orderNumber,
-
       quest.hubLocked,
-
       priorSlotCompleted
-
     );
 
     const rawProgress = locked
@@ -153,6 +151,11 @@ export function buildBusinessHubCards(
     const cardCount = resolveHubCardCount(quest);
 
     const priorTitle = priorQuest?.title ?? priorSlug ?? "previous quest";
+
+    const unlockEpoch =
+      orderNumber <= 1 || locked || !priorSlug
+        ? null
+        : questCompletedAtBySlug[priorSlug] ?? null;
 
 
 
@@ -194,7 +197,9 @@ export function buildBusinessHubCards(
 
           ? { slug: priorSlug, title: priorTitle }
 
-          : null
+          : null,
+
+      unlockEpoch
 
     };
 

@@ -1,23 +1,19 @@
-import { isSchoolsDemoPath } from "@/lib/schools/schoolsDemoHref";
+import { isSchoolsDemoPath, resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
 import {
   advanceSchoolsDemoStoryStep,
   ensureProductionSchoolsDemoFromPath,
   getRouteForSchoolsDemoStoryStep,
-  hydrateSchoolsDemoStoryFromSession,
-  isSchoolsDemoStoryModeActive,
+  schoolsDemoStepFromPathname,
+  setSchoolsDemoStoryStep,
   type SchoolsDemoStoryStep
 } from "@/lib/schools/schoolsDemoStoryMode";
 
-type RouterLike = { replace: (href: string) => void };
+type RouterLike = { replace: (href: string) => void; push?: (href: string) => void };
 
 /** Ensure Schools demo story is active before advancing (PWA cold start / race-safe). */
 export function ensureSchoolsDemoStoryReady(pathname: string): void {
   if (isSchoolsDemoPath(pathname)) {
     ensureProductionSchoolsDemoFromPath(pathname);
-    return;
-  }
-  if (!isSchoolsDemoStoryModeActive()) {
-    hydrateSchoolsDemoStoryFromSession();
   }
 }
 
@@ -33,5 +29,25 @@ export function navigateSchoolsDemoStep(
   advanceSchoolsDemoStoryStep(next);
   const target = getRouteForSchoolsDemoStoryStep(next);
   router.replace(target);
+  return target;
+}
+
+/** Hamburger hub jumps — sync story step (including backward) then navigate. */
+export function navigateSchoolsDemoMenuHref(
+  schoolsPath: string,
+  pathname: string,
+  router: RouterLike
+): string {
+  ensureSchoolsDemoStoryReady(pathname);
+  const target = resolveSchoolsLearnerHref(schoolsPath, pathname);
+  const inferred = schoolsDemoStepFromPathname(target);
+  if (inferred) {
+    setSchoolsDemoStoryStep(inferred);
+  }
+  if (router.push) {
+    router.push(target);
+  } else {
+    router.replace(target);
+  }
   return target;
 }

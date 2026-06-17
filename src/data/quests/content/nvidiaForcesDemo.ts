@@ -1,22 +1,25 @@
 /**
- * NVIDIA forces — complete the loop; always land how it helps or hurts NVIDIA.
+ * NVIDIA forces — relatable headline + visual explanation copy.
+ * Grounded in real business themes; no SEC jargon on screen.
  */
 import { contentKey } from "@/data/quests/content/types";
 import type { QuestContentOverride } from "@/data/quests/content/types";
+import { goldAnswer } from "@/lib/demo/nvidiaDemoGoldAnswer";
 import { NVDA_DEMO_SOURCE } from "@/lib/demo/nvidiaDemoSources";
 
 function force(
   slug: string,
   title: string,
   investorQuestion: string,
-  plainEnglishAnswer: string
+  takeaway: string,
+  supporting: string
 ): [string, QuestContentOverride] {
   return [
     contentKey("forces", slug),
     {
       title,
       investorQuestion,
-      plainEnglishAnswer,
+      plainEnglishAnswer: goldAnswer(takeaway, supporting),
       secSection: NVDA_DEMO_SOURCE
     }
   ];
@@ -28,114 +31,133 @@ export const NVIDIA_FORCES_DEMO_OVERRIDES: Record<string, QuestContentOverride> 
       "positive-inside-supply-chain",
       "Getting chips built & shipped",
       "Can they actually get enough chips out the door?",
-      "When factories and shipping work, NVIDIA's designs become real chips on time — big customers hit their launch dates and keep ordering.\n\nWhen the chain jams, NVIDIA takes the blame even though partners build the silicon. Staying on schedule is how they keep those mega-buyers happy."
+      "On-time supply keeps NVIDIA customers reordering.",
+      "NVIDIA designs the chips but partner factories actually build and ship them. When that chain runs smoothly, big tech companies get their orders on time and keep coming back for more."
     ),
     force(
       "positive-inside-technology",
       "Software people already know",
       "Why do so many coders stick with NVIDIA?",
-      "Retraining a whole engineering team is slow and painful — millions already know NVIDIA's tools from school and work.\n\nThat habit helps NVIDIA keep selling: buyers stick with chips and software they don't want to rip out, even when rivals exist."
+      "Developers already know NVIDIA's software tools.",
+      "Millions of coders learned NVIDIA's tools in school and on the job — like everyone already knowing how to use iPhone apps. Retraining a whole team on something new is slow and expensive, so buyers stick with what works."
     ),
     force(
       "positive-inside-financial-strength",
       "Money in the bank",
       "Do they have enough cash to keep going?",
-      "A big cash pile and manageable debt mean a bad quarter doesn't force NVIDIA to panic-cut R&D or fire-sale chips.\n\nThat financial strength lets them keep funding the next invention while investors argue about the stock price."
+      "Strong cash gives NVIDIA room to keep inventing.",
+      "NVIDIA piled up serious cash during the AI rush with manageable debt. That buffer lets them keep funding new products even if one quarter disappoints — like savings for a rough month."
     ),
     force(
       "positive-inside-brand-strength",
       "Name people trust",
       "Does being \"NVIDIA\" actually help them sell?",
-      "Big AI and gaming launches don't want to bet the headline on unknown hardware — \"we need NVIDIA\" shuts rivals out of the room.\n\nThe brand helps NVIDIA win orders and hold pricing because customers trust it won't embarrass them on launch day."
+      "The NVIDIA name helps win big AI deals.",
+      "When a company is betting its flagship AI launch, it rarely wants to gamble on unknown hardware. A trusted name helps NVIDIA hold pricing and stay first pick in many deals."
     ),
     force(
       "negative-inside-operational-failures",
       "Mess-ups & delays",
       "What if they drop the ball on a launch?",
-      "Missed dates and buggy rollouts give rivals an opening to say they're more reliable.\n\nFor NVIDIA, repeated mess-ups would break the trust that keeps giants reordering — one bad launch hurts; a pattern could push customers to try someone else."
+      "Launch delays can open the door to rivals.",
+      "Missed ship dates or buggy rollouts give customers a reason to try AMD, Intel, or their own in-house chips. Repeat mess-ups would break the trust that keeps mega-buyers reordering."
     ),
     force(
       "negative-inside-supply-disruption",
       "Factories or shipping stuck",
       "What if the factories or boats get stuck?",
-      "NVIDIA doesn't own every factory — a shutdown or trade fight can mean no chips while customers already promised launches.\n\nWhen supply freezes, NVIDIA can't ship revenue; rivals with stock swoop in. That's how a factory problem becomes an NVIDIA sales problem overnight."
+      "Factory or shipping jams can stop NVIDIA revenue cold.",
+      "NVIDIA relies on partner factories, so a shutdown, trade fight, or shipping snag can mean no chips while customers already promised launches. Rivals with inventory can grab those orders."
     ),
     force(
       "negative-inside-cyber-risk",
       "Hacks & outages",
       "Could a hack or outage mess them up?",
-      "A serious hack or outage can slow orders and spook partners who need reliability.\n\nFor NVIDIA, that kind of hit means lost sales plus slower trust rebuild — partners need to believe systems and data are safe before they commit to the next big chip buy."
+      "Cyber incidents can slow orders and shake trust.",
+      "A serious hack or outage can delay customer rollouts and make partners nervous about reliability. NVIDIA would lose sales while rebuilding confidence — like a store that got robbed and has to win trust back."
     ),
     force(
       "negative-inside-financial-weakness",
       "Running low on cash",
       "What if cash got tight?",
-      "If giant AI orders paused and cash in dropped fast, NVIDIA would have fewer choices — less R&D, tougher terms, maybe less room to reward owners.\n\nThey're not there today, but cash trouble would force NVIDIA to protect survival before growth — and the stock would feel that immediately."
+      "Tight cash would force NVIDIA to protect survival first.",
+      "If AI orders paused and cash flow dropped sharply, NVIDIA would have less room for research, factory prepayments, and returns to owners. They are not there today, but it is a real downside scenario."
     ),
     force(
       "negative-inside-reputation-damage",
       "Trust gets bruised",
       "What if a bad launch or scandal spreads online?",
-      "One viral failure makes buyers pause to see if NVIDIA is still safe to bet on.\n\nReputation damage hits NVIDIA where it hurts: slower reorders, tougher negotiations, and rivals pitching \"pick us instead\" while the story is hot."
+      "Reputation hits can slow reorders fast.",
+      "One viral product failure or scandal makes buyers pause before the next big commit. Rivals pitch reliability while NVIDIA rebuilds trust — like a brand that lost a drop and has to win fans back."
     ),
     force(
       "positive-outside-demand-growth",
       "Everyone wants AI stuff",
       "Are people still buying like crazy?",
-      "While companies race to build AI, they need more chips — NVIDIA sells a large share of the advanced ones.\n\nThat demand wave lifts NVIDIA's revenue as long as the rush continues; they're riding the AI build-out, not inventing it from zero."
+      "The AI build-out still pulls chip orders higher.",
+      "Companies racing to launch AI need more computing power behind the scenes. NVIDIA sells a huge share of the gear powering that wave, so sales rise while the AI spending frenzy continues."
     ),
     force(
       "positive-outside-competitive-advantages",
       "Still ahead of rivals",
       "Are they still the one people pick first?",
-      "Speed, habit, and huge buyers already on NVIDIA's stack keep \"get NVIDIA\" the default in many deals.\n\nThat advantage means NVIDIA keeps winning orders even in a crowded market — being first choice is revenue before rivals get a meeting."
+      "NVIDIA is still the default for many AI builds.",
+      "Speed, coder habit, and major customers already on their stack keep \"get NVIDIA\" the easy path. That shows up as repeat orders even in a crowded chip market."
     ),
     force(
       "positive-outside-economic-growth",
       "Economy feeling okay",
       "Does a good economy help them?",
-      "When companies feel rich, they spend more on cloud, AI, and games — which usually means more chip orders.\n\nA healthy economy tailwind helps NVIDIA sell more; NVIDIA rides that mood until budgets tighten."
+      "A healthy economy usually means more chip orders.",
+      "When companies feel confident, they spend more on cloud, AI, and gaming gear. NVIDIA tends to sell more chips when those budgets expand — like people upgrading phones when they feel flush."
     ),
     force(
       "positive-outside-favorable-regulation",
       "Rules that help",
       "Can government rules ever help?",
-      "Subsidies, tax breaks, or easier trade can pull more AI spending and more chip buys.\n\nWhen policy tilts toward building AI at home, NVIDIA can win extra orders — governments become part of the demand story, not just the risk story."
+      "Pro-AI policy can pull more chip spending forward.",
+      "Government subsidies, tax breaks, or \"build AI at home\" programs can push companies to order more advanced chips sooner. When politicians push AI investment, NVIDIA can win extra orders."
     ),
     force(
       "positive-outside-global-expansion",
       "Selling around the world",
       "Does more countries wanting AI help?",
-      "Each new country investing in AI is another market that might order advanced chips — NVIDIA already sells globally.\n\nGlobal expansion means NVIDIA can grow in a new region even if another cools off — more places to sell the same chips."
+      "New regions investing in AI add more buyers.",
+      "Each country building AI server rooms is another customer for NVIDIA. They already sell globally, so growth in one region can offset a slowdown somewhere else."
     ),
     force(
       "negative-outside-demand-decline",
       "Buyers hit pause",
       "What if big companies stop ordering so much?",
-      "If mega-buyers slow AI chip orders, NVIDIA's sales can cool fast because recent growth was \"order more, again.\"\n\nDemand decline hits NVIDIA first in the revenue line — that's the fear that one big build-out was enough and reorder rates drop."
+      "Paused AI orders would cool NVIDIA revenue fast.",
+      "Recent growth came from big tech ordering again and again. If those buyers decide they built enough AI capacity, reorder rates could drop and sales would follow — like a hype cycle cooling off."
     ),
     force(
       "negative-outside-competition",
       "Other chip companies",
       "Can AMD, Intel, or DIY chips steal sales?",
-      "AMD and Intel keep improving; huge customers build in-house chips to depend less on any supplier.\n\nIf a rival matched performance at a lower price, NVIDIA could lose orders fast — competition is the constant threat to NVIDIA's pricing and volume."
+      "Rivals and in-house chips threaten NVIDIA's share.",
+      "AMD and Intel keep improving, and cloud giants are building their own chips to rely less on any supplier. A credible cheaper alternative could pull orders away from NVIDIA."
     ),
     force(
       "negative-outside-economic-slowdown",
       "Tough economy",
       "What if the economy gets rough?",
-      "Tighter budgets mean delayed cloud, game, and AI projects — often smaller or slower chip orders.\n\nIn a slowdown NVIDIA still sells, but deals get harder and growth can stall; the stock sometimes drops before sales prove the pain."
+      "A weak economy can delay cloud and AI projects.",
+      "Tighter corporate budgets often mean postponed server builds and smaller chip orders. NVIDIA still sells in a downturn, but growth gets harder to find — like fewer people upgrading gear in a recession."
     ),
     force(
       "negative-outside-regulation-risk",
       "New laws & court fights",
       "Can new rules hurt sales?",
-      "Export bans or lawsuits can block NVIDIA from selling into a major market or raise costs overnight.\n\nRegulation risk means NVIDIA can lose revenue without missing a product cycle — a rule change is as real as a rival launch."
+      "Export rules can block sales overnight.",
+      "U.S. restrictions on advanced chip sales to China already moved NVIDIA's business once. New limits or lawsuits can cut revenue without a single product miss — politics hitting the wallet."
     ),
     force(
       "negative-outside-geopolitical-risk",
       "Trade fights & wars",
       "Can wars or trade wars jam things up?",
-      "Tariffs, sanctions, and conflict can block buyers or slow factories — many NVIDIA chips are built in Taiwan.\n\nGeopolitical shocks hit NVIDIA through delayed chips, blocked markets, and nervous customers — politics becomes a sales and supply problem, not news filler."
+      "Geopolitics can jam factories, shipping, and buyers.",
+      "Tariffs, sanctions, and conflict can block markets or disrupt manufacturing partners overseas. Politics becomes a supply and sales problem, not just something you scroll past in the news."
     )
   ]);

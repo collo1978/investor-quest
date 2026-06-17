@@ -2,13 +2,20 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import Link, { useLinkStatus } from "next/link";
+import { usePathname } from "next/navigation";
 import { toDemoHref } from "@/lib/demo/demoHref";
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { resolveSchoolsHubQuestHref } from "@/lib/schools/schoolsDemoHref";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { HubMapCardTheme } from "@/components/quest/hub/hubMapCardTheme";
 import type { HubMapQuestCardData } from "@/lib/quests/hubMapQuestCardTypes";
 import type { HubQuestVisualState } from "@/lib/quests/resolveHubVisualState";
 import { trackUserEvent } from "@/lib/analytics/trackUserEvent";
 import type { Company } from "@/data/companies";
+import {
+  isHubCardTitleRevealed,
+  markHubCardTitleRevealed,
+  clearHubCardTitleRevealed
+} from "@/lib/quests/hubCardRevealStorage";
 import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
 
 function pulseShadow(theme: HubMapCardTheme, peak = false): string {
@@ -39,7 +46,13 @@ function QuestLinkPendingOverlay({ active }: { active: boolean }) {
   );
 }
 
-function lockedHintFor(card: HubMapQuestCardData): string {
+function lockedHintFor(
+  card: HubMapQuestCardData,
+  mysteryLockedCards = false,
+  awaitingDiscovery = false
+): string {
+  if (awaitingDiscovery) return "Quest unlocked — tap to reveal";
+  if (mysteryLockedCards) return "Complete the previous lesson to unlock";
   const prior = card.unlockSource?.title?.trim();
   if (prior) return `Complete “${prior}” to unlock`;
   return "Complete the previous quest to unlock";
@@ -56,6 +69,13 @@ const LOCKED_CARD_FRAME = [
   "relative overflow-hidden",
   "border border-[rgba(88,74,42,0.28)]",
   "shadow-[inset_0_1px_0_rgba(255,229,141,0.04),0_2px_12px_rgba(0,0,0,0.45)]"
+].join(" ");
+
+/** Schools mystery locked — premium future-reward frame. */
+const MYSTERY_LOCKED_CARD_FRAME = [
+  "relative overflow-hidden",
+  "border-2 border-[rgba(255,220,100,0.8)]",
+  "shadow-[inset_0_1px_0_rgba(255,236,170,0.38),inset_0_0_22px_rgba(139,92,246,0.14),0_0_0_1px_rgba(167,139,250,0.36),0_4px_22px_rgba(0,0,0,0.48)]"
 ].join(" ");
 
 const GOLD_SHINY_BORDER_ACTIVE = [
@@ -82,6 +102,8 @@ type Props = {
   /** When true, slot 1 shows category icon beside order badge (Forces). */
   showCategoryIcon?: boolean;
   cardSlotClassName?: string;
+  /** Schools demo — hide lesson titles on locked cards until unlocked. */
+  mysteryLockedCards?: boolean;
 };
 
 export function SharedHubQuestMapCard({
@@ -93,38 +115,119 @@ export function SharedHubQuestMapCard({
   partnerId,
   userId,
   staggerIndex = 0,
-  hubProgressPct = 0,
+  hubProgressPct: _hubProgressPct = 0,
   showCategoryIcon = false,
-  cardSlotClassName
+  cardSlotClassName,
+  mysteryLockedCards = false
 }: Props) {
+  const pathname = usePathname();
+  const questHref =
+    resolveSchoolsHubQuestHref(card.route, pathname) ?? toDemoHref(card.route);
   const pulseLo = pulseShadow(theme, false);
   const pulsePeak = pulseShadow(theme, true);
   const reduceMotion = useReducedMotion();
-  /**
-   * Locked visuals must win over data bugs and scene FX bleed-through.
-   * At 0% island progress only slot 1 may appear unlocked.
-   */
-  const isLocked =
-    card.locked ||
-    (hubProgressPct === 0 && card.orderNumber > 1);
-  const state: HubQuestVisualState = isLocked ? "locked" : card.visualState;
-  const isPrimaryActive = !isLocked && card.isPrimaryActive;
-  const lockedHint = lockedHintFor(card);
+  const dataLocked = card.locked;
+  const unlockEpoch = card.unlockEpoch ?? null;
 
-  const wasLockedRef = useRef(state === "locked");
-  const wasCompleteRef = useRef(state === "completed");
+  const [titleRevealed, setTitleRevealed] = useState(() => {
+    if (!mysteryLockedCards || card.orderNumber <= 1 || card.completed) {
+      return true;
+    }
+    if (dataLocked || unlockEpoch == null) return false;
+    return isHubCardTitleRevealed(
+      company.id,
+      theme.pillarId,
+      card.slug,
+      card.orderNumber,
+      card.completed,
+      unlockEpoch
+    );
+  });
+  useEffect(() => {
+    if (dataLocked) {
+      setTitleRevealed(false);
+      return;
+    }
+    if (!mysteryLockedCards || card.orderNumber <= 1 || card.completed) {
+      setTitleRevealed(true);
+      return;
+    }
+    if (unlockEpoch == null) {
+      setTitleRevealed(false);
+      return;
+    }
+    setTitleRevealed(
+      isHubCardTitleRevealed(
+        company.id,
+        theme.pillarId,
+        card.slug,
+        card.orderNumber,
+        card.completed,
+        unlockEpoch
+      )
+    );
+  }, [
+    dataLocked,
+    mysteryLockedCards,
+    company.id,
+    theme.pillarId,
+    card.slug,
+    card.orderNumber,
+    card.completed,
+    unlockEpoch
+  ]);
+
+  const wasDataLockedRef = useRef(dataLocked);
   const [celebrateUnlock, setCelebrateUnlock] = useState(false);
   const [celebrateComplete, setCelebrateComplete] = useState(false);
+  const [unlockBeacon, setUnlockBeacon] = useState(false);
+  const [isFlipping, setIsFlipping] = useState(false);
   const [navigating, setNavigating] = useState(false);
 
-  useEffect(() => {
-    if (isLocked) setCelebrateUnlock(false);
-  }, [isLocked]);
+  const awaitingDiscovery =
+    mysteryLockedCards && !dataLocked && !titleRevealed;
+  const showLockedChrome = dataLocked || awaitingDiscovery;
+  const isLocked = showLockedChrome;
+
+  const state: HubQuestVisualState = dataLocked
+    ? "locked"
+    : card.visualState;
+  const isActiveCard =
+    !isLocked && titleRevealed && state === "active";
+  const wasCompleteRef = useRef(state === "completed");
+  const lockedHint = lockedHintFor(
+    card,
+    mysteryLockedCards,
+    awaitingDiscovery
+  );
+  const showMysteryLocked =
+    mysteryLockedCards && (dataLocked || awaitingDiscovery);
 
   useEffect(() => {
-    if (wasLockedRef.current && state !== "locked") {
-      setCelebrateUnlock(true);
-      const clear = window.setTimeout(() => setCelebrateUnlock(false), 2400);
+    if (dataLocked) {
+      clearHubCardTitleRevealed(company.id, theme.pillarId, card.slug);
+      setCelebrateUnlock(false);
+      setUnlockBeacon(false);
+      return;
+    }
+    if (awaitingDiscovery) {
+      setUnlockBeacon(true);
+    }
+  }, [dataLocked, awaitingDiscovery, company.id, theme.pillarId, card.slug]);
+
+  useEffect(() => {
+    if (dataLocked) {
+      return;
+    }
+    if (wasDataLockedRef.current && !dataLocked) {
+      if (mysteryLockedCards && !titleRevealed) {
+        setUnlockBeacon(true);
+      } else if (!mysteryLockedCards) {
+        setCelebrateUnlock(true);
+        const clear = window.setTimeout(() => setCelebrateUnlock(false), 2400);
+        wasDataLockedRef.current = dataLocked;
+        return () => window.clearTimeout(clear);
+      }
       if (card.orderNumber > 1) {
         trackUserEvent({
           eventType: "user_unlocked_quest",
@@ -138,16 +241,17 @@ export function SharedHubQuestMapCard({
             unlockedBy: card.unlockSource?.title ?? "previous quest",
             unlockedBySlug: card.unlockSource?.slug,
             orderNumber: card.orderNumber,
-            route: card.route
+            route: card.route,
+            discoveryPending: mysteryLockedCards && !titleRevealed
           }
         });
       }
-      wasLockedRef.current = false;
-      return () => window.clearTimeout(clear);
     }
-    wasLockedRef.current = state === "locked";
+    wasDataLockedRef.current = dataLocked;
   }, [
-    state,
+    dataLocked,
+    mysteryLockedCards,
+    titleRevealed,
     card.orderNumber,
     card.questId,
     card.route,
@@ -155,8 +259,50 @@ export function SharedHubQuestMapCard({
     company.name,
     company.ticker,
     partnerId,
-    userId
+    userId,
+    theme.pillarLabel
   ]);
+
+  const handleFlipRequest = useCallback(() => {
+    if (!awaitingDiscovery || isFlipping) return;
+    if (reduceMotion) {
+      markHubCardTitleRevealed(
+        company.id,
+        theme.pillarId,
+        card.slug,
+        unlockEpoch
+      );
+      setTitleRevealed(true);
+      setUnlockBeacon(false);
+      setCelebrateUnlock(true);
+      window.setTimeout(() => setCelebrateUnlock(false), 2000);
+      return;
+    }
+    setIsFlipping(true);
+  }, [
+    awaitingDiscovery,
+    isFlipping,
+    reduceMotion,
+    company.id,
+    theme.pillarId,
+    card.slug,
+    unlockEpoch
+  ]);
+
+  const handleFlipComplete = useCallback(() => {
+    if (!isFlipping) return;
+    markHubCardTitleRevealed(
+      company.id,
+      theme.pillarId,
+      card.slug,
+      unlockEpoch
+    );
+    setTitleRevealed(true);
+    setIsFlipping(false);
+    setUnlockBeacon(false);
+    setCelebrateUnlock(true);
+    window.setTimeout(() => setCelebrateUnlock(false), 2200);
+  }, [isFlipping, company.id, theme.pillarId, card.slug, unlockEpoch]);
 
   useEffect(() => {
     if (!wasCompleteRef.current && state === "completed") {
@@ -170,11 +316,11 @@ export function SharedHubQuestMapCard({
 
   const floatDuration = 4.2 + staggerIndex * 0.35;
   const floatY =
-    state === "locked" ? 2 : state === "completed" ? 2 : isPrimaryActive ? 3 : 2.5;
+    state === "locked" ? 2 : state === "completed" ? 2 : isActiveCard ? 3 : 2.5;
 
   const enter = { opacity: 0, y: 10, scale: 0.95 };
   const scale =
-    state === "locked" ? 0.94 : state === "completed" ? 1 : isPrimaryActive ? 1.03 : 1;
+    state === "locked" ? 0.94 : state === "completed" ? 1 : isActiveCard ? 1.03 : 1;
   const shown = { opacity: 1, y: 0, scale };
 
   const baseTransition = {
@@ -184,9 +330,11 @@ export function SharedHubQuestMapCard({
   };
 
   const slotClass =
-    isLocked || state === "locked"
-      ? "group z-[10]"
-      : isPrimaryActive
+    isLocked
+      ? unlockBeacon
+        ? "group z-[20]"
+        : "group z-[10]"
+      : isActiveCard
         ? "z-[22]"
         : state === "completed"
           ? "z-[21]"
@@ -197,18 +345,27 @@ export function SharedHubQuestMapCard({
       position={position}
       cardWidth={cardWidth}
       className={[slotClass, cardSlotClassName].filter(Boolean).join(" ")}
-      title={state === "locked" ? lockedHint : undefined}
+      title={isLocked ? lockedHint : undefined}
       ariaLabel={
-        state === "locked"
-          ? `${card.title} locked`
-          : state === "completed"
-            ? `${card.title} completed`
-            : undefined
+        awaitingDiscovery
+          ? `Lesson ${card.orderNumber} unlocked — tap to reveal`
+          : dataLocked
+            ? showMysteryLocked
+              ? `Lesson ${card.orderNumber} locked`
+              : `${card.title} locked`
+            : state === "completed"
+              ? `${card.title} completed`
+              : undefined
       }
     >
       <HubQuestCardFrame
         state={state}
         isLocked={isLocked}
+        awaitingDiscovery={awaitingDiscovery}
+        unlockBeacon={unlockBeacon}
+        isFlipping={isFlipping}
+        onFlipRequest={handleFlipRequest}
+        onFlipComplete={handleFlipComplete}
         card={card}
         company={company}
         enter={enter}
@@ -221,13 +378,15 @@ export function SharedHubQuestMapCard({
         lockedHint={lockedHint}
         celebrateUnlock={celebrateUnlock}
         celebrateComplete={celebrateComplete}
-        isPrimaryActive={isPrimaryActive}
+        mysteryLockedCards={mysteryLockedCards}
+        isActiveCard={isActiveCard}
         partnerId={partnerId}
         userId={userId}
         theme={theme}
         pulseLo={pulseLo}
         pulsePeak={pulsePeak}
         navigating={navigating}
+        questHref={questHref}
         onNavigateStart={() => {
           preloadQuestDetailChunks();
           setNavigating(true);
@@ -237,9 +396,12 @@ export function SharedHubQuestMapCard({
           card={card}
           state={state}
           isLocked={isLocked}
-          isPrimaryActive={isPrimaryActive}
+          isActiveCard={isActiveCard}
           theme={theme}
           showCategoryIcon={showCategoryIcon}
+          mysteryLockedCards={mysteryLockedCards}
+          awaitingDiscovery={awaitingDiscovery}
+          celebrateUnlock={celebrateUnlock}
         />
       </HubQuestCardFrame>
     </CardSlot>
@@ -250,6 +412,11 @@ export function SharedHubQuestMapCard({
 function HubQuestCardFrame({
   state,
   isLocked,
+  awaitingDiscovery,
+  unlockBeacon,
+  isFlipping,
+  onFlipRequest,
+  onFlipComplete,
   card,
   company,
   children,
@@ -263,21 +430,29 @@ function HubQuestCardFrame({
   lockedHint,
   celebrateUnlock,
   celebrateComplete,
-  isPrimaryActive,
+  mysteryLockedCards,
+  isActiveCard,
   partnerId,
   userId,
   theme,
   pulseLo,
   pulsePeak,
   navigating,
+  questHref,
   onNavigateStart
 }: {
   state: HubQuestVisualState;
   isLocked: boolean;
+  awaitingDiscovery: boolean;
+  unlockBeacon: boolean;
+  isFlipping: boolean;
+  onFlipRequest: () => void;
+  onFlipComplete: () => void;
   card: HubMapQuestCardData;
   company: Company;
   children: ReactNode;
   navigating: boolean;
+  questHref: string;
   onNavigateStart: () => void;
   enter: { opacity: number; y: number; scale: number };
   shown: { opacity: number; y: number; scale: number };
@@ -293,7 +468,8 @@ function HubQuestCardFrame({
   lockedHint: string;
   celebrateUnlock: boolean;
   celebrateComplete: boolean;
-  isPrimaryActive: boolean;
+  mysteryLockedCards: boolean;
+  isActiveCard: boolean;
   partnerId?: string;
   userId?: string;
   theme: HubMapCardTheme;
@@ -309,31 +485,50 @@ function HubQuestCardFrame({
         scale: baseTransition
       };
 
-  if (isLocked || state === "locked") {
-    return (
-      <motion.div
-        key={`${card.slug}-locked`}
-        data-hub-locked="true"
-        data-hub-slug={card.slug}
-        data-hub-order={card.orderNumber}
-        className={[
-          "isolate z-[10] rounded-xl text-left backdrop-blur-sm",
-          "px-3 py-2.5 sm:px-3.5 sm:py-2.5",
-          LOCKED_CARD_FRAME,
-          "bg-[rgba(10,8,6,0.94)] scale-[0.95]",
-          "saturate-[0.72] brightness-[0.9]",
-          "cursor-not-allowed select-none"
-        ].join(" ")}
-        initial={enter}
-        animate={reduceMotion ? shown : { ...shown, scale: 0.95, y: [0, -2, 0] }}
-        transition={floatTransition}
-        aria-disabled
-      >
+  if (isLocked) {
+    const lockedFrameClass = [
+      "isolate z-[10] rounded-xl text-left backdrop-blur-sm",
+      "px-3 py-2.5 sm:px-3.5 sm:py-2.5",
+      mysteryLockedCards ? MYSTERY_LOCKED_CARD_FRAME : LOCKED_CARD_FRAME,
+      mysteryLockedCards
+        ? "bg-[rgba(8,7,14,0.96)]"
+        : "bg-[rgba(10,8,6,0.94)]",
+      awaitingDiscovery
+        ? [
+            "scale-[0.98] cursor-pointer select-none transition-[box-shadow,filter] duration-300",
+            unlockBeacon
+              ? "brightness-[1.08] saturate-[1.06] shadow-[0_0_28px_rgba(245,197,71,0.42),0_0_48px_rgba(139,92,246,0.22)]"
+              : "hover:brightness-[1.04]"
+          ].join(" ")
+        : "scale-[0.95] cursor-not-allowed select-none saturate-[0.72] brightness-[0.9]"
+    ].join(" ");
+
+    const lockedInner = (
+      <>
         <span
-          className="pointer-events-none absolute inset-0 z-[1] rounded-xl bg-[rgba(0,0,0,0.22)]"
+          className={[
+            "pointer-events-none absolute inset-0 z-[1] rounded-xl",
+            awaitingDiscovery ? "bg-[rgba(0,0,0,0.12)]" : "bg-[rgba(0,0,0,0.22)]"
+          ].join(" ")}
           aria-hidden
         />
         <LockedCardSheen />
+        {unlockBeacon && awaitingDiscovery && !reduceMotion ? (
+          <UnlockBeaconPulse theme={theme} />
+        ) : null}
+        {mysteryLockedCards ? (
+          <>
+            <span
+              className="pointer-events-none absolute inset-[2px] z-[1] rounded-[10px] bg-[radial-gradient(ellipse_at_50%_62%,rgba(139,92,246,0.16)_0%,rgba(109,40,217,0.06)_38%,transparent_72%)]"
+              aria-hidden
+            />
+            <MysteryLockedBorderShimmer orderNumber={card.orderNumber} />
+            <MysteryLockedBorderSweep orderNumber={card.orderNumber} />
+            {unlockBeacon ? (
+              <MysteryUnlockBorderBrighten persistent />
+            ) : null}
+          </>
+        ) : null}
         <span
           className="pointer-events-none absolute -top-9 left-1/2 z-40 hidden w-max max-w-[13rem] -translate-x-1/2 rounded-lg border border-[rgba(245,197,71,0.28)] bg-[rgba(8,7,4,0.96)] px-2.5 py-1.5 text-center text-[10px] leading-snug text-[rgba(255,229,141,0.82)] opacity-0 shadow-lg transition-opacity group-hover:opacity-100 sm:block"
           role="tooltip"
@@ -341,6 +536,45 @@ function HubQuestCardFrame({
           {lockedHint}
         </span>
         <span className="relative z-[2]">{children}</span>
+      </>
+    );
+
+    if (awaitingDiscovery) {
+      return (
+        <MysteryFlipRevealCard
+          card={card}
+          theme={theme}
+          unlockBeacon={unlockBeacon}
+          isFlipping={isFlipping}
+          reduceMotion={reduceMotion}
+          lockedFrameClass={lockedFrameClass}
+          pulseLo={pulseLo}
+          pulsePeak={pulsePeak}
+          shown={shown}
+          enter={enter}
+          baseTransition={baseTransition}
+          onFlipRequest={onFlipRequest}
+          onFlipComplete={onFlipComplete}
+        >
+          {children}
+        </MysteryFlipRevealCard>
+      );
+    }
+
+    return (
+      <motion.div
+        key={`${card.slug}-locked`}
+        data-hub-locked="true"
+        data-hub-slug={card.slug}
+        data-hub-order={card.orderNumber}
+        data-hub-mystery={mysteryLockedCards ? "true" : undefined}
+        className={lockedFrameClass}
+        initial={enter}
+        animate={reduceMotion ? shown : { ...shown, scale: 0.95, y: [0, -2, 0] }}
+        transition={floatTransition}
+        aria-disabled
+      >
+        {lockedInner}
       </motion.div>
     );
   }
@@ -361,33 +595,35 @@ function HubQuestCardFrame({
           "px-3 py-2.5 sm:px-3.5 sm:py-2.5",
           GOLD_SHINY_BORDER,
           GOLD_SHINY_BORDER_ACTIVE,
-          isPrimaryActive
-            ? "bg-[rgba(24,18,9,0.97)] brightness-[1.1] saturate-[1.08]"
-            : "bg-[rgba(14,11,7,0.92)]",
-          "cursor-pointer transition-[box-shadow,filter] duration-300",
-          "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/90",
-          isPrimaryActive ? "scale-[1.03]" : ""
+          "bg-[rgba(24,18,9,0.97)] brightness-[1.1] saturate-[1.08]",
+          "scale-[1.03] cursor-pointer transition-[box-shadow,filter] duration-300",
+          "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/90"
         ].join(" ");
 
   const boxShadowAnim =
     state === "completed"
       ? undefined
-      : isPrimaryActive
+      : isActiveCard
         ? [pulseLo, pulsePeak, pulseLo]
-        : celebrateUnlock
+        : celebrateUnlock && !mysteryLockedCards
           ? [pulseLo, pulsePeak, pulseLo]
           : undefined;
+
+  const mysteryReveal = false;
 
   return (
     <motion.div
       key={`${card.slug}-${state}`}
       className="relative"
+      style={mysteryReveal ? { perspective: 900 } : undefined}
       initial={
         celebrateComplete && state === "completed" && !reduceMotion
           ? { opacity: 0.85, scale: 0.94 }
-          : celebrateUnlock && !reduceMotion
-            ? { opacity: 0.55, scale: 0.9 }
-            : enter
+          : mysteryReveal
+            ? { opacity: 0, scale: 0.9, rotateY: -88 }
+            : celebrateUnlock && !reduceMotion && !mysteryLockedCards
+              ? { opacity: 0.55, scale: 0.9 }
+              : enter
       }
       animate={
         reduceMotion
@@ -395,6 +631,7 @@ function HubQuestCardFrame({
           : {
               ...shown,
               scale,
+              rotateY: 0,
               y: [0, -floatY, 0],
               filter: "brightness(1) saturate(1)",
               boxShadow: boxShadowAnim
@@ -409,7 +646,7 @@ function HubQuestCardFrame({
               boxShadow:
                 state === "completed"
                   ? undefined
-                  : isPrimaryActive
+                  : isActiveCard
                     ? { duration: 4.4, repeat: Infinity, ease: [0.45, 0.05, 0.55, 0.95] }
                     : celebrateUnlock
                       ? { duration: 2.2, ease: "easeOut" }
@@ -431,16 +668,39 @@ function HubQuestCardFrame({
           transition={{ duration: 2.4, ease: "easeOut" }}
         />
       ) : null}
-      {celebrateUnlock && state === "active" && !reduceMotion ? (
+      {celebrateUnlock && mysteryLockedCards && state === "active" && !reduceMotion ? (
         <motion.span
-          className="pointer-events-none absolute -inset-4 rounded-2xl bg-[radial-gradient(ellipse_at_50%_42%,rgba(255,229,141,0.42)_0%,rgba(245,197,71,0.16)_45%,transparent_72%)] blur-md"
+          className="-inset-2 pointer-events-none absolute rounded-2xl blur-sm bg-[radial-gradient(ellipse_at_50%_48%,rgba(255,229,141,0.38)_0%,rgba(139,92,246,0.22)_40%,transparent_68%)]"
           aria-hidden
-          initial={{ opacity: 0, scale: 0.88 }}
-          animate={{ opacity: [0, 0.9, 0], scale: [0.88, 1.1, 1.14] }}
-          transition={{ duration: 2.2, ease: "easeOut" }}
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: [0, 0.72, 0.28], scale: [0.92, 1.05, 1] }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
         />
       ) : null}
-      {isPrimaryActive && state === "active" && !reduceMotion ? (
+      {celebrateUnlock && state === "active" && !reduceMotion && !mysteryLockedCards ? (
+        <motion.span
+          className={[
+            "pointer-events-none absolute rounded-2xl",
+            mysteryLockedCards
+              ? "-inset-2 blur-sm bg-[radial-gradient(ellipse_at_50%_48%,rgba(255,229,141,0.38)_0%,rgba(139,92,246,0.22)_40%,transparent_68%)]"
+              : "-inset-4 blur-md bg-[radial-gradient(ellipse_at_50%_42%,rgba(255,229,141,0.42)_0%,rgba(245,197,71,0.16)_45%,transparent_72%)]"
+          ].join(" ")}
+          aria-hidden
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{
+            opacity: mysteryLockedCards ? [0, 0.72, 0] : [0, 0.95, 0],
+            scale: mysteryLockedCards ? [0.92, 1.05, 1.08] : [0.88, 1.14, 1.18]
+          }}
+          transition={{ duration: mysteryLockedCards ? 1.5 : 2.2, ease: "easeOut" }}
+        />
+      ) : null}
+      {mysteryReveal ? (
+        <>
+          <MysteryUnlockBorderBrighten />
+          <MysteryUnlockLockFade />
+        </>
+      ) : null}
+      {isActiveCard && !reduceMotion ? (
         <motion.span
           className="pointer-events-none absolute -inset-3 rounded-2xl bg-[radial-gradient(ellipse_at_50%_42%,rgba(255,229,141,0.36)_0%,rgba(245,197,71,0.14)_42%,transparent_72%)] blur-md"
           aria-hidden
@@ -454,14 +714,14 @@ function HubQuestCardFrame({
             ? undefined
             : state === "completed"
               ? { y: -3, scale: 1.02 }
-              : isPrimaryActive
+              : isActiveCard
                 ? { y: -6, scale: 1.034 }
                 : { y: -7, scale: 1.04 }
         }
         whileTap={reduceMotion ? undefined : { scale: 0.99 }}
       >
         <Link
-          href={toDemoHref(card.route)}
+          href={questHref}
           prefetch
           scroll
           className={linkClass}
@@ -495,7 +755,7 @@ function HubQuestCardFrame({
             <CompletedCardSheen />
           ) : (
             <>
-              <ActiveBorderShimmer intense={isPrimaryActive} />
+              <ActiveBorderShimmer intense={isActiveCard} />
               <GoldBorderSheen />
             </>
           )}
@@ -510,19 +770,37 @@ function HubCardBody({
   card,
   state,
   isLocked,
-  isPrimaryActive,
+  isActiveCard,
   theme,
-  showCategoryIcon
+  showCategoryIcon,
+  mysteryLockedCards = false,
+  awaitingDiscovery = false,
+  celebrateUnlock = false
 }: {
   card: HubMapQuestCardData;
   state: HubQuestVisualState;
   isLocked: boolean;
-  isPrimaryActive: boolean;
+  isActiveCard: boolean;
   theme: HubMapCardTheme;
   showCategoryIcon?: boolean;
+  mysteryLockedCards?: boolean;
+  awaitingDiscovery?: boolean;
+  celebrateUnlock?: boolean;
 }) {
   const dimmed = isLocked || state === "locked";
+
+  if (dimmed && mysteryLockedCards) {
+    return (
+      <MysteryLockedCardBody
+        card={card}
+        theme={theme}
+        awaitingDiscovery={awaitingDiscovery}
+      />
+    );
+  }
+
   const subtitle = card.subtitle?.trim() ?? "";
+
   return (
     <article className="flex flex-col">
       <header
@@ -548,7 +826,7 @@ function HubCardBody({
         {state === "completed" && !dimmed ? (
           <CompletionMark
             aria-label="Quest complete"
-            prominent={card.orderNumber === 1 || isPrimaryActive}
+            prominent={card.orderNumber === 1 || isActiveCard}
             theme={theme}
           />
         ) : (
@@ -572,20 +850,30 @@ function HubCardBody({
       </header>
 
       <motion.div className="-mt-1 space-y-1.5">
-        <h3
+        <motion.h3
           className={[
             "line-clamp-2 font-[var(--font-grotesk)] font-semibold leading-snug",
             dimmed
               ? "text-[19px] text-[rgba(255,248,230,0.68)] sm:text-[20px]"
               : state === "completed"
                 ? "text-[19px] text-[rgba(255,252,240,0.92)] sm:text-[21px]"
-                : "text-[19px] text-[rgba(255,248,230,0.98)] sm:text-[21px]",
-            isPrimaryActive ? "text-[rgba(255,252,235,1)]" : ""
+                : "text-[19px] text-[rgba(255,252,235,1)] sm:text-[21px]"
           ].join(" ")}
+          initial={
+            mysteryLockedCards && celebrateUnlock
+              ? { opacity: 0, rotateX: -24, y: 6 }
+              : false
+          }
+          animate={
+            mysteryLockedCards && celebrateUnlock
+              ? { opacity: 1, rotateX: 0, y: 0 }
+              : undefined
+          }
+          transition={{ duration: 0.55, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
         >
           {card.title}
-        </h3>
-        {subtitle ? (
+        </motion.h3>
+        {subtitle && !mysteryLockedCards ? (
           <p
             className={[
               "line-clamp-2 text-[14.5px] leading-snug sm:text-[15.5px]",
@@ -593,9 +881,7 @@ function HubCardBody({
                 ? "text-[rgba(255,235,200,0.52)]"
                 : state === "completed"
                   ? "text-[rgba(255,242,215,0.72)]"
-                  : isPrimaryActive
-                    ? "text-[rgba(255,242,215,0.92)]"
-                    : "text-[rgba(255,235,200,0.78)]"
+                  : "text-[rgba(255,242,215,0.92)]"
             ].join(" ")}
           >
             {subtitle}
@@ -604,14 +890,6 @@ function HubCardBody({
       </motion.div>
 
       <footer className="mt-2.5 space-y-2">
-        {isPrimaryActive && !dimmed && state === "active" ? (
-          <p
-            className="text-center text-[9px] font-bold uppercase tracking-[0.2em]"
-            style={{ color: theme.hi, textShadow: `0 0 12px ${theme.glow}` }}
-          >
-            Up next on your trail
-          </p>
-        ) : null}
         {state === "completed" && !dimmed ? (
           <p
             className="text-center font-[var(--font-grotesk)] text-[22px] font-bold tabular-nums leading-none tracking-tight text-[rgba(167,243,208,0.95)] sm:text-[24px]"
@@ -630,7 +908,7 @@ function HubCardBody({
             className="flex items-center justify-center py-1.5 text-[rgba(255,229,141,0.58)]"
             aria-hidden
           >
-            <LockIcon large />
+            <LockIcon size="md" />
           </div>
         ) : (
           <div
@@ -837,8 +1115,343 @@ function CompletedCardSheen() {
   );
 }
 
-function LockIcon({ large = false }: { large?: boolean }) {
-  if (!large) {
+/** Schools — tap unlocked mystery card to flip and reveal the lesson title. */
+function MysteryFlipRevealCard({
+  card,
+  theme,
+  unlockBeacon,
+  isFlipping,
+  reduceMotion,
+  lockedFrameClass,
+  pulseLo,
+  pulsePeak,
+  shown,
+  enter,
+  baseTransition,
+  onFlipRequest,
+  onFlipComplete,
+  children
+}: {
+  card: HubMapQuestCardData;
+  theme: HubMapCardTheme;
+  unlockBeacon: boolean;
+  isFlipping: boolean;
+  reduceMotion: boolean | null;
+  lockedFrameClass: string;
+  pulseLo: string;
+  pulsePeak: string;
+  shown: { opacity: number; y: number; scale: number };
+  enter: { opacity: number; y: number; scale: number };
+  baseTransition: {
+    delay: number;
+    duration: number;
+    ease: readonly [number, number, number, number];
+  };
+  onFlipRequest: () => void;
+  onFlipComplete: () => void;
+  children: ReactNode;
+}) {
+  const subtitle = card.subtitle?.trim() ?? "";
+
+  return (
+    <motion.button
+      type="button"
+      key={`${card.slug}-awaiting`}
+      data-hub-awaiting-reveal="true"
+      data-hub-slug={card.slug}
+      data-hub-order={card.orderNumber}
+      className={[
+        lockedFrameClass,
+        unlockBeacon && !isFlipping
+          ? "ring-2 ring-[rgba(255,229,141,0.72)] ring-offset-0 ring-offset-transparent"
+          : ""
+      ].join(" ")}
+      initial={enter}
+      animate={
+        reduceMotion
+          ? shown
+          : {
+              ...shown,
+              scale: isFlipping ? 1.02 : unlockBeacon ? [0.98, 1.03, 0.98] : 0.98,
+              y: isFlipping ? 0 : [0, -4, 0],
+              boxShadow: unlockBeacon
+                ? [pulseLo, pulsePeak, pulseLo]
+                : undefined
+            }
+      }
+      transition={
+        reduceMotion
+          ? baseTransition
+          : {
+              y: { duration: 3.2, repeat: isFlipping ? 0 : Infinity, ease: "easeInOut" },
+              scale: isFlipping
+                ? { duration: 0.85, ease: [0.22, 1, 0.36, 1] }
+                : unlockBeacon
+                  ? { duration: 2.6, repeat: Infinity, ease: [0.45, 0.05, 0.55, 0.95] }
+                  : baseTransition,
+              boxShadow: unlockBeacon
+                ? { duration: 2.6, repeat: Infinity, ease: [0.45, 0.05, 0.55, 0.95] }
+                : undefined,
+              default: baseTransition
+            }
+      }
+      aria-label={`Lesson ${card.orderNumber} unlocked — tap to reveal`}
+      onClick={onFlipRequest}
+      disabled={isFlipping}
+    >
+      <span
+        className={[
+          "pointer-events-none absolute inset-0 z-[1] rounded-xl",
+          unlockBeacon ? "bg-[rgba(0,0,0,0.08)]" : "bg-[rgba(0,0,0,0.22)]"
+        ].join(" ")}
+        aria-hidden
+      />
+      <LockedCardSheen />
+      {unlockBeacon && !isFlipping && !reduceMotion ? (
+        <UnlockBeaconPulse theme={theme} />
+      ) : null}
+      <span
+        className="pointer-events-none absolute inset-[2px] z-[1] rounded-[10px] bg-[radial-gradient(ellipse_at_50%_62%,rgba(139,92,246,0.16)_0%,rgba(109,40,217,0.06)_38%,transparent_72%)]"
+        aria-hidden
+      />
+      <MysteryLockedBorderShimmer orderNumber={card.orderNumber} />
+      <MysteryLockedBorderSweep orderNumber={card.orderNumber} />
+      {unlockBeacon ? <MysteryUnlockBorderBrighten persistent /> : null}
+      {isFlipping && !reduceMotion ? <MysteryUnlockBorderBrighten /> : null}
+
+      <div className="relative z-[2] min-h-[5.75rem]" style={{ perspective: 1000 }}>
+        <motion.div
+          className="relative h-full w-full"
+          style={{ transformStyle: "preserve-3d" }}
+          animate={{ rotateY: isFlipping ? 180 : 0 }}
+          transition={{ duration: 0.82, ease: [0.22, 1, 0.36, 1] }}
+          onAnimationComplete={() => {
+            if (isFlipping) onFlipComplete();
+          }}
+        >
+          <div
+            className="relative"
+            style={{
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden"
+            }}
+          >
+            {children}
+          </div>
+          <div
+            className="absolute inset-0 flex flex-col justify-center px-2 py-3"
+            style={{
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              transform: "rotateY(180deg)"
+            }}
+          >
+            <p className="text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-2">
+              Lesson {card.orderNumber}
+            </p>
+            <h3 className="mt-2 text-center font-[var(--font-grotesk)] text-[17px] font-semibold leading-snug text-[rgba(255,252,235,1)] sm:text-[19px]">
+              {card.title}
+            </h3>
+            {subtitle ? (
+              <p className="mt-1.5 line-clamp-2 text-center text-[12.5px] leading-snug text-[rgba(255,242,215,0.88)] sm:text-[13.5px]">
+                {subtitle}
+              </p>
+            ) : null}
+          </div>
+        </motion.div>
+      </div>
+    </motion.button>
+  );
+}
+
+/** Schools demo — locked card hides lesson title until unlocked. */
+function MysteryLockedCardBody({
+  card,
+  theme,
+  awaitingDiscovery = false
+}: {
+  card: HubMapQuestCardData;
+  theme: HubMapCardTheme;
+  awaitingDiscovery?: boolean;
+}) {
+  return (
+    <article className="flex min-h-[5.75rem] flex-col">
+      <header className="flex items-start justify-end">
+        <span
+          className="min-w-[2rem] rounded border px-2.5 py-0.5 text-center text-[17px] font-bold tabular-nums leading-none sm:min-w-[2.125rem] sm:text-[19px]"
+          style={{
+            borderColor: theme.lockedBorder,
+            color: `${theme.hi}cc`
+          }}
+        >
+          {card.orderNumber}
+        </span>
+      </header>
+
+      <div className="flex flex-1 flex-col items-center justify-center gap-1.5 py-2">
+        <LockIcon size="hero" pulse={awaitingDiscovery} unlocked={awaitingDiscovery} />
+        {awaitingDiscovery ? (
+          <p
+            className="text-center text-[9px] font-bold uppercase tracking-[0.18em]"
+            style={{
+              color: theme.hi,
+              textShadow: `0 0 14px ${theme.glow}, 0 0 24px rgba(245,197,71,0.35)`
+            }}
+          >
+            Tap to reveal
+          </p>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+/** Soft full-border shimmer pulse every ~9s. */
+function MysteryLockedBorderShimmer({ orderNumber }: { orderNumber: number }) {
+  const reduceMotion = useReducedMotion();
+  if (reduceMotion) return null;
+  const shimmerDelay = (orderNumber - 1) * 1.15;
+
+  return (
+    <motion.span
+      className="pointer-events-none absolute inset-0 z-[2] rounded-xl border-2 border-[rgba(255,236,175,0.55)]"
+      aria-hidden
+      animate={{ opacity: [0.22, 0.52, 0.22] }}
+      transition={{
+        duration: 2.2,
+        ease: "easeInOut",
+        repeat: Infinity,
+        repeatDelay: 6.8,
+        delay: shimmerDelay
+      }}
+    />
+  );
+}
+
+/** Soft gold highlight travels the border every ~9s. */
+function MysteryLockedBorderSweep({ orderNumber }: { orderNumber: number }) {
+  const reduceMotion = useReducedMotion();
+  if (reduceMotion) return null;
+  const sweepDelay = (orderNumber - 1) * 1.15;
+
+  return (
+    <span
+      className="pointer-events-none absolute inset-0 z-[3] overflow-hidden rounded-xl"
+      aria-hidden
+    >
+      <span
+        className="absolute inset-0 rounded-xl p-[2px]"
+        style={{
+          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+          WebkitMaskComposite: "xor",
+          maskComposite: "exclude"
+        }}
+      >
+        <motion.span
+          className="absolute left-1/2 top-1/2 h-[220%] w-[220%] -translate-x-1/2 -translate-y-1/2"
+          style={{
+            background:
+              "conic-gradient(from 0deg, transparent 0deg, transparent 302deg, rgba(255,229,141,0.42) 316deg, rgba(255,244,195,0.62) 328deg, transparent 342deg)"
+          }}
+          animate={{ rotate: 360 }}
+          transition={{
+            duration: 2.4,
+            ease: "linear",
+            repeat: Infinity,
+            repeatDelay: 6.6,
+            delay: sweepDelay
+          }}
+        />
+      </span>
+    </span>
+  );
+}
+
+/** Border brightens when a mystery card is awaiting discovery or flipping open. */
+function MysteryUnlockBorderBrighten({ persistent = false }: { persistent?: boolean }) {
+  return (
+    <motion.span
+      className="pointer-events-none absolute inset-0 z-[4] rounded-xl border-2 border-[rgba(255,238,150,0.92)]"
+      aria-hidden
+      initial={{ opacity: persistent ? 0.55 : 0.95 }}
+      animate={{ opacity: persistent ? [0.42, 0.72, 0.42] : 0 }}
+      transition={
+        persistent
+          ? { duration: 2.8, repeat: Infinity, ease: [0.45, 0.05, 0.55, 0.95] }
+          : { duration: 1.1, ease: "easeOut" }
+      }
+    />
+  );
+}
+
+/** Soft radial glow while a card awaits player reveal. */
+function UnlockBeaconPulse({ theme }: { theme: HubMapCardTheme }) {
+  return (
+    <motion.span
+      className="pointer-events-none absolute -inset-4 z-[0] rounded-2xl blur-md bg-[radial-gradient(ellipse_at_50%_48%,rgba(255,229,141,0.48)_0%,rgba(139,92,246,0.24)_42%,transparent_72%)]"
+      aria-hidden
+      animate={{ opacity: [0.42, 0.82, 0.42], scale: [0.96, 1.06, 0.96] }}
+      transition={{ duration: 2.4, repeat: Infinity, ease: [0.45, 0.05, 0.55, 0.95] }}
+      style={{ boxShadow: `0 0 32px ${theme.glowSoft}, 0 0 48px rgba(245,197,71,0.28)` }}
+    />
+  );
+}
+
+/** Lock gently shakes and fades when a mystery card flips open. */
+function MysteryUnlockLockFade() {
+  return (
+    <motion.span
+      className="pointer-events-none absolute inset-0 z-[5] flex items-center justify-center rounded-xl"
+      aria-hidden
+      initial={{ opacity: 1, scale: 1, x: 0, rotate: 0 }}
+      animate={{
+        opacity: 0,
+        scale: 1.06,
+        x: [0, -2, 2, -2, 1, 0],
+        rotate: [0, -3, 3, -2, 0]
+      }}
+      transition={{
+        opacity: { duration: 0.55, ease: "easeOut" },
+        scale: { duration: 0.55, ease: "easeOut" },
+        x: { duration: 0.48, ease: "easeInOut" },
+        rotate: { duration: 0.48, ease: "easeInOut" }
+      }}
+    >
+      <LockIcon size="hero" />
+    </motion.span>
+  );
+}
+
+function LockIcon({
+  size = "sm",
+  pulse = false,
+  unlocked = false
+}: {
+  size?: "sm" | "md" | "hero";
+  pulse?: boolean;
+  unlocked?: boolean;
+}) {
+  const reduceMotion = useReducedMotion();
+  const closedPaths = (
+    <>
+      <path d="M7 11V8a5 5 0 0110 0v3" />
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+    </>
+  );
+  const openPaths = (
+    <>
+      <path
+        d="M7 11V7.75a5 5 0 018.65-3.1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <circle cx="12" cy="15.5" r="1.15" fill="currentColor" stroke="none" />
+    </>
+  );
+  const iconPaths = unlocked ? openPaths : closedPaths;
+
+  if (size === "sm") {
     return (
       <svg
         viewBox="0 0 24 24"
@@ -848,29 +1461,89 @@ function LockIcon({ large = false }: { large?: boolean }) {
         strokeWidth={2}
         aria-hidden
       >
-        <path d="M7 11V8a5 5 0 0110 0v3" />
-        <rect x="5" y="11" width="14" height="10" rx="2" />
+        {iconPaths}
       </svg>
     );
   }
 
+  if (size === "md") {
+    return (
+      <span className="relative inline-flex items-center justify-center text-[rgba(255,229,141,0.68)]">
+        <span
+          className="pointer-events-none absolute -inset-2 rounded-full bg-[radial-gradient(circle,rgba(245,197,71,0.22)_0%,transparent_72%)] blur-[2px]"
+          aria-hidden
+        />
+        <svg
+          viewBox="0 0 24 24"
+          className="relative h-6 w-6 shrink-0 drop-shadow-[0_0_5px_rgba(245,197,71,0.45)]"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2.25}
+          aria-hidden
+        >
+          {iconPaths}
+        </svg>
+      </span>
+    );
+  }
+
+  const glowPulse =
+    pulse && !reduceMotion
+      ? {
+          opacity: [0.72, 0.88, 0.72],
+          scale: [1, 1.03, 1]
+        }
+      : undefined;
+  const glowTransition =
+    pulse && !reduceMotion
+      ? { duration: 8.2, repeat: Infinity, ease: "easeInOut" as const }
+      : undefined;
+
   return (
-    <span className="relative inline-flex items-center justify-center text-[rgba(255,229,141,0.68)]">
-      <span
-        className="pointer-events-none absolute -inset-2 rounded-full bg-[radial-gradient(circle,rgba(245,197,71,0.22)_0%,transparent_72%)] blur-[2px]"
+    <span
+      className={[
+        "relative inline-flex items-center justify-center",
+        unlocked ? "text-[rgba(255,236,160,0.94)]" : "text-[rgba(255,229,141,0.82)]"
+      ].join(" ")}
+      role="img"
+      aria-label={unlocked ? "Unlocked — tap to reveal" : "Locked"}
+    >
+      <motion.span
+        className="pointer-events-none absolute -inset-6 rounded-full bg-[radial-gradient(circle,rgba(245,197,71,0.3)_0%,rgba(139,92,246,0.2)_48%,transparent_74%)] blur-md"
         aria-hidden
+        animate={glowPulse}
+        transition={glowTransition}
       />
-      <svg
+      <motion.span
+        className="pointer-events-none absolute -inset-3 rounded-full bg-[radial-gradient(circle,rgba(167,139,250,0.16)_0%,transparent_70%)] blur-sm"
+        aria-hidden
+        animate={glowPulse}
+        transition={
+          glowTransition
+            ? { ...glowTransition, delay: 0.15 }
+            : undefined
+        }
+      />
+      <motion.svg
         viewBox="0 0 24 24"
-        className="relative h-6 w-6 shrink-0 drop-shadow-[0_0_5px_rgba(245,197,71,0.45)]"
+        className="relative h-10 w-10 shrink-0 drop-shadow-[0_0_14px_rgba(245,197,71,0.55)] sm:h-11 sm:w-11"
         fill="none"
         stroke="currentColor"
-        strokeWidth={2.25}
+        strokeWidth={2.15}
         aria-hidden
+        animate={
+          pulse && !reduceMotion
+            ? { opacity: [0.9, 0.98, 0.9] }
+            : undefined
+        }
+        transition={
+          pulse && !reduceMotion
+            ? { duration: 8.2, repeat: Infinity, ease: "easeInOut" }
+            : undefined
+        }
       >
-        <path d="M7 11V8a5 5 0 0110 0v3" />
-        <rect x="5" y="11" width="14" height="10" rx="2" />
-      </svg>
+        {iconPaths}
+      </motion.svg>
     </span>
   );
 }

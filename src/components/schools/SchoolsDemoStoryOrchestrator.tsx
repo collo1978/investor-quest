@@ -4,13 +4,26 @@ import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { useSchoolsDemoStory } from "@/components/schools/SchoolsDemoStoryProvider";
+import { isMobilePreviewEmbed, isMobilePreviewShellPath } from "@/lib/bank/mobilePreviewEmbed";
 import {
   advanceSchoolsDemoStoryStep,
+  deactivateSchoolsDemoStory,
+  ensureProductionSchoolsDemoFromPath,
   getRouteForSchoolsDemoStoryStep,
   isSchoolsDemoStoryModeActive,
-  SCHOOLS_DEMO_STORY_STEPS
+  markSchoolsDemoLaunched,
+  SCHOOLS_DEMO_STORY_STEPS,
+  schoolsDemoStepFromPathname,
+  setSchoolsDemoStoryStep,
+  wasSchoolsDemoLaunchedInSession
 } from "@/lib/schools/schoolsDemoStoryMode";
-import { stripSchoolsDemoPrefix } from "@/lib/schools/schoolsDemoHref";
+import { SCHOOLS_DEMO_MENU_HUB_PATHS } from "@/lib/schools/schoolsDemoMenu";
+import {
+  isSchoolsBusinessQuestDetailPath,
+  isSchoolsDemoPath,
+  SCHOOLS_DEMO_ROUTE_PREFIX,
+  stripSchoolsDemoPrefix
+} from "@/lib/schools/schoolsDemoHref";
 
 function stepIndex(step: (typeof SCHOOLS_DEMO_STORY_STEPS)[number]): number {
   return SCHOOLS_DEMO_STORY_STEPS.indexOf(step);
@@ -28,19 +41,77 @@ export function SchoolsDemoStoryOrchestrator() {
   routerRef.current = router;
 
   useEffect(() => {
+    if (isMobilePreviewShellPath(pathname) || isMobilePreviewEmbed()) return;
+    if (
+      isSchoolsDemoPath(pathname) &&
+      pathname !== SCHOOLS_DEMO_ROUTE_PREFIX
+    ) {
+      if (!wasSchoolsDemoLaunchedInSession()) {
+        markSchoolsDemoLaunched();
+      }
+      ensureProductionSchoolsDemoFromPath(pathname);
+    }
+    if (
+      pathname.startsWith("/schools") &&
+      !isSchoolsDemoPath(pathname) &&
+      !pathname.startsWith("/schools/preview")
+    ) {
+      if (isSchoolsDemoStoryModeActive()) {
+        deactivateSchoolsDemoStory();
+      }
+      prevStepRef.current = null;
+      return;
+    }
+    if (!isSchoolsDemoPath(pathname)) return;
     if (!isSchoolsDemoStoryModeActive()) return;
     if (!active) {
       prevStepRef.current = null;
       return;
     }
+
+    // Learner jumped via CTA or hamburger — sync story to the URL (forward or back).
+    const inferred = schoolsDemoStepFromPathname(pathname);
+    if (inferred) {
+      const inferredRoute = getRouteForSchoolsDemoStoryStep(inferred);
+      if (inferredRoute === pathname) {
+        if (step !== inferred) {
+          setSchoolsDemoStoryStep(inferred);
+        }
+        return;
+      }
+      const inferredIdx = stepIndex(inferred);
+      const currentIdx = stepIndex(step);
+      if (inferredIdx > currentIdx) {
+        advanceSchoolsDemoStoryStep(inferred);
+        return;
+      }
+    }
+
+    const learnerPath = stripSchoolsDemoPrefix(pathname);
+    if (SCHOOLS_DEMO_MENU_HUB_PATHS.has(learnerPath)) {
+      return;
+    }
+
     if (prevStepRef.current === step) return;
     prevStepRef.current = step;
 
+    // Quest 1 summary + check-in — stay on the quest URL until the learner taps Back.
+    if (
+      isSchoolsBusinessQuestDetailPath(pathname) &&
+      (step === "business-island" || step === "conviction")
+    ) {
+      return;
+    }
+
     const expected = getRouteForSchoolsDemoStoryStep(step);
-    routerRef.current.replace(expected);
-  }, [active, step]);
+    if (expected !== pathname) {
+      routerRef.current.replace(expected);
+    }
+  }, [active, pathname, step]);
 
   useEffect(() => {
+    if (isMobilePreviewShellPath(pathname) || isMobilePreviewEmbed()) return;
+    if (!isSchoolsDemoPath(pathname)) return;
     if (!active) return;
     const path = stripSchoolsDemoPrefix(pathname);
     if (
@@ -54,6 +125,21 @@ export function SchoolsDemoStoryOrchestrator() {
       stepIndex(step) < stepIndex("business-quest")
     ) {
       advanceSchoolsDemoStoryStep("business-quest");
+    }
+    if (path === "/schools/profile" && stepIndex(step) < stepIndex("profile")) {
+      advanceSchoolsDemoStoryStep("profile");
+    }
+    if (
+      path === "/schools/xp-ladder" &&
+      stepIndex(step) < stepIndex("xp-ladder")
+    ) {
+      advanceSchoolsDemoStoryStep("xp-ladder");
+    }
+    if (
+      path === "/schools/final-challenge" &&
+      stepIndex(step) < stepIndex("final-challenge")
+    ) {
+      advanceSchoolsDemoStoryStep("final-challenge");
     }
   }, [active, pathname, step]);
 

@@ -1,17 +1,34 @@
 "use client";
 
 import type { ReactNode } from "react";
+
 import { AppShell } from "@/components/AppShell";
 import { AnalyticsTelemetryBridge } from "@/components/analytics/AnalyticsTelemetryBridge";
+import { SchoolsPosterShell } from "@/components/schools/SchoolsPosterShell";
+import { useStablePathname } from "@/hooks/useStablePathname";
+import { isSchoolsLightweightClientPath } from "@/lib/schools/schoolsDemoProtection";
 
 /**
  * Client-only app shell + game/analytics providers.
- * Loaded via dynamic import from the root layout to keep the layout chunk smaller.
+ * Poster screens skip GameProvider — AppShell cannot be used there (it requires useGame).
  */
-export function ClientProviders({ children }: { children: ReactNode }) {
+export function ClientProviders({
+  children,
+  initialPathname = ""
+}: {
+  children: ReactNode;
+  initialPathname?: string;
+}) {
+  const pathname = useStablePathname(initialPathname);
+  const lightweight = isSchoolsLightweightClientPath(pathname);
+
+  if (lightweight) {
+    return <SchoolsPosterShell>{children}</SchoolsPosterShell>;
+  }
+
   return (
     <AnalyticsTelemetryBridge>
-      <AppShell>{children}</AppShell>
+      <AppShell initialPathname={initialPathname}>{children}</AppShell>
     </AnalyticsTelemetryBridge>
   );
 }

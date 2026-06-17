@@ -3,7 +3,7 @@ import { BUSINESS_QUEST_QUIZZES } from "@/data/quests/businessQuestQuizzes";
 
 /**
  * Business pillar — six adaptive-learning sections (Item 1 Business / 10-K).
- * Each section: three insight cards → section checkpoint quiz.
+ * Each section: insight cards → section checkpoint quiz (what-they-do: 2 cards).
  */
 export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
   {
@@ -13,8 +13,8 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     title: "WHAT {Company.name} ACTUALLY DOES",
     objective: "Explain what the company does in normal language.",
     description:
-      "Three quick cards: what they make, the problem they fix, and why they matter in AI today — grounded in Item 1 Business.",
-    investorQuestion: "What does {Company.name} actually make?",
+      "Two quick cards: what they sell and why customers buy — grounded in Item 1 Business.",
+    investorQuestion: "What does {Company.name} actually sell?",
     plainEnglishAnswer: null,
     whyItMatters:
       "If you cannot explain what they sell in everyday words, every later judgment is guesswork.",
@@ -24,42 +24,34 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
       hint: "Products, services, and business overview."
     },
     aiTask:
-      "Explain what {Company.name} sells and why it matters in plain English — products, customer pain, and market role.",
+      "Explain what {Company.name} sells and why customers buy in plain English — products and buyer benefits.",
     artifactType: "one-pager",
     rewardXp: 100,
     unlockRequirements: { pillar: "business" },
     completionState: { kind: "quiz", passPct: 0.66 },
     difficulty: "intro",
     visualStyle: "card",
-    estimatedTime: 4,
+    estimatedTime: 3,
     displayOrder: 1,
     hubIcon: "what-they-do",
-    hubCardCount: 3,
+    hubCardCount: 2,
     hubLocked: false,
     tags: ["overview", "intro", "company"],
     quizConfig: BUSINESS_QUEST_QUIZZES["what-they-do"],
     cards: [
       {
         id: "card-1",
-        investorQuestion: "What does {Company.name} actually make?",
+        investorQuestion: "What does {Company.name} actually sell?",
         plainEnglishAnswer: null,
         whyItMatters:
           "You cannot judge growth if you cannot say what people actually buy."
       },
       {
         id: "card-2",
-        investorQuestion: "What problem does {Company.name} solve?",
+        investorQuestion: "Why do customers buy {Company.name} products?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Fix a real annoyance and people keep paying — that is sticky revenue."
-      },
-      {
-        id: "card-3",
-        investorQuestion:
-          "How important is {Company.name} in today's AI world?",
-        plainEnglishAnswer: null,
-        whyItMatters:
-          "Market role tells you whether hype or real demand is driving the story."
+          "When buyers get real speed and efficiency, they keep ordering."
       }
     ]
   },

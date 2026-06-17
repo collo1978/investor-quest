@@ -1,0 +1,81 @@
+---
+description: Conversational voice for quest card answers, why-it-matters, and quiz explain copy
+globs:
+  - src/data/quests/**/*.ts
+  - src/lib/quests/**/*.ts
+  - src/components/quest/**/*.tsx
+---
+
+# Quest card voice — smart friend, not textbook
+
+Investor Quest copy should feel like a **smart friend explaining investing**, not Wikipedia, SEC filings, or a teacher.
+
+## Source of truth
+
+- `src/lib/quests/humanFirstExplanation.ts` — `QUEST_BEGINNER_VOICE`, `QUIZ_EXPLANATION_VOICE`, `WHY_IT_MATTERS_UI_VOICE`
+- `src/lib/quests/questionIntent.ts` — intent-specific prompts for AI generation
+
+## Do
+
+- Name real products, apps, and habits people already know
+- Short sentences (~8–14 words); max 4 before "Why investors care:"
+- Punchy **why it matters** lines tied to money, habits, or risk
+- Quiz **explain** strings: 1–2 sentences, picture-first
+
+## Customer / audience cards ("Who are the customers?")
+
+- WHO buys (specific segment + how they purchase), WHY they buy, WHY the model is strong (loyalty, ecosystem, switching costs, repeat spend).
+- BANNED: "regular people", "everyone", "normal consumers", "people upgrading phones", "all kinds of users".
+- Good: "mainly sells to consumers willing to pay more for premium devices and a connected ecosystem."
+- Bad: "Most buyers are regular people upgrading phones and laptops."
+
+Rules: `src/lib/quests/customerAudienceCopy.ts` · intent `target_customer` in `questionIntent.ts`.
+
+## R&D / innovation / moat cards
+
+- WHAT they invest in → WHY it matters (ecosystem, integration, switching costs, pricing power) → optional filing example.
+- BANNED: "whatever's next", "pours billions", buzzword stacks, cinematic narration, tech-bro hype.
+- Good: "Apple invests heavily in R&D to improve its devices, chips, software, and AI capabilities."
+- Bad: "Apple pours billions into R&D, custom chips, cameras, AI, Vision Pro, whatever's next."
+
+Rules: `src/lib/quests/innovationRdCopy.ts` · intent `innovation_advantage` in `questionIntent.ts` (Business → Advantage cards).
+
+## Punctuation and tone
+
+- No em dashes (—), en dashes (–), or `--` in player copy. Use periods or commas.
+- No cinematic lines: "the real story", "that makes every judgment sharper", "beneath the surface".
+- Sound like a smart teacher, not AI motivational narration.
+- Rules: `src/lib/quests/directProseCopy.ts`, `normalizePlayerFacingCopy()` in `normalizeQuestProse.ts`.
+
+## Don't
+
+- Corporate openers: "designs and sells", "provides solutions", "depends heavily on", "consumer demand"
+- Teacher voice: "In simple terms", "Simple version", "Understanding X helps investors see…"
+- Cinematic filler: "the real story is bigger…", "the twist:", "beneath the surface" — use a direct fact instead
+- Forced analogies (kitchen, bakery, phone running too many apps) unless the card is about pain or risk
+- Bullet dumps that read like filing outlines (prefer flowing prose)
+
+Sentence 2 on cards must teach beginners something real (money, habit, risk) in ~8–14 words — not drama.
+
+## Examples
+
+**Bad:** "Apple designs and sells a range of popular tech products…"
+
+**Good:** "Apple makes everyday tech people use constantly — iPhones, Macs, iPads, Apple Watches, and AirPods."
+
+**Bad:** "Understanding what Apple sells helps investors see where the company can grow…"
+
+**Good:** "If people keep buying Apple products and services, Apple keeps making money from the same customers over and over again."
+
+Goal reaction: **"Ohhh, now I get why investors care."** — not "I'm reading a simplified annual report."
+
+## Pipeline (what players see)
+
+Resolver: `src/lib/quests/questCardContentSource.ts` (used by `mergeGeneratedQuestContent`).
+
+1. **curated_override** — `src/data/quests/content/{companyId}.ts` (e.g. Apple snapshot card 1)
+2. **database_generated** — Supabase `company_quest_card_answers` (SEC → OpenAI)
+3. **template_fallback** — null placeholder
+4. **generating** — pipeline in flight
+
+Admin: `/admin/quest-generation` — source checker + “Regenerate with smart-friend voice”.

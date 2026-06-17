@@ -4,6 +4,12 @@
 
 import { splitIntoSentences } from "@/lib/quests/scannableAnswer";
 import { splitQuestAnswer } from "@/lib/quests/questAnswerFormat";
+import {
+  buildTakeawayAnswerBody,
+  hasLabeledTakeawayFormat,
+  parseTakeawayAnswerBody,
+  resolveTakeawayAnswer
+} from "@/lib/quests/takeawayAnswer";
 import { polishInnovationRdCopy } from "@/lib/quests/innovationRdCopy";
 import {
   BANNED_COPY_SECTION_HEADERS,
@@ -95,13 +101,55 @@ export function formatQuestCardCopy(input: {
   }
 
   body = stripBannedSections(body);
-  const sentences = splitIntoSentences(body);
-  const maxBody =
-    input.displayMode === "display"
-      ? QUEST_COPY_LIMITS.maxDisplayParagraphs
-      : QUEST_COPY_LIMITS.maxMainSentences;
-  const trimmedSentences = trimSentences(sentences, maxBody);
-  const paragraphs = trimmedSentences.map(normalizeParagraph);
+
+  let paragraphs: string[];
+  let bodyForStorage: string;
+
+  const labeled = parseTakeawayAnswerBody(body);
+  if (labeled || hasLabeledTakeawayFormat(body)) {
+    const parts =
+      labeled ??
+      resolveTakeawayAnswer(
+        body,
+        body
+          .split(/\n{2,}/)
+          .map((p) => p.replace(/\n+/g, " ").trim())
+          .filter(Boolean)
+      );
+    if (parts?.takeaway) {
+      const takeaway = normalizeParagraph(parts.takeaway);
+      const supporting = parts.supporting
+        ? normalizeParagraph(parts.supporting)
+        : null;
+      paragraphs = supporting ? [takeaway, supporting] : [takeaway];
+      bodyForStorage = buildTakeawayAnswerBody({ takeaway, supporting });
+    } else {
+      paragraphs = [];
+      bodyForStorage = body;
+    }
+  } else {
+    const sentences = splitIntoSentences(body);
+    const maxBody =
+      input.displayMode === "display"
+        ? QUEST_COPY_LIMITS.maxDisplayParagraphs
+        : QUEST_COPY_LIMITS.maxMainSentences;
+    const trimmedSentences = trimSentences(sentences, maxBody);
+    const takeawayParts = resolveTakeawayAnswer(
+      body,
+      trimmedSentences.map(normalizeParagraph)
+    );
+    if (takeawayParts?.takeaway) {
+      const takeaway = normalizeParagraph(takeawayParts.takeaway);
+      const supporting = takeawayParts.supporting
+        ? normalizeParagraph(takeawayParts.supporting)
+        : null;
+      paragraphs = supporting ? [takeaway, supporting] : [takeaway];
+      bodyForStorage = buildTakeawayAnswerBody({ takeaway, supporting });
+    } else {
+      paragraphs = trimmedSentences.map(normalizeParagraph);
+      bodyForStorage = paragraphs.join("\n\n").trim();
+    }
+  }
 
   if (why) {
     why = normalizeInline(why);
@@ -115,10 +163,12 @@ export function formatQuestCardCopy(input: {
     }
   }
 
-  const plainEnglishAnswer = buildCombinedAnswer(paragraphs, why);
+  const plainEnglishAnswer = buildCombinedAnswer(
+    [bodyForStorage],
+    why
+  );
   const wasTrimmed =
-    sentences.length > trimmedSentences.length ||
-    paragraphs.join(" ") !== body.replace(/\n+/g, " ");
+    paragraphs.join(" ") !== body.replace(/\n+/g, " ").replace(/MAIN TAKEAWAY:\s*/gi, "").replace(/SUPPORTING EXPLANATION:\s*/gi, "");
 
   return {
     plainEnglishAnswer,

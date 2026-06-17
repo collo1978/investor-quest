@@ -41,7 +41,14 @@ export const CONTROLLED_DEMO_COMING_SOON_PILLARS: readonly PillarId[] = [];
 export const CONTROLLED_DEMO_QUEST_SLUGS: Readonly<
   Record<(typeof CONTROLLED_DEMO_PILLAR_ORDER)[number], readonly string[]>
 > = {
-  business: ["what-they-do"],
+  business: [
+    "what-they-do",
+    "why-buying",
+    "everyday-life",
+    "how-it-works",
+    "why-they-stay",
+    "competition"
+  ],
   financials: ["growth"],
   forces: ["forces-hub-positive-inside", "positive-inside-supply-chain"],
   management: ["mgmt-1"]
@@ -127,6 +134,8 @@ export function getControlledDemoPrimaryNav() {
     // Local preview/testing links — keep production presenter flow at `/demo`.
     ...(process.env.NODE_ENV !== "production"
       ? ([
+          { href: "/bank/mobile-preview", label: "Mobile Preview" },
+          { href: "/demo", label: "Demo start" },
           { href: "/opening", label: "Opening Logo" },
           { href: "/welcome", label: "Welcome Intro" }
         ] as const)
@@ -210,7 +219,14 @@ export function getControlledDemoRedirect(
   search = ""
 ): string | null {
   if (!CONTROLLED_DEMO_MODE) return null;
+  if (pathname === "/schools" || pathname.startsWith("/schools/")) return null;
   if (pathname === "/demo" || pathname.startsWith("/demo/")) return null;
+  if (
+    pathname === "/mobile-preview" ||
+    pathname.startsWith("/bank/mobile-preview")
+  ) {
+    return null;
+  }
   if (pathname === "/" || pathname === "/home") return "/map";
 
   const legacyQuest = controlledDemoLegacyQuestRedirect(pathname, search);

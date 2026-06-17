@@ -3,6 +3,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getAnalyticsPartnerId, getAnalyticsUserId } from "@/lib/analytics/identity";
 import { pulseAnalyticsSession } from "@/lib/analytics/sessionTracker";
 import type { TrackUserEventInput } from "@/lib/analytics/types";
+import { isSchoolsDemoProtectedPath } from "@/lib/schools/schoolsDemoProtection";
 
 /**
  * Fire-and-forget insert into `user_activity_events`.
@@ -13,6 +14,7 @@ import type { TrackUserEventInput } from "@/lib/analytics/types";
  */
 export function trackUserEvent(input: TrackUserEventInput): void {
   if (typeof window === "undefined") return;
+  if (isSchoolsDemoProtectedPath()) return;
 
   const row = {
     user_id: input.userId ?? getAnalyticsUserId(),
@@ -35,6 +37,8 @@ export function trackUserEvent(input: TrackUserEventInput): void {
   void pulseAnalyticsSession({
     companyTicker: row.company_ticker ?? undefined,
     pillar: row.pillar ?? undefined
+  }).catch(() => {
+    /* analytics must never break quest UX */
   });
 
   if (!isSupabaseConfigured()) {

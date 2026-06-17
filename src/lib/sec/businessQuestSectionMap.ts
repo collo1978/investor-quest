@@ -31,15 +31,7 @@ export const BUSINESS_QUEST_CARD_SPECS: readonly QuestCardSpec[] = [
     formType: "10-K",
     sectionKeys: ["item_1"],
     promptFocus:
-      "ONLY the everyday customer pain WITHOUT this company, what goes wrong, and how life feels better WITH them. Pain → consequence → benefit. No revenue or competitor overview."
-  },
-  {
-    questSlug: "what-they-do",
-    cardId: "card-3",
-    formType: "10-K",
-    sectionKeys: ["item_1"],
-    promptFocus:
-      "ONLY company scale and importance in AI / core markets today. Real-world scale comparison → why being a major player matters. No customer-pain language from card-2."
+      "ONLY why customers buy — faster AI, smoother games, processing large amounts of data efficiently. Benefits to companies, gamers, and businesses. No market-size or competitor overview."
   },
   {
     questSlug: "why-buying",

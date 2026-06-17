@@ -251,10 +251,6 @@ export const APPLE_CONTENT: CompanyContent = {
         "card-2": {
           plainEnglishAnswer:
             "Apple makes technology feel simple and connected.\n\nPeople can move photos, messages, apps, and files easily between devices without needing to think about it too much.\n\nFor many customers, Apple products save time, reduce frustration, and work smoothly together in everyday life."
-        },
-        "card-3": {
-          plainEnglishAnswer:
-            "Apple is one of the biggest names in consumer tech. iPhone alone is a global phenomenon.\n\nMillions of people already use Apple products every day, and many keep paying for Apple services long after buying their devices.\n\nBecause Apple is already so massive, even small improvements in sales can create huge amounts of extra revenue.\n\nWhy investors care:\nScale plus loyalty means small wins still matter, and missteps hit a giant customer base fast."
         }
       },
       quizConfig: {

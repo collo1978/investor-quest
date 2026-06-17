@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 
 import { getLanIPv4 } from "./lan-ip.mjs";
 import { killPort } from "./kill-port.mjs";
+import "./sync-schools-demo-routes.mjs";
 
 const PORT = 3003;
 /** Listen on all interfaces so phones on the same Wi‑Fi can connect. */
@@ -29,12 +30,14 @@ const banner = `
 ╠══════════════════════════════════════════════════════════════╣
 ║  This computer:    ${LOCAL.padEnd(42)}║
 ${phoneLine}
+║  Schools demo:     ${`${LOCAL}/schools/demo`.padEnd(42)}║
 ║  Quest map:        ${`${LOCAL}/map`.padEnd(42)}║
 ╠══════════════════════════════════════════════════════════════╣
+║  Wait for "✓ Ready" below, then open Schools demo in browser ║
 ║  LAN: bound to 0.0.0.0:${PORT} (same Wi‑Fi as your phone)       ║
 ║  Keep this terminal open until you press Ctrl+C to stop      ║
 ╠══════════════════════════════════════════════════════════════╣
-║  Phone blocked? Allow port ${PORT} in Windows Firewall (private) ║
+║  ERR_CONNECTION_REFUSED? Run: npm run dev  (server not up)   ║
 ║  Port busy?  npm run dev:kill-port                           ║
 ╚══════════════════════════════════════════════════════════════╝
 `;
@@ -58,13 +61,19 @@ const nextBin = join(
   "next"
 );
 
+const existingNodeOptions = process.env.NODE_OPTIONS ?? "";
+const heapFlag = "--max-old-space-size=4096";
+const nodeOptions = existingNodeOptions.includes("max-old-space-size")
+  ? existingNodeOptions
+  : [existingNodeOptions, heapFlag].filter(Boolean).join(" ").trim();
+
 const child = spawn(
   process.execPath,
   [nextBin, "dev", "-H", HOSTNAME, "-p", String(PORT)],
   {
     cwd: root,
     stdio: "inherit",
-    env: { ...process.env, FORCE_COLOR: "1" }
+    env: { ...process.env, FORCE_COLOR: "1", NODE_OPTIONS: nodeOptions }
   }
 );
 

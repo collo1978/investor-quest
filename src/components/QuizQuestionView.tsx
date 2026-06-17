@@ -64,58 +64,142 @@ export type QuizQuestionViewProps = {
   mode: "input" | "review";
   /** Order questions: show ✓/✗ per step while still allowing reorder (input mode). */
   showFeedback?: boolean;
+  /** `focus` — single clean card; question is the hero (no inner fieldset chrome). */
+  variant?: "default" | "focus";
+  /** Schools micro-reward — pulse the card green/gold after a correct answer. */
+  celebrateCorrect?: boolean;
+  /** XP earned on the current correct answer (Schools flow). */
+  successXp?: number;
 };
 
 export function QuizQuestionView(props: QuizQuestionViewProps) {
-  const { question, mode, value, showFeedback } = props;
+  const {
+    question,
+    mode,
+    value,
+    showFeedback,
+    variant = "default",
+    celebrateCorrect = false,
+    successXp
+  } = props;
+  const isFocus = variant === "focus";
   const isReview = mode === "review";
   const showResult =
     isReview || (showFeedback && question.kind === "order");
   const answeredCorrect =
     showResult && isQuizAnswerCorrect(question, value);
 
+  const celebrating = celebrateCorrect && answeredCorrect;
+  const showSuccessXp = celebrating && successXp != null;
+  const feedbackBorder = celebrating
+    ? "rgba(245,197,71,0.58)"
+    : showResult
+      ? answeredCorrect
+        ? GREEN_BORDER
+        : RED_BORDER
+      : isFocus
+        ? "rgba(255,255,255,0.08)"
+        : GOLD_BORDER_SOFT;
+  const feedbackBg = celebrating
+    ? "rgba(34,197,139,0.07)"
+    : showResult
+      ? answeredCorrect
+        ? "rgba(34,197,139,0.035)"
+        : "rgba(244,120,120,0.04)"
+      : isFocus
+        ? "rgba(255,255,255,0.03)"
+        : "rgba(255,255,255,0.02)";
+  const feedbackShadow = celebrating
+    ? "0 0 36px -6px rgba(34,197,139,0.44), 0 0 24px -8px rgba(245,197,71,0.28)"
+    : showResult
+      ? answeredCorrect
+        ? "0 0 28px -8px rgba(34,197,139,0.44)"
+        : "0 0 28px -8px rgba(244,120,120,0.45)"
+      : isFocus
+        ? "0 24px 64px -32px rgba(0,0,0,0.55)"
+        : "none";
+
   return (
-    <fieldset
-      className="rounded-xl border px-4 py-3 transition-[border-color,box-shadow] duration-300"
+    <div
+      className={[
+        "transition-[border-color,box-shadow] duration-300",
+        isFocus
+          ? "relative rounded-2xl border px-5 py-9 sm:px-7 sm:py-11"
+          : "relative rounded-xl border px-4 py-3"
+      ].join(" ")}
       style={{
-        borderColor: showResult
-          ? answeredCorrect
-            ? GREEN_BORDER
-            : RED_BORDER
-          : GOLD_BORDER_SOFT,
-        background: showResult
-          ? answeredCorrect
-            ? "rgba(34,197,139,0.04)"
-            : "rgba(244,120,120,0.04)"
-          : "rgba(255,255,255,0.02)",
-        boxShadow: showResult
-          ? answeredCorrect
-            ? "0 0 28px -8px rgba(34,197,139,0.55)"
-            : "0 0 28px -8px rgba(244,120,120,0.45)"
-          : "none"
+        borderColor: feedbackBorder,
+        background: feedbackBg,
+        boxShadow: feedbackShadow
       }}
     >
-      <legend
-        className="flex items-center gap-2 px-1 text-[10.5px] font-semibold uppercase tracking-[0.22em]"
-        style={{
-          color: showResult ? (answeredCorrect ? GREEN_HI : RED_HI) : GOLD_HI
-        }}
-      >
-        <span>{`Question ${props.index + 1}`}</span>
-        <span aria-hidden style={{ opacity: 0.6 }}>·</span>
-        <span>{kindLabel(question.kind)}</span>
-        {showResult ? (
-          <>
-            <span aria-hidden style={{ opacity: 0.6 }}>·</span>
-            <span>{answeredCorrect ? "Correct" : "Not quite"}</span>
-          </>
-        ) : null}
-      </legend>
+      {celebrating ? (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full border sm:right-5 sm:top-5"
+          initial={{ scale: 0.5, opacity: 0, rotate: -24 }}
+          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 420, damping: 20 }}
+          style={{
+            borderColor: GREEN_BORDER,
+            background: "rgba(34,197,139,0.18)",
+            color: GREEN_HI,
+            boxShadow: "0 0 18px rgba(34,197,139,0.36)"
+          }}
+        >
+          <CheckGlyph className="h-5 w-5" />
+        </motion.span>
+      ) : null}
 
-      <QuestionPrompt question={question} />
+      {showSuccessXp ? (
+        <motion.div
+          initial={{ opacity: 0, y: 6, scale: 0.92 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ type: "spring", stiffness: 380, damping: 24 }}
+          className="mb-8 flex justify-center"
+          aria-live="polite"
+        >
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-[12px] font-bold tabular-nums uppercase tracking-[0.12em]"
+            aria-label={`Plus ${successXp} experience points`}
+            style={{
+              borderColor: "rgba(245,197,71,0.55)",
+              background: "rgba(245,197,71,0.14)",
+              color: GOLD_HI,
+              boxShadow: "0 0 20px rgba(245,197,71,0.28)"
+            }}
+          >
+            +{successXp} XP
+          </span>
+        </motion.div>
+      ) : null}
+      {!isFocus ? (
+        <p
+          className="flex items-center gap-2 px-1 text-[10.5px] font-semibold uppercase tracking-[0.22em]"
+          style={{
+            color: showResult ? (answeredCorrect ? GREEN_HI : RED_HI) : GOLD_HI
+          }}
+        >
+          <span>{`Question ${props.index + 1}`}</span>
+          <span aria-hidden style={{ opacity: 0.6 }}>
+            ·
+          </span>
+          <span>{kindLabel(question.kind)}</span>
+          {showResult ? (
+            <>
+              <span aria-hidden style={{ opacity: 0.6 }}>
+                ·
+              </span>
+              <span>{answeredCorrect ? "Correct" : "Not quite"}</span>
+            </>
+          ) : null}
+        </p>
+      ) : null}
 
-      <div className="mt-3">
-        <QuestionInput {...props} />
+      <QuestionPrompt question={question} hero={isFocus} celebrating={showSuccessXp} />
+
+      <div className={isFocus ? "mt-9" : "mt-3"}>
+        <QuestionInput {...props} premium={isFocus} />
       </div>
 
       {(isReview || showFeedback) && question.explain ? (
@@ -123,20 +207,28 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
-          className="mt-3 rounded-lg border px-3 py-2 text-[12.5px] leading-relaxed text-ink-0/90"
-          style={{
-            borderColor: answeredCorrect
-              ? "rgba(34,197,139,0.25)"
-              : "rgba(244,120,120,0.25)",
-            background: answeredCorrect
-              ? "rgba(34,197,139,0.06)"
-              : "rgba(244,120,120,0.06)"
-          }}
+          className={
+            isFocus
+              ? "mt-6 border-t border-white/[0.06] pt-5 text-[13px] leading-relaxed text-ink-1/90"
+              : "mt-3 rounded-lg border px-3 py-2 text-[12.5px] leading-relaxed text-ink-0/90"
+          }
+          style={
+            isFocus
+              ? undefined
+              : {
+                  borderColor: answeredCorrect
+                    ? "rgba(34,197,139,0.25)"
+                    : "rgba(244,120,120,0.25)",
+                  background: answeredCorrect
+                    ? "rgba(34,197,139,0.06)"
+                    : "rgba(244,120,120,0.06)"
+                }
+          }
         >
           {question.explain}
         </motion.p>
       ) : null}
-    </fieldset>
+    </div>
   );
 }
 
@@ -146,7 +238,35 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
  * - `fill-blank` swaps `___` for a stylised gold pill.
  * - Everything else uses a plain prompt line.
  */
-function QuestionPrompt({ question }: { question: QuizQuestion }) {
+function formatQuizPrompt(question: QuizQuestion): string {
+  if (question.kind !== "true-false") return question.prompt;
+  const prompt = question.prompt.trim();
+  if (/^(true or false|t\s*\/\s*f)\s*:?\s*/i.test(prompt)) return prompt;
+  return `True or False: ${prompt}`;
+}
+
+function QuestionPrompt({
+  question,
+  hero = false,
+  celebrating = false
+}: {
+  question: QuizQuestion;
+  hero?: boolean;
+  celebrating?: boolean;
+}) {
+  if (hero) {
+    return (
+      <p
+        className={[
+          "font-[var(--font-grotesk)] font-semibold leading-[1.35] tracking-[-0.01em] text-ink-0",
+          "text-[clamp(1.25rem,2.4vw,1.75rem)]",
+          celebrating ? "px-2 pt-1" : "px-1 py-1"
+        ].join(" ")}
+      >
+        {formatQuizPrompt(question)}
+      </p>
+    );
+  }
   if (question.kind === "scenario") {
     return (
       <div
@@ -241,7 +361,9 @@ function kindLabel(kind: QuizQuestion["kind"]): string {
 // Dispatch on question kind
 // ---------------------------------------------------------------------------
 
-function QuestionInput(props: QuizQuestionViewProps) {
+function QuestionInput(
+  props: QuizQuestionViewProps & { premium?: boolean }
+) {
   const { question } = props;
   switch (question.kind) {
     case "multiple-choice":
@@ -283,13 +405,17 @@ function IndexChoiceInput({
   question,
   value,
   onChange,
-  mode
-}: QuizQuestionViewProps & { question: MultipleChoiceQuestion }) {
+  mode,
+  premium = false
+}: QuizQuestionViewProps & {
+  question: MultipleChoiceQuestion;
+  premium?: boolean;
+}) {
   const list = question.choices;
   const selected = typeof value === "number" ? value : null;
   const correctIndex = question.correctIndex;
   return (
-    <div className="grid gap-1.5">
+    <div className={premium ? "grid gap-3" : "grid gap-1.5"}>
       {list.map((label, idx) => {
         const isSelected = selected === idx;
         const isCorrectChoice = mode === "review" && idx === correctIndex;
@@ -298,12 +424,18 @@ function IndexChoiceInput({
         return (
           <label
             key={idx}
-            className="flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-[13.5px] leading-snug transition focus-within:ring-2 focus-within:ring-amber-400/65"
+            className={[
+              "flex cursor-pointer items-center gap-4 border text-left leading-snug transition focus-within:ring-2 focus-within:ring-amber-400/65",
+              premium
+                ? "min-h-[3.75rem] rounded-2xl px-5 py-4 text-[15px] font-medium"
+                : "rounded-lg px-3 py-2 text-[13.5px]"
+            ].join(" ")}
             style={choiceStyle({
               isSelected,
               isCorrectChoice,
               isWrongChoice,
-              mode
+              mode,
+              premium
             })}
           >
             <input
@@ -413,8 +545,12 @@ function TrueFalseInput({
   question,
   value,
   onChange,
-  mode
-}: QuizQuestionViewProps & { question: TrueFalseQuestion }) {
+  mode,
+  premium = false
+}: QuizQuestionViewProps & {
+  question: TrueFalseQuestion;
+  premium?: boolean;
+}) {
   const selected = typeof value === "boolean" ? value : null;
   const options: { label: string; sub: string; bool: boolean }[] = [
     { label: "TRUE", sub: "Yes, that's right", bool: true },
@@ -436,12 +572,17 @@ function TrueFalseInput({
             whileHover={mode === "review" ? undefined : { y: -2 }}
             whileTap={mode === "review" ? undefined : { scale: 0.97 }}
             transition={{ type: "spring", stiffness: 320, damping: 22 }}
-            className="relative flex min-h-[96px] flex-col items-center justify-center gap-1.5 rounded-2xl border p-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65"
+            className={[
+              "relative flex flex-col items-center justify-center gap-1.5 border p-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65",
+              premium ? "min-h-[108px] rounded-2xl" : "min-h-[96px] rounded-2xl"
+            ].join(" ")}
             style={choiceStyle({
               isSelected,
               isCorrectChoice,
               isWrongChoice,
-              mode
+              mode,
+              premium,
+              isFalseOption: opt.bool === false
             })}
           >
             <span
@@ -455,6 +596,8 @@ function TrueFalseInput({
                     ? RED_BORDER
                     : isSelected
                     ? "rgba(245,197,71,0.55)"
+                    : opt.bool === false
+                    ? "rgba(245,197,71,0.36)"
                     : "rgba(245,197,71,0.30)"
                 }`,
                 background: isCorrectChoice
@@ -488,6 +631,8 @@ function TrueFalseInput({
                   ? RED_HI
                   : isSelected
                   ? "#fff"
+                  : opt.bool === false
+                  ? "rgba(245,197,71,0.92)"
                   : "rgba(245,197,71,0.85)"
               }}
             >
@@ -746,46 +891,44 @@ function ScenarioInput({
   question,
   value,
   onChange,
-  mode
-}: QuizQuestionViewProps & { question: ScenarioQuestion }) {
+  mode,
+  premium = false
+}: QuizQuestionViewProps & {
+  question: ScenarioQuestion;
+  premium?: boolean;
+}) {
   const selected = typeof value === "number" ? value : null;
   return (
-    <div>
-      <p
-        className="mb-2 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]"
-        style={{
-          borderColor: GOLD_BORDER,
-          background: "rgba(245,197,71,0.08)",
-          color: GOLD_HI
-        }}
-      >
-        <SparkleGlyphSmall className="h-3 w-3" />
-        Choose your move
-      </p>
-      <div className="grid gap-2">
-        {question.choices.map((label, idx) => {
-          const isSelected = selected === idx;
-          const isCorrectChoice =
-            mode === "review" && idx === question.correctIndex;
-          const isWrongChoice =
-            mode === "review" && isSelected && idx !== question.correctIndex;
-          return (
-            <motion.button
-              key={idx}
-              type="button"
-              disabled={mode === "review"}
-              onClick={() => onChange(idx)}
-              whileHover={mode === "review" ? undefined : { x: 2 }}
-              whileTap={mode === "review" ? undefined : { scale: 0.99 }}
-              transition={{ type: "spring", stiffness: 320, damping: 22 }}
-              className="group flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left text-[13.5px] leading-snug transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65"
-              style={choiceStyle({
-                isSelected,
-                isCorrectChoice,
-                isWrongChoice,
-                mode
-              })}
-            >
+    <div className={premium ? "grid gap-3" : "grid gap-2"}>
+      {question.choices.map((label, idx) => {
+        const isSelected = selected === idx;
+        const isCorrectChoice =
+          mode === "review" && idx === question.correctIndex;
+        const isWrongChoice =
+          mode === "review" && isSelected && idx !== question.correctIndex;
+        return (
+          <motion.button
+            key={idx}
+            type="button"
+            disabled={mode === "review"}
+            onClick={() => onChange(idx)}
+            whileHover={mode === "review" ? undefined : { y: -1 }}
+            whileTap={mode === "review" ? undefined : { scale: 0.99 }}
+            transition={{ type: "spring", stiffness: 320, damping: 22 }}
+            className={[
+              "group flex items-center gap-4 border text-left leading-snug transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65",
+              premium
+                ? "min-h-[3.75rem] rounded-2xl px-5 py-4 text-[15px] font-medium"
+                : "rounded-xl px-3.5 py-3 text-[13.5px]"
+            ].join(" ")}
+            style={choiceStyle({
+              isSelected,
+              isCorrectChoice,
+              isWrongChoice,
+              mode,
+              premium
+            })}
+          >
               <span
                 aria-hidden
                 className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold"
@@ -834,7 +977,6 @@ function ScenarioInput({
             </motion.button>
           );
         })}
-      </div>
     </div>
   );
 }
@@ -1876,12 +2018,16 @@ function choiceStyle({
   isSelected,
   isCorrectChoice,
   isWrongChoice,
-  mode
+  mode,
+  premium = false,
+  isFalseOption = false
 }: {
   isSelected: boolean;
   isCorrectChoice: boolean;
   isWrongChoice: boolean;
   mode: "input" | "review";
+  premium?: boolean;
+  isFalseOption?: boolean;
 }): React.CSSProperties {
   if (mode === "review") {
     if (isCorrectChoice) {
@@ -1903,16 +2049,29 @@ function choiceStyle({
       };
     }
     return {
-      borderColor: "rgba(255,255,255,0.06)",
+      borderColor: isFalseOption
+        ? "rgba(255,255,255,0.10)"
+        : "rgba(255,255,255,0.06)",
       background: "rgba(255,255,255,0.02)",
-      color: "rgb(170 170 185)",
+      color: isFalseOption ? "rgb(185 185 198)" : "rgb(170 170 185)",
       cursor: "default"
     };
   }
   return {
-    borderColor: isSelected ? GOLD_BORDER : GOLD_BORDER_SOFT,
-    background: isSelected ? "rgba(245,197,71,0.10)" : "rgba(255,255,255,0.02)",
-    color: isSelected ? "#fff" : "rgb(210 210 225)"
+    borderColor: isSelected
+      ? GOLD_BORDER
+      : premium
+        ? isFalseOption
+          ? "rgba(255,255,255,0.14)"
+          : "rgba(255,255,255,0.10)"
+        : GOLD_BORDER_SOFT,
+    background: isSelected
+      ? "rgba(245,197,71,0.12)"
+      : premium
+        ? "rgba(255,255,255,0.04)"
+        : "rgba(255,255,255,0.02)",
+    color: isSelected ? "#fff" : premium ? "rgb(225 225 235)" : "rgb(210 210 225)",
+    boxShadow: isSelected && premium ? "0 12px 32px -18px rgba(245,197,71,0.45)" : undefined
   };
 }
 

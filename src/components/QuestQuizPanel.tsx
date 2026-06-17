@@ -26,8 +26,12 @@
  */
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { SchoolsQuestQuizCompletionFlow } from "@/components/schools/SchoolsQuestQuizCompletionFlow";
+import { SchoolsQuizMicroCelebration } from "@/components/schools/SchoolsQuizMicroCelebration";
 
 import { useGame } from "@/components/GameProvider";
 import { usePillarQuestViews } from "@/components/gameHooks";
@@ -62,6 +66,13 @@ import {
   islandQuizStatusLabel,
   islandQuizUnlockedHeadline
 } from "@/lib/quests/islandQuizStyle";
+import { resolveSchoolsDemoMapHref } from "@/lib/schools/schoolsDemoHref";
+import {
+  SCHOOLS_CARD_COMPLETE_XP,
+  SCHOOLS_MICRO_XP_PER_CORRECT,
+  schoolsCorrectMessage,
+  schoolsWrongMessage
+} from "@/lib/schools/schoolsQuestRewardFlow";
 
 export type QuestQuizPanelProps = {
   pillarId: PillarId;
@@ -110,6 +121,19 @@ export type QuestQuizPanelProps = {
   panelTheme?: PillarQuestTheme;
   /** Return to insight cards (pillar quest reading flow). */
   onReviewQuestCards?: () => void;
+  /** Schools Business Island — micro rewards + hybrid skill summary. */
+  rewardFlow?: "default" | "schools";
+  /** Short topic takeaways for the post-quiz mentor summary (Schools flow). */
+  whatYouNowKnow?: readonly string[];
+  /** Opening pride line — "You now understand … better than most beginners." */
+  schoolsPrideLine?: string;
+  microXpPerCorrect?: number;
+  cardCompleteXp?: number;
+  onBackToIsland?: () => void;
+  /** When set, inline question progress is hidden (shown in page header instead). */
+  externalQuestionProgress?: boolean;
+  /** Fires while answering — null when not in the playing phase. */
+  onPlayingProgress?: (progress: { current: number; total: number } | null) => void;
 };
 
 const GOLD_HI = "#F5C547";
@@ -151,8 +175,18 @@ export function QuestQuizPanel({
   islandFinaleCta,
   passCelebration,
   panelTheme,
-  onReviewQuestCards
+  onReviewQuestCards,
+  rewardFlow = "default",
+  whatYouNowKnow,
+  schoolsPrideLine,
+  microXpPerCorrect = SCHOOLS_MICRO_XP_PER_CORRECT,
+  cardCompleteXp = SCHOOLS_CARD_COMPLETE_XP,
+  onBackToIsland,
+  externalQuestionProgress = false,
+  onPlayingProgress
 }: QuestQuizPanelProps) {
+  const pathname = usePathname();
+  const mapReturnHref = resolveSchoolsDemoMapHref(pathname);
   const { state, actions } = useGame();
   const quiz = useMemo(() => normalizeQuizConfig(quizRaw), [quizRaw]);
 
@@ -181,7 +215,10 @@ export function QuestQuizPanel({
   );
 
   const playable = hasPlayableQuizConfig(quiz);
-  const questions = playable ? quiz.questions : [];
+  const questions = useMemo(
+    () => (playable && quiz ? quiz.questions : []),
+    [playable, quiz]
+  );
   const total = questions.length;
   const threshold = quiz?.passThreshold ?? 0.66;
   const requiredCorrect = Math.max(1, Math.ceil(total * threshold));
@@ -212,6 +249,27 @@ export function QuestQuizPanel({
   const [phase, setPhase] = useState<Phase>(() =>
     alreadyCompleted ? "summary" : unlocked ? (autoStart ? "playing" : "ready") : "locked"
   );
+  const [microBeat, setMicroBeat] = useState<{
+    questionId: string;
+    kind: "correct" | "wrong";
+    message: string;
+    xp?: number;
+  } | null>(null);
+  const celebratedQuestionRef = useRef<string | null>(null);
+  const checkedIdsRef = useRef<string[]>([]);
+  const currentQRef = useRef<QuizQuestion | null>(null);
+  const answerCheckTimerRef = useRef<number | null>(null);
+  const continueCtaRef = useRef<HTMLDivElement | null>(null);
+  const isSchoolsReward = rewardFlow === "schools";
+
+  checkedIdsRef.current = checkedIds;
+
+  const clearAnswerCheckTimer = useCallback(() => {
+    if (answerCheckTimerRef.current) {
+      clearTimeout(answerCheckTimerRef.current);
+      answerCheckTimerRef.current = null;
+    }
+  }, []);
 
   // Keep phase in sync with engine + unlock prop. Never demote out of
   // summary or playing.
@@ -227,13 +285,22 @@ export function QuestQuizPanel({
     });
   }, [alreadyCompleted, unlocked]);
 
+  useEffect(() => {
+    if (!onPlayingProgress) return;
+    if (phase === "playing" && total > 0) {
+      onPlayingProgress({ current: currentIndex + 1, total });
+      return;
+    }
+    onPlayingProgress(null);
+  }, [onPlayingProgress, phase, currentIndex, total]);
+
   const honorRoll =
     isTenK &&
     didPass &&
     (Boolean(honorSeed) ||
       (lastFraction !== null && lastFraction >= 0.9));
 
-  function startQuiz() {
+  const startQuiz = useCallback(() => {
     setOrder(shuffleArray(questions.map((_, i) => i)));
     setAnswers({});
     setCheckedIds([]);
@@ -242,8 +309,11 @@ export function QuestQuizPanel({
     setLastScore(null);
     setLastFraction(null);
     setShowTenKXpBanner(false);
+    setMicroBeat(null);
+    celebratedQuestionRef.current = null;
+    clearAnswerCheckTimer();
     setPhase("playing");
-  }
+  }, [questions, clearAnswerCheckTimer]);
 
   // In-flow handoff: when the quiz panel mounts after a "Quiz unlocked" CTA,
   // skip the Ready interstitial and start immediately once unlocked.
@@ -253,7 +323,7 @@ export function QuestQuizPanel({
     if (!unlocked) return;
     if (phase !== "ready") return;
     startQuiz();
-  }, [autoStart, alreadyCompleted, unlocked, phase]);
+  }, [autoStart, alreadyCompleted, unlocked, phase, startQuiz]);
 
   function setAnswer(qid: string, value: unknown) {
     setAnswers((prev) => ({ ...prev, [qid]: value }));
@@ -273,6 +343,8 @@ export function QuestQuizPanel({
     const pct = total === 0 ? 0 : correctCount / total;
     setLastFraction(pct);
     const passed = pct >= threshold;
+    setDidPass(passed);
+    setPhase("summary");
     if (passed) {
       if (metaCompletion) {
         if (!metaCompletion.completed) {
@@ -290,8 +362,6 @@ export function QuestQuizPanel({
         });
       }
     }
-    setDidPass(passed);
-    setPhase("summary");
   }
 
   // -------------------------------------------------------------------------
@@ -302,6 +372,11 @@ export function QuestQuizPanel({
     phase === "playing" && order[currentIndex] !== undefined
       ? questions[order[currentIndex]]
       : null;
+  currentQRef.current = currentQ;
+  const currentQuestionId = currentQ?.id ?? null;
+  const currentAnswerValue = currentQuestionId
+    ? answers[currentQuestionId]
+    : undefined;
   const isCurrentChecked = currentQ
     ? checkedIds.includes(currentQ.id)
     : false;
@@ -341,12 +416,13 @@ export function QuestQuizPanel({
 
   // Instant inline feedback once the answer is complete (same screen).
   useEffect(() => {
-    if (phase !== "playing" || !currentQ) return;
-    if (checkedIds.includes(currentQ.id)) return;
-    const ans = answers[currentQ.id];
-    if (!isQuizAnswerProvided(currentQ, ans)) return;
-    if (currentQ.kind === "order") {
-      const oq = currentQ as OrderQuestion;
+    const q = currentQRef.current;
+    if (phase !== "playing" || !q || !currentQuestionId) return;
+    if (checkedIdsRef.current.includes(currentQuestionId)) return;
+    const ans = currentAnswerValue;
+    if (!isQuizAnswerProvided(q, ans)) return;
+    if (q.kind === "order") {
+      const oq = q as OrderQuestion;
       const initial = initialOrderPermutation(oq.id, oq.steps.length);
       if (
         Array.isArray(ans) &&
@@ -355,12 +431,62 @@ export function QuestQuizPanel({
         return;
       }
     }
-    const qid = currentQ.id;
-    const t = window.setTimeout(() => {
+    const qid = currentQuestionId;
+    clearAnswerCheckTimer();
+    answerCheckTimerRef.current = window.setTimeout(() => {
+      answerCheckTimerRef.current = null;
       setCheckedIds((prev) => (prev.includes(qid) ? prev : [...prev, qid]));
     }, 120);
+  }, [phase, currentQuestionId, currentAnswerValue, clearAnswerCheckTimer]);
+
+  useEffect(() => {
+    setMicroBeat(null);
+    celebratedQuestionRef.current = null;
+    clearAnswerCheckTimer();
+  }, [currentIndex, clearAnswerCheckTimer]);
+
+  useEffect(() => {
+    return () => clearAnswerCheckTimer();
+  }, [clearAnswerCheckTimer]);
+
+  // Tall question layouts (e.g. multiple choice) can push the CTA below the fold.
+  useEffect(() => {
+    if (phase !== "playing" || !isCurrentChecked) return;
+    const node = continueCtaRef.current;
+    if (!node) return;
+    const t = window.setTimeout(() => {
+      node.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 160);
     return () => window.clearTimeout(t);
-  }, [phase, currentQ, answers, checkedIds]);
+  }, [phase, isCurrentChecked, currentIndex]);
+
+  useEffect(() => {
+    if (phase !== "playing" || !isSchoolsReward || !currentQuestionId) return;
+    if (!checkedIds.includes(currentQuestionId)) return;
+    if (celebratedQuestionRef.current === currentQuestionId) return;
+
+    const q = currentQRef.current;
+    if (!q) return;
+
+    celebratedQuestionRef.current = currentQuestionId;
+    const correct = isQuizAnswerCorrect(q, currentAnswerValue);
+    setMicroBeat({
+      questionId: currentQuestionId,
+      kind: correct ? "correct" : "wrong",
+      message: correct
+        ? schoolsCorrectMessage(currentIndex)
+        : schoolsWrongMessage(currentIndex),
+      xp: correct ? microXpPerCorrect : undefined
+    });
+  }, [
+    phase,
+    currentQuestionId,
+    currentAnswerValue,
+    checkedIds,
+    currentIndex,
+    isSchoolsReward,
+    microXpPerCorrect
+  ]);
 
   const perQuestionStatus: PerQuestionStatus[] = order.map((origIdx, slot) => {
     const q = questions[origIdx];
@@ -373,9 +499,17 @@ export function QuestQuizPanel({
 
   const isPassedDisplay = phase === "summary" && didPass;
   const isFailedDisplay = phase === "summary" && !didPass;
-  /** Ready + pass summary are self-titled â€” hide duplicate title chip. */
+  /** Playing + ready + pass summary — no duplicate title chip / section label. */
+  const isPlayingFocus = phase === "playing" && !isTenK;
+  const schoolsLearnings =
+    whatYouNowKnow && whatYouNowKnow.length > 0
+      ? whatYouNowKnow
+      : learningRecap;
   const hideHeader =
-    !isTenK && (phase === "ready" || (phase === "summary" && isPassedDisplay));
+    !isTenK &&
+    (phase === "ready" ||
+      phase === "playing" ||
+      (phase === "summary" && isPassedDisplay));
 
   // -------------------------------------------------------------------------
   // Render
@@ -403,27 +537,40 @@ export function QuestQuizPanel({
   return (
     <motion.section
       initial={false}
-      animate={{
-        boxShadow: baseStyle.boxShadow as string,
-        borderColor: baseStyle.borderColor as string
-      }}
+      animate={
+        isPlayingFocus
+          ? undefined
+          : {
+              boxShadow: baseStyle.boxShadow as string,
+              borderColor: baseStyle.borderColor as string
+            }
+      }
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="relative overflow-hidden rounded-2xl border backdrop-blur-md"
-      style={baseStyle}
+      className={
+        isPlayingFocus
+          ? "relative"
+          : "relative overflow-hidden rounded-2xl border backdrop-blur-md"
+      }
+      style={isPlayingFocus ? undefined : baseStyle}
       aria-label={title}
     >
-      {/* Ambient corner wash */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: isPassedDisplay
-            ? "radial-gradient(110% 80% at 90% -10%, rgba(34,197,139,0.10) 0%, transparent 60%)"
-            : `radial-gradient(110% 80% at 90% -10%, ${accent.glowSoft} 0%, transparent 60%)`
-        }}
-      />
+      {!isPlayingFocus ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: isPassedDisplay
+              ? "radial-gradient(110% 80% at 90% -10%, rgba(34,197,139,0.10) 0%, transparent 60%)"
+              : `radial-gradient(110% 80% at 90% -10%, ${accent.glowSoft} 0%, transparent 60%)`
+          }}
+        />
+      ) : null}
 
-      <div className="relative px-5 py-5 md:px-6 md:py-6">
+      <div
+        className={
+          isPlayingFocus ? "relative" : "relative px-5 py-5 md:px-6 md:py-6"
+        }
+      >
         {/* Header row â€” hidden on ready intro (body shows "Quiz unlocked" only). */}
         {!hideHeader ? (
         <header className="flex flex-wrap items-center justify-between gap-3">
@@ -542,17 +689,27 @@ export function QuestQuizPanel({
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.22 }}
             >
-              <ProgressDots statuses={perQuestionStatus} />
+              {isTenK ? <ProgressDots statuses={perQuestionStatus} /> : null}
 
-              {/* Single-question runner — feedback stays on this screen */}
-              <div className="relative mt-4">
+              {isPlayingFocus && !externalQuestionProgress ? (
+                <p className="mb-6 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-ink-2/65">
+                  Question {currentIndex + 1} of {total}
+                </p>
+              ) : null}
+
+              <div className="relative">
                 <AnimatePresence mode="wait" initial={false}>
                   {currentQ ? (
                     <motion.div
                       key={currentQ.id}
                       initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
+                      animate={
+                        isSchoolsReward &&
+                        microBeat?.questionId === currentQ.id &&
+                        microBeat.kind === "wrong"
+                          ? { opacity: 1, y: 0, x: [0, -5, 5, -3, 3, 0] }
+                          : { opacity: 1, y: 0, x: 0 }
+                      }
                       transition={{ duration: 0.2, ease: "easeOut" }}
                     >
                       <QuizQuestionView
@@ -566,42 +723,99 @@ export function QuestQuizPanel({
                             : "input"
                         }
                         showFeedback={isCurrentChecked}
+                        variant={isPlayingFocus ? "focus" : "default"}
+                        celebrateCorrect={
+                          isSchoolsReward &&
+                          microBeat?.questionId === currentQ.id &&
+                          microBeat.kind === "correct"
+                        }
+                        successXp={
+                          isSchoolsReward &&
+                          microBeat?.questionId === currentQ.id &&
+                          microBeat.kind === "correct"
+                            ? microBeat.xp
+                            : undefined
+                        }
                       />
                     </motion.div>
+                  ) : null}
+                </AnimatePresence>
+                <AnimatePresence>
+                  {isSchoolsReward &&
+                  microBeat &&
+                  microBeat.questionId === currentQ?.id &&
+                  microBeat.kind === "wrong" ? (
+                    <SchoolsQuizMicroCelebration
+                      key={`${microBeat.questionId}-wrong`}
+                      message={microBeat.message}
+                    />
                   ) : null}
                 </AnimatePresence>
               </div>
 
               <motion.div
-                className="mt-5 flex flex-wrap items-center justify-between gap-3"
+                ref={continueCtaRef}
+                className={
+                  isPlayingFocus
+                    ? "mt-8 flex flex-col items-center gap-4"
+                    : "mt-5 flex flex-wrap items-center justify-between gap-3"
+                }
                 initial={false}
-                animate={{ opacity: isCurrentChecked ? 1 : 0.45 }}
+                animate={{
+                  opacity: isCurrentChecked ? 1 : 0.45
+                }}
               >
-                <span
-                  className="text-[11.5px] uppercase tracking-[0.16em] text-ink-2"
-                  style={{
-                    color: isCurrentChecked
-                      ? isCurrentCorrect
-                        ? GREEN_HI
-                        : RED_HI
-                      : undefined
-                  }}
-                >
-                  {isCurrentChecked
-                    ? isCurrentCorrect
+                {isCurrentChecked && !isSchoolsReward ? (
+                  <span
+                    className={
+                      isPlayingFocus
+                        ? "text-center text-sm font-medium sm:text-left"
+                        : "text-[11.5px] uppercase tracking-[0.16em] text-ink-2"
+                    }
+                    style={{
+                      color: isCurrentCorrect ? GREEN_HI : RED_HI
+                    }}
+                  >
+                    {isCurrentCorrect
                       ? quizPlayingCopy.correct
-                      : quizPlayingCopy.wrong
-                    : currentQ?.kind === "order"
+                      : quizPlayingCopy.wrong}
+                  </span>
+                ) : isPlayingFocus ? (
+                  <span className="sr-only">Select an answer to continue</span>
+                ) : (
+                  <span className="text-[11.5px] uppercase tracking-[0.16em] text-ink-2">
+                    {currentQ?.kind === "order"
                       ? "Reorder the steps, then continue"
                       : quizPlayingCopy.prompt}
-                </span>
+                  </span>
+                )}
                 <PrimaryGoldButton
                   onClick={advance}
                   disabled={!isCurrentChecked}
+                  variant={isPlayingFocus ? "trail" : "default"}
                 >
                   {isLast ? "See results" : "Next question"}
                 </PrimaryGoldButton>
               </motion.div>
+            </motion.div>
+          ) : isSchoolsReward && didPass && onBackToIsland ? (
+            <motion.div
+              key="schools-summary"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22 }}
+            >
+              <SchoolsQuestQuizCompletionFlow
+                rewardXp={cardCompleteXp > 0 ? cardCompleteXp : rewardXp}
+                prideLine={
+                  schoolsPrideLine ??
+                  "You now understand this company better than most beginners."
+                }
+                takeaways={schoolsLearnings}
+                accent={accent}
+                onBackToIsland={onBackToIsland}
+              />
             </motion.div>
           ) : (
             <motion.div
@@ -624,6 +838,7 @@ export function QuestQuizPanel({
                 onReviewQuestCards={onReviewQuestCards}
                 nextQuest={nextQuest}
                 islandFinaleCta={islandFinaleCta}
+                mapReturnHref={mapReturnHref}
                 isLastQuestInPillar={isLastQuestInPillar}
                 nextIslandTitle={
                   nextIsland ? pillarById(nextIsland).title : undefined
@@ -840,6 +1055,7 @@ function SummaryBody({
   onReviewQuestCards,
   nextQuest,
   islandFinaleCta,
+  mapReturnHref,
   isLastQuestInPillar,
   nextIslandTitle,
   passCelebration,
@@ -854,6 +1070,7 @@ function SummaryBody({
 }: {
   isTenK: boolean;
   honorRoll: boolean;
+  mapReturnHref: string;
   didPass: boolean;
   score: number | null;
   total: number;
@@ -1026,7 +1243,7 @@ function SummaryBody({
         }
         extraLink={
           isTenK && didPass
-            ? { href: "/map", label: "Return to map" }
+            ? { href: mapReturnHref, label: "Return to map" }
             : undefined
         }
       />
@@ -1452,7 +1669,7 @@ function PrimaryGoldButton({
     variant === "hero"
       ? "w-full max-w-md px-8 py-4 text-[13px] uppercase tracking-[0.18em]"
       : variant === "trail"
-        ? "w-full max-w-sm px-5 py-3 text-[12px] uppercase tracking-[0.18em]"
+        ? "w-full max-w-[14rem] px-4 py-2.5 text-[12px] uppercase tracking-[0.18em]"
         : "px-4 py-2.5"
   ].join(" ");
   const style: React.CSSProperties = {
@@ -1461,7 +1678,13 @@ function PrimaryGoldButton({
     color: disabled ? `${t.hi}88` : t.hi,
     cursor: disabled ? "not-allowed" : "pointer",
     boxShadow:
-      disabled ? "none" : variant === "hero" ? `0 0 34px -12px ${t.glow}` : `0 0 24px -10px ${t.glow}`,
+      disabled
+        ? "none"
+        : variant === "hero"
+          ? `0 0 34px -12px ${t.glow}`
+          : variant === "trail"
+            ? `0 0 18px -12px ${t.glow}`
+            : `0 0 24px -10px ${t.glow}`,
     opacity: disabled ? 0.85 : 1
   };
 

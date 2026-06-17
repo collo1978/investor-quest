@@ -89,10 +89,9 @@ export function nvidiaIslandQuizPassMessage(
 }
 
 export const NVDA_ONBOARDING = {
-  step1Title: "Pick what",
-  step1TitleAccent: "you're into",
-  step1Subtitle:
-    "Tap a few things you actually care about — games, tech, whatever. We'll use it to make your first company pick feel personal.",
+  step1Title: "Pick 2 interests",
+  step1TitleAccent: "",
+  step1Subtitle: "Will pick a stock to match.",
   step1Continue: "Next",
   step1Footnote: "About a minute — promise",
 
@@ -164,8 +163,8 @@ type QuestLabel = Pick<
 
 const NVDA_QUEST_LABELS: Record<string, QuestLabel> = {
   [contentKey("business", "what-they-do")]: {
-    title: "WHAT NVIDIA ACTUALLY DOES",
-    investorQuestion: "What does NVIDIA actually make?",
+    title: "WHAT NVIDIA DOES",
+    investorQuestion: "What does NVIDIA actually sell?",
     objective: "Explain the company in normal language.",
     whyItMatters:
       "If you can't explain it in everyday words, you're guessing about the stock."

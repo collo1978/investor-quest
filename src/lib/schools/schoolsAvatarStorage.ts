@@ -1,5 +1,6 @@
 import type { SchoolsAvatarId } from "@/lib/schools/avatars";
 import { SCHOOLS_AVATAR_IDS } from "@/lib/schools/avatars";
+import { hasSchoolsArmorSelected } from "@/lib/schools/schoolsIdentityStorage";
 
 const STORAGE_KEY = "investor-quest::schools-avatar";
 
@@ -39,5 +40,5 @@ export function readSchoolsAvatar(): StoredSchoolsAvatar | null {
 }
 
 export function hasSchoolsAvatarSelected(): boolean {
-  return readSchoolsAvatar() != null;
+  return readSchoolsAvatar() != null || hasSchoolsArmorSelected();
 }

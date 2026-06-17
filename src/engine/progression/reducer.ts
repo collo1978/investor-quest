@@ -97,6 +97,12 @@ export type GameAction =
       mode: "repair" | "reset" | "unlock_quiz";
     }
   | { type: "submit-conviction-and-advance" }
+  | {
+      type: "enqueue-pillar-conviction";
+      pillarId: PillarId;
+      /** Omit to auto-unlock next pillar; pass `null` to skip island unlock (Schools tile demo). */
+      pillarToUnlock?: PillarId | null;
+    }
   | { type: "complete-ten-k-rookie-challenge"; scoreFraction: number }
   | { type: "dismiss-quest-map-brief" }
   | { type: "dismiss-business-island-brief" };
@@ -672,6 +678,38 @@ export function reduce(state: GameState, action: GameAction): ReduceResult {
       };
     }
 
+    case "enqueue-pillar-conviction": {
+      const prog0 = getProg(state);
+      if (typeof prog0.pillarConvictionSubmittedAt[action.pillarId] === "number") {
+        return { state, events };
+      }
+      const queue = prog0.pendingConvictionQueue.filter(
+        (x) => x.completedPillarId !== action.pillarId
+      );
+      const pillarToUnlock =
+        action.pillarToUnlock === null
+          ? null
+          : action.pillarToUnlock !== undefined
+            ? action.pillarToUnlock
+            : nextUnlockablePillar(prog0.pillars, action.pillarId);
+      const prog1: CompanyProgress = {
+        ...prog0,
+        pendingConvictionQueue: [
+          ...queue,
+          {
+            completedPillarId: action.pillarId,
+            pillarToUnlock
+          }
+        ]
+      };
+      events.push({
+        kind: "pillar-awaiting-conviction",
+        completedPillarId: action.pillarId,
+        nextPillarId: pillarToUnlock
+      });
+      return { state: putProg(state, prog1), events };
+    }
+
     case "submit-conviction-and-advance": {
       const prog0 = getProg(state);
       const queue = prog0.pendingConvictionQueue;
@@ -1014,6 +1052,7 @@ const ACTIVITY_ACTIONS: ReadonlySet<GameAction["type"]> = new Set<
   "repair-quest-progress",
   "clear-pillar-progress",
   "submit-conviction-and-advance",
+  "enqueue-pillar-conviction",
   "complete-ten-k-rookie-challenge"
 ]);
 

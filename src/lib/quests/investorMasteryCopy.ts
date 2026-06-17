@@ -7,8 +7,8 @@ export type InvestorMasteryContent = {
   message: string;
   /** Label above the checklist (e.g. "You now understand"). */
   learnedIntro: string;
-  /** Three beginner-friendly “you now understand” bullets. */
-  learned: [string, string, string];
+  /** Beginner-friendly “you now understand” bullets (one per card when possible). */
+  learned: readonly string[];
   /** One-line momentum into the quiz. */
   momentum: string;
 };
@@ -31,9 +31,8 @@ const MASTERY_BY_SECTION = {
       "You can now explain {company} like a real business, not a ticker.",
     learnedIntro: "You now understand",
     learned: [
-      "What {company} actually makes",
-      "The problem {company} solves for customers",
-      "Why {company} matters in today's AI world"
+      "What {company} actually sells",
+      "Why customers buy {company} products"
     ],
     momentum: "Now let’s see what stuck."
   },
@@ -354,7 +353,7 @@ function bindContent(
     ),
     learned: content.learned.map((item) =>
       normalizeQuestProseDashes(withCompany(companyName, item))
-    ) as [string, string, string],
+    ),
     momentum: normalizeQuestProseDashes(withCompany(companyName, content.momentum))
   };
 }

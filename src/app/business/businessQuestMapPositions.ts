@@ -31,7 +31,7 @@ export const BUSINESS_SCENE_STYLE_PORTRAIT: CSSProperties = {
 export const BUSINESS_MAP_CARD_POSITIONS: Record<number, CSSProperties> = {
   1: {
     top: "2.5%",
-    left: "50%",
+    left: "calc(50% - clamp(150px, 14vw, 250px))",
     transform: "translateX(-50%)"
   },
   2: {
@@ -64,7 +64,7 @@ export const BUSINESS_MAP_CARD_POSITIONS: Record<number, CSSProperties> = {
 export const BUSINESS_MAP_CARD_POSITIONS_PORTRAIT: Record<number, CSSProperties> = {
   1: {
     top: "3%",
-    left: "50%",
+    left: "calc(50% - clamp(72px, 18vw, 120px))",
     transform: "translateX(-50%)"
   },
   2: {

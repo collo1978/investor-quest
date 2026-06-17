@@ -1,5 +1,3 @@
-import { CONTROLLED_DEMO_MODE } from "@/lib/demo/controlledDemo";
-
 /**
  * Hub map slot unlock — linear chain: slot N unlocks when slot N−1 is **completed**
  * (quiz passed / checklist done), not when cards are only marked read.
@@ -11,7 +9,6 @@ export function resolveHubSlotLocked(
   hubLocked: boolean | null | undefined,
   priorSlotCompleted: boolean
 ): boolean {
-  if (CONTROLLED_DEMO_MODE) return false;
   if (hubLocked === true) return true;
   if (hubLocked === false && orderNumber <= 1) return false;
   if (orderNumber <= 1) return false;

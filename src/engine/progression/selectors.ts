@@ -18,6 +18,7 @@ import {
   pillarById,
   type PillarId
 } from "@/data/pillars";
+import { isSchoolsDemoFinalChallengeReady } from "@/lib/schools/schoolsDemoPlaythrough";
 import {
   findQuestDefinition,
   getCompanyPillarQuests
@@ -468,6 +469,9 @@ export function isPillarReadingComplete(
 /** Center-map final challenge — all pillars cleared, read, and conviction submitted. */
 export function isTenKFinalChallengeUnlocked(state: GameState): boolean {
   const prog = getActiveCompanyProgress(state);
+  if (isSchoolsDemoFinalChallengeReady(prog.pillarConvictionSubmittedAt)) {
+    return true;
+  }
   return PILLAR_ORDER.every((pid) => {
     if (!isPillarComplete(prog.pillars, pid)) return false;
     if (!isPillarReadingComplete(state, pid)) return false;

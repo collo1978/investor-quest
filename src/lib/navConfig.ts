@@ -18,6 +18,8 @@ export const PRIMARY_NAV = [
   // Local preview/testing links — keep production presenter flow at `/demo`.
   ...(process.env.NODE_ENV !== "production"
     ? ([
+        { href: "/bank/mobile-preview", label: "Mobile Preview" },
+        { href: "/demo", label: "Demo start" },
         { href: "/opening", label: "Opening Logo" },
         { href: "/welcome", label: "Welcome Intro" }
       ] as const)

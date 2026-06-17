@@ -2,7 +2,8 @@
 
 import { usePathname } from "next/navigation";
 
-import { useRunOnceOnMount } from "@/hooks/useRunOnceOnMount";
+import { useRunOnceOnLayoutMount } from "@/hooks/useRunOnceOnLayoutMount";
+import { isMobilePreviewEmbed } from "@/lib/bank/mobilePreviewEmbed";
 import { DEMO_ROUTE_PREFIX, isDemoPath } from "@/lib/demo/demoHref";
 import {
   ensureProductionDemoFromPath,
@@ -16,7 +17,8 @@ import {
 export function DemoRouteBootstrap() {
   const pathname = usePathname();
 
-  useRunOnceOnMount(() => {
+  useRunOnceOnLayoutMount(() => {
+    if (isMobilePreviewEmbed()) return;
     if (!isDemoPath(pathname) || pathname === DEMO_ROUTE_PREFIX) return;
     if (isDemoStoryModeActive()) return;
     ensureProductionDemoFromPath(pathname);

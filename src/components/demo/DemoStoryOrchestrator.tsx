@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { useDemoStory } from "@/components/demo/DemoStoryProvider";
+import { isMobilePreviewEmbed, isMobilePreviewShellPath } from "@/lib/bank/mobilePreviewEmbed";
 import {
   advanceDemoStoryStep,
   DEMO_STORY_STEPS,
@@ -29,6 +30,7 @@ export function DemoStoryOrchestrator() {
   routerRef.current = router;
 
   useEffect(() => {
+    if (isMobilePreviewShellPath(pathname) || isMobilePreviewEmbed()) return;
     if (isSchoolsDemoStoryModeActive()) return;
     if (!active) {
       prevStepRef.current = null;
@@ -39,9 +41,10 @@ export function DemoStoryOrchestrator() {
 
     const expected = getRouteForDemoStoryStep(step);
     routerRef.current.replace(expected);
-  }, [active, step]);
+  }, [active, pathname, step]);
 
   useEffect(() => {
+    if (isMobilePreviewShellPath(pathname) || isMobilePreviewEmbed()) return;
     if (isSchoolsDemoStoryModeActive()) return;
     if (!active) return;
     const path = stripDemoPrefix(pathname);

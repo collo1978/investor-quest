@@ -106,6 +106,13 @@ h3 {
 }
 
 /* Schools PWA map — no app header / bottom nav chrome */
+/* Bank/broker mobile preview iframe — full viewport map stage */
+.bank-preview-map-stage-height {
+  height: 100dvh;
+  min-height: 100dvh;
+  max-height: 100dvh;
+}
+
 .schools-demo-map-stage-height {
   height: calc(
     100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
@@ -118,6 +125,38 @@ h3 {
   }
 }
 
+/* Schools fullscreen preview — true production viewport (no chrome). */
+.schools-preview-map-stage-height {
+  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+}
+
+/* Schools map — subtle glow pulse while hovering a corner panel */
+@keyframes schools-map-box-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.88;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.iq-schools-map-box-glow {
+  animation: schools-map-box-glow-pulse 2.4s ease-in-out infinite;
+}
+
+.iq-schools-map-box-locked {
+  cursor: not-allowed;
+}
+
+.iq-schools-map-box-locked:focus-visible {
+  outline-color: rgba(196, 181, 253, 0.55);
+}
+
 /* Scrollable Schools demo flow pages inside fullscreen shell */
 .iq-schools-demo-scroll-host {
   min-height: 0;
@@ -128,8 +167,8 @@ h3 {
   -webkit-overflow-scrolling: touch;
 }
 
-.iq-schools-demo-scroll-host main:not(.iq-schools-business-hub-main) {
-  padding-bottom: max(7rem, env(safe-area-inset-bottom, 0px));
+.iq-schools-demo-scroll-host main:not(.iq-schools-business-hub-main):not(.iq-schools-profile-hub-main) {
+  padding-bottom: max(9rem, calc(env(safe-area-inset-bottom, 0px) + 5rem));
 }
 
 /* Business island hub — wide 16:9 desktop; tall portrait stage on phones */
@@ -152,6 +191,79 @@ h3 {
   width: 100%;
   max-width: 100%;
   aspect-ratio: 16 / 9;
+}
+
+/* Schools profile hub — mirror Business Island viewport fill */
+.iq-schools-profile-hub-main {
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+.iq-schools-profile-hub-stage {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.iq-schools-profile-scene-root {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.iq-schools-profile-scene-scroll {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  padding-left: max(0px, env(safe-area-inset-left));
+  padding-right: max(0px, env(safe-area-inset-right));
+}
+
+.iq-schools-profile-scene-frame {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+}
+
+/* Sized to the largest uncropped poster box that fits the viewport */
+.iq-schools-profile-art-stage {
+  position: relative;
+  aspect-ratio: var(--iq-profile-art-aspect, 1672 / 941);
+  width: min(100%, calc(100dvh * var(--iq-profile-art-aspect, 1672 / 941)));
+  height: auto;
+  max-height: 100dvh;
+  margin: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.iq-schools-profile-scene-art {
+  object-fit: contain;
+  object-position: center center;
+}
+
+.iq-schools-demo-scroll-host .iq-schools-profile-hub-main {
+  padding-bottom: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  height: auto;
+  max-height: 100dvh;
 }
 
 .iq-schools-demo-scroll-host .iq-schools-business-hub-main {
@@ -218,6 +330,22 @@ h3 {
     object-position: center 26%;
   }
 
+  .iq-schools-profile-hub-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .iq-schools-profile-scene-root,
+  .iq-schools-profile-scene-scroll,
+  .iq-schools-profile-scene-frame {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
   .business-hub-company-emblem {
     top: 36% !important;
     left: 50% !important;
@@ -232,7 +360,7 @@ h3 {
   /* Portrait orbit — matches BUSINESS_MAP_CARD_POSITIONS_PORTRAIT */
   .business-hub-orbit-slot-1 {
     top: 3% !important;
-    left: 50% !important;
+    left: calc(50% - clamp(72px, 18vw, 120px)) !important;
     right: auto !important;
     transform: translateX(-50%) !important;
   }
@@ -382,7 +510,6 @@ h3 {
 }
 
 .iq-opening-logo-sequence {
-  position: relative;
   opacity: 0;
   animation: iq-opening-logo-enter 1.1s ease-out both;
   animation-delay: 0.8s;
@@ -668,6 +795,30 @@ h3 {
     linear-gradient(180deg, rgba(3, 3, 8, 0.18) 0%, transparent 12%, transparent 72%, rgba(3, 3, 8, 0.42) 100%);
 }
 
+@keyframes iq-schools-pick-interest-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.iq-schools-pick-interest-selected::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 50% 40%,
+    rgba(196, 181, 253, 0.22),
+    transparent 68%
+  );
+  animation: iq-schools-pick-interest-glow 2.8s ease-in-out infinite;
+}
+
 .iq-schools-opening-cta-dock {
   margin-top: -0.5rem;
   padding:
@@ -712,6 +863,123 @@ h3 {
     0 8px 24px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
     inset 0 -8px 20px rgba(0, 0, 0, 0.22) !important;
+}
+
+/* Business Island mission brief — neutral stack; no grain/blur tint under scrim */
+body.iq-business-mission-brief-open {
+  background: #000 !important;
+}
+
+body.iq-business-mission-brief-open.grain::before {
+  display: none !important;
+}
+
+body.iq-business-mission-brief-open .bg-bg-0,
+body.iq-business-mission-brief-open .iq-schools-demo-fullscreen {
+  background-color: #000 !important;
+}
+
+body.iq-business-mission-brief-open aside {
+  background: #000 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Brief open — hub shows scenery only (no quest cards or chrome overlays) */
+body.iq-business-mission-brief-open .business-hub-cards-layer,
+body.iq-business-mission-brief-open .business-hub-quest-card,
+body.iq-business-mission-brief-open [data-business-quest-hub] [data-hub-locked],
+body.iq-business-mission-brief-open [data-business-quest-hub] [data-hub-slug] {
+  display: none !important;
+}
+
+.iq-business-mission-brief-overlay {
+  isolation: isolate;
+  background: transparent;
+  mix-blend-mode: normal;
+}
+
+.iq-business-mission-brief-dim {
+  background: rgba(0, 0, 0, 0.55) !important;
+  mix-blend-mode: normal;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* Mission brief CTA — button surface only; no ambient violet/blue spill */
+.iq-mission-brief-cta {
+  display: inline-flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.875rem 2rem;
+  border: 2px solid rgba(245, 197, 71, 0.5);
+  background: linear-gradient(
+    165deg,
+    rgba(212, 168, 52, 0.94) 0%,
+    rgba(160, 120, 32, 0.9) 52%,
+    rgba(130, 96, 24, 0.92) 100%
+  );
+  color: #1a1204;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -6px 16px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.iq-mission-brief-cta:hover {
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.iq-mission-brief-cta:active {
+  transform: translateY(0.5px);
+}
+
+.iq-mission-brief-cta:focus {
+  outline: none;
+}
+
+.iq-mission-brief-cta:focus-visible {
+  outline: 2px solid rgba(245, 197, 71, 0.65);
+  outline-offset: 2px;
+}
+
+/* Schools map mission brief — CTA only; no ambient glow spill */
+.iq-schools-map-brief-cta {
+  border-radius: 9999px;
+  background:
+    linear-gradient(
+      165deg,
+      rgba(139, 92, 246, 0.48) 0%,
+      rgba(109, 40, 217, 0.36) 52%,
+      rgba(88, 28, 180, 0.4) 100%
+    );
+  color: #faf5ff;
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.3),
+    0 6px 18px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -6px 16px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+}
+
+.iq-schools-map-brief-cta:hover {
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.36),
+    0 8px 20px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -6px 16px rgba(0, 0, 0, 0.22);
 }
 
 .iq-schools-opening-cta-secondary {
@@ -778,32 +1046,1191 @@ body.iq-schools-demo-fullscreen {
   width: 100%;
   height: 100dvh;
   min-height: 100dvh;
-  max-height: 100dvh;
   overflow: hidden;
   overscroll-behavior: none;
   background-color: #05010f;
   -webkit-touch-callout: none;
 }
 
-body.iq-schools-demo-fullscreen {
-  position: fixed;
-  inset: 0;
-}
-
 @supports (-webkit-touch-callout: none) {
   html.iq-schools-demo-fullscreen,
   body.iq-schools-demo-fullscreen {
     min-height: -webkit-fill-available;
-    height: -webkit-fill-available;
   }
 }
 
 @media (display-mode: standalone), (display-mode: fullscreen) {
   html.iq-schools-demo-fullscreen,
   body.iq-schools-demo-fullscreen {
-    height: 100dvh;
     min-height: 100dvh;
+  }
+}
+
+/* XP ladder — schools tour (all viewports; scroll via demo shell) */
+body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck {
+  min-height: 0 !important;
+  height: auto;
+  min-height: 100%;
+  max-height: none;
+  overflow: visible;
+  width: 100%;
+}
+
+body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck .iq-schools-xp-ladder-inner {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: min(100%, 42rem);
+  margin-inline: auto;
+  padding-top: 0.35rem;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck .iq-schools-xp-ladder-inner header {
+  margin-bottom: 0.75rem !important;
+}
+
+body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck .iq-schools-xp-ladder-title-block {
+  margin-bottom: 1rem !important;
+}
+
+body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck .iq-schools-xp-ladder-title-block h1 {
+  font-size: clamp(1.35rem, 4.5vw, 1.75rem);
+}
+
+body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck .iq-schools-xp-ladder-title-block p:last-child {
+  display: none;
+}
+
+body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol {
+  gap: 0.5rem !important;
+}
+
+body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
+  padding-block: 0.65rem;
+}
+
+/*
+ * Schools demo — laptop deck (1366×768 class displays).
+ * Deck steps use scoped max-heights; quest pages scroll normally.
+ */
+@media (min-width: 768px) and (max-height: 820px) {
+  body.iq-schools-demo-fullscreen .schools-demo-map-stage-height {
+    height: 100dvh;
     max-height: 100dvh;
+  }
+
+  /* Pick interests */
+  body.iq-schools-demo-fullscreen .iq-schools-deck-pick-interests header h1 {
+    font-size: clamp(1.35rem, 2.5vw, 2rem);
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-deck-pick-interests header p {
+    margin-top: 0.5rem;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-deck-pick-interests .iq-schools-deck-pick-grid {
+    max-height: min(36vh, 280px);
+    gap: clamp(0.45rem, 0.9vw, 0.75rem);
+  }
+
+  /* Mission brief */
+  body.iq-schools-demo-fullscreen .iq-schools-mission-brief-deck .iq-schools-mission-brief-content {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-mission-brief-layout {
+    max-width: min(92vw, 30rem);
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-mission-section-gap {
+    padding-top: 1rem;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-mission-type--title {
+    font-size: clamp(0.68rem, 1.5vw, 0.82rem);
+    margin-bottom: 1rem;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-mission-type--intro {
+    font-size: clamp(0.88rem, 1.75vw, 0.98rem);
+    margin-top: 0.55rem;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-mission-type--body-hero {
+    font-size: clamp(1.2rem, 3.2vw, 1.55rem);
+  }
+
+  /* Company reveal */
+  body.iq-schools-demo-fullscreen .iq-schools-company-reveal-deck .iq-schools-company-reveal-inner {
+    min-height: 100dvh !important;
+    max-height: 100dvh;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-reveal-deck .iq-schools-company-reveal-board {
+    min-height: 200px !important;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-reveal-deck .iq-schools-company-reveal-scan-headline {
+    margin-bottom: 0.75rem !important;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-reveal-deck .iq-schools-company-reveal-scan-headline p:first-child {
+    font-size: 1.125rem;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-reveal-deck .iq-schools-company-reveal-reveal-copy {
+    gap: 0.65rem !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-reveal-deck .iq-quest-unlock-headline {
+    font-size: clamp(1.55rem, 4.2vw, 2.15rem);
+    letter-spacing: 0.08em;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-reveal-deck .iq-schools-company-reveal-reveal-copy h2 {
+    font-size: clamp(1.45rem, 3.6vw, 2rem);
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-reveal-deck .iq-quest-unlock-card {
+    padding: 1.35rem 1.75rem;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-reveal-deck .iq-quest-unlock-card img,
+  body.iq-schools-demo-fullscreen .iq-schools-company-reveal-deck .iq-quest-unlock-card svg {
+    height: 4.5rem;
+    width: 4.5rem;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-reveal-deck .iq-schools-company-reveal-blurb {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-reveal-deck .iq-schools-company-reveal-reveal-copy .iq-schools-company-reveal-cta {
+    margin-top: 0.5rem !important;
+    padding-top: 0 !important;
+  }
+
+  /* Business island hub */
+  body.iq-schools-demo-fullscreen .iq-schools-business-hub-main {
+    overflow: hidden !important;
+    max-height: 100dvh;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-business-hub-stage {
+    overflow: hidden;
+    max-height: 100dvh;
+  }
+
+  body.iq-schools-demo-fullscreen .business-hub-scene-scroll {
+    overflow: hidden;
+  }
+
+  body.iq-schools-demo-fullscreen .business-hub-scene-frame {
+    padding-bottom: clamp(0.35rem, 2vw, 1rem);
+  }
+
+  body.iq-schools-demo-fullscreen .business-hub-scene-stage {
+    width: 100%;
+    max-height: calc(100dvh - 1rem);
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Profile — schools tour deck (full-screen artwork) */
+  body.iq-schools-demo-fullscreen .iq-schools-profile-hub-main {
+    overflow: hidden !important;
+    max-height: 100dvh;
+    min-height: 0 !important;
+    height: auto;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-profile-hub-stage {
+    overflow: hidden;
+    max-height: 100dvh;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-profile-scene-scroll {
+    overflow: hidden;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-profile-scene-frame {
+    padding-bottom: 0;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-profile-art-stage {
+    width: min(100%, calc(100dvh * var(--iq-profile-art-aspect, 1672 / 941)));
+    max-height: 100dvh;
+    height: auto;
+    aspect-ratio: var(--iq-profile-art-aspect, 1672 / 941);
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-armor-guide-deck {
+    min-height: 0 !important;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden !important;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-armor-guide-art-stage {
+    max-height: 100dvh;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-armor-guide-overlay .iq-schools-armor-guide-art-stage {
+    max-height: 100dvh;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-mastery-deck {
+    min-height: 0 !important;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden !important;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-mastery-art-stage {
+    max-height: 100dvh;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-company-mastery-overlay .iq-schools-company-mastery-art-stage {
+    max-height: 100dvh;
+  }
+
+  /* Final challenge — schools tour deck */
+  body.iq-schools-demo-fullscreen .iq-schools-final-challenge-deck {
+    padding-top: 1rem !important;
+    padding-bottom: 0.5rem !important;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-final-challenge-deck .iq-schools-final-challenge-intro p:last-of-type {
+    font-size: 0.8125rem;
+    line-height: 1.45;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-final-challenge-deck .iq-schools-final-challenge-quiz {
+    margin-top: 0.75rem !important;
+  }
+}
+
+/* Schools profile — CTA hotspots (layout rules live with business hub above) */
+
+@keyframes iq-schools-profile-cta-violet-flash {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(167, 139, 250, 0.55),
+      0 0 26px rgba(139, 92, 246, 0.48),
+      0 0 44px rgba(109, 40, 217, 0.22),
+      0 6px 20px rgba(0, 0, 0, 0.48),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    border-color: rgba(196, 181, 253, 0.62);
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(221, 214, 254, 0.88),
+      0 0 40px rgba(139, 92, 246, 0.72),
+      0 0 72px rgba(109, 40, 217, 0.38),
+      0 8px 26px rgba(0, 0, 0, 0.52),
+      inset 0 1px 0 rgba(255, 255, 255, 0.26);
+    border-color: rgba(237, 233, 254, 0.98);
+    transform: scale(1.06);
+    filter: brightness(1.14);
+  }
+}
+
+@keyframes iq-schools-profile-cta-gold-flash {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(245, 197, 71, 0.52),
+      0 0 26px rgba(245, 197, 71, 0.48),
+      0 0 44px rgba(253, 186, 66, 0.22),
+      0 6px 18px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    border-color: rgba(253, 230, 138, 0.88);
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(255, 244, 196, 0.92),
+      0 0 40px rgba(245, 197, 71, 0.68),
+      0 0 72px rgba(253, 186, 66, 0.34),
+      0 8px 24px rgba(0, 0, 0, 0.58),
+      inset 0 1px 0 rgba(255, 255, 255, 0.26);
+    border-color: rgba(255, 251, 235, 1);
+    transform: scale(1.06);
+    filter: brightness(1.16);
+  }
+}
+
+@keyframes iq-schools-profile-cta-shimmer {
+  0% {
+    background-position: 180% 0;
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.85;
+  }
+  42% {
+    background-position: -80% 0;
+    opacity: 0;
+  }
+  100% {
+    background-position: -80% 0;
+    opacity: 0;
+  }
+}
+
+.iq-schools-profile-xp-ladder-btn,
+.iq-schools-profile-armor-guide-btn,
+.iq-schools-profile-company-mastery-btn {
+  isolation: isolate;
+  overflow: visible;
+  z-index: 30;
+}
+
+.iq-schools-profile-xp-ladder-btn::after,
+.iq-schools-profile-armor-guide-btn::after,
+.iq-schools-profile-company-mastery-btn::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  border-radius: inherit;
+  clip-path: inherit;
+  background: linear-gradient(
+    105deg,
+    transparent 36%,
+    rgba(255, 255, 255, 0.42) 50%,
+    transparent 64%
+  );
+  background-size: 220% 100%;
+  animation: iq-schools-profile-cta-shimmer 2.6s ease-in-out infinite;
+}
+
+.iq-schools-demo-scroll-host:has(.iq-schools-profile-hub-main) {
+  overflow: hidden;
+}
+
+.iq-schools-profile-xp-ladder-btn {
+  touch-action: manipulation;
+  position: absolute;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.28em 0.72em;
+  border-radius: 9999px;
+  border: 2.5px solid rgba(221, 214, 254, 0.92);
+  background:
+    linear-gradient(
+      165deg,
+      rgba(139, 92, 246, 0.52) 0%,
+      rgba(88, 28, 180, 0.38) 48%,
+      rgba(109, 40, 217, 0.44) 100%
+    );
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: clamp(0.52rem, 1.65vw, 0.7rem);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-indent: 0.1em;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+  color: #faf5ff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(109, 40, 217, 0.45),
+    0 0 18px rgba(139, 92, 246, 0.42),
+    0 4px 14px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: iq-schools-profile-cta-violet-flash 2.1s ease-in-out infinite;
+  animation-delay: 1.4s;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease,
+    filter 0.2s ease;
+}
+
+.iq-schools-profile-xp-ladder-btn::after {
+  animation-delay: 1.4s;
+  border-radius: inherit;
+}
+
+.iq-schools-profile-xp-ladder-btn:hover {
+  animation-play-state: paused;
+  border-color: rgba(237, 233, 254, 1);
+  transform: translateY(-1px) scale(1.05);
+  color: #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(221, 214, 254, 0.55),
+    0 0 28px rgba(139, 92, 246, 0.55),
+    0 6px 20px rgba(0, 0, 0, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.iq-schools-profile-xp-ladder-btn:active {
+  transform: translateY(0);
+}
+
+.iq-schools-profile-armor-guide-btn {
+  touch-action: manipulation;
+  border: 2px solid rgba(253, 230, 138, 0.78);
+  border-radius: 9999px;
+  background:
+    linear-gradient(
+      165deg,
+      rgba(12, 8, 4, 0.92) 0%,
+      rgba(24, 14, 6, 0.88) 42%,
+      rgba(46, 24, 8, 0.9) 100%
+    );
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: clamp(0.5rem, 1.55vw, 0.68rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  text-align: center;
+  text-decoration: none;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.55),
+    0 0 12px rgba(245, 197, 71, 0.35);
+  color: #fff7d6;
+  box-shadow:
+    0 0 0 1px rgba(245, 197, 71, 0.28),
+    0 0 20px rgba(245, 197, 71, 0.28),
+    0 6px 18px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  animation: iq-schools-profile-cta-gold-flash 2.1s ease-in-out infinite;
+  animation-delay: 0s;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    filter 0.2s ease;
+}
+
+.iq-schools-profile-armor-guide-btn::after {
+  animation-delay: 0s;
+}
+
+.iq-schools-profile-armor-guide-btn:hover {
+  animation-play-state: paused;
+  border-color: rgba(255, 244, 196, 0.92);
+  transform: translateY(-1px) scale(1.07);
+  color: #fffbeb;
+  box-shadow:
+    0 0 0 1px rgba(253, 230, 138, 0.42),
+    0 0 28px rgba(245, 197, 71, 0.38),
+    0 8px 22px rgba(0, 0, 0, 0.58),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.iq-schools-profile-armor-guide-btn:active {
+  transform: translateY(0);
+}
+
+.iq-schools-profile-company-mastery-btn {
+  touch-action: manipulation;
+  border: 2px solid rgba(167, 139, 250, 0.52);
+  border-radius: 9999px;
+  background:
+    linear-gradient(
+      165deg,
+      rgba(139, 92, 246, 0.38) 0%,
+      rgba(88, 28, 180, 0.3) 48%,
+      rgba(109, 40, 217, 0.34) 100%
+    );
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: clamp(0.48rem, 1.45vw, 0.64rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.15;
+  text-align: center;
+  text-decoration: none;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.45),
+    0 0 10px rgba(167, 139, 250, 0.35);
+  color: #f5f3ff;
+  box-shadow:
+    0 0 0 1px rgba(109, 40, 217, 0.28),
+    0 0 18px rgba(139, 92, 246, 0.3),
+    0 5px 16px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  animation: iq-schools-profile-cta-violet-flash 2.1s ease-in-out infinite;
+  animation-delay: 0.7s;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    filter 0.2s ease;
+}
+
+.iq-schools-profile-company-mastery-btn::after {
+  animation-delay: 0.7s;
+}
+
+.iq-schools-profile-company-mastery-btn:hover {
+  animation-play-state: paused;
+  border-color: rgba(221, 214, 254, 0.78);
+  transform: translateY(-1px) scale(1.07);
+  color: #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.4),
+    0 0 26px rgba(139, 92, 246, 0.42),
+    0 7px 20px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.iq-schools-profile-company-mastery-btn:active {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-schools-profile-xp-ladder-btn,
+  .iq-schools-profile-armor-guide-btn,
+  .iq-schools-profile-company-mastery-btn {
+    animation: none !important;
+  }
+
+  .iq-schools-profile-xp-ladder-btn::after,
+  .iq-schools-profile-armor-guide-btn::after,
+  .iq-schools-profile-company-mastery-btn::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
+
+/** Schools nav menu — offset past dev sidebar on canonical localhost routes (md+). */
+@media (min-width: 768px) {
+  .iq-schools-nav-menu-shell--dev-sidebar {
+    left: var(--iq-schools-nav-menu-left-md, 12px);
+  }
+}
+
+.iq-schools-pick-company-select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(245, 197, 71, 0.75) 50%),
+    linear-gradient(135deg, rgba(245, 197, 71, 0.75) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% + 2px),
+    calc(100% - 12px) calc(50% + 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.iq-schools-pick-company-select option {
+  background: #0a0814;
+  color: #f5f3ff;
+}
+
+.iq-schools-armor-guide-art-stage {
+  width: 100%;
+  max-height: 100dvh;
+  max-width: min(100%, calc(100dvh * var(--iq-armor-guide-art-aspect, 1.5)));
+}
+
+.iq-schools-armor-guide-got-it-btn {
+  touch-action: manipulation;
+  border: 2px solid rgba(167, 139, 250, 0.52);
+  border-radius: 9999px;
+  background:
+    linear-gradient(
+      165deg,
+      rgba(139, 92, 246, 0.42) 0%,
+      rgba(88, 28, 180, 0.34) 48%,
+      rgba(109, 40, 217, 0.38) 100%
+    );
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: clamp(0.72rem, 2.4vw, 0.92rem);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-indent: 0.12em;
+  text-decoration: none;
+  color: #faf5ff;
+  box-shadow:
+    0 0 0 1px rgba(109, 40, 217, 0.3),
+    0 0 24px rgba(139, 92, 246, 0.34),
+    0 8px 22px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.iq-schools-armor-guide-got-it-btn:hover {
+  border-color: rgba(221, 214, 254, 0.78);
+  transform: translateY(-1px);
+  color: #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.42),
+    0 0 34px rgba(139, 92, 246, 0.46),
+    0 10px 26px rgba(0, 0, 0, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.iq-schools-armor-guide-got-it-btn:active {
+  transform: translateY(0);
+}
+
+.iq-schools-company-mastery-art-stage {
+  width: 100%;
+  max-height: 100dvh;
+  max-width: min(100%, calc(100dvh * var(--iq-company-mastery-art-aspect, 1.5)));
+}
+
+/** @deprecated Use {@link .iq-schools-profile-xp-ladder-btn}. */
+.iq-schools-profile-xp-ladder-hit {
+  display: block;
+  touch-action: manipulation;
+  border-radius: 9999px;
+  transform-origin: center;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.iq-schools-profile-xp-ladder-hit:hover {
+  transform: scale(1.04);
+  box-shadow:
+    0 0 22px rgba(139, 92, 246, 0.45),
+    0 0 40px rgba(168, 85, 247, 0.28),
+    inset 0 0 0 1px rgba(196, 181, 253, 0.35);
+  filter: brightness(1.08);
+}
+
+.iq-schools-profile-xp-ladder-hit:active {
+  transform: scale(1.02);
+}
+
+/* Schools choose armor — reference poster + per-card hover zones */
+.iq-schools-choose-identity {
+  background: #030208;
+}
+
+/* Fit inside viewport — centered, no crop, capped so laptop doesn't blow up */
+.iq-schools-choose-stage {
+  width: 100%;
+  max-height: 100dvh;
+  max-width: min(100%, calc(100dvh * var(--iq-art-aspect, 1.5)), 1200px);
+}
+
+.iq-schools-choose-option {
+  touch-action: manipulation;
+}
+
+.iq-schools-armor-select-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  border: 2px solid rgba(167, 139, 250, 0.42) !important;
+  background:
+    linear-gradient(
+      165deg,
+      rgba(139, 92, 246, 0.28) 0%,
+      rgba(88, 28, 180, 0.2) 48%,
+      rgba(109, 40, 217, 0.24) 100%
+    ) !important;
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: clamp(0.58rem, 1.15vw, 0.72rem);
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-indent: 0.16em;
+  color: #f5f3ff;
+  clip-path: polygon(6% 0%, 94% 0%, 100% 50%, 94% 100%, 6% 100%, 0% 50%);
+  box-shadow:
+    0 0 0 1px rgba(109, 40, 217, 0.24),
+    0 0 20px rgba(139, 92, 246, 0.28),
+    0 6px 18px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.iq-schools-armor-select-btn:hover {
+  border-color: rgba(221, 214, 254, 0.68) !important;
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.36),
+    0 0 28px color-mix(in srgb, var(--iq-accent, #a855f7) 55%, transparent),
+    0 8px 22px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.iq-schools-armor-select-btn--selected {
+  border-color: color-mix(in srgb, var(--iq-accent, #a855f7) 75%, white) !important;
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--iq-accent, #a855f7) 52%, transparent) 0%,
+      color-mix(in srgb, var(--iq-accent, #a855f7) 28%, transparent) 100%
+    ) !important;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--iq-accent, #a855f7) 65%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--iq-accent, #a855f7) 45%, transparent),
+    0 0 32px color-mix(in srgb, var(--iq-accent, #a855f7) 55%, transparent),
+    0 8px 22px rgba(0, 0, 0, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.iq-schools-choose-continue-btn {
+  position: relative;
+  display: inline-flex;
+  width: min(100%, 14rem);
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(167, 139, 250, 0.38);
+  background:
+    linear-gradient(
+      165deg,
+      rgba(139, 92, 246, 0.22) 0%,
+      rgba(88, 28, 180, 0.16) 48%,
+      rgba(109, 40, 217, 0.2) 100%
+    );
+  padding: 0.85rem 2.5rem;
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: clamp(0.9rem, 2.4vw, 1.05rem);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  color: rgba(237, 233, 254, 0.55);
+  clip-path: polygon(6% 0%, 94% 0%, 100% 50%, 94% 100%, 6% 100%, 0% 50%);
+  box-shadow:
+    0 0 0 1px rgba(109, 40, 217, 0.2),
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.iq-schools-choose-continue-btn--armed {
+  border-color: rgba(196, 181, 253, 0.62);
+  color: #f5f3ff;
+  text-shadow: 0 0 18px rgba(196, 181, 253, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(167, 139, 250, 0.32),
+    0 0 36px rgba(139, 92, 246, 0.42),
+    0 8px 28px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.iq-schools-choose-continue-btn--armed:hover {
+  border-color: rgba(221, 214, 254, 0.72);
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.4),
+    0 0 44px rgba(139, 92, 246, 0.52),
+    0 10px 32px rgba(0, 0, 0, 0.58),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.iq-schools-choose-continue-btn--armed:active {
+  transform: translateY(0);
+}
+
+.iq-schools-choose-continue-btn:disabled {
+  pointer-events: none;
+}
+
+/* Quest unlock reveal — achievement reward beat */
+.iq-quest-unlock-headline {
+  text-shadow:
+    0 0 28px rgba(139, 92, 246, 0.65),
+    0 0 56px rgba(109, 40, 217, 0.35),
+    0 2px 0 rgba(0, 0, 0, 0.45);
+}
+
+.iq-quest-unlock-rays {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(139, 92, 246, 0.22) 28deg,
+    transparent 56deg,
+    rgba(196, 181, 253, 0.14) 112deg,
+    transparent 148deg,
+    rgba(139, 92, 246, 0.2) 196deg,
+    transparent 232deg,
+    rgba(245, 197, 71, 0.12) 288deg,
+    transparent 328deg,
+    transparent 360deg
+  );
+  animation: iq-quest-unlock-rays-spin 14s linear infinite;
+}
+
+@keyframes iq-quest-unlock-rays-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-quest-unlock-rays {
+    animation: none;
+  }
+}
+
+/* Schools stocks experience — screen 5 onboarding */
+.iq-schools-stocks-experience-grid {
+  align-content: center;
+}
+
+@media (min-width: 768px) and (max-height: 820px) {
+  body.iq-schools-demo-fullscreen .iq-schools-stocks-experience-body {
+    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-stocks-experience-body header h1 {
+    font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-stocks-experience-body header p {
+    font-size: 0.8125rem;
+    margin-top: 0.35rem;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-stocks-experience-grid {
+    gap: 0.4rem;
+    max-height: min(58vh, 520px);
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-stocks-experience-grid button {
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+  }
+}
+
+/* DS-Digital — LCD segment font (DaFont / tutorial reference) */
+@font-face {
+  font-family: "DS-Digital";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/ds-digital/DS-DIGI.woff") format("woff");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "DS-Digital";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/ds-digital/DS-DIGIB.woff") format("woff");
+  font-display: swap;
+}
+
+.iq-schools-mission-brief-type {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+.iq-schools-map-stage-dimmed {
+  filter: brightness(0.92);
+}
+
+.iq-schools-mission-brief-scrim {
+  background: rgba(0, 0, 0, 0.26);
+}
+
+.iq-schools-map-box-highlight {
+  animation: schools-map-box-focus-pulse 2.6s ease-in-out infinite;
+  z-index: 25;
+}
+
+.iq-schools-map-box-landed {
+  animation: schools-map-box-landed-pulse 2.8s ease-in-out infinite;
+  z-index: 25;
+}
+
+.iq-schools-map-business-building-glow {
+  width: 4.8%;
+  height: 14%;
+  transform: translate(-50%, -50%);
+  border-radius: 38% / 42%;
+  background: radial-gradient(
+    ellipse 52% 88% at 50% 56%,
+    rgba(255, 251, 235, 0.95),
+    rgba(253, 230, 138, 0.62) 24%,
+    rgba(245, 158, 11, 0.28) 48%,
+    transparent 74%
+  );
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.55));
+}
+
+.iq-schools-map-business-building-glow--impact {
+  animation: schools-business-building-impact 0.32s ease-out forwards;
+}
+
+.iq-schools-map-business-building-glow--lit {
+  opacity: 0.72;
+}
+
+.iq-schools-map-business-building-glow--lit-reactive {
+  animation: schools-business-building-pulse-hit
+    calc(var(--schools-bridge-flow-s, 1.75) * 1s / 3) linear infinite;
+}
+
+@keyframes schools-business-building-impact {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.82);
+    filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.2));
+  }
+  35% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.14);
+    filter: drop-shadow(0 0 28px rgba(255, 237, 160, 0.95));
+  }
+  100% {
+    opacity: 0.78;
+    transform: translate(-50%, -50%) scale(1);
+    filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.55));
+  }
+}
+
+@keyframes schools-business-building-pulse-hit {
+  0%,
+  68% {
+    opacity: 0.48;
+    transform: translate(-50%, -50%) scale(0.98);
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.28));
+  }
+  82% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.16);
+    filter: drop-shadow(0 0 34px rgba(255, 251, 235, 0.98));
+  }
+  100% {
+    opacity: 0.52;
+    transform: translate(-50%, -50%) scale(1);
+    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.32));
+  }
+}
+
+@keyframes schools-map-box-landed-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      inset 0 0 0 2px rgba(251, 191, 36, 0.85),
+      0 0 16px rgba(245, 158, 11, 0.45);
+  }
+  50% {
+    transform: scale(1.035);
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 237, 160, 0.95),
+      0 0 24px rgba(245, 158, 11, 0.55);
+  }
+}
+
+.iq-schools-map-guide-label {
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(0.62rem, 1.4vw, 0.72rem);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(255, 251, 235, 0.96);
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(245, 197, 71, 0.55);
+  background: rgba(12, 10, 8, 0.82);
+  box-shadow:
+    0 0 18px rgba(245, 158, 11, 0.28),
+    0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+@keyframes schools-map-box-focus-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      inset 0 0 0 2px rgba(245, 158, 11, 0.75),
+      0 0 14px rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow:
+      inset 0 0 0 2px rgba(251, 191, 36, 0.9),
+      0 0 20px rgba(245, 158, 11, 0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-schools-map-box-highlight,
+  .iq-schools-map-box-landed {
+    animation: none;
+    transform: scale(1.02);
+    box-shadow:
+      inset 0 0 0 1.5px rgba(245, 158, 11, 0.7),
+      0 0 12px rgba(245, 158, 11, 0.35);
+  }
+
+  .iq-schools-map-business-island-glow {
+    animation: none;
+    opacity: 0.55;
+  }
+}
+
+.iq-schools-mission-brief-backdrop {
+  background: linear-gradient(180deg, rgba(10, 10, 14, 0.98) 0%, rgba(4, 4, 8, 1) 100%);
+}
+
+.iq-schools-mission-brief-layout {
+  max-width: min(92vw, 32rem);
+}
+
+/* Schools mission brief — gold-bordered briefing card */
+.iq-schools-mission-card {
+  border-color: rgba(212, 168, 83, 0.72);
+  background: linear-gradient(165deg, rgba(18, 16, 22, 0.97) 0%, rgba(10, 10, 14, 0.99) 100%);
+  box-shadow:
+    0 0 0 1px rgba(212, 168, 83, 0.28),
+    0 0 20px rgba(212, 168, 83, 0.14),
+    0 20px 48px rgba(0, 0, 0, 0.5);
+}
+
+.iq-schools-mission-section-gap {
+  padding-top: 1.35rem;
+}
+
+.iq-schools-mission-type {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-shadow: none;
+}
+
+.iq-schools-mission-type--label-gold,
+.iq-schools-mission-type--label-violet {
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(0.68rem, 1.6vw, 0.78rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.iq-schools-mission-type--title {
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(0.72rem, 1.7vw, 0.88rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+  color: rgba(245, 197, 71, 0.94);
+  margin-bottom: 1.35rem;
+}
+
+.iq-schools-mission-type--intro {
+  margin-top: 0.7rem;
+  font-size: clamp(0.94rem, 2.1vw, 1.08rem);
+  font-weight: 400;
+  line-height: 1.52;
+  color: rgba(248, 250, 252, 0.86);
+}
+
+.iq-schools-mission-type--label-gold {
+  color: rgba(245, 197, 71, 0.92);
+}
+
+.iq-schools-mission-type--label-violet {
+  color: rgba(245, 197, 71, 0.88);
+}
+
+.iq-schools-mission-type--body {
+  margin-top: 0.55rem;
+  font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+  font-weight: 500;
+  line-height: 1.45;
+  color: rgba(248, 250, 252, 0.88);
+}
+
+.iq-schools-mission-type--body-hero {
+  margin-top: 0.6rem;
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(1.35rem, 3.6vw, 1.95rem);
+  font-weight: 700;
+  line-height: 1.32;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.iq-schools-mission-type--body-reward {
+  margin-top: 0.5rem;
+  font-size: clamp(0.98rem, 2.4vw, 1.12rem);
+  font-weight: 500;
+  line-height: 1.45;
+  color: rgba(248, 250, 252, 0.9);
+}
+
+
+.iq-schools-mission-brief-cta {
+  border: 2px solid rgba(212, 168, 83, 0.65);
+  background: linear-gradient(180deg, rgba(22, 20, 26, 0.96) 0%, rgba(12, 12, 16, 0.98) 100%);
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 16px rgba(212, 168, 83, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.iq-schools-mission-brief-cta:hover:not(:disabled) {
+  border-color: rgba(245, 197, 71, 0.85);
+  box-shadow:
+    0 0 22px rgba(212, 168, 83, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+@keyframes schools-mission-cursor-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.iq-schools-mission-cursor {
+  display: inline-block;
+  margin-left: 1px;
+  color: inherit;
+  opacity: 0.85;
+  animation: schools-mission-cursor-blink 0.9s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-schools-mission-cursor {
+    animation: none;
+    opacity: 0.85;
   }
 }
 

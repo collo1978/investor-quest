@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { QuestQuizPanel } from "@/components/QuestQuizPanel";
@@ -18,6 +19,9 @@ import {
   isTenKFinalChallengeUnlocked
 } from "@/engine";
 import { loadConvictionRecords } from "@/lib/conviction";
+import { resolveSchoolsDemoMapHref } from "@/lib/schools/schoolsDemoHref";
+import { isSchoolsDemoPlaythroughActive } from "@/lib/schools/schoolsDemoPlaythrough";
+import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
 
 const GOLD_HI = "#F5C547";
 const GOLD_BORDER = "rgba(245, 197, 71, 0.40)";
@@ -27,7 +31,11 @@ const VIOLET_HI = "#C4B5FD";
 const GOLD_BORDER_SOFT = "rgba(245, 197, 71, 0.22)";
 
 export default function FinalChallengeClient() {
+  const pathname = usePathname();
+  const router = useRouter();
   const { raw, actions } = useGame();
+  const schoolsTour = isSchoolsDemoPlaythroughActive();
+  const mapHref = resolveSchoolsDemoMapHref(pathname);
   const company = companyById(raw.activeCompanyId);
   const prog = raw.companies[raw.activeCompanyId];
   const record = prog?.tenKRookieChallenge ?? null;
@@ -78,6 +86,11 @@ export default function FinalChallengeClient() {
     if (!hadRecordOnMount.current) {
       hadRecordOnMount.current = true;
       setCelebrateBadge(true);
+    }
+    if (schoolsTour) {
+      window.setTimeout(() => {
+        navigateSchoolsDemoStep("map-return", pathname, router);
+      }, 1200);
     }
   };
 
@@ -139,7 +152,7 @@ export default function FinalChallengeClient() {
         </ul>
         <div className="mt-8">
           <Link
-            href="/map"
+            href={mapHref}
             className="inline-flex items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-semibold transition"
             style={{
               borderColor: GOLD_BORDER,
@@ -155,8 +168,13 @@ export default function FinalChallengeClient() {
   }
 
   return (
-    <main className="pointer-events-auto relative mx-auto max-w-xl px-5 py-10 md:px-6 md:py-12">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <main
+      className={[
+        "pointer-events-auto relative mx-auto max-w-xl px-5 py-10 md:px-6 md:py-12",
+        schoolsTour ? "iq-schools-final-challenge-deck" : ""
+      ].join(" ")}
+    >
+      <div className="iq-schools-final-challenge-intro flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink-2">
             Final Challenge
@@ -169,7 +187,7 @@ export default function FinalChallengeClient() {
           </h1>
         </div>
         <Link
-          href="/map"
+          href={mapHref}
           className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-2 underline-offset-4 transition hover:text-ink-0 hover:underline"
           style={{ color: GOLD_HI }}
         >
@@ -217,7 +235,7 @@ export default function FinalChallengeClient() {
         ) : null}
       </AnimatePresence>
 
-      <div className="mt-8">
+      <div className="iq-schools-final-challenge-quiz mt-8">
         <QuestQuizPanel
           pillarId="business"
           slug="__meta_ten_k_rookie__"

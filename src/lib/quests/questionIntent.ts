@@ -201,18 +201,18 @@ Pattern: name what people actually use → where the money comes from → one ex
 - No forced analogy. No "In simple terms". No textbook opener.
 - Do NOT lead with customer pain, lag, or "without them" unless this card asks for that.`,
     styleReference: `STYLE REFERENCE (what they do — tone only):
-"Apple makes everyday tech people use constantly — iPhones, Macs, iPads, Apple Watches, and AirPods.
+MAIN TAKEAWAY:
+NVIDIA makes the chips behind modern AI.
 
-It also earns when you pay for App Store apps, iCloud, Apple Music, and Apple TV+.
-
-iPhone still brings in the biggest share of sales.
+SUPPORTING EXPLANATION:
+When you use ChatGPT or play a game with advanced graphics, NVIDIA technology is often working behind the scenes. Many companies build their products using NVIDIA's computing power.
 
 Why investors care:
-If people keep buying devices and subscriptions, Apple keeps making money from the same customers over and over."`,
+When a company supplies key parts of a fast-growing industry, its size and reach matter."`,
     writeInstruction:
-      "Write: what people use/buy → main money lines → optional one fact (max 4 sentences); then Why investors care:",
+      "Write YELLOW MAIN TAKEAWAY: 8–12 word headline, one idea → WHITE SUPPORTING EXPLANATION: 1–2 sentences (examples, context, why it's true) → Why investors care:",
     sentenceMap:
-      "1. What people actually use or buy — name real products\n2. Other ways money comes in (subscriptions, fees)\n3. What matters most (flagship line or habit)\n4. Optional — one short filing fact"
+      "YELLOW MAIN TAKEAWAY: one-idea headline (8–12 words)\nWHITE SUPPORTING EXPLANATION: examples + why the takeaway is true (1–2 sentences)"
   },
 
   customer_problem: {
@@ -392,6 +392,7 @@ import {
   INNOVATION_RD_STYLE_REFERENCE
 } from "@/lib/quests/innovationRdCopy";
 import { QUEST_CARD_FOCUS_RULES } from "@/lib/quests/questionFocusGate";
+import { TAKEAWAY_CONTENT_RULES } from "@/lib/quests/takeawayAnswer";
 
 export function buildIntentPromptFooter(ctx: QuestionIntentContext): string {
   const intent = detectQuestionIntent(ctx);
@@ -411,6 +412,8 @@ export function buildIntentPromptFooter(ctx: QuestionIntentContext): string {
     `QUESTION TYPE: ${QUESTION_INTENT_LABELS[intent]}`,
     ...questionBlock,
     pack.cardPrompt,
+    "",
+    TAKEAWAY_CONTENT_RULES,
     "",
     pack.styleReference,
     "",

@@ -1,7 +1,7 @@
 /**
- * NVIDIA demo — curated copy governed by
- * `src/data/contentRules/investorQuestContentRules.ts` (island + section + question-type rules).
- * Every card completes the loop: situation → problem → explanation → NVIDIA payoff.
+ * NVIDIA demo — gold-standard curated copy (headline takeaway + white explanation).
+ * Grounded in NVIDIA's public filings; copy stays relatable — no SEC jargon on screen.
+ * Governed by `src/data/contentRules/investorQuestContentRules.ts`.
  */
 import type {
   CompanyContent,
@@ -14,6 +14,7 @@ import {
   NVDA_DEMO_SOURCE,
   NVDA_DEMO_SOURCE_TEAM
 } from "@/lib/demo/nvidiaDemoSources";
+import { goldAnswer } from "@/lib/demo/nvidiaDemoGoldAnswer";
 import { NVIDIA_FORCES_DEMO_OVERRIDES } from "@/data/quests/content/nvidiaForcesDemo";
 
 const PASS = 0.66 as const;
@@ -37,18 +38,17 @@ export const NVIDIA_CONTENT: CompanyContent = {
       cards: cards({
         "card-1": {
           investorQuestion: "What does NVIDIA actually sell?",
-          plainEnglishAnswer:
-            "NVIDIA makes the special chips that help power a lot of today's AI tools, modern video games, and the giant computer rooms behind apps you use every day.\n\nWhen you use ChatGPT or play a new game that looks insanely smooth, there's a good chance NVIDIA technology is involved somewhere in the background. That's what the company does — it sells the speed and power other companies build on top of."
+          plainEnglishAnswer: goldAnswer(
+            "NVIDIA builds powerful computer chips that help run AI and advanced graphics.",
+            "When you use ChatGPT, watch realistic video games, or see AI create images, there is a good chance NVIDIA technology is helping behind the scenes. Their chips are designed to process huge amounts of data much faster than a normal computer can."
+          )
         },
         "card-2": {
-          investorQuestion: "What customer problem does NVIDIA fix?",
-          plainEnglishAnswer:
-            "When AI tools, games, or apps run slowly, people get frustrated and stop using them.\n\nCompanies need huge computing power to process graphics, AI, and massive amounts of data quickly.\n\nSlow performance can mean lost users, unhappy customers, and lost revenue.\n\nNVIDIA builds the powerful chips and technology that help AI tools, games, and data centers run faster and more smoothly."
-        },
-        "card-3": {
-          investorQuestion: "How important is NVIDIA in the AI chip market?",
-          plainEnglishAnswer:
-            "Right now a huge share of serious AI projects lean on NVIDIA chips — so when big tech keeps ordering, the company looks unstoppable. When orders pause, the mood can flip just as fast.\n\nThat market position is the story: NVIDIA isn't a side supplier, it's often the default choice for the hardest AI work. You're watching whether the world still needs that default."
+          investorQuestion: "Why do customers buy NVIDIA products?",
+          plainEnglishAnswer: goldAnswer(
+            "NVIDIA helps computers do difficult tasks faster and more efficiently.",
+            "Companies use NVIDIA chips to train AI models, gamers use them for smoother graphics, and businesses use them to process large amounts of information. By reducing waiting time and improving performance, NVIDIA helps customers save time and get more done."
+          )
         }
       }),
       quizConfig: q({
@@ -71,7 +71,7 @@ export const NVIDIA_CONTENT: CompanyContent = {
           {
             kind: "true-false",
             id: "nvda-snap-q2",
-            prompt: "ChatGPT and a lot of AI websites lean on NVIDIA chips.",
+            prompt: "True or False: ChatGPT and many AI apps rely on NVIDIA chips.",
             correct: true,
             explain:
               "Lots of AI apps you touch often run on gear that includes NVIDIA chips."
@@ -93,18 +93,24 @@ export const NVIDIA_CONTENT: CompanyContent = {
       cards: cards({
         "card-1": {
           investorQuestion: "Who spends the most money with NVIDIA?",
-          plainEnglishAnswer:
-            "The customers writing the biggest checks are massive tech and cloud companies — a handful of giants can move a huge slice of revenue. If one pauses orders, NVIDIA feels it quickly.\n\nThat's why who buys matters: NVIDIA's business runs on repeat mega-orders from a small club of powerful buyers."
+          plainEnglishAnswer: goldAnswer(
+            "A few giant tech buyers drive most revenue.",
+            "Picture Microsoft, Google, and Amazon placing massive orders — not you buying one graphics card at Best Buy. If one of those giants pauses spending, NVIDIA feels it fast."
+          )
         },
         "card-2": {
           investorQuestion: "What products make NVIDIA the most money?",
-          plainEnglishAnswer:
-            "Most dollars lately come from selling high-end chips (and software) to companies building AI — think cloud giants ordering again and again. Gaming chips like GeForce still sell, but they're not the main paycheck anymore.\n\nSo NVIDIA makes money by being the chip supplier behind the AI boom, not by you picking up one card at the mall."
+          plainEnglishAnswer: goldAnswer(
+            "Server AI chips pay most bills now.",
+            "Gaming gear still sells, but the big money lately is companies building AI — like buying engines for every new chatbot and cloud service they launch."
+          )
         },
         "card-3": {
           investorQuestion: "Why are companies rushing to buy AI chips?",
-          plainEnglishAnswer:
-            "Everyone is racing to build AI — chatbots, search, cloud services — and that race needs serious computing power. NVIDIA's chips are a default choice for the hardest work, so orders pile up when budgets shift toward AI.\n\nThe rush is real demand meeting a limited supply of trusted fast chips — not just headlines."
+          plainEnglishAnswer: goldAnswer(
+            "The AI race needs more computing power fast.",
+            "Every company racing to launch AI needs serious horsepower behind the scenes. NVIDIA is the name a lot of them call when they need to move fast and not fall behind."
+          )
         }
       }),
       quizConfig: q({
@@ -113,38 +119,44 @@ export const NVIDIA_CONTENT: CompanyContent = {
           {
             kind: "multiple-choice",
             id: "nvda-wb-q1",
-            prompt: "Where does most of NVIDIA's money come from lately?",
+            prompt: "Who spends the most money with NVIDIA?",
             choices: [
-              "Huge tech companies buying for AI",
-              "A mall chain",
-              "Movie tickets",
-              "Tractors"
+              "A few giant tech companies placing huge orders",
+              "Individual shoppers buying one graphics card at a time",
+              "Small local restaurants",
+              "Movie theaters"
             ],
             correctIndex: 0,
             explain:
-              "Big tech AI orders — not everyday shoppers picking up one graphics card."
+              "Think Microsoft, Google, and Amazon — not you picking up one card at Best Buy."
           },
           {
-            kind: "true-false",
+            kind: "multiple-choice",
             id: "nvda-wb-q2",
-            prompt: "They sell in lots of countries, not just one.",
-            correct: true,
+            prompt: "Which product line brings in the most money for NVIDIA lately?",
+            choices: [
+              "Server AI chips for cloud and data centers",
+              "Gaming graphics cards alone",
+              "Movie tickets and streaming apps",
+              "Restaurant and retail store sales"
+            ],
+            correctIndex: 0,
             explain:
-              "Global sales — wherever AI and cloud spending is hottest."
+              "Gaming still sells — but huge AI orders from cloud and tech companies pay most bills now."
           },
           {
             kind: "multiple-choice",
             id: "nvda-wb-q3",
-            prompt: "Why does it matter who the big buyers are?",
+            prompt: "Why are companies rushing to buy NVIDIA AI chips right now?",
             choices: [
-              "A few buyers can move the whole company up or down",
-              "Only store foot traffic matters",
-              "Logo color drives sales",
-              "Headlines are the same as cash"
+              "The AI race needs more computing power fast",
+              "NVIDIA stopped selling chips to tech companies",
+              "Governments banned gaming graphics cards",
+              "Customers only buy one chip at a time now"
             ],
             correctIndex: 0,
             explain:
-              "A few giants placing orders means one pause can hit the whole business hard."
+              "Every company launching AI needs serious horsepower — and many do not want to fall behind rivals."
           }
         ]
       })
@@ -154,18 +166,24 @@ export const NVIDIA_CONTENT: CompanyContent = {
       cards: cards({
         "card-1": {
           investorQuestion: "Where do people interact with NVIDIA technology?",
-          plainEnglishAnswer:
-            "You usually do not buy an NVIDIA chip at a store — you meet them inside products. ChatGPT feeling fast, a game looking incredible, a cloud app training a model: the speed often traces back to NVIDIA gear in a data center somewhere.\n\nThat is the everyday link — their tech hides inside things you already use."
+          plainEnglishAnswer: goldAnswer(
+            "You meet NVIDIA inside apps and games.",
+            "You never buy an NVIDIA part at the mall — you feel it when ChatGPT answers quick or a game looks insane. That speed often starts in giant server rooms packed with their gear."
+          )
         },
         "card-2": {
           investorQuestion: "How does NVIDIA affect gaming and AI apps?",
-          plainEnglishAnswer:
-            "In gaming, GeForce-class chips push frames and graphics you can feel. In AI, their data-center chips help models train and answer without endless waiting.\n\nSame company, two vibes you already know — prettier games and snappier AI."
+          plainEnglishAnswer: goldAnswer(
+            "NVIDIA helps games look better and AI respond faster.",
+            "Smooth frame rates in a new game? Faster replies from an AI helper? Same idea — powerful chips doing math-heavy work so your experience does not lag."
+          )
         },
         "card-3": {
           investorQuestion: "Why do AI companies rely on NVIDIA?",
-          plainEnglishAnswer:
-            "Serious AI teams want chips and software that are proven fast — not experiments on launch day. NVIDIA earned default status by shipping speed teams can trust and tools developers already know.\n\nWhen builders standardize on you, demand can stick even when hype cycles turn."
+          plainEnglishAnswer: goldAnswer(
+            "AI teams trust NVIDIA because it already works.",
+            "Coders already know how to build on NVIDIA's tools from school and work projects. Starting fresh on a rival system feels like switching game consoles mid-season — slow and risky."
+          )
         }
       }),
       quizConfig: q({
@@ -212,18 +230,24 @@ export const NVIDIA_CONTENT: CompanyContent = {
       cards: cards({
         "card-1": {
           investorQuestion: "How are NVIDIA chips designed and built?",
-          plainEnglishAnswer:
-            "NVIDIA designs the chips; partner factories (often in Taiwan) build them; then they ship to cloud and tech customers that put them in servers you use indirectly. No NVIDIA store on every corner — it is mostly business-to-business.\n\nWhen that chain works, launches land on time. NVIDIA's job is nailing the design and keeping partners delivering."
+          plainEnglishAnswer: goldAnswer(
+            "NVIDIA designs chips; other companies build them.",
+            "Think of NVIDIA as the architect drawing blueprints, and partner factories as the construction crew actually building the chips. Finished parts ship to tech giants and gaming PC makers worldwide."
+          )
         },
         "card-2": {
           investorQuestion: "Who helps manufacture NVIDIA products?",
-          plainEnglishAnswer:
-            "Partner fabs build the silicon — NVIDIA does not own every factory on earth. That partnership model lets them scale fast but also concentrates risk if a key factory slips.\n\nWho builds is as important as who designs when supply is tight."
+          plainEnglishAnswer: goldAnswer(
+            "Partner factories actually build the chips.",
+            "NVIDIA does not own every factory on Earth — like a clothing brand that designs but does not sew every shirt. That helps them scale fast, but a factory slowdown could leave customers waiting."
+          )
         },
         "card-3": {
           investorQuestion: "How does NVIDIA deliver its technology worldwide?",
-          plainEnglishAnswer:
-            "Chips and boards ship to hyperscalers, PC makers, and partners globally — logistics and allocation decide who gets the next fast thing first.\n\nWorldwide delivery is how a design in California becomes speed in an app you open tonight."
+          plainEnglishAnswer: goldAnswer(
+            "Chips ship worldwide to big tech partners.",
+            "Orders go to cloud companies, PC makers, and distributors everywhere. Who gets the next batch can decide whose AI launch ships on time."
+          )
         }
       }),
       quizConfig: q({
@@ -271,18 +295,24 @@ export const NVIDIA_CONTENT: CompanyContent = {
       cards: cards({
         "card-1": {
           investorQuestion: "Why is NVIDIA hard to replace?",
-          plainEnglishAnswer:
-            "A lot of companies choose NVIDIA because the biggest AI and gaming names already trust the chips, and millions of coders know their software. Switching everything is slow, expensive, and risky.\n\nThat is the edge: customers stick because it is the safe, fast default — not because rivals never try."
+          plainEnglishAnswer: goldAnswer(
+            "Switching off NVIDIA is slow and costly.",
+            "Big AI and gaming teams already built everything on NVIDIA. Switching feels like rebuilding a whole app from scratch — expensive, slow, and risky."
+          )
         },
         "card-2": {
           investorQuestion: "What makes NVIDIA different from competitors?",
-          plainEnglishAnswer:
-            "Speed plus a software stack teams already trained on — rivals can ship chips, but retraining every developer and retesting every model is painful.\n\nDifference shows up when buyers need results on a deadline, not in a lab slide."
+          plainEnglishAnswer: goldAnswer(
+            "Speed plus software habit sets NVIDIA apart.",
+            "Rivals can ship fast chips too, but retraining every coder and retesting every model takes forever. Teams stay with what already works when deadlines are tight."
+          )
         },
         "card-3": {
           investorQuestion: "Why do developers keep building around NVIDIA?",
-          plainEnglishAnswer:
-            "CUDA and the broader toolkit mean years of code, courses, and habit point here. New projects default to what already works.\n\nDeveloper habit is a quiet moat — code outlasts one product cycle."
+          plainEnglishAnswer: goldAnswer(
+            "Developers build on tools they already know.",
+            "Years of school projects, tutorials, and job experience taught coders NVIDIA's stack. New AI projects often default there because nobody wants to learn a whole new system from zero."
+          )
         }
       }),
       quizConfig: q({
@@ -325,18 +355,24 @@ export const NVIDIA_CONTENT: CompanyContent = {
       cards: cards({
         "card-1": {
           investorQuestion: "Who is trying to compete with NVIDIA?",
-          plainEnglishAnswer:
-            "Main rivals you will hear about: AMD and Intel on chips, plus huge buyers like Google and Amazon building more in-house. Everyone wants AI money, so the crowd keeps growing.\n\nNVIDIA still wins a lot of orders today because buyers reach for them first — but they have to beat that crowd every year."
+          plainEnglishAnswer: goldAnswer(
+            "AMD, Intel, and cloud rivals compete hard.",
+            "AMD and Intel want in, and big cloud companies are trying to build their own chips — like making your own sneakers instead of buying Nike. NVIDIA still wins a lot of deals, but the crowd keeps growing."
+          )
         },
         "card-2": {
           investorQuestion: "What trends could help NVIDIA grow even faster?",
-          plainEnglishAnswer:
-            "More AI spending, bigger models, and more devices needing fast inference all pull for more chips. When the world keeps betting on AI, NVIDIA sells into that wave.\n\nTailwinds help — but only if they keep winning the orders inside the boom."
+          plainEnglishAnswer: goldAnswer(
+            "More AI spending pulls more chip orders.",
+            "More chatbots, smarter search, AI in your phone — all of that needs more computing power. As long as the AI race keeps heating up, NVIDIA keeps selling."
+          )
         },
         "card-3": {
           investorQuestion: "What could slow NVIDIA down in the future?",
-          plainEnglishAnswer:
-            "Rivals catching up, customers building their own chips, AI budgets cooling, or export rules tightening can all bite. Export limits on advanced chips to China already moved the stock once.\n\nFor NVIDIA, the battlefield is crowded and the rules can change overnight — wins are not guaranteed forever."
+          plainEnglishAnswer: goldAnswer(
+            "Rivals, custom chips, or export rules bite.",
+            "If a rival catches up on speed and price, or government rules block sales to a huge market, growth could cool fast — even if the products stay great."
+          )
         }
       }),
       quizConfig: q({
@@ -372,16 +408,22 @@ export const NVIDIA_CONTENT: CompanyContent = {
       secSection: NVDA_DEMO_SOURCE,
       cards: cards({
         "card-1": {
-          plainEnglishAnswer:
-            "Revenue jumped hard over the last few years as companies raced to buy AI chips — real orders, not just hype words. That's the growth story in one line.\n\nFor NVIDIA, the open question is whether those buyers keep reordering or already built what they needed — growth stays hot only while the orders keep coming."
+          plainEnglishAnswer: goldAnswer(
+            "NVIDIA sales exploded during the AI rush.",
+            "Imagine every big tech company ordering gear for the next wave of AI — that order pile is why revenue shot up. The catch: if they stop reordering, sales could flatten fast."
+          )
         },
         "card-2": {
-          plainEnglishAnswer:
-            "Most of the surge came from AI/data-center chips. Gaming still pays bills, but it's a smaller slice than it used to be.\n\nSo NVIDIA's growth lately is really an AI-chip story — you're tracking whether AI orders stay the engine."
+          plainEnglishAnswer: goldAnswer(
+            "Server-side AI now drives most growth.",
+            "Gaming still brings in money, but the hockey-stick growth came from companies building AI — the behind-the-scenes stuff powering apps you actually use."
+          )
         },
         "card-3": {
-          plainEnglishAnswer:
-            "Sales land worldwide, with the heaviest weight wherever cloud and AI budgets are biggest — U.S. and Asia both matter a lot.\n\nNVIDIA captures that by selling into every hot region; if one geography slows, the whole company's growth can wobble with it."
+          plainEnglishAnswer: goldAnswer(
+            "NVIDIA sells all over the world.",
+            "Buyers span the U.S., Asia, and beyond — wherever AI spending is hottest. If one region cools off, the whole growth story can wobble."
+          )
         }
       }),
       quizConfig: q({
@@ -417,12 +459,16 @@ export const NVIDIA_CONTENT: CompanyContent = {
       secSection: NVDA_DEMO_SOURCE,
       cards: cards({
         "card-1": {
-          plainEnglishAnswer:
-            "Margins rose during the AI rush — tons of demand, tight supply, NVIDIA kept more of each sale. Profits looked great in that stretch.\n\nThat's how NVIDIA turned hot orders into real profit power; margins can fall again if rivals catch up or buyers negotiate harder."
+          plainEnglishAnswer: goldAnswer(
+            "AI demand helped NVIDIA keep more of each sale.",
+            "When everyone wants what you sell and prices stay strong, you keep a bigger slice — like a sold-out drop where demand outruns supply. That can shrink if rivals undercut or buyers push back on price."
+          )
         },
         "card-2": {
-          plainEnglishAnswer:
-            "Earnings per share (EPS) climbed as total profits rose — more profit split across each share owners hold. Headline revenue is big; EPS is what hits your slice.\n\nNVIDIA has been delivering rising EPS in the good years — that's owners actually benefiting, not just a big company total on a screen."
+          plainEnglishAnswer: goldAnswer(
+            "Rising profits lifted earnings per share.",
+            "As profits grew, each share of stock earned more — like splitting a growing pizza into the same number of slices and each slice getting bigger."
+          )
         }
       }),
       quizConfig: q({
@@ -458,12 +504,16 @@ export const NVIDIA_CONTENT: CompanyContent = {
       secSection: NVDA_DEMO_SOURCE,
       cards: cards({
         "card-1": {
-          plainEnglishAnswer:
-            "Operating expenses are up — more hiring, more labs, more spend to stay in the AI race. Costs rise because they're trying to lead, not because they're careless.\n\nNVIDIA is betting those dollars buy the next chips buyers still want; that's the efficiency test — spend now to keep revenue later."
+          plainEnglishAnswer: goldAnswer(
+            "Operating costs rose with the AI push.",
+            "They hired more people, opened labs, and spent to stay ahead in the AI race — like an athlete paying for better training as rivals get faster."
+          )
         },
         "card-2": {
-          plainEnglishAnswer:
-            "A big slice goes to inventing future chips and software, not just today's bills. Cut that and you risk showing up with last year's tech.\n\nNVIDIA spends to grow the business — R&D is how they plan to still matter when the current AI wave matures."
+          plainEnglishAnswer: goldAnswer(
+            "Heavy research spend targets the next big thing.",
+            "A big chunk of spending goes to inventing whatever comes after today's chips. Skimp on that and you might save money now but lose the next round."
+          )
         }
       }),
       quizConfig: q({
@@ -499,12 +549,16 @@ export const NVIDIA_CONTENT: CompanyContent = {
       secSection: NVDA_DEMO_SOURCE,
       cards: cards({
         "card-1": {
-          plainEnglishAnswer:
-            "Operating cash flow has been strong — real money from customers, not just paper profits. Cash rising with sales is the proof people actually paid.\n\nFor NVIDIA, that means the AI boom showed up in the bank account, which is why investors trust the results more than a viral headline."
+          plainEnglishAnswer: goldAnswer(
+            "Real cash kept flowing in from AI orders.",
+            "Customers actually paid up — money hitting the bank, not just hype headlines. That is why investors feel better when cash piles up."
+          )
         },
         "card-2": {
-          plainEnglishAnswer:
-            "They use cash to fund more invention, buy back shares, and pay a modest dividend. Buybacks shrink the share count so future profit is split fewer ways.\n\nNVIDIA's message with that spending: keep building the next chip while also rewarding people who own the stock."
+          plainEnglishAnswer: goldAnswer(
+            "Cash funds invention, buybacks, and dividends.",
+            "They spend cash inventing the next products, buying back shares, and paying a small dividend — like choosing between saving, investing in yourself, and sharing profits with owners."
+          )
         }
       }),
       quizConfig: q({
@@ -540,12 +594,16 @@ export const NVIDIA_CONTENT: CompanyContent = {
       secSection: NVDA_DEMO_SOURCE,
       cards: cards({
         "card-1": {
-          plainEnglishAnswer:
-            "They have more cash muscle than scary debt right now — earnings and cash outweigh debt pressure for most comparisons. That's breathing room.\n\nFor NVIDIA, financial strength means they can survive a softer quarter and still pay for the next chip without panic borrowing."
+          plainEnglishAnswer: goldAnswer(
+            "NVIDIA carries more cash than scary debt.",
+            "They built up cash faster than scary debt piled up — like having a fat savings account for a rainy month."
+          )
         },
         "card-2": {
-          plainEnglishAnswer:
-            "Even with low debt, big future bills matter — prepaying factories, heavy R&D, cash to owners via buybacks and dividends. Those promises can tie up money.\n\nNVIDIA is strong today, but you're still watching whether future chip commitments eat cash they might need if sales slow."
+          plainEnglishAnswer: goldAnswer(
+            "Big future chip commitments still tie up cash.",
+            "Even with low debt, big promises to factories and research can lock up money — like pre-ordering next year's gear before you know how much you'll earn."
+          )
         }
       }),
       quizConfig: q({
@@ -584,18 +642,24 @@ export const NVIDIA_CONTENT: CompanyContent = {
         "card-1": {
           investorQuestion:
             "Who runs NVIDIA day to day, and what experience do they bring?",
-          plainEnglishAnswer:
-            "Jensen Huang co-founded NVIDIA and still runs it as CEO — the face in interviews. He leads a team covering finance, operations, and engineering.\n\nThat matters because you're trusting people who already steered the company through gaming cycles and the AI pivot, not a newcomer learning the industry."
+          plainEnglishAnswer: goldAnswer(
+            "Jensen Huang leads NVIDIA as founder CEO.",
+            "Jensen Huang is the founder CEO you see on stage in the black leather jacket — the face tied to NVIDIA's big AI bets for decades."
+          )
         },
         "card-2": {
           investorQuestion: "How long has NVIDIA's CEO been in charge?",
-          plainEnglishAnswer:
-            "Huang has been CEO for decades, not months. That long run let NVIDIA bet big on AI chips before AI was everywhere.\n\nLong tenure gives NVIDIA steady direction — and it's why a CEO change would be a massive event for the stock."
+          plainEnglishAnswer: goldAnswer(
+            "Huang has led NVIDIA since the early 1990s.",
+            "He has run the company since the early 1990s — before AI was on every phone. That long run let NVIDIA bet on AI early; a new CEO would shake things up."
+          )
         },
         "card-3": {
           investorQuestion: "What has NVIDIA's leadership actually delivered?",
-          plainEnglishAnswer:
-            "Under this team NVIDIA became a top AI chip supplier and one of the world's largest companies — real chip shipments and revenue during the AI rush, not just talk.\n\nThat's the delivery record: they turned the AI bet into sales while rivals were still catching up."
+          plainEnglishAnswer: goldAnswer(
+            "Leadership delivered through the AI boom.",
+            "Under this team, NVIDIA became the name behind much of today's AI rush and sales soared. The question now: can they keep winning if the AI frenzy cools?"
+          )
         }
       }),
       quizConfig: q({
@@ -646,19 +710,25 @@ export const NVIDIA_CONTENT: CompanyContent = {
       cards: cards({
         "card-1": {
           investorQuestion: "Do NVIDIA's top executives own a lot of stock?",
-          plainEnglishAnswer:
-            "Top leaders hold meaningful NVIDIA stock, so when the price moves, so does a chunk of their wealth. Pay is tied to owners more than a flat salary alone.\n\nThat's how NVIDIA aligns bosses with shareholders — they feel a drop in the stock in their own pocket."
+          plainEnglishAnswer: goldAnswer(
+            "Top leaders hold meaningful NVIDIA stock.",
+            "A chunk of their pay is NVIDIA stock that rises and falls with the share price. When the stock drops, their wallet takes a hit too — same as any owner."
+          )
         },
         "card-2": {
           investorQuestion:
             "Does executive pay at NVIDIA match how the company performed?",
-          plainEnglishAnswer:
-            "Pay rose when the stock and profits rose — that matched the good years. The test ahead is whether pay falls if results cool.\n\nFor owners, fair pay means NVIDIA leaders don't cash giant checks while the business is clearly sliding."
+          plainEnglishAnswer: goldAnswer(
+            "Executive pay rose with strong results.",
+            "Pay climbed during years when profits and the stock price were flying. Owners watch whether bosses still earn big if results start sliding."
+          )
         },
         "card-3": {
           investorQuestion: "How is executive pay structured at NVIDIA?",
-          plainEnglishAnswer:
-            "Mix of salary, bonuses, and stock that vests over time. Stock unlocking later rewards staying and performing, not one lucky quarter.\n\nThat structure is supposed to keep NVIDIA leaders building long-term value instead of chasing a short pop."
+          plainEnglishAnswer: goldAnswer(
+            "Pay mixes salary, bonus, and stock.",
+            "They get a paycheck, bonuses, and stock that vests over time — so staying and performing matters. More stock in the mix means leaders feel the same ups and downs owners do."
+          )
         }
       }),
       quizConfig: q({
@@ -696,14 +766,18 @@ export const NVIDIA_CONTENT: CompanyContent = {
         "card-1": {
           investorQuestion:
             "What is NVIDIA's board supposed to do for shareholders?",
-          plainEnglishAnswer:
-            "The board oversees the CEO and asks hard questions — not just applause. With one leader for decades, someone needs to push back when hype runs hot.\n\nFor NVIDIA owners, a working board means there's a check on big bets before they become expensive mistakes."
+          plainEnglishAnswer: goldAnswer(
+            "The board oversees the CEO for owners.",
+            "Think of the board as the group that hires the CEO and asks the uncomfortable questions — especially when one leader has been in charge for decades."
+          )
         },
         "card-2": {
           investorQuestion:
             "What big risks does NVIDIA's board keep an eye on?",
-          plainEnglishAnswer:
-            "They stress-test supply, export rules, rivals catching up, and succession if the CEO ever leaves. Dry meetings, real dangers.\n\nThe board's job is to make sure NVIDIA spots those risks early — so the company can fix course before owners take the full hit."
+          plainEnglishAnswer: goldAnswer(
+            "The board tracks supply, rivals, and rules.",
+            "Chip shortages, new competitors, and government export rules can wreck a launch overnight. The board's job is spotting those threats before they become expensive surprises."
+          )
         }
       }),
       quizConfig: q({
@@ -741,14 +815,18 @@ export const NVIDIA_CONTENT: CompanyContent = {
         "card-1": {
           investorQuestion:
             "If you own NVIDIA stock, what say do you get in big decisions?",
-          plainEnglishAnswer:
-            "You get to vote on directors and some major choices — small voice per share, but real. Huge funds own big stakes, so their votes move outcomes.\n\nOwning NVIDIA stock means you're not just watching — you help pick who's in charge."
+          plainEnglishAnswer: goldAnswer(
+            "Shareholders vote on directors and major items.",
+            "Each share gives you a small vote — like picking club leaders, except big investment funds own millions of shares and their votes carry extra weight."
+          )
         },
         "card-2": {
           investorQuestion:
             "What rules and disclosures does NVIDIA publish for owners?",
-          plainEnglishAnswer:
-            "They publish board rules, ethics basics, and how executive pay is set. Boring pages, but they show who's in control.\n\nFor you as an owner, that transparency is how NVIDIA proves pay and power aren't changing in secret overnight."
+          plainEnglishAnswer: goldAnswer(
+            "Public docs explain board rules and pay.",
+            "NVIDIA publishes who sits on the board and how boss pay is set — boring pages, but they show who holds power and how incentives work."
+          )
         }
       }),
       quizConfig: q({
@@ -786,14 +864,18 @@ export const NVIDIA_CONTENT: CompanyContent = {
         "card-1": {
           investorQuestion:
             "How much cash does NVIDIA have — and why do leaders point to it?",
-          plainEnglishAnswer:
-            "Leaders highlight cash in the bank and manageable debt so you know they can fund the next chip even if one quarter disappoints. Cash is runway, not a trophy.\n\nNVIDIA points to that strength so you trust they can keep inventing through a rough patch — not freeze up."
+          plainEnglishAnswer: goldAnswer(
+            "Leaders highlight cash as invention runway.",
+            "Strong cash in the bank means they can keep inventing the next big thing even if one quarter disappoints — like savings that let you keep training when income dips."
+          )
         },
         "card-2": {
           investorQuestion:
             "What financial promises could squeeze NVIDIA even with low debt?",
-          plainEnglishAnswer:
-            "Future chip factory payments, heavy R&D, and cash returned via buybacks and dividends can still tie up money. Low debt doesn't mean unlimited free cash.\n\nFor NVIDIA, the squeeze risk is big commitments landing at once while sales slow — that's what leaders should be managing before it bites."
+          plainEnglishAnswer: goldAnswer(
+            "Factory prepays and research can tie up cash.",
+            "Big promises to chip factories, heavy research spending, and cash returned to owners still use money. Low debt does not mean unlimited spending forever."
+          )
         }
       }),
       quizConfig: q({
@@ -831,8 +913,10 @@ export const NVIDIA_CONTENT: CompanyContent = {
         "card-1": {
           investorQuestion:
             "Would you trust NVIDIA's management with your money — why or why not?",
-          plainEnglishAnswer:
-            "The case for trust: long-time CEO, real AI results, pay tied to stock, board watching supply and policy. They shipped chips and revenue during the rush — not just slogans.\n\nThe case for caution: no team stays hot forever. Your verdict is whether this leadership can keep winning if AI orders slow — that's the one-minute people story on NVIDIA."
+          plainEnglishAnswer: goldAnswer(
+            "Long-tenured leaders delivered through the AI boom.",
+            "Huang's team helped NVIDIA become the name behind much of today's AI rush while sales soared. The open question: can they keep winning if orders slow or rivals catch up?"
+          )
         }
       }),
       quizConfig: q({

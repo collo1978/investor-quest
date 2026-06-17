@@ -35,7 +35,8 @@ function toHubCard(card: BusinessHubQuestCard): HubMapQuestCardData {
     isPrimaryActive: card.isPrimaryActive,
     completed: card.completed,
     read: card.read,
-    unlockSource: card.unlockSource
+    unlockSource: card.unlockSource,
+    unlockEpoch: card.unlockEpoch
   };
 }
 
@@ -43,6 +44,7 @@ export function BusinessQuestMapCard(props: Props) {
   return (
     <SharedHubQuestMapCard
       card={toHubCard(props.card)}
+      mysteryLockedCards
       position={props.position}
       cardWidth={BUSINESS_MAP_CARD_WIDTH}
       cardSlotClassName={[

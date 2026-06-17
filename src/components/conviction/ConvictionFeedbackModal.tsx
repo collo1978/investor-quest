@@ -11,6 +11,12 @@ export type ConvictionFeedbackModalProps = {
   heading?: string;
   body?: string;
   nextUnlockLabel?: string;
+  confidentLabel?: string;
+  confidentDescription?: string;
+  cautiousLabel?: string;
+  cautiousDescription?: string;
+  confidentGlyph?: string;
+  cautiousGlyph?: string;
   onConfident: () => void;
   onCautious: () => void;
 };
@@ -22,6 +28,12 @@ export function ConvictionFeedbackModal({
   heading,
   body,
   nextUnlockLabel,
+  confidentLabel = "Confident",
+  confidentDescription = "I understand this business and feel positive about it.",
+  cautiousLabel = "Cautious",
+  cautiousDescription = "I still have concerns or low conviction.",
+  confidentGlyph = "👍",
+  cautiousGlyph = "👎",
   onConfident,
   onCautious
 }: ConvictionFeedbackModalProps) {
@@ -106,13 +118,13 @@ export function ConvictionFeedbackModal({
               className="text-5xl transition group-hover:animate-pulse sm:text-6xl"
               style={{ filter: "drop-shadow(0 0 18px rgba(52,211,153,0.55))" }}
             >
-              👍
+              {confidentGlyph}
             </span>
             <span className="text-sm font-semibold uppercase tracking-[0.14em] text-emerald-200">
-              Confident
+              {confidentLabel}
             </span>
             <span className="text-xs leading-relaxed text-ink-1">
-              I understand this business and feel positive about it.
+              {confidentDescription}
             </span>
           </motion.button>
 
@@ -128,13 +140,13 @@ export function ConvictionFeedbackModal({
               className="text-5xl transition group-hover:animate-pulse sm:text-6xl"
               style={{ filter: "drop-shadow(0 0 18px rgba(251,146,60,0.45))" }}
             >
-              👎
+              {cautiousGlyph}
             </span>
             <span className="text-sm font-semibold uppercase tracking-[0.14em] text-orange-200">
-              Cautious
+              {cautiousLabel}
             </span>
             <span className="text-xs leading-relaxed text-ink-1">
-              I still have concerns or low conviction.
+              {cautiousDescription}
             </span>
           </motion.button>
         </div>

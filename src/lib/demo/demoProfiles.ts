@@ -151,8 +151,7 @@ function buildInvestorCompanyProgress(): CompanyProgress {
 
   prog = applyReadsAndCompletion(prog, "business", "what-they-do", [
     "card-1",
-    "card-2",
-    "card-3"
+    "card-2"
   ], { complete: true });
 
   prog = applyReadsAndCompletion(prog, "business", "why-buying", ["card-1", "card-2"], {

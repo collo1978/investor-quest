@@ -1,6 +1,7 @@
 import type { QuestDefinition } from "@/data/quests/types";
 import type { QuestView } from "@/engine";
 import { getQuestProgressPct } from "@/engine";
+import { isHubPriorSlotComplete } from "@/lib/quests/isHubPriorSlotComplete";
 
 function compositeCardSlug(parentSlug: string, cardId: string): string {
   return `${parentSlug}#${cardId}`;
@@ -18,6 +19,27 @@ export function resolveHubQuestProgressPct(
   if (view?.completed) return 100;
 
   const cards = quest.cards ?? [];
+  const rule = quest.completionState;
+
+  // Quiz quests: reading all cards is not completion — quiz pass unlocks the chain.
+  if (rule.kind === "quiz") {
+    if (isHubPriorSlotComplete(quest, view, readSlugs)) return 100;
+
+    if (cards.length > 0) {
+      const readCount = cards.filter((c) =>
+        readSlugs.has(compositeCardSlug(quest.slug, c.id))
+      ).length;
+      const preQuizMax = Math.round((cards.length / (cards.length + 1)) * 100);
+      if (readCount < cards.length) {
+        return Math.round((readCount / cards.length) * preQuizMax);
+      }
+      const quizPct = getQuestProgressPct(view ?? null, quest);
+      return Math.min(99, Math.max(preQuizMax, quizPct));
+    }
+
+    return Math.min(99, Math.max(0, getQuestProgressPct(view ?? null, quest)));
+  }
+
   if (cards.length > 0) {
     if (readSlugs.has(quest.slug)) return 100;
     const readCount = cards.filter((c) =>

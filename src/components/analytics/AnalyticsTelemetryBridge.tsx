@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useCallback, type ReactNode } from "react";
 import { GameProvider } from "@/components/GameProvider";
 import { DemoStoryOrchestrator } from "@/components/demo/DemoStoryOrchestrator";
@@ -12,6 +13,7 @@ import {
   telemetryFromGameAction,
   telemetryFromRewardEvents
 } from "@/lib/analytics/telemetryFromEngine";
+import { isSchoolsDemoProtectedPath } from "@/lib/schools/schoolsDemoProtection";
 
 type Props = {
   children: ReactNode;
@@ -22,16 +24,20 @@ type Props = {
  * TODO: Replace demo user/partner ids with auth + org claims.
  */
 export function AnalyticsTelemetryBridge({ children }: Props) {
+  const pathname = usePathname();
+  const telemetryEnabled = !isSchoolsDemoProtectedPath(pathname);
+
   const onAction = useCallback(
     (input: {
       action: GameAction;
       state: GameState;
       events: RewardEvent[];
     }) => {
+      if (!telemetryEnabled) return;
       telemetryFromGameAction(input.action, input.state);
       telemetryFromRewardEvents(input.events, input.state);
     },
-    []
+    [telemetryEnabled]
   );
 
   return (

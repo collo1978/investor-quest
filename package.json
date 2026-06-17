@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "node scripts/dev-server.mjs",
+    "start:local": "node scripts/dev-server.mjs",
     "dev:kill-port": "node scripts/kill-port.mjs 3003",
     "dev:3000": "next dev -p 3000",
     "dev:fresh": "node -e \"try{require('fs').rmSync('.next',{recursive:true,force:true})}catch(e){if(e.code!=='ENOENT')throw e}\" && node scripts/dev-server.mjs",

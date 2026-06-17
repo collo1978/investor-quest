@@ -11,6 +11,7 @@ const PROGRESS_PERSIST_ACTIONS: ReadonlySet<GameAction["type"]> = new Set([
   "clear-pillar-progress",
   "repair-quest-progress",
   "submit-conviction-and-advance",
+  "enqueue-pillar-conviction",
   "complete-ten-k-rookie-challenge",
   "award-xp",
   "tick-streak",

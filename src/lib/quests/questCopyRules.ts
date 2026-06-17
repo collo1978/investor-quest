@@ -34,8 +34,8 @@ export const BANNED_COPY_SECTION_INLINE =
   /\n\s*(?:How to read this|Investor [Ii]nsight|Investor takeaway|What we know|What changed|Bottom line|Simple version)\s*:?\s*/gi;
 
 export const QUEST_COPY_LIMITS = {
-  /** Max sentences in main story (before "Why investors care") */
-  maxMainSentences: 4,
+  /** Max sentences in main story (1 takeaway + up to 2 supporting) */
+  maxMainSentences: 3,
   /** Max sentences shown on flashcard-style UI */
   maxDisplayParagraphs: 2,
   maxMainStoryWords: 95,

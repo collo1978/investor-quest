@@ -4,6 +4,7 @@ import type { PillarQuestPipelineConfig } from "@/lib/quests/pillarQuestPipeline
 import type { PillarQuestAnswersPayload } from "@/lib/supabase/questCardAnswers/types";
 
 import { getQuestAnswersPollMs } from "@/lib/quests/questGenerationModeClient";
+import { isSchoolsDemoProtectedPath } from "@/lib/schools/schoolsDemoProtection";
 
 /** @deprecated Use getQuestAnswersPollMs() */
 export const QUEST_ANSWERS_POLL_MS = 2000;
@@ -13,6 +14,17 @@ export async function fetchQuestAnswersPayload(
   ticker: string,
   questSlug: string
 ): Promise<PillarQuestAnswersPayload> {
+  if (isSchoolsDemoProtectedPath()) {
+    return {
+      pillarId: config.pillarId,
+      status: "ready",
+      questSlug,
+      ticker,
+      cards: {},
+      expectedCardIds: [],
+      sourceLabel: null
+    };
+  }
   const res = await fetch(
     `/api/companies/${encodeURIComponent(ticker)}/${config.answersPath}/${questSlug}`,
     { cache: "no-store" }
@@ -41,6 +53,9 @@ export async function postQuestGenerate(
   errors?: Array<{ message: string }>;
   error?: string;
 }> {
+  if (isSchoolsDemoProtectedPath()) {
+    return { ok: true, generated: 0 };
+  }
   const qs = new URLSearchParams({
     ticker: params.ticker,
     slug: params.questSlug
@@ -82,6 +97,7 @@ export async function postQuestGenerate(
 }
 
 export async function postSecExtract(ticker: string): Promise<void> {
+  if (isSchoolsDemoProtectedPath()) return;
   const res = await fetch(
     `/api/sec/extract?ticker=${encodeURIComponent(ticker)}`,
     { method: "POST", cache: "no-store" }

@@ -20,10 +20,10 @@ export function resolveSchoolsHomeEntryRoute(
 ):
   | "/schools/opening"
   | "/schools/avatar"
-  | "/schools/onboarding"
+  | "/schools/screen5-onboarding"
   | "/schools/map" {
   if (shouldShowOpeningScreen(state)) return "/schools/opening";
   if (shouldShowSchoolsAvatarScreen(state)) return "/schools/avatar";
-  if (shouldShowOnboarding(state)) return "/schools/onboarding";
+  if (shouldShowOnboarding(state)) return "/schools/screen5-onboarding";
   return "/schools/map";
 }

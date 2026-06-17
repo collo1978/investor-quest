@@ -28,9 +28,8 @@ Your reader wants: "Ohhh, now I get why investors care." They do NOT want Wikipe
 - BANNED openers: "designs and sells", "operates across", "provides solutions", "offers a range of", "delivers value", "In simple terms".
 
 Per card:
-- Snapshot 1 — what they do: products people use daily → how the company also earns (services, repeat spend) → Why investors care.
-- Snapshot 2 — customer problem ONLY: real annoyance → how the company fixes it (no random analogies).
-- Snapshot 3 — market scale: how big/important it feels → why scale matters to investors (no lag/stutter).
+- Snapshot 1 — what they do: products people use daily → how the chips or tech show up in real life.
+- Snapshot 2 — why customers buy: who uses it (companies, gamers, businesses) → speed/efficiency benefit → why buyers keep ordering.
 - Revenue card 1–2 — where money comes from / regions → what repeats → investor stake for THIS card only.
 - Revenue card 3 (who customers are) — specific target segment → why they buy → ecosystem/loyalty/switching strength. Never "regular people" or "people upgrading phones."`,
   extraBlock: `STYLE ANCHOR (tone only — adapt facts to the company in the excerpts):
@@ -77,16 +76,6 @@ export async function buildBusinessCardUserPrompt(params: {
         ].join("\n")
       : "";
 
-  const scaleOnlyGuard =
-    params.questSlug === "what-they-do" && params.cardId === "card-3"
-      ? [
-          "CRITICAL: MARKET SIZE / POSITION card only.",
-          "Do NOT mention lag, stutter, slow games, slow AI, or customer pain.",
-          "Lead with how big or important the company is in its market (especially AI if relevant).",
-          ""
-        ].join("\n")
-      : "";
-
   const customerAudienceGuard =
     params.questSlug === "revenue" && params.cardId === "card-3"
       ? [
@@ -105,7 +94,6 @@ export async function buildBusinessCardUserPrompt(params: {
     `This card: ${params.cardId}`,
     `Card question: ${params.cardQuestion}`,
     `Focus ONLY on: ${params.cardPromptFocus}`,
-    scaleOnlyGuard,
     customerAudienceGuard,
     priorBlock,
     "SEC filing excerpts (10-K — Business / related sections):",

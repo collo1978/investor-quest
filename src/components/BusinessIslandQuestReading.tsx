@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { PillarQuestTemplateFrame } from "@/components/BusinessQuestTemplateFrame";
 import {
@@ -13,6 +14,7 @@ import {
   type PillarQuestTheme
 } from "@/components/quest/pillarQuestTheme";
 import { QuestQuizPanel } from "@/components/QuestQuizPanel";
+import { useGame } from "@/components/GameProvider";
 import type { Company } from "@/data/companies";
 import type { PillarId } from "@/data/pillars";
 import type { QuestDefinition, QuestSubCard } from "@/data/quests/types";
@@ -47,6 +49,26 @@ import {
 } from "@/lib/demo/controlledDemo";
 import { parseRelatableQuestAnswer } from "@/lib/quests/questAnswerFormat";
 import { islandQuizSectionTitle } from "@/lib/quests/islandQuizStyle";
+import {
+  isSchoolsBusinessQuestPath,
+  isSchoolsLearnerPath,
+  resolveSchoolsLearnerHref
+} from "@/lib/schools/schoolsDemoHref";
+import {
+  advanceSchoolsDemoStoryStep,
+  getSchoolsDemoStoryStep
+} from "@/lib/schools/schoolsDemoStoryMode";
+import {
+  isSchoolsDemoPlaythroughActive,
+  SCHOOLS_DEMO_BUSINESS_TILE
+} from "@/lib/schools/schoolsDemoPlaythrough";
+import {
+  markSchoolsHubCelebrateReturn,
+  resolveSchoolsCompletionPrideLine,
+  resolveSchoolsQuestTakeaways,
+  SCHOOLS_CARD_COMPLETE_XP,
+  SCHOOLS_MICRO_XP_PER_CORRECT
+} from "@/lib/schools/schoolsQuestRewardFlow";
 
 type AnswerBlock =
   | { kind: "prose"; text: string }
@@ -240,7 +262,8 @@ function BusinessTemplateAnswerSlot({
   companyTicker,
   showGeographicMap,
   showProductVisual,
-  isLoading
+  isLoading,
+  answerEmphasized = false
 }: {
   plainEnglishAnswer?: string | null;
   investorInsight?: string | null;
@@ -250,6 +273,7 @@ function BusinessTemplateAnswerSlot({
   showGeographicMap?: boolean;
   showProductVisual?: boolean;
   isLoading?: boolean;
+  answerEmphasized?: boolean;
 }) {
   const relatable = useMemo(
     () =>
@@ -298,7 +322,13 @@ function BusinessTemplateAnswerSlot({
 
   const textFallback =
     compactParagraphs.length > 0 ? (
-      <CompactFlashcardAnswer paragraphs={compactParagraphs} theme={theme} />
+      <CompactFlashcardAnswer
+        paragraphs={compactParagraphs}
+        takeaway={relatable?.takeaway}
+        supporting={relatable?.supporting}
+        theme={theme}
+        emphasized={answerEmphasized}
+      />
     ) : null;
 
   if (showGeographicMap && companyTicker) {
@@ -425,10 +455,10 @@ function QuestReadingHeader({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="mx-auto mb-4 max-w-2xl text-center"
+      className="mx-auto mb-5 max-w-2xl text-center sm:mb-6"
     >
       <p
-        className="text-[10px] font-bold uppercase tracking-[0.26em]"
+        className="font-[var(--font-grotesk)] text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-0/90 sm:text-[12px]"
         style={{ color: theme.hi }}
       >
         {title}
@@ -560,7 +590,10 @@ export type BusinessIslandQuestReadingProps = {
   onMarkUnread: (markSlug: string) => void;
   /** Fires when the visible card changes (reading analytics). */
   onCardView?: (cardId: string | null, cardIndex: number) => void;
-  onQuizScreenChange?: (onQuizScreen: boolean) => void;
+  onQuizScreenChange?: (
+    onQuizScreen: boolean,
+    progress?: { current: number; total: number }
+  ) => void;
   nextQuest?: { href: string; label: string };
   islandFinaleCta?: { href: string; label: string };
   questPipeline?: PillarQuestPipelineState;
@@ -592,6 +625,10 @@ export function BusinessIslandQuestReading(
   } = props;
   const questPipeline = questPipelineProp ?? financialPipeline;
   const questProgressDebug = useQuestProgressDebug();
+  const pathname = usePathname();
+  const router = useRouter();
+  const { actions, state, raw } = useGame();
+  const schoolsRewardFlow = isSchoolsBusinessQuestPath(pathname);
 
   const theme = getPillarQuestTheme(pillarId);
   // Host / demo / testing needs reversible progress to reset flows quickly.
@@ -600,6 +637,9 @@ export function BusinessIslandQuestReading(
     process.env.NODE_ENV !== "production" || questProgressDebug;
   const [cardIndex, setCardIndex] = useState(0);
   const [screen, setScreen] = useState<"cards" | "quiz">("cards");
+  const [answerRevealed, setAnswerRevealed] = useState(false);
+  /** Q → SHOW ME → A reveal for every Business quest card (same flow as Quest 1). */
+  const useAnswerReveal = pillarId === "business";
   const quiz = useMemo(
     () => normalizeQuizConfig(quest.quizConfig),
     [quest.quizConfig]
@@ -621,7 +661,14 @@ export function BusinessIslandQuestReading(
   useEffect(() => {
     setCardIndex(0);
     setScreen("cards");
+    setAnswerRevealed(false);
   }, [slug]);
+
+  useEffect(() => {
+    if (!useAnswerReveal) return;
+    const idx = Math.min(cardIndex, Math.max(cards.length - 1, 0));
+    setAnswerRevealed(cardReadFlags[idx] ?? false);
+  }, [useAnswerReveal, cardIndex, cardReadFlags, cards.length]);
 
   useEffect(() => {
     if (!onCardView) return;
@@ -638,8 +685,57 @@ export function BusinessIslandQuestReading(
   // Removed mastery interstitial — keep momentum (cards → quiz).
 
   useEffect(() => {
-    onQuizScreenChange?.(screen === "quiz");
+    if (screen !== "quiz") {
+      onQuizScreenChange?.(false);
+    }
   }, [screen, onQuizScreenChange]);
+
+  const handleQuizPlayingProgress = useCallback(
+    (progress: { current: number; total: number } | null) => {
+      if (screen !== "quiz") return;
+      onQuizScreenChange?.(progress !== null, progress ?? undefined);
+    },
+    [screen, onQuizScreenChange]
+  );
+
+  const handleSchoolsBackToIsland = useCallback(() => {
+    markSchoolsHubCelebrateReturn();
+    const hubHref = resolveSchoolsLearnerHref("/schools/business", pathname);
+    const needsQuest1CheckIn =
+      isSchoolsLearnerPath(pathname) && slug === SCHOOLS_DEMO_BUSINESS_TILE;
+
+    if (needsQuest1CheckIn) {
+      const prog = raw.companies[raw.activeCompanyId];
+      const convictionDone =
+        prog != null &&
+        typeof prog.pillarConvictionSubmittedAt.business === "number";
+      const convictionPending = state.pendingConvictionQueue.some(
+        (item) => item.completedPillarId === "business"
+      );
+      if (!convictionDone && !convictionPending) {
+        // Hub first — check-in modal should overlay the island, not the quest summary.
+        router.replace(hubHref);
+        actions.enqueuePillarConviction("business", { pillarToUnlock: null });
+        if (
+          isSchoolsDemoPlaythroughActive() &&
+          getSchoolsDemoStoryStep() === "business-quest"
+        ) {
+          advanceSchoolsDemoStoryStep("conviction");
+        }
+        return;
+      }
+    }
+
+    router.replace(hubHref);
+  }, [
+    actions,
+    pathname,
+    raw.activeCompanyId,
+    raw.companies,
+    router,
+    slug,
+    state.pendingConvictionQueue
+  ]);
 
   const cardView = useMemo(() => {
     if (cards.length > 0) {
@@ -719,7 +815,7 @@ export function BusinessIslandQuestReading(
 
   if (screen === "quiz" && quiz) {
     return (
-      <motion.div className={shellClass}>
+      <motion.div className="relative px-3 pb-2 pt-4 sm:px-4 md:px-5 md:pt-6">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={`${slug}-quiz-screen`}
@@ -727,7 +823,7 @@ export function BusinessIslandQuestReading(
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.32, ease: "easeOut" }}
-            className="mx-auto w-full max-w-2xl"
+            className="mx-auto w-full max-w-3xl"
           >
             <QuestQuizPanel
               pillarId={pillarId}
@@ -739,11 +835,23 @@ export function BusinessIslandQuestReading(
               rewardXp={quest.rewardXp}
               cardsRead={cardReadFlags.filter(Boolean).length}
               cardsTotal={cards.length || 1}
-              nextQuest={nextQuest}
-              islandFinaleCta={islandFinaleCta}
+              nextQuest={schoolsRewardFlow ? undefined : nextQuest}
+              islandFinaleCta={schoolsRewardFlow ? undefined : islandFinaleCta}
               passCelebration={passCelebration}
               panelTheme={theme}
               onReviewQuestCards={() => setScreen("cards")}
+              rewardFlow={schoolsRewardFlow ? "schools" : "default"}
+              schoolsPrideLine={resolveSchoolsCompletionPrideLine(company.name)}
+              whatYouNowKnow={resolveSchoolsQuestTakeaways(slug)}
+              microXpPerCorrect={SCHOOLS_MICRO_XP_PER_CORRECT}
+              cardCompleteXp={SCHOOLS_CARD_COMPLETE_XP}
+              externalQuestionProgress={Boolean(onQuizScreenChange)}
+              onPlayingProgress={
+                onQuizScreenChange ? handleQuizPlayingProgress : undefined
+              }
+              onBackToIsland={
+                schoolsRewardFlow ? handleSchoolsBackToIsland : undefined
+              }
             />
           </motion.div>
         </AnimatePresence>
@@ -794,26 +902,37 @@ export function BusinessIslandQuestReading(
                 showGeographicMap={showGeographicMap}
                 showProductVisual={showProductVisual}
                 isLoading={cardView.isLoading}
+                answerEmphasized={useAnswerReveal && answerRevealed}
               />
             }
             companyName={company.name}
             cardIndex={cardView.cardIndex}
             cardTotal={cardView.cardTotal}
+            answerReveal={
+              useAnswerReveal
+                ? {
+                    revealed: answerRevealed,
+                    onRevealComplete: () => setAnswerRevealed(true)
+                  }
+                : undefined
+            }
             footerSlot={
-              <MarkAsReadGlowWrap isRead={cardView.isRead} theme={theme}>
-                <MarkAsReadCheckbox
-                  isRead={cardView.isRead}
-                  theme={theme}
-                  allowToggle={allowReadToggle}
-                  onClick={() => {
-                    if (allowReadToggle && cardView.isRead) {
-                      onMarkUnread(cardView.markReadSlug);
-                    } else {
-                      onMarkRead(cardView.markReadSlug);
-                    }
-                  }}
-                />
-              </MarkAsReadGlowWrap>
+              !useAnswerReveal || answerRevealed ? (
+                <MarkAsReadGlowWrap isRead={cardView.isRead} theme={theme}>
+                  <MarkAsReadCheckbox
+                    isRead={cardView.isRead}
+                    theme={theme}
+                    allowToggle={allowReadToggle}
+                    onClick={() => {
+                      if (allowReadToggle && cardView.isRead) {
+                        onMarkUnread(cardView.markReadSlug);
+                      } else {
+                        onMarkRead(cardView.markReadSlug);
+                      }
+                    }}
+                  />
+                </MarkAsReadGlowWrap>
+              ) : null
             }
           />
         </motion.div>

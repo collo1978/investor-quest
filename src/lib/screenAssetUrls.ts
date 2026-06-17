@@ -78,3 +78,42 @@ export const MISSION_BRIEF_IMAGE_PUBLIC_REL =
   "screens/mission-brief-image.webp" as const;
 export const MISSION_BRIEF_IMAGE_PATH =
   "/screens/mission-brief-image.webp" as const;
+
+/** Bank/broker mobile preview quest map (`public/logos/mobile-map.png`). */
+export const BANK_MOBILE_MAP_PATH = "/logos/mobile-map.png" as const;
+
+/** Desktop / widescreen quest map (`public/logos/desktop-map.png`). */
+export const DESKTOP_MAP_PATH = "/logos/desktop-map.png" as const;
+
+/** Schools identity picker (`public/images/schools/choose-identity.jpg`). */
+export const SCHOOLS_CHOOSE_IDENTITY_PATH =
+  "/images/schools/choose-identity.jpg" as const;
+
+/** @deprecated Legacy 8-card avatar art — use {@link SCHOOLS_CHOOSE_IDENTITY_PATH}. */
+export const SCHOOLS_IDENTITY_AVATAR_PATH =
+  "/logos/choose-your-avatar-latest.png" as const;
+
+/** Schools quest map (`public/logos/latest-map-schools.png`). */
+export const SCHOOLS_MAP_PATH = "/logos/latest-map-schools.png" as const;
+
+/** Schools opening logo splash (`public/logos/new-school-logo.png`). */
+export const SCHOOLS_OPENING_LOGO_PATH =
+  "/logos/new-school-logo.png" as const;
+
+/** Schools opening screen 2 poster (`public/logos/opening-new-screen.png`). */
+export const SCHOOLS_OPENING_SCREEN2_PATH =
+  "/logos/opening-new-screen.png" as const;
+
+/** Natural size of Schools opening poster art (logo + screen 2). */
+export const SCHOOLS_OPENING_POSTER_NATURAL = {
+  width: 1672,
+  height: 941
+} as const;
+
+/** Schools onboarding step 1 (`public/logos/onboarding-question-screen.png`). */
+export const SCHOOLS_ONBOARDING_QUESTION_SCREEN_PATH =
+  "/logos/onboarding-question-screen.png" as const;
+
+/** Schools onboarding experience screen (`public/logos/schools-sounds-like-you.png`). */
+export const SCHOOLS_SOUNDS_LIKE_YOU_SCREEN_PATH =
+  "/logos/schools-sounds-like-you.png" as const;

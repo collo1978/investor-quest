@@ -1,10 +1,16 @@
-import MapPage from "@/app/map/page";
+import { preload } from "react-dom";
+
+import {
+  SCHOOLS_MAP_IMAGE_SRC
+} from "@/lib/schools/schoolsMapConfig";
+
+import SchoolsMapPageClient from "./SchoolsMapPageClient";
 
 /**
- * Schools variant — map.
- * Starts by mirroring the main map page, but is routed separately for safe iteration.
+ * Schools map — dedicated art + corner description panels.
+ * Bank/broker and `/map` continue to use `QuestMapScene` + `desktop-map.png`.
  */
 export default function SchoolsMapPage() {
-  return <MapPage />;
+  preload(SCHOOLS_MAP_IMAGE_SRC, { as: "image" });
+  return <SchoolsMapPageClient />;
 }
-

@@ -1,4 +1,1 @@
-export {
-  default,
-  generateStaticParams
-} from "@/app/business/[questSlug]/page";
+export { default, generateStaticParams } from "@/app/schools/business/[questSlug]/page";

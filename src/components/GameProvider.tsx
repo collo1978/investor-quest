@@ -131,6 +131,10 @@ type GameActions = {
   replaceGameState: (next: GameState) => void;
   dismissToast: (id: string) => void;
   submitConvictionAndAdvance: () => void;
+  enqueuePillarConviction: (
+    pillarId: PillarId,
+    opts?: { pillarToUnlock?: PillarId | null }
+  ) => void;
   completeTenKRookieChallenge: (scoreFraction: number) => void;
   dismissQuestMapBrief: () => void;
   dismissBusinessIslandBrief: () => void;
@@ -536,6 +540,12 @@ export function GameProvider({
         setToasts((prev) => prev.filter((t) => t.id !== id)),
       submitConvictionAndAdvance: () =>
         dispatch({ type: "submit-conviction-and-advance" }),
+      enqueuePillarConviction: (pillarId, opts) =>
+        dispatch({
+          type: "enqueue-pillar-conviction",
+          pillarId,
+          pillarToUnlock: opts?.pillarToUnlock
+        }),
       completeTenKRookieChallenge: (scoreFraction) =>
         dispatch({
           type: "complete-ten-k-rookie-challenge",
@@ -602,4 +612,9 @@ export function useGame(): GameContextValue {
   const ctx = useContext(GameContext);
   if (!ctx) throw new Error("useGame must be used within GameProvider");
   return ctx;
+}
+
+/** Poster screens under `/schools/demo/*` skip GameProvider — use for optional FX bridges. */
+export function useOptionalGame(): GameContextValue | null {
+  return useContext(GameContext);
 }

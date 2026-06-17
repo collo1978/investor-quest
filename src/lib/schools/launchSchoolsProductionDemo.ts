@@ -10,11 +10,14 @@ import { prefetchStartupAssets } from "@/lib/startup/prefetchStartupAssets";
 import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
 import {
   activateSchoolsDemoStory,
+  deactivateSchoolsDemoStory,
   getRouteForSchoolsDemoStoryStep,
+  markSchoolsDemoLaunched,
   SCHOOLS_DEMO_STORY_PREFETCH_ROUTES,
   setSchoolsDemoStoryStep
 } from "@/lib/schools/schoolsDemoStoryMode";
 import { SCHOOLS_DEMO_ROUTE_PREFIX } from "@/lib/schools/schoolsDemoHref";
+import { clearSchoolsMapMissionBriefDismiss } from "@/lib/schools/schoolsMapMissionBriefState";
 
 type LaunchActions = {
   replaceGameState: (state: ReturnType<typeof buildDemoGameState>) => void;
@@ -40,12 +43,15 @@ export function launchSchoolsProductionDemo(
   router: DemoRouter,
   actions: LaunchActions
 ): void {
+  deactivateSchoolsDemoStory();
   deactivateDemoStory();
   clearPersistedSnapshots();
   clearDemoSessionFlags();
+  clearSchoolsMapMissionBriefDismiss();
   rotateOnboardingGuestId();
   setActiveDemoProfileLabel(DEMO_PROFILE_NEW_USER);
 
+  markSchoolsDemoLaunched();
   activateSchoolsDemoStory({ productionRoutes: true });
   setSchoolsDemoStoryStep("logo");
 
@@ -72,5 +78,11 @@ export function launchSchoolsProductionDemo(
     }
   });
 
+  // Hard navigation — soft router.replace can stall on `/schools/demo` when crossing
+  // demo vs canonical layout trees (user stays on "Starting Schools demo…").
+  if (typeof window !== "undefined") {
+    window.location.replace(opening);
+    return;
+  }
   router.replace(opening);
 }

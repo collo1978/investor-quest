@@ -1,0 +1,42 @@
+---
+description: Adaptive learning design rules — island, section, question-type
+globs:
+  - src/data/contentRules/**
+  - src/data/quests/content/nvidia*.ts
+  - src/lib/demo/nvidiaDemoLearningDesign.ts
+alwaysApply: false
+---
+
+# Investor Quest content rules (MVP brain)
+
+Source of truth: `src/data/contentRules/investorQuestContentRules.ts`
+
+## Layers
+
+1. **Island** — how Business vs Financials vs Forces vs Management should feel
+2. **Section** — snapshot, revenue, growth, positive-inside, leadership, etc.
+3. **Question type** — company understanding vs problem vs business model vs financial health, etc.
+4. **Island quiz checkpoint** — same loop (cards → quiz → XP), different checkpoint *kind* per pillar:
+   - Business: understanding check
+   - Financials: health check
+   - Forces: strategy checkpoint
+   - Management: trust judgment
+
+## Requirements
+
+- Every answer must **match the question** AND **follow island + section style**
+- Do not force the same opener on every card
+- Complete the loop (never stop at problem setup only on problem questions)
+
+## Helpers
+
+- `getIslandRule(pillarId)`
+- `getIslandQuizRule(pillarId)` — checkpoint goal, CTA, preferred question kinds
+- `getSectionRule(pillarId, sectionId)`
+- `getQuestionTypeRule(id)`
+- `resolveContentRules({ pillarId, questSlug, investorQuestion })`
+- `formatContentRuleBriefForPrompt(resolved)` — for future LLM generation
+- `formatIslandQuizBriefForPrompt(pillarId)` — quiz-only generation brief
+- UI: `@/lib/quests/islandQuizStyle` — unlock headline, intro, section titles, in-quiz feedback
+
+Not in Supabase yet. No admin UI yet.

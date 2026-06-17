@@ -32,6 +32,16 @@ import {
 } from "@/lib/quests/innovationRdCopy";
 import { QUEST_COPY_GLOBAL_RULES_TEXT } from "@/lib/quests/questCopyRules";
 import {
+  countTakeawayWords,
+  extractTakeawayForValidation,
+  parseTakeawayAnswerBody,
+  TAKEAWAY_CONTENT_RULES,
+  TAKEAWAY_MAX_WORDS,
+  TAKEAWAY_TARGET_MIN_WORDS,
+  takeawayHasExampleLanguage,
+  takeawayReadsLikeParagraph
+} from "@/lib/quests/takeawayAnswer";
+import {
   DIRECT_PROSE_VOICE_RULES,
   DRAMATIC_NARRATION_RE,
   EM_DASH_IN_COPY_RE
@@ -50,20 +60,10 @@ Investor Quest should feel like a smart friend explaining what matters to invest
 Target reaction: "Ohhh, now I get why investors care about this company."`;
 
 export const INSIGHT_DRIVEN_STYLE_ANCHOR = `INSIGHT-DRIVEN STYLE (match this rhythm on visible cards)
-"Apple makes tech products people use every day, like iPhones, Macs, iPads, AirPods, and Apple Watches.
-
-Apple also earns recurring revenue from services like the App Store, iCloud, and Apple Music after the device is sold.
+${TAKEAWAY_CONTENT_RULES}
 
 Why investors care:
-Repeat spending from the same customers is steadier than one-off hardware sales."
-
-Every supporting sentence must TEACH something concrete (money, habit, risk, scale). Not dramatic pivots.
-
-Good sentence 2 examples:
-- "Apple also earns recurring revenue from services."
-- "Services help Apple make money after the device is sold."
-- "The ecosystem encourages customers to stay with Apple products."
-- "Recurring subscriptions create more stable revenue."
+When a company supplies key parts of a fast-growing industry, its size and reach matter.
 
 Banned cinematic filler (auto-rejected):
 - "But the real story is bigger than the devices."
@@ -74,12 +74,14 @@ export const HUMAN_FIRST_SIX_STEPS = `HUMAN-FIRST EXPLANATION ARCHITECTURE (flex
 Match the CARD QUESTION — use the pattern for that question type (see intent footer on each card).
 
 Common patterns (pick ONE that fits the question):
-- What they do: what people actually use/buy → where money comes from → investor meaning (no forced analogy)
-- Customer problem: what life feels like → what gets easier → everyday benefit (no investor analysis in the main story)
-- Market scale: how big it feels in real life → why that position matters → investor meaning
-- How they make money: what people pay for → main revenue source → investor meaning
-- Risk/force: real-world risk → what could happen → filing fact → investor meaning
-- Financials: money comparison → what the number shows → consequence → investor meaning
+- YELLOW TAKEAWAY = one-idea headline in 8–12 words (no examples)
+- WHITE EXPLANATION = examples, context, and why the takeaway is true (1–2 sentences)
+- What they do: takeaway names what they sell/do → supporting adds everyday examples
+- Customer problem: takeaway states the problem solved → supporting shows a real moment
+- Market scale: takeaway states scale/position → supporting makes size feel real
+- How they make money: takeaway states main revenue line → supporting shows a purchase moment
+- Risk/force: takeaway states the risk → supporting shows what could happen in real life
+- Financials: takeaway states what the number means → supporting anchors it to everyday money
 
 Always end with "Why investors care:" — one short line on growth, risk, trust, or strength.`;
 
@@ -92,7 +94,9 @@ export const HUMAN_FIRST_HARD_RULES = `HARD RULES (auto-rejected before save)
 - No em dashes (—), en dashes (–), or double hyphens (--) in player copy. Use periods or commas instead.
 - No dramatic narration ("that makes every judgment sharper", "the deeper story matters", "beneath the surface")
 - No jargon unless translated into normal life in the same breath
-- No long article-style answers (max 4 short sentences before "Why investors care:")
+- YELLOW TAKEAWAY ${TAKEAWAY_TARGET_MIN_WORDS}–${TAKEAWAY_MAX_WORDS} words — one idea, headline only; no "because", "when", examples, or lists in yellow
+- WHITE EXPLANATION explains why the takeaway is true (examples + context go there)
+- No long article-style answers (max 1 takeaway + 2 supporting sentences before "Why investors care:")
 - No vague "innovation" unless you show a concrete everyday result
 - R&D / moat cards: ${INNOVATION_RD_HARD_RULES.replace(/\n/g, " ")}
 - Global card structure: ${QUEST_COPY_GLOBAL_RULES_TEXT.replace(/\n/g, " ").slice(0, 400)}…
@@ -123,14 +127,17 @@ TEENAGER PICTURE TEST (enforced before save)
 - They understand what it helps power and why people use it — NOT product categories or industry tours.
 
 LENGTH (hard cap)
-- Before "Why investors care:" at most 4 short sentences (3 is ideal).
-- Each sentence: ~8–14 words. No stacked "and / which / while" chains.
-- Main story: ~45–75 words total.
+- YELLOW TAKEAWAY: one idea, ${TAKEAWAY_TARGET_MIN_WORDS}–${TAKEAWAY_MAX_WORDS} words (hard max ${TAKEAWAY_MAX_WORDS}).
+- WHITE EXPLANATION: 1–2 short sentences with examples and why the takeaway is true.
+- If yellow contains "because", "when", or multiple "and"s, shorten it.
+- Main story: ~30–60 words total before "Why investors care:".
 
-REAL-WORLD FIRST
-- Sentence 1 MUST hook normal life — never open with what the company builds technically.
-- Good: "If you've used a popular AI chat app…", "When your paycheck hits the account…", "They're one of the biggest names in…"
-- Bad: "[Company] develops…", "They provide solutions…", "Their technology is crucial…"
+REAL-WORLD CONTEXT
+- YELLOW TAKEAWAY: headline only — one idea, what they sell, do, earn, or risk.
+- WHITE EXPLANATION: examples, context, and why the takeaway is true.
+- Good takeaway: "NVIDIA powers AI, gaming, and data centers."
+- Good supporting: "When you use ChatGPT… NVIDIA technology is often working behind the scenes."
+- Bad takeaway: "NVIDIA makes the special chips that help power a lot of today's AI tools…" (paragraph — never)
 
 JARGON (zero tolerance — rewrite if found)
 - BANNED: GPU, SDK, infrastructure, analytics, accelerated computing, data center, semiconductor, computing platform, cloud platform, hyperscaler, workload, ecosystem (buzzword), solutions (corporate), industries (vague tour), innovation (filler).
@@ -143,9 +150,11 @@ BANNED IN STORY
 
 export const QUEST_ANSWER_FORMAT = `FORMAT (strict)
 - NO markdown: no **, #, bullets (• - *), or backticks.
-- NO headings inside the main story.
+- Use exactly these labels in the main story (required):
 
-Write at most 4 short sentences, then one blank line and exactly:
+${TAKEAWAY_CONTENT_RULES}
+
+Then one blank line and exactly:
 
 Why investors care:
 (one short sentence — growth, risk, trust, or strength)
@@ -154,7 +163,7 @@ Why investors care:
 - Answer ONLY this card's question. Do not repeat earlier cards.`;
 
 export const HUMAN_FIRST_WRITE_INSTRUCTION =
-  "Write using the QUESTION TYPE pattern in the user message; max 4 short sentences; then Why investors care:";
+  `Write YELLOW MAIN TAKEAWAY (${TAKEAWAY_TARGET_MIN_WORDS}–${TAKEAWAY_MAX_WORDS} words, one idea, headline) + WHITE SUPPORTING EXPLANATION (1–2 sentences: examples, context, why it's true) + Why investors care:`;
 
 export const QUIZ_EXPLANATION_VOICE = `QUIZ EXPLANATION RULES (post-answer "Why" copy)
 - 1–2 short sentences max.
@@ -236,6 +245,9 @@ export type HumanFirstStructureResult = {
   missingInnovationRdFocus: boolean;
   tooLong: boolean;
   missingWhyInvestorsCare: boolean;
+  takeawayTooLong: boolean;
+  takeawayHasExamples: boolean;
+  takeawayNotHeadline: boolean;
 };
 
 /** Dramatic pivot lines that teach nothing — reject in player copy. */
@@ -290,13 +302,26 @@ export function analyzeHumanFirstStructure(
         ? detectQuestionIntent(intentOrContext)
         : "general";
 
+  const rawMainStory = extractRawMainStoryForAnalysis(plainEnglishAnswer);
   const mainStory = extractMainStoryForAnalysis(plainEnglishAnswer);
-  const first = splitIntoSentences(mainStory)[0] ?? mainStory.slice(0, 180);
+  const takeaway = extractTakeawayForValidation(rawMainStory);
+  const takeawayTooLong =
+    takeaway.length > 0 && countTakeawayWords(takeaway) > TAKEAWAY_MAX_WORDS;
+  const takeawayHasExamples =
+    takeaway.length > 0 && takeawayHasExampleLanguage(takeaway);
+  const takeawayNotHeadline =
+    takeaway.length > 0 && takeawayReadsLikeParagraph(takeaway);
+  const first = takeaway || splitIntoSentences(mainStory)[0] || mainStory.slice(0, 180);
   const openingTwo = splitIntoSentences(mainStory).slice(0, 2).join(" ");
+  const supportingText =
+    parseTakeawayAnswerBody(rawMainStory)?.supporting?.trim() ?? "";
   const wordCount = mainStory.split(/\s+/).filter(Boolean).length;
   const sentenceCount = splitIntoSentences(mainStory).length;
 
   const hasRealLifeOpening =
+    REAL_LIFE_OPENING_RE.test(supportingText || openingTwo) ||
+    (intent === "what_company_does" &&
+      /\b(makes|sells|builds|powers|provides)\b/i.test(takeaway)) ||
     REAL_LIFE_OPENING_RE.test(first) ||
     /\b(investors?|customers?|people|users|shoppers|drivers|listeners)\b/i.test(
       first
@@ -340,7 +365,7 @@ export function analyzeHumanFirstStructure(
     !scaleStyleOpening &&
     (CORPORATE_PHRASE_RE.test(mainStory) ||
       CORPORATE_OPENING_RE.some((re) => re.test(first)));
-  const tooLong = wordCount > 95 || sentenceCount > 4;
+  const tooLong = wordCount > 75 || sentenceCount > 3;
   const missingWhyInvestorsCare =
     !/why investors care:/i.test(plainEnglishAnswer) &&
     !investorInsight?.trim();
@@ -403,6 +428,9 @@ export function analyzeHumanFirstStructure(
   if (missingInnovationRdFocus) flags.push("missing_innovation_rd_focus");
   if (tooLong) flags.push("too_long");
   if (missingWhyInvestorsCare) flags.push("missing_why_investors_care");
+  if (takeawayTooLong) flags.push("takeaway_too_long");
+  if (takeawayHasExamples) flags.push("takeaway_has_examples");
+  if (takeawayNotHeadline) flags.push("takeaway_not_headline");
 
   if (intent === "target_customer") {
     if (!hasTargetCustomerFocus(mainStory)) {
@@ -446,6 +474,9 @@ export function analyzeHumanFirstStructure(
     !hasGenericCustomerAudience &&
     !tooLong &&
     !missingWhyInvestorsCare &&
+    !takeawayTooLong &&
+    !takeawayHasExamples &&
+    !takeawayNotHeadline &&
     !hasWrongIntentTemplate &&
     !hasInvestorDriftInMain &&
     !hasQuestionDrift &&
@@ -482,15 +513,31 @@ export function analyzeHumanFirstStructure(
     hasInnovationRdIssue,
     missingInnovationRdFocus,
     tooLong,
-    missingWhyInvestorsCare
+    missingWhyInvestorsCare,
+    takeawayTooLong,
+    takeawayHasExamples,
+    takeawayNotHeadline
   };
+}
+
+function extractRawMainStoryForAnalysis(text: string): string {
+  const trimmed = text.trim();
+  const cut = trimmed.match(/\n\s*Why investors care:\s*/i);
+  if (cut?.index != null) return trimmed.slice(0, cut.index).trim();
+  return trimmed.replace(/\n\s*Why it matters:\s*[\s\S]*$/i, "").trim();
 }
 
 function extractMainStoryForAnalysis(text: string): string {
   const trimmed = text.trim();
   const cut = trimmed.match(/\n\s*Why investors care:\s*/i);
-  if (cut?.index != null) return trimmed.slice(0, cut.index).trim();
-  return trimmed.replace(/\n\s*Why it matters:\s*[\s\S]*$/i, "").trim();
+  const main =
+    cut?.index != null
+      ? trimmed.slice(0, cut.index).trim()
+      : trimmed.replace(/\n\s*Why it matters:\s*[\s\S]*$/i, "").trim();
+  return main
+    .replace(/MAIN TAKEAWAY:\s*/gi, "")
+    .replace(/SUPPORTING EXPLANATION:\s*/gi, "")
+    .trim();
 }
 
 export function describeHumanFirstFailure(result: HumanFirstStructureResult): string {
@@ -544,8 +591,16 @@ export function describeHumanFirstFailure(result: HumanFirstStructureResult): st
       "missing target customer, value proposition, or business-model strength (loyalty, ecosystem, switching costs)"
     );
   }
-  if (result.tooLong) parts.push("too long — max 4 short sentences");
+  if (result.tooLong) parts.push("too long — max 1 takeaway + 2 supporting sentences");
   if (result.missingWhyInvestorsCare) parts.push('missing "Why investors care:" line');
+  if (result.takeawayTooLong) {
+    parts.push(`MAIN TAKEAWAY too long — max ${TAKEAWAY_MAX_WORDS} words`);
+  }
+  if (result.takeawayHasExamples || result.takeawayNotHeadline) {
+    parts.push(
+      "YELLOW TAKEAWAY must be a headline (8–12 words, one idea, no because/when/examples/lists — move examples and why-it's-true detail to WHITE EXPLANATION)"
+    );
+  }
   return parts.join("; ") || "failed human-first structure";
 }
 

@@ -12,6 +12,7 @@ type Props = {
   hubProgressPct: number;
   partnerId?: string;
   userId?: string;
+  missionBriefOpen?: boolean;
 };
 
 /** Business island — wide scene on desktop; CSS portrait stage on phones. */

@@ -5,8 +5,7 @@ import { useQuestProgressDebug } from "@/hooks/useQuestProgressDebug";
 import { formatPlayerQuestSourceDisplay } from "@/lib/quests/questSourceLabel";
 
 export function QuestSourceFooter({
-  source,
-  theme
+  source
 }: {
   source: string | null | undefined;
   theme?: PillarQuestTheme;
@@ -17,16 +16,15 @@ export function QuestSourceFooter({
   if (!label) return null;
 
   return (
-    <footer className="mx-auto mt-7 max-w-2xl text-center">
+    <footer className="mx-auto mt-12 max-w-2xl pb-1 text-center">
       <p
-        className="text-[11px] font-medium tracking-wide text-ink-2/80"
+        className="text-[10px] leading-relaxed tracking-wide text-ink-2/45"
         title={accession ? `SEC accession: ${accession}` : undefined}
       >
-        <span className="text-ink-2/60">Source: </span>
-        <span style={theme ? { color: theme.hi } : undefined}>{label}</span>
+        {label}
       </p>
       {accession ? (
-        <p className="mt-1 font-mono text-[9px] text-ink-2/50" title="Dev only — accession number">
+        <p className="mt-1 font-mono text-[9px] text-ink-2/35" title="Dev only — accession number">
           {accession}
         </p>
       ) : null}

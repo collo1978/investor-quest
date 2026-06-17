@@ -3,13 +3,15 @@
 import { useCallback, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-import { SchoolsArmorAvatarScreen } from "@/components/schools/SchoolsArmorAvatarScreen";
+import { SchoolsChooseIdentityScreen } from "@/components/schools/SchoolsChooseIdentityScreen";
 import { useGame } from "@/components/GameProvider";
-import { getSchoolsAvatarById, type SchoolsAvatarId } from "@/lib/schools/avatars";
+import {
+  getSchoolsArmorById,
+  type SchoolsArmorId
+} from "@/lib/schools/schoolsIdentities";
 import { isSchoolsDemoPath, resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
 import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
-import { isSchoolsDemoStoryModeActive } from "@/lib/schools/schoolsDemoStoryMode";
-import { saveSchoolsAvatar } from "@/lib/schools/schoolsAvatarStorage";
+import { saveSchoolsArmor } from "@/lib/schools/schoolsIdentityStorage";
 import { markFunnelTransition, releaseFunnelTransition } from "@/lib/startup/funnelTransition";
 
 export default function SchoolsAvatarPage() {
@@ -22,27 +24,26 @@ export default function SchoolsAvatarPage() {
   }, []);
 
   const onContinue = useCallback(
-    (avatarId: SchoolsAvatarId) => {
-      const avatar = getSchoolsAvatarById(avatarId);
-      saveSchoolsAvatar(avatarId);
+    (armorId: SchoolsArmorId) => {
+      const armor = getSchoolsArmorById(armorId);
+      saveSchoolsArmor(armorId);
       actions.setProfile({
-        playerName: avatar.name,
+        playerName: armor.title,
         goal: state.goal ?? "Build investing mastery"
       });
 
-      const onSchoolsDemo =
-        isSchoolsDemoPath(pathname) || isSchoolsDemoStoryModeActive();
-
-      if (onSchoolsDemo) {
+      if (isSchoolsDemoPath(pathname)) {
         navigateSchoolsDemoStep("onboarding", pathname, router);
         return;
       }
 
       markFunnelTransition("onboarding");
-      router.replace(resolveSchoolsLearnerHref("/schools/onboarding", pathname));
+      router.replace(
+        resolveSchoolsLearnerHref("/schools/screen5-onboarding", pathname)
+      );
     },
     [actions, pathname, router, state.goal]
   );
 
-  return <SchoolsArmorAvatarScreen onContinue={onContinue} />;
+  return <SchoolsChooseIdentityScreen onContinue={onContinue} />;
 }

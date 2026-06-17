@@ -28,6 +28,8 @@ export type BusinessHubQuestCard = {
   read: boolean;
   /** Prior hub slot that must reach 100% to unlock this card (chain). */
   unlockSource?: { slug: string; title: string } | null;
+  /** Prior quest completion time — scopes mystery title reveal to this unlock. */
+  unlockEpoch?: number | null;
   /** Future: XP ring, streak badge, achievement — not rendered until populated. */
   chrome?: BusinessHubCardChrome;
 };

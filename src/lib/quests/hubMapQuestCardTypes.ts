@@ -18,4 +18,6 @@ export type HubMapQuestCardData = {
   completed: boolean;
   read: boolean;
   unlockSource?: { slug: string; title: string } | null;
+  /** Prior quest completion time — scopes mystery title reveal to this unlock. */
+  unlockEpoch?: number | null;
 };
