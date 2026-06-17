@@ -3,8 +3,10 @@ import {
   advanceSchoolsDemoStoryStep,
   ensureProductionSchoolsDemoFromPath,
   getRouteForSchoolsDemoStoryStep,
+  markSchoolsDemoLaunched,
   schoolsDemoStepFromPathname,
   setSchoolsDemoStoryStep,
+  wasSchoolsDemoLaunchedInSession,
   type SchoolsDemoStoryStep
 } from "@/lib/schools/schoolsDemoStoryMode";
 
@@ -12,9 +14,11 @@ type RouterLike = { replace: (href: string) => void; push?: (href: string) => vo
 
 /** Ensure Schools demo story is active before advancing (PWA cold start / race-safe). */
 export function ensureSchoolsDemoStoryReady(pathname: string): void {
-  if (isSchoolsDemoPath(pathname)) {
-    ensureProductionSchoolsDemoFromPath(pathname);
+  if (!isSchoolsDemoPath(pathname)) return;
+  if (!wasSchoolsDemoLaunchedInSession()) {
+    markSchoolsDemoLaunched();
   }
+  ensureProductionSchoolsDemoFromPath(pathname);
 }
 
 /**

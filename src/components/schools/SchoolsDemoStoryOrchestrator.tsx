@@ -21,7 +21,6 @@ import { SCHOOLS_DEMO_MENU_HUB_PATHS } from "@/lib/schools/schoolsDemoMenu";
 import {
   isSchoolsBusinessQuestDetailPath,
   isSchoolsDemoPath,
-  SCHOOLS_DEMO_ROUTE_PREFIX,
   stripSchoolsDemoPrefix
 } from "@/lib/schools/schoolsDemoHref";
 
@@ -42,10 +41,7 @@ export function SchoolsDemoStoryOrchestrator() {
 
   useEffect(() => {
     if (isMobilePreviewShellPath(pathname) || isMobilePreviewEmbed()) return;
-    if (
-      isSchoolsDemoPath(pathname) &&
-      pathname !== SCHOOLS_DEMO_ROUTE_PREFIX
-    ) {
+    if (isSchoolsDemoPath(pathname)) {
       if (!wasSchoolsDemoLaunchedInSession()) {
         markSchoolsDemoLaunched();
       }

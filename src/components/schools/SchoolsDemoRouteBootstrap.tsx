@@ -6,25 +6,29 @@ import { usePathname } from "next/navigation";
 import { isMobilePreviewEmbed } from "@/lib/bank/mobilePreviewEmbed";
 import {
   isSchoolsDemoPath,
-  SCHOOLS_DEMO_ROUTE_PREFIX,
   stripSchoolsDemoPrefix
 } from "@/lib/schools/schoolsDemoHref";
 import {
   ensureProductionSchoolsDemoFromPath,
-  hydrateSchoolsDemoStoryFromSession
+  hydrateSchoolsDemoStoryFromSession,
+  markSchoolsDemoLaunched,
+  wasSchoolsDemoLaunchedInSession
 } from "@/lib/schools/schoolsDemoStoryMode";
 import { warmSchoolsProfileApproachAssets } from "@/lib/schools/prefetchSchoolsProfileLinks";
 
 /**
- * Resume scripted Schools mode on `/schools/demo/*` after sidebar launch only.
+ * Resume scripted Schools mode on `/schools/demo` and `/schools/demo/*`.
  */
 export function SchoolsDemoRouteBootstrap() {
   const pathname = usePathname();
 
   useEffect(() => {
     if (isMobilePreviewEmbed()) return;
-    if (!isSchoolsDemoPath(pathname) || pathname === SCHOOLS_DEMO_ROUTE_PREFIX) {
+    if (!isSchoolsDemoPath(pathname)) {
       return;
+    }
+    if (!wasSchoolsDemoLaunchedInSession()) {
+      markSchoolsDemoLaunched();
     }
     hydrateSchoolsDemoStoryFromSession(pathname);
     ensureProductionSchoolsDemoFromPath(pathname);

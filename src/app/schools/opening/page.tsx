@@ -5,10 +5,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 import { useDemoStory } from "@/components/demo/DemoStoryProvider";
-import { useSchoolsDemoStory } from "@/components/schools/SchoolsDemoStoryProvider";
 import { useGame } from "@/components/GameProvider";
 import { MOBILE_PREVIEW_SEARCH_PARAM } from "@/lib/bank/mobilePreviewEmbed";
 import { clearDemoFreshStart } from "@/lib/demo/demoSessionReset";
+import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
 import {
   isSchoolsDemoPath,
   resolveSchoolsLearnerHref
@@ -105,7 +105,6 @@ export default function SchoolsOpeningPage() {
   const searchParams = useSearchParams();
   const { actions } = useGame();
   const demoStory = useDemoStory();
-  const schoolsDemo = useSchoolsDemoStory();
   const leavingRef = useRef(false);
   const reduceMotion = useReducedMotion();
   const openOnScreen2 = searchParams.get("screen") === "2";
@@ -129,10 +128,6 @@ export default function SchoolsOpeningPage() {
 
   const demoStoryActiveRef = useRef(demoStory.active);
   demoStoryActiveRef.current = demoStory.active;
-  const schoolsDemoActiveRef = useRef(schoolsDemo.active);
-  schoolsDemoActiveRef.current = schoolsDemo.active;
-  const advanceSchoolsStoryRef = useRef(schoolsDemo.advance);
-  advanceSchoolsStoryRef.current = schoolsDemo.advance;
 
   const finishIntro = useCallback(() => {
     if (previewScreen2Inspect) return;
@@ -145,7 +140,7 @@ export default function SchoolsOpeningPage() {
         actions.completeOpeningScreen();
         actions.completeWelcomeScreen();
       });
-      advanceSchoolsStoryRef.current("avatar");
+      navigateSchoolsDemoStep("avatar", pathname, router);
       return;
     }
 

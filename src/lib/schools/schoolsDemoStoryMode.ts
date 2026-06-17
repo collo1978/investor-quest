@@ -263,7 +263,7 @@ export function schoolsDemoStepFromPathname(
     : pathname;
 
   if (!path.startsWith("/schools")) return null;
-  if (path === "/schools/opening") return "logo";
+  if (path === "/schools" || path === "/schools/opening") return "logo";
   if (path === "/schools/avatar") return "avatar";
   if (
     path === "/schools/onboarding" ||
