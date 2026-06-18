@@ -21,11 +21,22 @@ import { SCHOOLS_DEMO_MENU_HUB_PATHS } from "@/lib/schools/schoolsDemoMenu";
 import {
   isSchoolsBusinessQuestDetailPath,
   isSchoolsDemoPath,
+  SCHOOLS_DEMO_ROUTE_PREFIX,
   stripSchoolsDemoPrefix
 } from "@/lib/schools/schoolsDemoHref";
 
 function stepIndex(step: (typeof SCHOOLS_DEMO_STORY_STEPS)[number]): number {
   return SCHOOLS_DEMO_STORY_STEPS.indexOf(step);
+}
+
+/** `/schools/demo` and `/schools/demo/opening` are both valid logo beats. */
+function pathnameMatchesDemoStepRoute(
+  pathname: string,
+  storyStep: (typeof SCHOOLS_DEMO_STORY_STEPS)[number]
+): boolean {
+  const expected = getRouteForSchoolsDemoStoryStep(storyStep);
+  if (pathname === expected) return true;
+  return storyStep === "logo" && pathname === SCHOOLS_DEMO_ROUTE_PREFIX;
 }
 
 /**
@@ -68,10 +79,14 @@ export function SchoolsDemoStoryOrchestrator() {
     // Learner jumped via CTA or hamburger — sync story to the URL (forward or back).
     const inferred = schoolsDemoStepFromPathname(pathname);
     if (inferred) {
-      const inferredRoute = getRouteForSchoolsDemoStoryStep(inferred);
-      if (inferredRoute === pathname) {
+      if (pathnameMatchesDemoStepRoute(pathname, inferred)) {
         if (step !== inferred) {
-          setSchoolsDemoStoryStep(inferred);
+          const inferredIdx = stepIndex(inferred);
+          const currentIdx = stepIndex(step);
+          // Never downgrade an in-flight CTA advance while the URL still shows logo.
+          if (inferredIdx > currentIdx) {
+            setSchoolsDemoStoryStep(inferred);
+          }
         }
         return;
       }
@@ -100,7 +115,7 @@ export function SchoolsDemoStoryOrchestrator() {
     }
 
     const expected = getRouteForSchoolsDemoStoryStep(step);
-    if (expected !== pathname) {
+    if (!pathnameMatchesDemoStepRoute(pathname, step)) {
       routerRef.current.replace(expected);
     }
   }, [active, pathname, step]);

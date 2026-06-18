@@ -12,6 +12,11 @@ import {
 
 type RouterLike = { replace: (href: string) => void; push?: (href: string) => void };
 
+type NavigateSchoolsDemoStepOptions = {
+  /** Full document navigation — avoids soft-router stalls on presenter entry. */
+  hard?: boolean;
+};
+
 /** Ensure Schools demo story is active before advancing (PWA cold start / race-safe). */
 export function ensureSchoolsDemoStoryReady(pathname: string): void {
   if (!isSchoolsDemoPath(pathname)) return;
@@ -27,12 +32,17 @@ export function ensureSchoolsDemoStoryReady(pathname: string): void {
 export function navigateSchoolsDemoStep(
   next: SchoolsDemoStoryStep,
   pathname: string,
-  router: RouterLike
+  router: RouterLike,
+  options?: NavigateSchoolsDemoStepOptions
 ): string {
   ensureSchoolsDemoStoryReady(pathname);
   advanceSchoolsDemoStoryStep(next);
   const target = getRouteForSchoolsDemoStoryStep(next);
-  router.replace(target);
+  if (options?.hard && typeof window !== "undefined") {
+    window.location.assign(target);
+  } else {
+    router.replace(target);
+  }
   return target;
 }
 

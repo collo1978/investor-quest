@@ -63,7 +63,7 @@ function SchoolsScreen2Portal({
   return (
     <motion.div
       key="schools-screen-2"
-      className="fixed inset-0 z-20 flex items-center justify-center bg-[#030308]"
+      className="fixed inset-0 z-20 flex items-center justify-center bg-[#030308] pointer-events-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{
@@ -84,12 +84,12 @@ function SchoolsScreen2Portal({
           className="pointer-events-none absolute inset-0 h-full w-full select-none object-fill"
         />
 
-        <footer className="pointer-events-none absolute inset-x-0 bottom-[2%] z-30 flex justify-center px-[10%]">
+        <footer className="pointer-events-auto absolute inset-x-0 bottom-[2%] z-30 flex justify-center px-[10%]">
           <button
             type="button"
             aria-label="Continue to choose your investor armor"
             onClick={onContinue}
-            className="iq-schools-choose-continue-btn iq-schools-choose-continue-btn--armed pointer-events-auto cursor-pointer"
+            className="iq-schools-choose-continue-btn iq-schools-choose-continue-btn--armed pointer-events-auto cursor-pointer touch-manipulation"
           >
             CONTINUE
           </button>
@@ -140,7 +140,7 @@ export default function SchoolsOpeningPage() {
         actions.completeOpeningScreen();
         actions.completeWelcomeScreen();
       });
-      navigateSchoolsDemoStep("avatar", pathname, router);
+      navigateSchoolsDemoStep("avatar", pathname, router, { hard: true });
       return;
     }
 
