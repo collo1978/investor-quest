@@ -18,6 +18,7 @@ import {
   wasSchoolsDemoLaunchedInSession
 } from "@/lib/schools/schoolsDemoStoryMode";
 import { SCHOOLS_DEMO_MENU_HUB_PATHS } from "@/lib/schools/schoolsDemoMenu";
+import { isSchoolsOnboardingFlowRoute } from "@/lib/schools/schoolsOnboardingFlow";
 import {
   isSchoolsBusinessQuestDetailPath,
   isSchoolsDemoPath,
@@ -36,7 +37,14 @@ function pathnameMatchesDemoStepRoute(
 ): boolean {
   const expected = getRouteForSchoolsDemoStoryStep(storyStep);
   if (pathname === expected) return true;
-  return storyStep === "logo" && pathname === SCHOOLS_DEMO_ROUTE_PREFIX;
+  if (storyStep === "logo" && pathname === SCHOOLS_DEMO_ROUTE_PREFIX) {
+    return true;
+  }
+  if (storyStep === "onboarding") {
+    const learnerPath = stripSchoolsDemoPrefix(pathname);
+    if (isSchoolsOnboardingFlowRoute(learnerPath)) return true;
+  }
+  return false;
 }
 
 /**
@@ -88,6 +96,7 @@ export function SchoolsDemoStoryOrchestrator() {
             setSchoolsDemoStoryStep(inferred);
           }
         }
+        prevStepRef.current = step;
         return;
       }
       const inferredIdx = stepIndex(inferred);
@@ -100,6 +109,11 @@ export function SchoolsDemoStoryOrchestrator() {
 
     const learnerPath = stripSchoolsDemoPrefix(pathname);
     if (SCHOOLS_DEMO_MENU_HUB_PATHS.has(learnerPath)) {
+      return;
+    }
+
+    if (step === "onboarding" && isSchoolsOnboardingFlowRoute(learnerPath)) {
+      prevStepRef.current = step;
       return;
     }
 
