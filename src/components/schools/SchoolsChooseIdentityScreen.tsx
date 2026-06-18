@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import {
   getSchoolsArmorById,
@@ -16,6 +16,22 @@ import { readSchoolsArmor, saveSchoolsArmor } from "@/lib/schools/schoolsIdentit
 
 const { width: ART_W, height: ART_H } = SCHOOLS_ARMOR_IMAGE_NATURAL;
 const ART_ASPECT = ART_W / ART_H;
+
+/** Largest uncropped poster box that fits the viewport — matches profile / opening. */
+function SchoolsArmorArtStage({ children }: { children: ReactNode }) {
+  return (
+    <div
+      className="iq-schools-choose-stage relative mx-auto w-full max-h-[100dvh] shrink-0 overflow-hidden"
+      style={{
+        maxWidth: `min(100vw, calc(100dvh * ${ART_ASPECT}))`,
+        aspectRatio: `${ART_W} / ${ART_H}`,
+        ["--iq-art-aspect" as string]: ART_ASPECT
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 export type SchoolsChooseIdentityScreenProps = {
   onContinue: (armorId: SchoolsArmorId) => void;
@@ -78,22 +94,21 @@ export function SchoolsChooseIdentityScreen({
 
   return (
     <main
-      className="iq-schools-choose-identity flex h-[100dvh] w-full items-center justify-center overflow-hidden bg-[#030208]"
+      className="iq-schools-choose-identity iq-schools-avatar-deck pointer-events-auto relative flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden bg-[#030208]"
       role="application"
       aria-label="Choose your investor armor"
       style={{ ["--iq-art-aspect" as string]: ART_ASPECT }}
     >
-      <div
-        className="iq-schools-choose-stage relative mx-auto"
-        style={{ aspectRatio: `${ART_W} / ${ART_H}` }}
-      >
+      <SchoolsArmorArtStage>
         <img
           src={SCHOOLS_ARMOR_IMAGE_SRC}
           alt=""
           width={ART_W}
           height={ART_H}
           draggable={false}
-          className="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-fill"
+          decoding="async"
+          fetchPriority="high"
+          className="pointer-events-none absolute inset-0 z-0 h-full w-full select-none object-contain object-center"
         />
 
         <div
@@ -121,7 +136,7 @@ export function SchoolsChooseIdentityScreen({
               if (selectedId) onContinue(selectedId);
             }}
             className={[
-              "iq-schools-choose-continue-btn pointer-events-auto",
+              "iq-schools-choose-continue-btn pointer-events-auto touch-manipulation",
               canContinue
                 ? "iq-schools-choose-continue-btn--armed cursor-pointer"
                 : "cursor-not-allowed"
@@ -130,7 +145,7 @@ export function SchoolsChooseIdentityScreen({
             CONTINUE
           </button>
         </footer>
-      </div>
+      </SchoolsArmorArtStage>
     </main>
   );
 }

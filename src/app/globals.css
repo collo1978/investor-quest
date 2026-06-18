@@ -167,7 +167,7 @@ h3 {
   -webkit-overflow-scrolling: touch;
 }
 
-.iq-schools-demo-scroll-host main:not(.iq-schools-business-hub-main):not(.iq-schools-profile-hub-main) {
+.iq-schools-demo-scroll-host main:not(.iq-schools-business-hub-main):not(.iq-schools-profile-hub-main):not(.iq-schools-avatar-deck) {
   padding-bottom: max(9rem, calc(env(safe-area-inset-bottom, 0px) + 5rem));
 }
 
@@ -264,6 +264,20 @@ h3 {
   flex: 1 1 auto;
   height: auto;
   max-height: 100dvh;
+}
+
+.iq-schools-demo-scroll-host .iq-schools-avatar-deck {
+  padding-bottom: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  width: 100%;
+  height: auto;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+.iq-schools-demo-scroll-host:has(.iq-schools-avatar-deck) {
+  overflow: hidden;
 }
 
 .iq-schools-demo-scroll-host .iq-schools-business-hub-main {
@@ -1270,6 +1284,21 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
     aspect-ratio: var(--iq-profile-art-aspect, 1672 / 941);
   }
 
+  /* Avatar / choose armor — schools tour deck */
+  body.iq-schools-demo-fullscreen .iq-schools-avatar-deck {
+    overflow: hidden !important;
+    max-height: 100dvh;
+    min-height: 0 !important;
+    height: auto;
+  }
+
+  body.iq-schools-demo-fullscreen .iq-schools-choose-stage {
+    width: min(100%, calc(100dvh * var(--iq-art-aspect, 1.5)));
+    max-height: 100dvh;
+    height: auto;
+    aspect-ratio: var(--iq-art-aspect, 1536 / 1024);
+  }
+
   body.iq-schools-demo-fullscreen .iq-schools-armor-guide-deck {
     min-height: 0 !important;
     height: 100dvh;
@@ -1724,13 +1753,22 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 /* Schools choose armor — reference poster + per-card hover zones */
 .iq-schools-choose-identity {
   background: #030208;
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
 }
 
-/* Fit inside viewport — centered, no crop, capped so laptop doesn't blow up */
+/* Fit inside viewport — centered, no crop (profile hub pattern) */
 .iq-schools-choose-stage {
-  width: 100%;
+  position: relative;
+  aspect-ratio: var(--iq-art-aspect, 1536 / 1024);
+  width: min(100%, calc(100dvh * var(--iq-art-aspect, 1.5)));
+  height: auto;
   max-height: 100dvh;
-  max-width: min(100%, calc(100dvh * var(--iq-art-aspect, 1.5)), 1200px);
+  margin: 0;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .iq-schools-choose-option {
