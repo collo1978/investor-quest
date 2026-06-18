@@ -9,19 +9,28 @@ import {
   wasSchoolsDemoLaunchedInSession,
   type SchoolsDemoStoryStep
 } from "@/lib/schools/schoolsDemoStoryMode";
+import { seedSchoolsDemoGameStateOncePerSession } from "@/lib/schools/seedSchoolsDemoSession";
 
 type RouterLike = { replace: (href: string) => void; push?: (href: string) => void };
 
-type NavigateSchoolsDemoStepOptions = {
-  /** Full document navigation — avoids soft-router stalls on presenter entry. */
-  hard?: boolean;
-};
+function resolveNavigateTarget(
+  next: SchoolsDemoStoryStep,
+  pathname: string
+): string {
+  const stepRoute = getRouteForSchoolsDemoStoryStep(next);
+  if (!isSchoolsDemoPath(pathname)) return stepRoute;
+  const learnerPath = stepRoute.startsWith("/schools/demo")
+    ? stepRoute.replace("/schools/demo", "/schools")
+    : stepRoute;
+  return resolveSchoolsLearnerHref(learnerPath, pathname);
+}
 
 /** Ensure Schools demo story is active before advancing (PWA cold start / race-safe). */
 export function ensureSchoolsDemoStoryReady(pathname: string): void {
   if (!isSchoolsDemoPath(pathname)) return;
   if (!wasSchoolsDemoLaunchedInSession()) {
     markSchoolsDemoLaunched();
+    seedSchoolsDemoGameStateOncePerSession();
   }
   ensureProductionSchoolsDemoFromPath(pathname);
 }
@@ -32,17 +41,12 @@ export function ensureSchoolsDemoStoryReady(pathname: string): void {
 export function navigateSchoolsDemoStep(
   next: SchoolsDemoStoryStep,
   pathname: string,
-  router: RouterLike,
-  options?: NavigateSchoolsDemoStepOptions
+  router: RouterLike
 ): string {
   ensureSchoolsDemoStoryReady(pathname);
   advanceSchoolsDemoStoryStep(next);
-  const target = getRouteForSchoolsDemoStoryStep(next);
-  if (options?.hard && typeof window !== "undefined") {
-    window.location.assign(target);
-  } else {
-    router.replace(target);
-  }
+  const target = resolveNavigateTarget(next, pathname);
+  router.replace(target);
   return target;
 }
 

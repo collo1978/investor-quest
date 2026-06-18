@@ -20,8 +20,10 @@ export default function SchoolsAvatarPage() {
   const { state, actions } = useGame();
 
   useEffect(() => {
+    actions.completeOpeningScreen();
+    actions.completeWelcomeScreen();
     releaseFunnelTransition("avatar");
-  }, []);
+  }, [actions]);
 
   const onContinue = useCallback(
     (armorId: SchoolsArmorId) => {

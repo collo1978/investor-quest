@@ -15,6 +15,7 @@ import {
   wasSchoolsDemoLaunchedInSession
 } from "@/lib/schools/schoolsDemoStoryMode";
 import { warmSchoolsProfileApproachAssets } from "@/lib/schools/prefetchSchoolsProfileLinks";
+import { seedSchoolsDemoGameStateOncePerSession } from "@/lib/schools/seedSchoolsDemoSession";
 
 /**
  * Resume scripted Schools mode on `/schools/demo` and `/schools/demo/*`.
@@ -29,6 +30,7 @@ export function SchoolsDemoRouteBootstrap() {
     }
     if (!wasSchoolsDemoLaunchedInSession()) {
       markSchoolsDemoLaunched();
+      seedSchoolsDemoGameStateOncePerSession();
     }
     hydrateSchoolsDemoStoryFromSession(pathname);
     ensureProductionSchoolsDemoFromPath(pathname);

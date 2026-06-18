@@ -136,11 +136,7 @@ export default function SchoolsOpeningPage() {
     leavingRef.current = true;
 
     if (isSchoolsDemoPath(pathname)) {
-      queueMicrotask(() => {
-        actions.completeOpeningScreen();
-        actions.completeWelcomeScreen();
-      });
-      navigateSchoolsDemoStep("avatar", pathname, router, { hard: true });
+      navigateSchoolsDemoStep("avatar", pathname, router);
       return;
     }
 
