@@ -9,7 +9,11 @@ import { companyById } from "@/data/companies";
 import { pillarById } from "@/data/pillars";
 import { CONTROLLED_DEMO_MODE } from "@/lib/demo/controlledDemo";
 import { NVDA_CONVICTION } from "@/lib/demo/nvidiaDemoVoice";
-import { resolveSchoolsLearnerHref, isSchoolsLearnerPath } from "@/lib/schools/schoolsDemoHref";
+import {
+  isSchoolsBusinessQuestDetailPath,
+  isSchoolsLearnerPath,
+  resolveSchoolsLearnerHref
+} from "@/lib/schools/schoolsDemoHref";
 import { isSchoolsDemoPlaythroughActive } from "@/lib/schools/schoolsDemoPlaythrough";
 import { warmSchoolsProfileApproachAssets } from "@/lib/schools/prefetchSchoolsProfileLinks";
 import {
@@ -19,8 +23,10 @@ import {
   SCHOOLS_CONVICTION_CONFIDENT_LABEL,
   schoolsConvictionConfidentDescription,
   schoolsConvictionHeading,
-  schoolsConvictionKicker
+  schoolsConvictionKicker,
+  clearSchoolsQuestSummaryExited
 } from "@/lib/schools/schoolsQuestRewardFlow";
+import { SCHOOLS_DEMO_BUSINESS_TILE } from "@/lib/schools/schoolsDemoPlaythrough";
 import { XP_ISLAND_COMPLETION } from "@/engine/progression/xpEconomy";
 import { appendConvictionRecord } from "@/lib/conviction";
 import { filingForPillar } from "@/lib/conviction/filingForPillar";
@@ -76,15 +82,17 @@ export function ConvictionQueueHost() {
         head.completedPillarId === "business" &&
         head.pillarToUnlock == null;
 
-      actions.submitConvictionAndAdvance();
-
       if (schoolsImmediate) {
         pendingRouteRef.current = null;
+        clearSchoolsQuestSummaryExited(SCHOOLS_DEMO_BUSINESS_TILE);
         if (pathname !== next) {
           router.replace(next);
         }
+        actions.submitConvictionAndAdvance();
         return;
       }
+
+      actions.submitConvictionAndAdvance();
 
       pendingRouteRef.current = next;
     },
@@ -97,6 +105,24 @@ export function ConvictionQueueHost() {
     if (!isSchoolsLearnerPath(pathname) && !isSchoolsDemoPlaythroughActive()) return;
     warmSchoolsProfileApproachAssets();
   }, [head, open, pathname]);
+
+  const schoolsQuest1CheckIn =
+    open &&
+    head != null &&
+    isSchoolsLearnerPath(pathname) &&
+    head.completedPillarId === "business" &&
+    head.pillarToUnlock == null;
+
+  /** Wait until hub navigation finishes — never overlay check-in on the quest summary. */
+  const deferSchoolsQuest1Modal =
+    schoolsQuest1CheckIn && isSchoolsBusinessQuestDetailPath(pathname);
+
+  const showModal = open && head && !deferSchoolsQuest1Modal;
+
+  useEffect(() => {
+    if (!showModal || !schoolsQuest1CheckIn) return;
+    clearSchoolsQuestSummaryExited(SCHOOLS_DEMO_BUSINESS_TILE);
+  }, [showModal, schoolsQuest1CheckIn]);
 
   useEffect(() => {
     const len = state.pendingConvictionQueue.length;
@@ -114,7 +140,7 @@ export function ConvictionQueueHost() {
 
   return (
     <AnimatePresence>
-      {open && head ? (
+      {showModal && head ? (
         <ConvictionFeedbackModal
           key={`${head.completedPillarId}:${head.pillarToUnlock ?? "none"}`}
           pillarTitle={pillarById(head.completedPillarId).title}

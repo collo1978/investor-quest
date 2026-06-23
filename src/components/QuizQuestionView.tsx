@@ -425,7 +425,8 @@ function IndexChoiceInput({
           <label
             key={idx}
             className={[
-              "flex cursor-pointer items-center gap-4 border text-left leading-snug transition focus-within:ring-2 focus-within:ring-amber-400/65",
+              "flex items-center gap-4 border text-left leading-snug transition focus-within:ring-2 focus-within:ring-amber-400/65",
+              mode === "review" ? "cursor-default" : "cursor-pointer",
               premium
                 ? "min-h-[3.75rem] rounded-2xl px-5 py-4 text-[15px] font-medium"
                 : "rounded-lg px-3 py-2 text-[13.5px]"

@@ -144,47 +144,37 @@ export const BUSINESS_QUEST_QUIZZES: Record<BusinessQuestSlug, QuizConfig> = {
     passThreshold: PASS,
     questions: [
       {
-        kind: "order",
+        kind: "multiple-choice",
         id: "hiw-q1",
-        prompt:
-          "For {Company.name}, put the typical path from idea to customer in order.",
-        steps: [
-          "Designed (often with partner factories)",
-          "Built and tested at scale",
-          "Shipped to customers and partners",
-          "Runs inside products you use"
+        prompt: "How does {Company.name} reach customers around the world?",
+        choices: [
+          "Through a large network of partners that sell, distribute, and support its products",
+          "Only through company-owned stores in every country",
+          "By shipping products directly to every household",
+          "Through banks that manage product orders"
         ],
+        correctIndex: 0,
         explain:
-          "Operations is how strategy becomes something people can actually buy."
+          "Partners help {Company.name} reach more customers across industries and countries than it could on its own."
       },
       {
-        kind: "scenario",
+        kind: "true-false",
         id: "hiw-q2",
         prompt:
-          "A key supplier for {Company.name} cannot ship for a quarter. What should worry you first?",
-        choices: [
-          "Production, availability, and margins until supply recovers",
-          "Supply shocks never affect companies this size",
-          "Competitors automatically exit the market",
-          "The stock must fall exactly 10% that day"
-        ],
-        correctIndex: 0,
+          "{Company.name} employs engineers and technology experts who work closely with customers to help them use its products.",
+        correct: true,
         explain:
-          "Even strong operators feel supply concentration in sales and mix."
+          "Hands-on support helps customers get the most value from {Company.name}'s technology."
       },
       {
-        kind: "multiple-choice",
+        kind: "fill-blank",
         id: "hiw-q3",
-        prompt: "Why trace how {Company.name} delivers technology worldwide?",
-        choices: [
-          "More steps can mean more cost and more delay risk",
-          "Distribution only affects logo colours",
-          "Customers never care how products arrive",
-          "Operations never touch margins"
-        ],
+        prompt:
+          "Complete the sentence:\nThe more developers who use {Company.name}'s platform, the ______ its ecosystem becomes.",
+        options: ["Stronger", "Smaller", "Slower", "Quieter"],
         correctIndex: 0,
         explain:
-          "The machine behind the product decides whether promises ship on time."
+          "Tools, training, and educational programs help developers build on {Company.name} — and a stronger ecosystem attracts more users."
       }
     ]
   },
@@ -194,41 +184,35 @@ export const BUSINESS_QUEST_QUIZZES: Record<BusinessQuestSlug, QuizConfig> = {
       {
         kind: "multiple-choice",
         id: "wts-q1",
-        prompt: "What does a durable edge at {Company.name} usually look like?",
+        prompt: "Does {Company.name} manufacture its own chips?",
         choices: [
-          "Customers stick because switching is slow, expensive, or risky",
-          "A guarantee the stock doubles yearly",
-          "Elimination of all regulation",
-          "Zero need for future investment"
+          "No — it designs chips and other companies manufacture them",
+          "Yes — it owns all chip factories worldwide",
+          "Yes — every chip is built only in the United States",
+          "No — it only sells software, not chips"
         ],
         correctIndex: 0,
         explain:
-          "Trust, habit, and tools people already know are real moats."
+          "{Company.name} designs its chips and relies on specialist manufacturers to produce them."
       },
       {
-        kind: "red-flag",
+        kind: "true-false",
         id: "wts-q2",
         prompt:
-          "Which signal would worry you most about {Company.name}'s competitive edge?",
-        choices: [
-          "Customers switching away easily with no friction",
-          "Continued spend on new products and platforms",
-          "Developers still building on the stack",
-          "A brand customers still trust in the category"
-        ],
-        flagIndex: 0,
+          "{Company.name}'s supply chain spans multiple countries, with many suppliers in the Asia-Pacific region.",
+        correct: true,
         explain:
-          "If switching gets easy, pricing power and retention are the first casualties."
+          "A global supply chain helps {Company.name} access leading manufacturing companies."
       },
       {
         kind: "fill-blank",
         id: "wts-q3",
         prompt:
-          "Developers keeping tools on {Company.name} is a quiet form of customer ___ .",
-        options: ["loyalty", "confusion", "indifference", "randomness"],
+          "Complete the sentence:\nEven great products depend on a strong supply ___ .",
+        options: ["chain", "color", "logo", "slogan"],
         correctIndex: 0,
         explain:
-          "Habit in code outlasts one hot product cycle."
+          "Investors watch who makes the products — and what happens if suppliers run into problems."
       }
     ]
   },
@@ -238,40 +222,73 @@ export const BUSINESS_QUEST_QUIZZES: Record<BusinessQuestSlug, QuizConfig> = {
       {
         kind: "multiple-choice",
         id: "comp-q1",
-        prompt: "Why map {Company.name}'s rivals before you get excited about the stock?",
+        prompt: "Why is this industry difficult to compete in?",
         choices: [
-          "Competitors and trends shape pricing, share, and strategic risk",
-          "Only one company can exist per industry",
-          "Rivals never affect margins",
-          "Competition removes all regulation"
+          "Technology changes quickly and companies must keep improving",
+          "Technology never changes",
+          "Only one company is allowed to sell products",
+          "Customers never want new products"
         ],
         correctIndex: 0,
         explain:
-          "The battlefield matters as much as today's win."
-      },
-      {
-        kind: "scenario",
-        id: "comp-q2",
-        prompt:
-          "A trend lifts AI spending industry-wide. For {Company.name}, that is mostly…",
-        choices: [
-          "A tailwind — if they keep winning orders inside the boom",
-          "A promise profits never dip",
-          "Proof rivals disappear",
-          "A reason to ignore competition"
-        ],
-        correctIndex: 0,
-        explain:
-          "Tailwinds help, but share and execution still decide who captures them."
+          "Fast-moving tech means companies must constantly improve to stay ahead."
       },
       {
         kind: "true-false",
-        id: "comp-q3",
+        id: "comp-q2",
         prompt:
-          "Export rules, rival chips, or slower AI spending could slow {Company.name} even if products stay strong.",
+          "Customers look for products that perform well, are reasonably priced, and have strong software support.",
         correct: true,
         explain:
-          "Headwinds hit orders and mood before the story fully resets."
+          "Companies that meet these needs are more likely to win customers."
+      },
+      {
+        kind: "fill-blank",
+        id: "comp-q3",
+        prompt:
+          "Complete the sentence:\nNew competitors may offer cheaper or faster products — so {Company.name} must keep ______ to stay competitive.",
+        options: ["innovating", "advertising only", "closing factories", "raising prices only"],
+        correctIndex: 0,
+        explain:
+          "Even strong leaders must keep innovating when new challengers enter the market."
+      }
+    ]
+  },
+  "who-competes": {
+    passThreshold: PASS,
+    questions: [
+      {
+        kind: "multiple-choice",
+        id: "wc-q1",
+        prompt: "Which chip companies compete with {Company.name}?",
+        choices: [
+          "AMD, Intel, and Huawei",
+          "Only grocery store brands",
+          "Banks and insurance companies",
+          "Streaming video services"
+        ],
+        correctIndex: 0,
+        explain:
+          "These companies develop chips and processors used for AI and advanced computing."
+      },
+      {
+        kind: "true-false",
+        id: "wc-q2",
+        prompt:
+          "Many big tech companies are developing their own AI chips and computing systems.",
+        correct: true,
+        explain:
+          "Companies like Amazon, Microsoft, and Google are building their own AI computing platforms."
+      },
+      {
+        kind: "fill-blank",
+        id: "wc-q3",
+        prompt:
+          "Complete the sentence:\nUnderstanding the competition helps investors judge whether a company can protect its ______ position.",
+        options: ["market", "logo", "headline", "slogan"],
+        correctIndex: 0,
+        explain:
+          "Knowing the rivals helps you see whether a company can defend its place in the industry."
       }
     ]
   }

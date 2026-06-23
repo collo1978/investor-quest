@@ -151,6 +151,45 @@ export const BUSINESS_QUEST_CARD_SPECS: readonly QuestCardSpec[] = [
     sectionKeys: ["item_1"],
     promptFocus:
       "ONLY risks and headwinds — regulation, rivalry, demand slowdown. Land impact on the company."
+  },
+  {
+    questSlug: "who-competes",
+    cardId: "card-1",
+    formType: "10-K",
+    sectionKeys: ["item_1"],
+    promptFocus:
+      "ONLY AI chip and processor rivals — AMD, Intel, Huawei category. Bullet list only."
+  },
+  {
+    questSlug: "who-competes",
+    cardId: "card-2",
+    formType: "10-K",
+    sectionKeys: ["item_1"],
+    promptFocus:
+      "ONLY big tech rivals building AI chips — cloud and platform companies. Do not repeat card-1 chip list."
+  },
+  {
+    questSlug: "who-competes",
+    cardId: "card-3",
+    formType: "10-K",
+    sectionKeys: ["item_1"],
+    promptFocus: "ONLY CPU and computing platform rivals. Separate from GPU list."
+  },
+  {
+    questSlug: "who-competes",
+    cardId: "card-4",
+    formType: "10-K",
+    sectionKeys: ["item_1"],
+    promptFocus:
+      "ONLY automotive, edge, and smart-device rivals — vehicles and embedded computing."
+  },
+  {
+    questSlug: "who-competes",
+    cardId: "card-5",
+    formType: "10-K",
+    sectionKeys: ["item_1"],
+    promptFocus:
+      "ONLY networking and data-center infrastructure rivals. Do not repeat prior cards."
   }
 ] as const;
 

@@ -13,6 +13,7 @@ alwaysApply: false
 When authoring or editing quest quizzes, follow `src/lib/quests/quizCopy.ts`:
 
 - **Mix:** ~70–80% company-specific (`{Company.name}` / `{Company.ticker}`) — filled at instantiate; ~20–30% investor lenses
+- **Variety:** Never use the same question format twice in a row. Standard 3-question quizzes must use three different formats (reference: MC → T/F → fill-blank on Quest Card 1). See `src/lib/quests/quizFormatVariety.ts`.
 - **Feel:** “I’m understanding THIS company” — pillar-aligned (Business / Forces / Financials / Management)
 - **Prompts:** natural, investor-minded; never “After reading the cards…”
 - **Wrong answers:** realistic financial mistakes — not jokes

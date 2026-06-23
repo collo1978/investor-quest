@@ -53,14 +53,14 @@ export function launchSchoolsProductionDemo(
 
   markSchoolsDemoLaunched();
   activateSchoolsDemoStory({ productionRoutes: true });
-  setSchoolsDemoStoryStep("logo");
+  setSchoolsDemoStoryStep("logo-intro");
 
   actions.replaceGameState(buildDemoGameState(DEMO_PROFILE_NEW_USER));
 
   prefetchStartupAssets();
   preloadQuestDetailChunks();
 
-  const opening = getRouteForSchoolsDemoStoryStep("logo");
+  const opening = getRouteForSchoolsDemoStoryStep("logo-intro");
   try {
     router.prefetch(opening);
   } catch {

@@ -2,7 +2,7 @@ import type { QuestTemplate } from "@/data/quests/types";
 import { BUSINESS_QUEST_QUIZZES } from "@/data/quests/businessQuestQuizzes";
 
 /**
- * Business pillar — six adaptive-learning sections (Item 1 Business / 10-K).
+ * Business pillar — seven adaptive-learning sections (Item 1 Business / 10-K).
  * Each section: insight cards → section checkpoint quiz (what-they-do: 2 cards).
  */
 export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
@@ -119,22 +119,22 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     slug: "everyday-life",
     type: "everyday",
     pillarId: "business",
-    title: "HOW {Company.name} FITS INTO EVERYDAY LIFE",
-    objective: "Connect the company to apps, games, and AI you already touch.",
+    title: "HOW {Company.name} STAYS AHEAD",
+    objective: "See how the company tries to stay ahead through technology and innovation.",
     description:
-      "Where you meet their tech, how gaming and AI apps feel different, and why builders rely on them — still grounded in Item 1.",
+      "Five quick cards on technology, AI, graphics, future markets, and owned inventions — grounded in Item 1 strategy themes.",
     investorQuestion:
-      "Where do people interact with {Company.name} technology?",
+      "How does {Company.name} stay ahead through technology?",
     plainEnglishAnswer: null,
     whyItMatters:
-      "When you can point to real life, the company stops feeling like a ticker symbol.",
+      "Knowing how a company tries to stay ahead helps you judge whether its edge can last.",
     secSection: {
       form: "10-K",
       section: "Item 1 Business",
-      hint: "Products, end markets, and how customers use the technology."
+      hint: "Strategy, competition, R&D, and key markets."
     },
     aiTask:
-      "Connect {Company.name} to everyday life: consumer touchpoints, gaming, AI apps, and why developers standardize on them.",
+      "Explain how {Company.name} tries to stay ahead: core technology, AI, graphics, future markets, and owned inventions.",
     artifactType: "map",
     rewardXp: 120,
     unlockRequirements: {
@@ -144,35 +144,50 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     completionState: { kind: "quiz", passPct: 0.66 },
     difficulty: "core",
     visualStyle: "card",
-    estimatedTime: 4,
+    estimatedTime: 5,
     displayOrder: 3,
     hubIcon: "everyday-life",
-    hubCardCount: 3,
-    tags: ["everyday", "relatable", "ecosystem"],
+    hubCardCount: 5,
+    tags: ["everyday", "strategy", "competition"],
     quizConfig: BUSINESS_QUEST_QUIZZES["everyday-life"],
     cards: [
       {
         id: "card-1",
         investorQuestion:
-          "Where do people interact with {Company.name} technology?",
+          "How does {Company.name} stay ahead through technology?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Touchpoints turn abstract chips into something you can picture."
+          "A full platform can be harder to copy than a single chip."
       },
       {
         id: "card-2",
-        investorQuestion:
-          "How does {Company.name} affect gaming and AI apps?",
+        investorQuestion: "How does {Company.name} stay ahead in AI?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Speed and graphics are how most people feel the business in real life."
+          "AI spending is huge — leaders in AI tools can win repeat orders."
       },
       {
         id: "card-3",
-        investorQuestion: "Why do AI companies rely on {Company.name}?",
+        investorQuestion: "How does {Company.name} stay ahead in graphics?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "When builders depend on you, demand can stick even when headlines shift."
+          "Gaming and design keep millions of users tied to the brand."
+      },
+      {
+        id: "card-4",
+        investorQuestion:
+          "How does {Company.name} stay ahead in self-driving cars?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "Early bets on new markets can pay off if the industry grows."
+      },
+      {
+        id: "card-5",
+        investorQuestion:
+          "How does {Company.name} stay ahead through its technology?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "Owned inventions can spread through licensing, not just direct sales."
       }
     ]
   },
@@ -180,21 +195,21 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     slug: "how-it-works",
     type: "operations",
     pillarId: "business",
-    title: "HOW THE BUSINESS REALLY WORKS",
-    objective: "Follow design → factory → delivery in plain steps.",
+    title: "HOW {Company.name} SELLS AND MARKETS",
+    objective: "See how the company reaches customers and supports them.",
     description:
-      "How chips are designed and built, who manufactures them, and how tech reaches the world — supply chain and human capital in Item 1.",
-    investorQuestion: "How are {Company.name} chips designed and built?",
+      "Partners, customer support, and developers — how sales, distribution, and ecosystem growth work in Item 1.",
+    investorQuestion: "How does {Company.name} reach customers around the world?",
     plainEnglishAnswer: null,
     whyItMatters:
-      "Late chips feel like a delayed preorder — customers notice when shipments slip.",
+      "Strong partnerships and customer relationships can help a company grow faster and reach more buyers.",
     secSection: {
       form: "10-K",
-      section: "Supply Chain",
-      hint: "Manufacturing, partners, distribution, and workforce."
+      section: "Item 1 Business",
+      hint: "Sales, distribution, partners, and customer support."
     },
     aiTask:
-      "Explain how {Company.name} designs chips, who builds them, and how products reach customers worldwide.",
+      "Explain how {Company.name} sells and markets: partners, customer support, and why developers matter.",
     artifactType: "note",
     rewardXp: 120,
     unlockRequirements: {
@@ -213,47 +228,48 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     cards: [
       {
         id: "card-1",
-        investorQuestion: "How are {Company.name} chips designed and built?",
+        investorQuestion:
+          "How does {Company.name} reach customers around the world?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Design plus manufacturing partners decide whether launches land on time."
+          "Partner networks can expand reach beyond what one company could do alone."
       },
       {
         id: "card-2",
-        investorQuestion: "Who helps manufacture {Company.name} products?",
+        investorQuestion:
+          "How does {Company.name} help customers use its technology?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Depending on a few factories can be a strength or a bottleneck."
+          "Hands-on support helps customers succeed — and keep buying."
       },
       {
         id: "card-3",
-        investorQuestion:
-          "How does {Company.name} deliver its technology worldwide?",
+        investorQuestion: "Why are developers important to {Company.name}?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "More steps to reach customers usually mean more cost and more delay risk."
+          "More developers on the platform can strengthen the whole ecosystem."
       }
     ]
   },
   {
     slug: "why-they-stay",
-    type: "advantage",
+    type: "operations",
     pillarId: "business",
-    title: "WHY CUSTOMERS KEEP CHOOSING {Company.name}",
-    objective: "Trust, habit, and speed — not hype.",
+    title: "WHO MAKES {Company.name}'S CHIPS?",
+    objective: "Follow design → supplier → factory in plain steps.",
     description:
-      "Why they are hard to replace, what makes them different, and why developers keep building on them — R&D and competition subsections.",
-    investorQuestion: "Why is {Company.name} hard to replace?",
+      "Who manufactures the chips, why suppliers matter, and where products are made — supply chain in Item 1.",
+    investorQuestion: "Does {Company.name} manufacture its own chips?",
     plainEnglishAnswer: null,
     whyItMatters:
-      "A real edge beats one hot year — customers stick when switching is painful.",
+      "Even great products depend on partners who can actually build and ship them.",
     secSection: {
       form: "10-K",
-      section: "Item 1. Business",
-      hint: "R&D, intellectual property, ecosystem, and competition."
+      section: "Supply Chain",
+      hint: "Manufacturing partners, suppliers, and global operations."
     },
     aiTask:
-      "Explain why customers stay with {Company.name}: switching costs, trust, product lead, and developer habit.",
+      "Explain who manufactures {Company.name}'s chips, why it uses suppliers, and where products are made.",
     artifactType: "scorecard",
     rewardXp: 140,
     unlockRequirements: {
@@ -266,32 +282,38 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     estimatedTime: 5,
     displayOrder: 5,
     hubIcon: "why-they-stay",
-    hubCardCount: 3,
-    tags: ["moat", "advantage", "loyalty"],
+    hubCardCount: 4,
+    tags: ["operations", "supply-chain", "manufacturing"],
     quizConfig: BUSINESS_QUEST_QUIZZES["why-they-stay"],
     cards: [
       {
         id: "card-1",
-        investorQuestion: "Why is {Company.name} hard to replace?",
+        investorQuestion: "Does {Company.name} manufacture its own chips?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Harder to copy means they can charge more without losing customers."
+          "Design plus manufacturing partners decide whether launches land on time."
       },
       {
         id: "card-2",
-        investorQuestion:
-          "What makes {Company.name} different from competitors?",
+        investorQuestion: "Why does {Company.name} work with suppliers?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Difference only matters if buyers feel it when they place orders."
+          "Specialist suppliers can scale faster than owning every factory."
       },
       {
         id: "card-3",
-        investorQuestion:
-          "Why do developers keep building around {Company.name}?",
+        investorQuestion: "Where are {Company.name}'s products made?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Developer habit is a quiet moat — tools and code outlast one product cycle."
+          "A global supply chain can access the best manufacturers — but adds distance and risk."
+      },
+      {
+        id: "card-4",
+        investorQuestion:
+          "Which companies help manufacture {Company.name}'s chips?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "Depending on a few key partners can be a strength or a bottleneck."
       }
     ]
   },
@@ -299,21 +321,21 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     slug: "competition",
     type: "industry",
     pillarId: "business",
-    title: "THE COMPETITION {Company.name} FACES",
-    objective: "Name rivals, tailwinds, and what could slow them down.",
+    title: "HOW TOUGH IS THIS INDUSTRY?",
+    objective: "See why the industry is hard to compete in and what it takes to win.",
     description:
-      "Who is competing, trends that could accelerate growth, and risks ahead — competition and regulation in Item 1.",
-    investorQuestion: "Who is trying to compete with {Company.name}?",
+      "Fast-moving technology, customer expectations, future demand, and new challengers — competition in Item 1.",
+    investorQuestion: "Why is this industry difficult to compete in?",
     plainEnglishAnswer: null,
     whyItMatters:
-      "You need the competitive picture before you judge if the lead can last.",
+      "Highly competitive industries reward companies that keep improving — and punish those that stop.",
     secSection: {
       form: "10-K",
       section: "Competition",
-      hint: "Competition, industry trends, and regulatory risks."
+      hint: "Industry dynamics, competitive factors, and market trends."
     },
     aiTask:
-      "Profile rivals, industry tailwinds, and strategic risks for {Company.name} in plain English.",
+      "Explain how tough the industry is for {Company.name}: technology pace, customer needs, and competitive threats.",
     artifactType: "memo",
     rewardXp: 140,
     unlockRequirements: {
@@ -326,32 +348,114 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     estimatedTime: 5,
     displayOrder: 6,
     hubIcon: "competition",
-    hubCardCount: 3,
-    tags: ["competition", "strategy", "regulation"],
+    hubCardCount: 4,
+    tags: ["competition", "industry", "strategy"],
     quizConfig: BUSINESS_QUEST_QUIZZES.competition,
     cards: [
       {
         id: "card-1",
-        investorQuestion: "Who is trying to compete with {Company.name}?",
+        investorQuestion: "Why is this industry difficult to compete in?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Strong competitors can limit growth and reduce profits."
+          "Fast-changing technology means standing still can mean falling behind."
       },
       {
         id: "card-2",
-        investorQuestion:
-          "What trends could help {Company.name} grow even faster?",
+        investorQuestion: "What helps companies win customers?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Tailwinds can lift everyone — you want to know which ones are real."
+          "Performance, price, and support decide who customers choose."
       },
       {
         id: "card-3",
         investorQuestion:
-          "What could slow {Company.name} down in the future?",
+          "Why does {Company.name} need to predict future demand?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Headwinds show up in orders and mood long before the story resets."
+          "Building the wrong product is costly when customer needs shift."
+      },
+      {
+        id: "card-4",
+        investorQuestion: "What could threaten {Company.name}'s position?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "New challengers can undercut on price, speed, or features."
+      }
+    ]
+  },
+  {
+    slug: "who-competes",
+    type: "industry",
+    pillarId: "business",
+    title: "WHO IS {Company.name} COMPETING AGAINST?",
+    objective: "Name the rivals across chips, tech, CPUs, devices, and networking.",
+    description:
+      "AI chip makers, big tech, CPU rivals, automotive and smart devices, and networking — competition in Item 1.",
+    investorQuestion: "Which chip companies compete with {Company.name}?",
+    plainEnglishAnswer: null,
+    whyItMatters:
+      "Knowing who you fight helps you judge whether the lead can last.",
+    secSection: {
+      form: "10-K",
+      section: "Competition",
+      hint: "Named competitors by product category and market."
+    },
+    aiTask:
+      "List who competes with {Company.name} across chips, big tech, CPUs, devices, and networking.",
+    artifactType: "memo",
+    rewardXp: 150,
+    unlockRequirements: {
+      pillar: "business",
+      questSlugs: ["competition"]
+    },
+    completionState: { kind: "quiz", passPct: 0.66 },
+    difficulty: "deep",
+    visualStyle: "panel",
+    estimatedTime: 6,
+    displayOrder: 7,
+    hubIcon: "who-competes",
+    hubCardCount: 5,
+    tags: ["competition", "rivals", "strategy"],
+    quizConfig: BUSINESS_QUEST_QUIZZES["who-competes"],
+    cards: [
+      {
+        id: "card-1",
+        investorQuestion: "Which chip companies compete with {Company.name}?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "Chip rivals can undercut on price, speed, or features."
+      },
+      {
+        id: "card-2",
+        investorQuestion:
+          "Which technology companies compete with {Company.name}?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "Big tech building its own chips can change who buys from you."
+      },
+      {
+        id: "card-3",
+        investorQuestion:
+          "Which companies compete with {Company.name} in CPUs?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "CPU competition can pull customers toward other platforms."
+      },
+      {
+        id: "card-4",
+        investorQuestion:
+          "Which companies compete with {Company.name} in vehicles and smart devices?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "Auto and edge markets can shift if rivals win key design slots."
+      },
+      {
+        id: "card-5",
+        investorQuestion:
+          "Which companies compete with {Company.name} in networking?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "Data-center networking rivals can affect cloud and AI build-outs."
       }
     ]
   }

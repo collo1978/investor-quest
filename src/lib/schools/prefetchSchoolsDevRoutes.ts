@@ -6,10 +6,20 @@ import { preloadImage } from "@/lib/preloadImage";
 /** Dev sidebar Schools links — keep in sync with AppShell `schoolsNav`. */
 export const SCHOOLS_DEV_NAV_ROUTES = [
   "/schools/demo",
-  "/schools/opening",
-  "/schools/avatar",
+  "/schools/logo-intro",
+  "/schools/mission-brief-cards",
+  "/schools/logo-reveal",
   "/schools/screen5-onboarding",
   "/schools/preview/mission-brief",
+  "/schools/preview/mission-brief-terminal",
+  "/schools/preview/jarvis-ai-briefing",
+  "/schools/preview/mission-card-reveal",
+  "/schools/preview/red-alert-system",
+  "/schools/preview/hacker-style",
+  "/schools/preview/final-mission-brief",
+  "/schools/preview/mission-brief-cards",
+  "/schools/preview/logo-reveal",
+  "/schools/preview/tech-sector",
   "/schools/map",
   "/schools/business",
   "/schools/forces",
@@ -69,5 +79,8 @@ export function prefetchSchoolsDevRoute(
   }
   if (href.includes("/profile")) {
     preloadImage(SCHOOLS_PROFILE_IMAGE_SRC);
+  }
+  if (href.includes("logo-reveal") || href.includes("logo-intro")) {
+    preloadImage("/logos/current-schools-logo.png");
   }
 }

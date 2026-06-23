@@ -5,9 +5,11 @@
  * Secondary: investor judgment lenses (~20–30%) — never dominate.
  *
  * @see QUIZ_COPY_GUIDELINES
+ * @see QUIZ_FORMAT_VARIETY_GUIDELINES in quizFormatVariety.ts
  */
 
 import type { QuizQuestion } from "@/data/quests/types";
+import { assertQuizFormatVariety } from "@/lib/quests/quizFormatVariety";
 
 /** Target mix per quest (3–4 questions typical). */
 export const QUIZ_QUESTION_MIX = {
@@ -53,6 +55,12 @@ Tone
 Wrong answers
 - Realistic mistakes investors make (price action, hype, single metrics without context).
 
+Format variety (required)
+- Never use the same question kind twice in a row within one quiz.
+- Standard 3-question checkpoints: three different kinds (e.g. MC → T/F → fill-blank).
+- Avoid MC → T/F → MC — the third question feels like the first again.
+- See QUIZ_FORMAT_VARIETY_GUIDELINES in quizFormatVariety.ts.
+
 Explanations
 - 1–2 sentences; picture-first; anchor to {Company.name} when possible.
 - Good: "iPhone still pays most of the bills — Services adds monthly revenue on top."
@@ -76,6 +84,7 @@ export function assertQuizQuestionsCopy(
   questions: readonly QuizQuestion[],
   catalogLabel?: string
 ): void {
+  assertQuizFormatVariety(questions, catalogLabel);
   const prefix = catalogLabel ? `${catalogLabel}/` : "";
   for (const q of questions) {
     assertQuizCopyAllowed(q.prompt, `${prefix}${q.id}`);

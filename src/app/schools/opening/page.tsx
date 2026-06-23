@@ -136,7 +136,7 @@ export default function SchoolsOpeningPage() {
     leavingRef.current = true;
 
     if (isSchoolsDemoPath(pathname)) {
-      navigateSchoolsDemoStep("avatar", pathname, router);
+      navigateSchoolsDemoStep("logo-reveal", pathname, router);
       return;
     }
 

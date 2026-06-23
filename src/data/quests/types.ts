@@ -552,7 +552,7 @@ export type GenerateQuizOptions = {
  *
  * Contract for the eventual implementation:
  *  1. Receive a list of `GeneratableCard`s (the parent quest's sub-cards).
- *  2. Pick `count` distinct formats via `pickRandomFormats(count, opts)`.
+ *  2. Pick `count` varied formats via `pickVariedQuizFormats(count, opts)`.
  *  3. For each chosen format, ask an LLM to author a beginner-friendly
  *     question grounded in the card content (investor question, plain-English
  *     answer, why-it-matters).

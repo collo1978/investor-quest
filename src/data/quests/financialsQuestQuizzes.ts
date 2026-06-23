@@ -36,19 +36,14 @@ export const FINANCIALS_QUEST_QUIZZES: Record<
           "Concentration at {Company.name} is fine until the engine that drives most sales hiccups."
       },
       {
-        kind: "multiple-choice",
+        kind: "fill-blank",
         id: "fin-growth-q3",
         prompt:
-          "Why look at {Company.name}'s revenue mix before you react to the share price?",
-        choices: [
-          "You need to know what is actually growing and whether it can last",
-          "Price always reflects every product line perfectly",
-          "Mix only matters for banks",
-          "Growth headlines replace reading filings"
-        ],
+          "Before reacting to {Company.name}'s share price, revenue ___ matters more than the daily chart.",
+        options: ["mix", "noise", "colour", "headlines"],
         correctIndex: 0,
         explain:
-          "Revenue logic on {Company.name} comes before valuation, otherwise you are guessing."
+          "Revenue logic on {Company.name} comes before valuation — otherwise you are guessing."
       }
     ]
   },
@@ -169,15 +164,15 @@ export const FINANCIALS_QUEST_QUIZZES: Record<
           "Capital allocation at {Company.name} should map to the business, not random ventures off thesis."
       },
       {
-        kind: "multiple-choice",
+        kind: "scenario",
         id: "fin-cash-q3",
         prompt:
-          "Why is cash flow often a more honest signal than accounting profit alone for {Company.name}?",
+          "Operating cash at {Company.name} trails net income for two quarters. What deserves your next click?",
         choices: [
-          "Cash is harder to dress up and funds real choices",
-          "Profit is always identical to free cash flow",
-          "Investors should only watch daily charts",
-          "Cash flow ignores all investment"
+          "Trace receivables, inventory, and capex timing before trusting the headline profit",
+          "Assume fraud and stop researching",
+          "Ignore cash — only EPS matters",
+          "Buy more shares immediately"
         ],
         correctIndex: 0,
         explain:

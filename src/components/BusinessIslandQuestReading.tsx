@@ -64,6 +64,8 @@ import {
 } from "@/lib/schools/schoolsDemoPlaythrough";
 import {
   markSchoolsHubCelebrateReturn,
+  markSchoolsQuestSummaryExited,
+  clearSchoolsQuestSummaryExited,
   resolveSchoolsCompletionPrideLine,
   resolveSchoolsQuestTakeaways,
   SCHOOLS_CARD_COMPLETE_XP,
@@ -326,6 +328,8 @@ function BusinessTemplateAnswerSlot({
         paragraphs={compactParagraphs}
         takeaway={relatable?.takeaway}
         supporting={relatable?.supporting}
+        supportChunks={relatable?.supportChunks}
+        lesson={relatable?.lesson}
         theme={theme}
         emphasized={answerEmphasized}
       />
@@ -629,15 +633,23 @@ export function BusinessIslandQuestReading(
   const router = useRouter();
   const { actions, state, raw } = useGame();
   const schoolsRewardFlow = isSchoolsBusinessQuestPath(pathname);
+  const questCompleted =
+    raw.companies[raw.activeCompanyId]?.pillars[pillarId]?.completedQuestSlugs.includes(
+      slug
+    ) ?? false;
 
   const theme = getPillarQuestTheme(pillarId);
   // Host / demo / testing needs reversible progress to reset flows quickly.
   // Enable in non-production by default, and also when explicitly requested via query params.
   const allowReadToggle =
-    process.env.NODE_ENV !== "production" || questProgressDebug;
+    process.env.NODE_ENV !== "production" ||
+    questProgressDebug ||
+    (schoolsRewardFlow && isSchoolsDemoPlaythroughActive());
   const [cardIndex, setCardIndex] = useState(0);
   const [screen, setScreen] = useState<"cards" | "quiz">("cards");
   const [answerRevealed, setAnswerRevealed] = useState(false);
+  const [leavingForHub, setLeavingForHub] = useState(false);
+  const prevQuestCompletedRef = useRef(questCompleted);
   /** Q → SHOW ME → A reveal for every Business quest card (same flow as Quest 1). */
   const useAnswerReveal = pillarId === "business";
   const quiz = useMemo(
@@ -662,7 +674,20 @@ export function BusinessIslandQuestReading(
     setCardIndex(0);
     setScreen("cards");
     setAnswerRevealed(false);
-  }, [slug]);
+    setLeavingForHub(false);
+    if (schoolsRewardFlow) {
+      clearSchoolsQuestSummaryExited(slug);
+    }
+  }, [slug, schoolsRewardFlow]);
+
+  useEffect(() => {
+    const wasComplete = prevQuestCompletedRef.current;
+    prevQuestCompletedRef.current = questCompleted;
+    // Only leave the quiz screen when completion is cleared mid-retest — not when opening the quiz.
+    if (wasComplete && !questCompleted && screen === "quiz") {
+      setScreen("cards");
+    }
+  }, [questCompleted, screen]);
 
   useEffect(() => {
     if (!useAnswerReveal) return;
@@ -700,6 +725,8 @@ export function BusinessIslandQuestReading(
 
   const handleSchoolsBackToIsland = useCallback(() => {
     markSchoolsHubCelebrateReturn();
+    markSchoolsQuestSummaryExited(slug);
+    setLeavingForHub(true);
     const hubHref = resolveSchoolsLearnerHref("/schools/business", pathname);
     const needsQuest1CheckIn =
       isSchoolsLearnerPath(pathname) && slug === SCHOOLS_DEMO_BUSINESS_TILE;
@@ -713,7 +740,6 @@ export function BusinessIslandQuestReading(
         (item) => item.completedPillarId === "business"
       );
       if (!convictionDone && !convictionPending) {
-        // Hub first — check-in modal should overlay the island, not the quest summary.
         router.replace(hubHref);
         actions.enqueuePillarConviction("business", { pillarToUnlock: null });
         if (
@@ -814,8 +840,17 @@ export function BusinessIslandQuestReading(
   const sourceLine = <QuestSourceFooter source={source} theme={theme} />;
 
   if (screen === "quiz" && quiz) {
+    if (leavingForHub) {
+      return (
+        <motion.div
+          className="relative px-3 pb-2 pt-4 sm:px-4 md:px-5 md:pt-6"
+          aria-hidden
+        />
+      );
+    }
+
     return (
-      <motion.div className="relative px-3 pb-2 pt-4 sm:px-4 md:px-5 md:pt-6">
+      <motion.div className="relative px-3 pb-2 pt-2 sm:px-4 md:px-5 md:pt-3">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={`${slug}-quiz-screen`}

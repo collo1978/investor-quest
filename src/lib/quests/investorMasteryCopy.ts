@@ -87,14 +87,26 @@ const MASTERY_BY_SECTION = {
   [key("business", "competition")]: {
     kicker: "Checkpoint",
     message:
-      "You’ve got the battlefield: rivals, tailwinds, and what could slow the story down.",
+      "You see how tough the industry is — and what it takes to stay ahead when tech moves fast.",
     learnedIntro: "You now understand",
     learned: [
-      "Who is trying to compete with {company}",
-      "Trends that could accelerate growth",
-      "What could slow {company} down"
+      "Why the industry is hard to compete in",
+      "What customers look for",
+      "What could threaten its position"
     ],
     momentum: "Quick quiz — then on to the next unlock."
+  },
+  [key("business", "who-competes")]: {
+    kicker: "Nice work",
+    message:
+      "You can now name who {company} is fighting — across chips, big tech, and networking.",
+    learnedIntro: "You now understand",
+    learned: [
+      "Which chip and tech rivals it faces",
+      "Who competes in CPUs and smart devices",
+      "Who competes in networking"
+    ],
+    momentum: "Lock it in with a quick checkpoint."
   },
   [key("financials", "growth")]: {
     kicker: "Nice work",

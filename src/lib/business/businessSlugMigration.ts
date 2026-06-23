@@ -7,7 +7,8 @@ export const BUSINESS_QUEST_SLUGS = [
   "everyday-life",
   "how-it-works",
   "why-they-stay",
-  "competition"
+  "competition",
+  "who-competes"
 ] as const;
 
 export type BusinessQuestSlug = (typeof BUSINESS_QUEST_SLUGS)[number];

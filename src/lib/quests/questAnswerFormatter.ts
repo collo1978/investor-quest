@@ -118,11 +118,16 @@ export function formatQuestCardCopy(input: {
       );
     if (parts?.takeaway) {
       const takeaway = normalizeParagraph(parts.takeaway);
-      const supporting = parts.supporting
-        ? normalizeParagraph(parts.supporting)
-        : null;
-      paragraphs = supporting ? [takeaway, supporting] : [takeaway];
-      bodyForStorage = buildTakeawayAnswerBody({ takeaway, supporting });
+      if (parts.supportChunks?.length) {
+        paragraphs = [takeaway];
+        bodyForStorage = body.trim();
+      } else {
+        const supporting = parts.supporting
+          ? normalizeParagraph(parts.supporting)
+          : null;
+        paragraphs = supporting ? [takeaway, supporting] : [takeaway];
+        bodyForStorage = buildTakeawayAnswerBody({ takeaway, supporting });
+      }
     } else {
       paragraphs = [];
       bodyForStorage = body;

@@ -944,22 +944,66 @@ export function reduce(state: GameState, action: GameAction): ReduceResult {
       if (!pillarState.readQuestSlugs.includes(action.slug)) {
         return { state, events };
       }
+
+      const parentSlug = action.slug.includes("#")
+        ? action.slug.slice(0, action.slug.indexOf("#"))
+        : action.slug;
+
       const nextReadAt = { ...pillarState.readAt };
       delete nextReadAt[action.slug];
-      const prog1: CompanyProgress = {
+
+      let nextPillar: typeof pillarState = {
+        ...pillarState,
+        readQuestSlugs: pillarState.readQuestSlugs.filter(
+          (s) => s !== action.slug
+        ),
+        readAt: nextReadAt
+      };
+
+      const quest = findQuestDefinition(
+        state.activeCompanyId as CompanyId,
+        action.pillarId,
+        parentSlug
+      );
+      const hadQuizCompletion =
+        quest?.completionState?.kind === "quiz" &&
+        pillarState.completedQuestSlugs.includes(parentSlug);
+
+      if (hadQuizCompletion) {
+        const completedAt = { ...pillarState.completedAt };
+        delete completedAt[parentSlug];
+        nextPillar = {
+          ...nextPillar,
+          completedQuestSlugs: pillarState.completedQuestSlugs.filter(
+            (s) => s !== parentSlug
+          ),
+          completedAt
+        };
+      }
+
+      let prog1: CompanyProgress = {
         ...prog0,
         pillars: {
           ...prog0.pillars,
-          [action.pillarId]: {
-            ...pillarState,
-            readQuestSlugs: pillarState.readQuestSlugs.filter(
-              (s) => s !== action.slug
-            ),
-            readAt: nextReadAt
-          }
+          [action.pillarId]: nextPillar
         }
       };
-      return { state: putProg(state, prog1), events };
+
+      if (hadQuizCompletion) {
+        prog1 = {
+          ...prog1,
+          questWork: stripQuestWorkForQuest(
+            prog1.questWork,
+            action.pillarId,
+            parentSlug
+          )
+        };
+      }
+
+      return {
+        state: putProg(state, hadQuizCompletion ? bumpCompanyRevision(prog1) : prog1),
+        events
+      };
     }
 
     case "clear-pillar-progress": {

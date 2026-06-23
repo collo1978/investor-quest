@@ -8,8 +8,9 @@ export const SCHOOLS_DEMO_STORY_SESSION_KEY = "iq-schools-demo-story-active";
 export const SCHOOLS_DEMO_STORY_LAUNCHED_KEY = "iq-schools-demo-story-launched";
 
 export const SCHOOLS_DEMO_STORY_STEPS = [
-  "logo",
-  "avatar",
+  "logo-intro",
+  "mission-brief-cards",
+  "logo-reveal",
   "onboarding",
   "map-brief",
   "map",
@@ -35,7 +36,7 @@ type Listener = () => void;
 
 let snapshot: SchoolsDemoStorySnapshot = {
   active: false,
-  step: "logo",
+  step: "logo-intro",
   productionRoutes: false
 };
 const listeners = new Set<Listener>();
@@ -130,7 +131,7 @@ export function activateSchoolsDemoStory(options?: {
 }): void {
   snapshot = {
     active: true,
-    step: "logo",
+    step: "logo-intro",
     productionRoutes: options?.productionRoutes === true
   };
   writeSessionFlag(true);
@@ -138,7 +139,7 @@ export function activateSchoolsDemoStory(options?: {
 }
 
 export function deactivateSchoolsDemoStory(): void {
-  snapshot = { active: false, step: "logo", productionRoutes: false };
+  snapshot = { active: false, step: "logo-intro", productionRoutes: false };
   writeSessionFlag(false);
   writeLaunchedFlag(false);
   emit();
@@ -160,10 +161,12 @@ export function advanceSchoolsDemoStoryStep(next: SchoolsDemoStoryStep): void {
 
 function basePathForStep(step: SchoolsDemoStoryStep): string {
   switch (step) {
-    case "logo":
-      return "/schools/opening";
-    case "avatar":
-      return "/schools/avatar";
+    case "logo-intro":
+      return "/schools/logo-intro";
+    case "mission-brief-cards":
+      return "/schools/mission-brief-cards";
+    case "logo-reveal":
+      return "/schools/logo-reveal";
     case "onboarding":
       return "/schools/screen5-onboarding";
     case "map-brief":
@@ -184,7 +187,7 @@ function basePathForStep(step: SchoolsDemoStoryStep): string {
     case "map-return":
       return "/schools/map";
     default:
-      return "/schools/opening";
+      return "/schools/logo-intro";
   }
 }
 
@@ -198,8 +201,9 @@ export function getRouteForSchoolsDemoStoryStep(step: SchoolsDemoStoryStep): str
 }
 
 export const SCHOOLS_DEMO_STORY_PREFETCH_ROUTES = [
-  "/schools/opening",
-  "/schools/avatar",
+  "/schools/logo-intro",
+  "/schools/mission-brief-cards",
+  "/schools/logo-reveal",
   "/schools/screen5-onboarding",
   "/schools/pick-interests",
   "/schools/company-reveal",
@@ -223,7 +227,7 @@ export function ensureProductionSchoolsDemoFromPath(pathname: string): void {
   if (!pathname.startsWith("/schools/demo")) return;
   if (!wasSchoolsDemoLaunchedInSession()) return;
 
-  const inferred = schoolsDemoStepFromPathname(pathname) ?? "logo";
+  const inferred = schoolsDemoStepFromPathname(pathname) ?? "logo-intro";
   let step = inferred;
 
   if (snapshot.active) {
@@ -263,8 +267,13 @@ export function schoolsDemoStepFromPathname(
     : pathname;
 
   if (!path.startsWith("/schools")) return null;
-  if (path === "/schools" || path === "/schools/opening") return "logo";
-  if (path === "/schools/avatar") return "avatar";
+  if (path === "/schools" || path === "/schools/logo-intro") {
+    return "logo-intro";
+  }
+  if (path === "/schools/mission-brief-cards") {
+    return "mission-brief-cards";
+  }
+  if (path === "/schools/logo-reveal") return "logo-reveal";
   if (
     path === "/schools/onboarding" ||
     path === "/schools/screen5-onboarding" ||

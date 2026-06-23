@@ -47,7 +47,8 @@ export const CONTROLLED_DEMO_QUEST_SLUGS: Readonly<
     "everyday-life",
     "how-it-works",
     "why-they-stay",
-    "competition"
+    "competition",
+    "who-competes"
   ],
   financials: ["growth"],
   forces: ["forces-hub-positive-inside", "positive-inside-supply-chain"],

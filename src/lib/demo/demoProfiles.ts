@@ -36,7 +36,7 @@ export const DEMO_PROFILE_META: Record<DemoProfileId, DemoProfileMeta> = {
     id: DEMO_PROFILE_NEW_USER,
     label: "New user",
     description:
-      "Demo Story Mode — scripted tour: logo → welcome → onboarding → map brief → business quest.",
+      "Demo Story Mode — scripted tour: logo intro → mission brief → logo reveal → onboarding → map brief → business quest.",
     startRoute: "/opening"
   },
   [DEMO_PROFILE_INVESTOR]: {

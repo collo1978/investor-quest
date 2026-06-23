@@ -2,7 +2,7 @@
 export const SCHOOLS_MAP_PORTAL_CENTER = { x: 50.5, y: 52 } as const;
 
 /** NVIDIA skyscraper center on Business Kingdom island (viewBox %). */
-export const SCHOOLS_MAP_BUSINESS_BUILDING = { x: 25.5, y: 26 } as const;
+export const SCHOOLS_MAP_BUSINESS_BUILDING = { x: 28.5, y: 21.5 } as const;
 
 /** Bridge pulse + unlock FX land on the building mass (alias). */
 export const SCHOOLS_MAP_BUSINESS_TARGET = SCHOOLS_MAP_BUSINESS_BUILDING;

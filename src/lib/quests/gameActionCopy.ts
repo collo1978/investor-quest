@@ -7,4 +7,5 @@ export const MARK_AS_READ_LABEL = "Mark as Read";
 export const SHOW_ME_LABEL = "SHOW ME";
 export const START_QUIZ_LABEL = "Start Quiz";
 export const CONTINUE_LABEL = "Continue";
+export const LOCK_IN_ANSWER_LABEL = "LOCK IN ANSWER";
 export const BACK_TO_ISLAND_LABEL = "Back to Island";

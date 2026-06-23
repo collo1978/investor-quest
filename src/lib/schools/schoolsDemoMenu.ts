@@ -98,6 +98,9 @@ export function shouldOffsetSchoolsNavMenuForDevSidebar(pathname: string): boole
   const learner = schoolsLearnerPath(pathname);
   const immersive =
     learner === "/schools" ||
+    learner === "/schools/logo-intro" ||
+    learner === "/schools/mission-brief-cards" ||
+    learner === "/schools/logo-reveal" ||
     learner === "/schools/opening" ||
     learner === "/schools/avatar" ||
     learner === "/schools/screen5-onboarding" ||

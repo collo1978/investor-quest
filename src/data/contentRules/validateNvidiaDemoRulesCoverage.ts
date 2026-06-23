@@ -17,7 +17,8 @@ const DEMO_RULE_CHECK: ReadonlyArray<{
       "everyday-life",
       "how-it-works",
       "why-they-stay",
-      "competition"
+      "competition",
+      "who-competes"
     ]
   },
   { pillarId: "financials", slugs: ["growth"] },

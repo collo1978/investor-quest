@@ -34,7 +34,9 @@ export function nvidiaIslandQuizPassMessage(
       case "why-they-stay":
         return "You get why they're hard to copy — habit, speed, trust. That's the difference between hype and a real edge.";
       case "competition":
-        return "You see the fight they're in, what could speed them up, and what could slow them down. The story finally clicks.";
+        return "You see how tough the industry is — fast tech, picky customers, and new challengers. That frame helps you judge the fight.";
+      case "who-competes":
+        return "You can name who NVIDIA is up against — chip rivals, big tech, and more. That's how you judge if the lead can hold.";
       default:
         return "Business level-up — you're connecting NVIDIA to real life, not memorizing jargon.";
     }
@@ -131,9 +133,9 @@ export const NVDA_PILLAR_COPY: Record<
   { subtitle: string; description: string; playerFeeling: string }
 > = {
   business: {
-    subtitle: "Six chapters — from what they do to who they fight.",
+    subtitle: "Seven chapters — from what they do to who they fight.",
     description:
-      "What NVIDIA does, why the world buys, everyday life, how it works, why customers stay, and the competition — each section feels different, each ends with a checkpoint quiz.",
+      "What NVIDIA does, why the world buys, everyday life, how it sells, who makes the chips, industry pressure, and named rivals — each section ends with a checkpoint quiz.",
     playerFeeling: getIslandRule("business").playerFeeling
   },
   financials: {
@@ -198,11 +200,18 @@ const NVDA_QUEST_LABELS: Record<string, QuestLabel> = {
       "A real edge beats one hot year — customers stick when switching is painful."
   },
   [contentKey("business", "competition")]: {
-    title: "THE COMPETITION NVIDIA FACES",
-    investorQuestion: "Who is trying to compete with NVIDIA?",
-    objective: "Name rivals, tailwinds, and what could slow them down.",
+    title: "HOW TOUGH IS THIS INDUSTRY?",
+    investorQuestion: "Why is this industry difficult to compete in?",
+    objective: "See why the industry is hard to compete in and what it takes to win.",
     whyItMatters:
-      "You need the competitive picture before you judge if the lead can last."
+      "Highly competitive industries reward companies that keep improving — and punish those that stop."
+  },
+  [contentKey("business", "who-competes")]: {
+    title: "WHO IS NVIDIA COMPETING AGAINST?",
+    investorQuestion: "Which chip companies compete with NVIDIA?",
+    objective: "Name the rivals across chips, tech, CPUs, devices, and networking.",
+    whyItMatters:
+      "Knowing who you fight helps you judge whether the lead can last."
   },
   [contentKey("financials", "growth")]: {
     title: "When sales took off",

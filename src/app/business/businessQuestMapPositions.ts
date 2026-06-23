@@ -27,31 +27,41 @@ export const BUSINESS_SCENE_STYLE_PORTRAIT: CSSProperties = {
   overflow: "visible"
 };
 
-/** Quest card slots — symmetric orbit around the island (desktop / wide). */
+/** Quest card slots — staggered path 1→7; left/right pairs with clear vertical gaps (desktop). */
 export const BUSINESS_MAP_CARD_POSITIONS: Record<number, CSSProperties> = {
+  /** Top left — WHAT NVIDIA DOES */
   1: {
-    top: "2.5%",
-    left: "calc(50% - clamp(150px, 14vw, 250px))",
-    transform: "translateX(-50%)"
+    top: "4%",
+    left: "4%"
   },
+  /** Top right — WHAT'S NVIDIA'S PRODUCT SEGMENTS? (inset left of progress HUD) */
   2: {
-    top: "34%",
-    left: "8%"
+    top: "4%",
+    right: "24%"
   },
+  /** Middle right — HOW NVIDIA STAYS AHEAD */
   3: {
-    top: "34%",
-    right: "8%"
+    top: "26%",
+    right: "4%"
   },
+  /** Lower right — HOW NVIDIA SELLS AND MARKETS */
   4: {
-    top: "62%",
-    left: "8%"
+    top: "48%",
+    right: "4%"
   },
+  /** Middle left — WHO MAKES NVIDIA'S CHIPS? */
   5: {
-    top: "58%",
-    right: "8%"
+    top: "26%",
+    left: "4%"
   },
+  /** Lower left — HOW TOUGH IS THIS INDUSTRY? */
   6: {
-    top: "78%",
+    top: "48%",
+    left: "4%"
+  },
+  /** Bottom center — WHO IS NVIDIA COMPETING AGAINST? */
+  7: {
+    top: "72%",
     left: "50%",
     transform: "translateX(-50%)"
   }
@@ -63,28 +73,31 @@ export const BUSINESS_MAP_CARD_POSITIONS: Record<number, CSSProperties> = {
  */
 export const BUSINESS_MAP_CARD_POSITIONS_PORTRAIT: Record<number, CSSProperties> = {
   1: {
-    top: "3%",
-    left: "calc(50% - clamp(72px, 18vw, 120px))",
-    transform: "translateX(-50%)"
+    top: "2%",
+    left: "1%"
   },
   2: {
-    top: "17%",
+    top: "18%",
     left: "1%"
   },
   3: {
-    top: "17%",
+    top: "22%",
     right: "1%"
   },
   4: {
-    top: "41%",
-    left: "1%"
-  },
-  5: {
-    top: "41%",
+    top: "40%",
     right: "1%"
   },
+  5: {
+    top: "36%",
+    left: "1%"
+  },
   6: {
-    top: "67%",
+    top: "40%",
+    left: "1%"
+  },
+  7: {
+    top: "58%",
     left: "50%",
     transform: "translateX(-50%)"
   }
@@ -95,8 +108,17 @@ export const BUSINESS_MAP_CARD_POSITIONS_MOBILE =
   BUSINESS_MAP_CARD_POSITIONS_PORTRAIT;
 
 export const BUSINESS_MAP_CARD_WIDTH: CSSProperties = {
-  width: "clamp(220px, 18vw, 320px)"
+  width: "clamp(260px, 17vw, 390px)"
 };
+
+/** Slot 7 — final mission; slightly larger than the orbit cards. */
+export const BUSINESS_MAP_FINALE_CARD_WIDTH: CSSProperties = {
+  width: "clamp(295px, 19.5vw, 445px)"
+};
+
+export function resolveBusinessMapCardWidth(orderNumber: number): CSSProperties {
+  return orderNumber === 7 ? BUSINESS_MAP_FINALE_CARD_WIDTH : BUSINESS_MAP_CARD_WIDTH;
+}
 
 /** Portrait — sized in CSS too; this sets the non-portrait fallback for SSR. */
 export const BUSINESS_MAP_CARD_WIDTH_PORTRAIT: CSSProperties = {
@@ -109,25 +131,24 @@ export const BUSINESS_MAP_COMPANY_LOGO_POSITION: CSSProperties =
 
 /** Tower anchor when the stage is tall (island center sits higher in the crop). */
 export const BUSINESS_MAP_COMPANY_LOGO_POSITION_PORTRAIT: CSSProperties = {
-  top: "36%",
+  top: "34%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  height: "clamp(2.65rem, 7.5%, 3.85rem)",
-  width: "clamp(2.45rem, 7%, 3.55rem)",
-  maxHeight: "68px",
-  maxWidth: "64px"
+  height: "clamp(2.25rem, 6.4%, 3.25rem)",
+  width: "clamp(2.1rem, 5.9%, 3rem)",
+  maxHeight: "56px",
+  maxWidth: "52px"
 };
 
 /** Crop focus for `biz-quest.webp` on a tall portrait stage. */
 export const BUSINESS_HUB_SCENE_OBJECT_POSITION_PORTRAIT = "center 26%" as const;
 
 export const BUSINESS_MAP_AMBIENT_PARTICLES = [
-  { left: "22%", top: "20%", size: 3, delay: 0 },
-  { left: "68%", top: "16%", size: 2, delay: 0.8 },
-  /* Avoid slot 3 (top-right Operations) — was read as false “active” glow */
-  { left: "18%", top: "44%", size: 2, delay: 2.2 },
-  { left: "50%", top: "10%", size: 2, delay: 1.1 },
-  { left: "52%", top: "64%", size: 3, delay: 2.8 },
-  { left: "30%", top: "68%", size: 2, delay: 0.4 },
-  { left: "66%", top: "70%", size: 2, delay: 1.9 }
+  { left: "28%", top: "22%", size: 3, delay: 0 },
+  { left: "62%", top: "20%", size: 2, delay: 0.8 },
+  { left: "24%", top: "42%", size: 2, delay: 2.2 },
+  { left: "50%", top: "14%", size: 2, delay: 1.1 },
+  { left: "50%", top: "58%", size: 3, delay: 2.8 },
+  { left: "34%", top: "60%", size: 2, delay: 0.4 },
+  { left: "58%", top: "62%", size: 2, delay: 1.9 }
 ] as const;

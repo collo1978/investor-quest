@@ -32,7 +32,7 @@ type Props = {
 };
 
 /**
- * Business island hub — wide 16:9 scene on desktop; tall portrait stage on phones.
+ * Business island hub — full-viewport stage on desktop; tall portrait stage on phones.
  * Portrait layout is CSS-driven (`globals.css`) so SSR and hydration stay aligned.
  */
 export function BusinessQuestMapDesktop({
@@ -76,10 +76,10 @@ export function BusinessQuestMapDesktop({
   }, [menuOpen]);
 
   return (
-    <div className="business-hub-scene-root w-full" data-business-quest-hub>
-      <div className="business-hub-scene-scroll w-full">
+    <div className="business-hub-scene-root flex min-h-0 w-full flex-1 flex-col" data-business-quest-hub>
+      <div className="business-hub-scene-scroll flex min-h-0 w-full flex-1 flex-col">
         <motion.div
-          className="business-hub-scene-frame relative mx-auto flex w-full max-w-[1600px] flex-col py-1 max-md:min-h-0 max-md:flex-1 max-md:py-0"
+          className="business-hub-scene-frame relative mx-auto flex w-full min-h-0 flex-1 flex-col max-md:max-w-[1600px]"
           data-business-quest-hub-desktop
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -87,7 +87,7 @@ export function BusinessQuestMapDesktop({
         >
           <div
             className={[
-              "business-hub-scene-shell relative flex min-h-0 flex-1 flex-col overflow-visible rounded-2xl sm:rounded-3xl",
+              "business-hub-scene-shell relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl sm:rounded-3xl",
               missionBriefOpen
                 ? "border-0 shadow-none"
                 : "border border-[rgba(245,197,71,0.2)] shadow-[0_32px_100px_rgba(0,0,0,0.62)]"
@@ -95,12 +95,12 @@ export function BusinessQuestMapDesktop({
             data-mission-brief-open={missionBriefOpen ? "" : undefined}
           >
             <div
-              className="business-hub-scene-stage relative"
+              className="business-hub-scene-stage relative flex min-h-0 flex-1 flex-col"
               style={BUSINESS_SCENE_STYLE}
               data-business-scene
             >
               <div
-                className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl sm:rounded-3xl"
+                className="business-hub-scene-art-wrap pointer-events-none absolute inset-0 overflow-hidden rounded-2xl sm:rounded-3xl"
                 aria-hidden
               >
                 <div className="relative h-full w-full">
@@ -108,9 +108,9 @@ export function BusinessQuestMapDesktop({
                 </div>
                 {!missionBriefOpen ? (
                   <>
-                    <div className="absolute inset-0 bg-gradient-to-t from-[rgba(4,3,8,0.48)] via-transparent to-[rgba(4,3,8,0.1)]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[rgba(4,3,8,0.38)] via-transparent to-[rgba(4,3,8,0.12)]" />
                     <motion.div
-                      className="absolute inset-0 bg-[radial-gradient(ellipse_48%_42%_at_50%_42%,rgba(245,197,71,0.09),transparent_72%)]"
+                      className="absolute inset-0 bg-[radial-gradient(ellipse_42%_36%_at_50%_40%,rgba(245,197,71,0.05),transparent_74%)]"
                       animate={reduceMotion ? undefined : { opacity: [0.4, 0.62, 0.4] }}
                       transition={
                         reduceMotion

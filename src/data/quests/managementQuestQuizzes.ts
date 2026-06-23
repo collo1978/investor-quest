@@ -307,16 +307,11 @@ export const MANAGEMENT_QUEST_QUIZZES: Record<
           "For {Company.name}, leadership is a package, team, incentives, capital choices, and board oversight."
       },
       {
-        kind: "multiple-choice",
+        kind: "fill-blank",
         id: "mgmtsum-q3",
         prompt:
-          "Why read the proxy for {Company.name} after you understand the business and financials?",
-        choices: [
-          "Management decides how strategy turns into cash returns and risk",
-          "Proxies replace income statements",
-          "Governance only matters for banks",
-          "CEOs never influence capital allocation"
-        ],
+          "Complete the sentence:\nAfter the business and financials, the proxy shows how {Company.name}'s team turns strategy into cash returns and _____.",
+        options: ["risk", "logo colour", "ticker symbol", "store layout"],
         correctIndex: 0,
         explain:
           "The team at {Company.name} connects operating reality to how owners are treated over time."

@@ -5,10 +5,47 @@
 export const SCHOOLS_HUB_CELEBRATE_SESSION_KEY =
   "iq-schools-business-hub-celebrate";
 
+/** Set when leaving quest summary for hub — suppresses summary flash during navigation. */
+export const SCHOOLS_QUEST_SUMMARY_EXIT_SESSION_KEY =
+  "iq-schools-quest-summary-exited";
+
+export function markSchoolsQuestSummaryExited(slug: string): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.setItem(SCHOOLS_QUEST_SUMMARY_EXIT_SESSION_KEY, slug);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function peekSchoolsQuestSummaryExited(slug: string): boolean {
+  if (typeof sessionStorage === "undefined") return false;
+  try {
+    return sessionStorage.getItem(SCHOOLS_QUEST_SUMMARY_EXIT_SESSION_KEY) === slug;
+  } catch {
+    return false;
+  }
+}
+
+export function clearSchoolsQuestSummaryExited(slug?: string): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    if (slug == null) {
+      sessionStorage.removeItem(SCHOOLS_QUEST_SUMMARY_EXIT_SESSION_KEY);
+      return;
+    }
+    if (sessionStorage.getItem(SCHOOLS_QUEST_SUMMARY_EXIT_SESSION_KEY) === slug) {
+      sessionStorage.removeItem(SCHOOLS_QUEST_SUMMARY_EXIT_SESSION_KEY);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 export const SCHOOLS_MICRO_XP_PER_CORRECT = 10;
 /** Quest-clear bonus shown on the post-quiz skill summary. */
 export const SCHOOLS_CARD_COMPLETE_XP = 75;
-export const SCHOOLS_BUSINESS_HUB_CARD_TOTAL = 6;
+export const SCHOOLS_BUSINESS_HUB_CARD_TOTAL = 7;
 export const SCHOOLS_MICRO_CELEBRATION_MS = 1000;
 
 export const SCHOOLS_CORRECT_MESSAGES = [
@@ -31,10 +68,121 @@ export const SCHOOLS_BUSINESS_HUB_SLOT: Record<string, number> = {
   "everyday-life": 3,
   "how-it-works": 4,
   "why-they-stay": 5,
-  competition: 6
+  competition: 6,
+  "who-competes": 7
 };
 
-export const SCHOOLS_COMPLETION_HEADLINE = "Nice work.";
+export const SCHOOLS_COMPLETION_HEADLINE = "You Did the Work";
+export const SCHOOLS_COMPLETION_SKILL_HEADING = "Stack Another Skill";
+
+export type SchoolsQuestCompletionCopy = {
+  headline: string;
+  investorSkillHeading: string;
+  /** Intro line before optional bullet list (e.g. "The best investors first ask:"). */
+  skillIntro?: string;
+  skillBullets?: readonly string[];
+  investorSkillLines: readonly string[];
+  ctaLabel?: string;
+  whatYouLearnedLabel?: string;
+  whatYouLearned?: string;
+};
+
+export const SCHOOLS_QUEST_COMPLETION_COPY: Partial<
+  Record<string, SchoolsQuestCompletionCopy>
+> = {
+  "what-they-do": {
+    headline: "First Quest Complete",
+    investorSkillHeading: "New Investor Skill Unlocked",
+    skillIntro: "The best investors first ask:",
+    skillBullets: [
+      "What does the company sell?",
+      "What problem does it solve?"
+    ],
+    investorSkillLines: [
+      "Companies that solve important problems often attract more customers."
+    ],
+    ctaLabel: "Unlock Next Quest →"
+  },
+  "why-buying": {
+    headline: "Second Quest Complete",
+    investorSkillHeading: "New Investor Skill Unlocked",
+    skillIntro: "The best investors ask:",
+    skillBullets: ["What are all the company's revenue sources?"],
+    investorSkillLines: [
+      "Knowing where a company makes its money helps investors understand what is driving the business."
+    ],
+    ctaLabel: "Unlock Next Quest →"
+  },
+  "everyday-life": {
+    headline: "Third Quest Complete",
+    investorSkillHeading: "New Investor Skill Unlocked",
+    skillIntro: "The best investors ask:",
+    skillBullets: [
+      "How is the company trying to stay ahead of competitors?"
+    ],
+    investorSkillLines: [
+      "Companies that keep innovating often have a better chance of long-term success."
+    ],
+    ctaLabel: "Unlock Next Quest →"
+  },
+  "how-it-works": {
+    headline: "Fourth Quest Complete",
+    investorSkillHeading: "New Investor Skill Unlocked",
+    skillIntro: "The best investors ask:",
+    skillBullets: [
+      "How does the company get its products or services to customers?"
+    ],
+    investorSkillLines: [
+      "Companies with strong partnerships, customer relationships, and distribution networks can often grow faster and reach more customers."
+    ],
+    ctaLabel: "Unlock Next Quest →"
+  },
+  "why-they-stay": {
+    headline: "Fifth Quest Complete",
+    investorSkillHeading: "New Investor Skill Unlocked",
+    skillIntro: "The best investors ask:",
+    skillBullets: [
+      "Who helps the company make its products?",
+      "What happens if those suppliers run into problems?"
+    ],
+    investorSkillLines: [
+      "Even great products depend on a strong supply chain."
+    ],
+    ctaLabel: "Unlock Next Quest →"
+  },
+  competition: {
+    headline: "Sixth Quest Complete",
+    investorSkillHeading: "New Investor Skill Unlocked",
+    skillIntro: "The best investors ask:",
+    skillBullets: [
+      "How difficult is this industry to compete in?",
+      "What does a company need to do to stay successful?"
+    ],
+    investorSkillLines: [
+      "Companies in highly competitive industries must constantly innovate to stay ahead."
+    ],
+    ctaLabel: "Unlock Next Quest →"
+  },
+  "who-competes": {
+    headline: "Seventh Quest Complete",
+    investorSkillHeading: "New Investor Skill Unlocked",
+    skillIntro: "The best investors ask:",
+    skillBullets: [
+      "Who are the company's competitors?",
+      "What advantages does the company have over them?"
+    ],
+    investorSkillLines: [
+      "Understanding the competition helps investors judge whether a company can protect its market position."
+    ],
+    ctaLabel: "Unlock Next Quest →"
+  }
+};
+
+export function resolveSchoolsQuestCompletionCopy(
+  slug: string
+): SchoolsQuestCompletionCopy | null {
+  return SCHOOLS_QUEST_COMPLETION_COPY[slug] ?? null;
+}
 
 export const SCHOOLS_COMPLETION_PRIDE_LINE =
   "You now understand {company} better than most beginners.";
@@ -56,29 +204,34 @@ export const SCHOOLS_QUEST_SKILL_TAKEAWAYS: Record<string, readonly string[]> = 
     "Why customers buy its products"
   ],
   "why-buying": [
-    "Who pays the biggest bills",
-    "Where the money comes from",
-    "Why buyers keep ordering"
+    "NVIDIA's two main product segments",
+    "What Compute & Networking does",
+    "What the Graphics segment does"
   ],
   "everyday-life": [
-    "Where you meet it in daily life",
-    "How it shows up in games and AI",
-    "Why builders rely on it"
+    "How it tries to stay ahead of competitors",
+    "Where it invests in new technology",
+    "Why innovation can drive long-term success"
   ],
   "how-it-works": [
-    "How its products get designed",
-    "Who helps build them",
-    "How the tech reaches the world"
+    "How it reaches customers worldwide",
+    "How it helps customers succeed",
+    "Why developers matter to its ecosystem"
   ],
   "why-they-stay": [
-    "Why it's hard to replace",
-    "What sets it apart",
-    "Why developers keep building on it"
+    "Who actually manufactures its chips",
+    "Why it works with suppliers",
+    "Where its global supply chain operates"
   ],
   competition: [
-    "Who it's competing with",
-    "Trends that could help it grow",
-    "Risks that could slow it down"
+    "Why the industry is hard to compete in",
+    "What customers look for",
+    "What could threaten its position"
+  ],
+  "who-competes": [
+    "Which chip and tech rivals it faces",
+    "Who competes in CPUs and devices",
+    "Who competes in networking"
   ]
 };
 
@@ -143,8 +296,8 @@ export function schoolsConvictionHeading(companyName: string): string {
 
 export const SCHOOLS_CONVICTION_BODY = "Pick the option that feels closest.";
 
-export const SCHOOLS_CONVICTION_CONFIDENT_LABEL = "Yes, it does";
-export const SCHOOLS_CONVICTION_CAUTIOUS_LABEL = "I'm getting there";
+export const SCHOOLS_CONVICTION_CONFIDENT_LABEL = "YES, IT DOES";
+export const SCHOOLS_CONVICTION_CAUTIOUS_LABEL = "I'M GETTING THERE";
 
 export function schoolsConvictionConfidentDescription(companyName: string): string {
   const company = companyName.trim() || "this company";

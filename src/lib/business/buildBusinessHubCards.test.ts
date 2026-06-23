@@ -51,14 +51,15 @@ test("fresh state: only what-they-do unlocked", () => {
     "everyday-life",
     "how-it-works",
     "why-they-stay",
-    "competition"
+    "competition",
+    "who-competes"
   ] as const) {
     assert.equal(bySlug[slug]?.locked, true, `${slug} should be locked`);
     assert.equal(bySlug[slug]?.visualState, "locked", `${slug} visual`);
     assert.equal(bySlug[slug]?.isPrimaryActive, false, `${slug} primary`);
   }
 
-  assert.equal(cards.length, 6);
+  assert.equal(cards.length, 7);
 });
 
 test("missing why-buying row still locks everyday-life (canonical prior chain)", () => {

@@ -3,8 +3,12 @@ import { formatQuestCardCopy } from "@/lib/quests/questAnswerFormatter";
 import {
   buildTakeawayAnswerBody,
   hasLabeledTakeawayFormat,
+  parseTakeawayAnswerBody,
   resolveTakeawayAnswer
 } from "@/lib/quests/takeawayAnswer";
+import { hasLessonSupportingFormat, parseLessonSupportingBody } from "@/lib/quests/lessonAnswer";
+import type { ScannableSupportChunk } from "@/lib/quests/scannableTakeawayBody";
+import type { LessonLayoutParts } from "@/lib/quests/lessonAnswer";
 
 export {
   QUEST_BEGINNER_VOICE,
@@ -19,6 +23,8 @@ export type RelatableAnswerSections = {
   paragraphs: string[];
   takeaway: string | null;
   supporting: string | null;
+  supportChunks?: ScannableSupportChunk[];
+  lesson?: LessonLayoutParts;
   whyInvestorsCare: string | null;
 };
 
@@ -51,6 +57,31 @@ export function parseRelatableQuestAnswer(
 ): RelatableAnswerSections | null {
   const raw = plainEnglishAnswer?.trim();
   if (!raw) return null;
+
+  if (hasLessonSupportingFormat(raw) && !hasLabeledTakeawayFormat(raw)) {
+    const lessonOnly = parseLessonSupportingBody(raw);
+    if (lessonOnly) {
+      const formatted = formatQuestCardCopy({
+        plainEnglishAnswer: raw,
+        investorInsight,
+        displayMode: "display"
+      });
+      const why =
+        formatted?.whyInvestorsCare ?? investorInsight?.trim() ?? null;
+      return {
+        paragraphs: [],
+        takeaway: null,
+        supporting: null,
+        supportChunks: lessonOnly.middleChunks,
+        lesson: lessonOnly,
+        whyInvestorsCare: why
+      };
+    }
+  }
+
+  const rawLabeled = hasLabeledTakeawayFormat(raw)
+    ? parseTakeawayAnswerBody(raw)
+    : null;
 
   const formatted = formatQuestCardCopy({
     plainEnglishAnswer: raw,
@@ -88,12 +119,23 @@ export function parseRelatableQuestAnswer(
 
   const paragraphs = splitParagraphs(body);
   const takeawayParts = resolveTakeawayAnswer(body, paragraphs);
-  if (paragraphs.length === 0 && !why && !takeawayParts?.takeaway) return null;
+  if (paragraphs.length === 0 && !why && !takeawayParts?.takeaway && !rawLabeled?.takeaway) {
+    return null;
+  }
+
+  const supportChunks =
+    rawLabeled?.supportChunks ?? takeawayParts?.supportChunks;
+  const lesson = rawLabeled?.lesson ?? takeawayParts?.lesson;
 
   return {
     paragraphs,
-    takeaway: takeawayParts?.takeaway ?? null,
-    supporting: takeawayParts?.supporting ?? null,
+    takeaway: rawLabeled?.takeaway ?? takeawayParts?.takeaway ?? null,
+    supporting:
+      supportChunks?.length || lesson
+        ? null
+        : rawLabeled?.supporting ?? takeawayParts?.supporting ?? null,
+    supportChunks,
+    lesson,
     whyInvestorsCare: why
   };
 }

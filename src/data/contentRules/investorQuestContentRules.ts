@@ -195,7 +195,7 @@ export const ISLAND_QUIZ_RULES: Record<PillarId, IslandQuizRule> = {
     checkpointGoal: "Do you understand what the company does?",
     emotionalTone: "Curious, friendly, conversational — explain-it-back.",
     interactionStyle:
-      "Conversational MC and scenarios; plain-language “what do they actually do?” — not trivia.",
+      "Conversational MC and scenarios; plain-language “what do they actually do?” — alternate formats (never same kind twice in a row).",
     unlockedHeadline: "Understanding check unlocked",
     readyIntro: (required, total) =>
       `Explain it back in everyday words — get ${required} of ${total} right to show you can say what this company actually does.`,
@@ -312,7 +312,8 @@ export type BusinessSectionId =
   | "everyday-life"
   | "how-it-works"
   | "why-they-stay"
-  | "competition";
+  | "competition"
+  | "who-competes";
 
 /** Per-section checkpoint — same quiz loop, different emotional register. */
 export type BusinessSectionQuizRule = Pick<
@@ -382,7 +383,7 @@ export const BUSINESS_SECTION_QUIZ_RULES: Record<
     readyIntro: (required, total) =>
       `Connect the dots to real life — ${required} of ${total} right to show you see where this company shows up.`,
     startCta: "Start real-world check",
-    lockedHint: "Read all three everyday-life cards — then connect the dots.",
+    lockedHint: "Read all five cards — then connect the dots.",
     defaultPassMessage:
       "You can point to where this company shows up in life — not just on a chart.",
     playingFeedback: {
@@ -446,6 +447,25 @@ export const BUSINESS_SECTION_QUIZ_RULES: Record<
       prompt: "Help, hurt, or rival move?",
       correct: "Sharp strategic read",
       wrong: "Land the effect on the company"
+    }
+  },
+  "who-competes": {
+    quizKind: "Competitor check",
+    checkpointGoal: "Can you name who the company is competing against?",
+    emotionalTone: "Clear-eyed, factual — rivals by category.",
+    interactionStyle:
+      "Named competitors in chips, big tech, CPUs, devices, and networking.",
+    unlockedHeadline: "Competitor check unlocked",
+    readyIntro: (required, total) =>
+      `Name the rivals — ${required} of ${total} right to show you know who they fight.`,
+    startCta: "Start competitor check",
+    lockedHint: "Read every competitor card — then run the check.",
+    defaultPassMessage:
+      "You can name who competes with this company across chips, tech, and networking.",
+    playingFeedback: {
+      prompt: "Who is the rival here?",
+      correct: "You know the battlefield",
+      wrong: "Scan the company lists again"
     }
   }
 };
@@ -528,12 +548,26 @@ export const BUSINESS_SECTION_RULES: Record<BusinessSectionId, SectionRule> = {
     teachingGoal: "Explain competition, trends, and strategic pressure.",
     emotionalTone: "Strategic, future-focused.",
     answerStyle:
-      "Named rivals, tailwinds that could accelerate, headwinds that could slow — land impact on NVIDIA.",
+      "Industry difficulty, customer expectations, future demand, and new challengers — land impact on NVIDIA.",
     presentationStyle: "Battlefield and rule-change framing.",
     interactionStyle: "Strategy check after cards.",
     avoid: ["rival name-drops without why it matters", "panic without mechanism"],
     exampleAnswerStyle:
-      "“AMD, Intel, and in-house chips keep the fight fierce — export rules can shut doors overnight.”"
+      "“Technology moves fast — companies must keep improving or fall behind.”"
+  },
+  "who-competes": {
+    pillarId: "business",
+    sectionId: "who-competes",
+    sectionLabel: "Who competes",
+    teachingGoal: "Name competitors across product categories.",
+    emotionalTone: "Clear, factual, scannable lists.",
+    answerStyle:
+      "Bullet lists of named rivals by category — chips, big tech, CPUs, devices, networking.",
+    presentationStyle: "Category cards with competitor bullet lists.",
+    interactionStyle: "Read cards → competitor check.",
+    avoid: ["wall of names without category", "mixing unrelated rivals on one card"],
+    exampleAnswerStyle:
+      "“In AI chips, NVIDIA competes with AMD, Intel, and Huawei — each building processors for advanced computing.”"
   }
 };
 

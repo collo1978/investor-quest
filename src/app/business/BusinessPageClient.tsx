@@ -125,8 +125,8 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
         "pointer-events-auto relative w-full",
         showIslandBrief ? "bg-black" : "bg-bg-0",
         schoolsDemoFullscreen
-          ? "iq-schools-business-hub-main flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-hidden"
-          : "-mb-24 pb-10 pt-2 max-md:flex max-md:min-h-[100dvh] max-md:flex-col",
+          ? "iq-schools-business-hub-main flex min-h-0 flex-1 flex-col overflow-hidden"
+          : "flex min-h-[100dvh] max-h-[100dvh] flex-col overflow-hidden max-md:pt-2",
         hydrationReady ? "" : "static-ui"
       ].join(" ")}
     >
@@ -141,7 +141,7 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
           showIslandBrief ? "pointer-events-none" : "",
           schoolsDemoFullscreen
             ? "iq-schools-business-hub-stage flex min-h-0 w-full flex-1 flex-col"
-            : "business-hub-page-stage flex w-full flex-col max-md:min-h-0 max-md:flex-1 md:items-center md:justify-center md:px-1 md:py-2 sm:px-3 sm:py-5 md:py-6",
+            : "business-hub-page-stage flex min-h-0 w-full flex-1 flex-col max-md:min-h-[100dvh]",
         ].join(" ")}
       >
         {!hydrated ? (

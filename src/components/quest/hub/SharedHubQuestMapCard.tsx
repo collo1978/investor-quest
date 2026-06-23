@@ -320,7 +320,13 @@ export function SharedHubQuestMapCard({
 
   const enter = { opacity: 0, y: 10, scale: 0.95 };
   const scale =
-    state === "locked" ? 0.94 : state === "completed" ? 1 : isActiveCard ? 1.03 : 1;
+    state === "locked"
+      ? 0.94
+      : state === "completed"
+        ? 1
+        : isActiveCard
+          ? 1.08
+          : 1;
   const shown = { opacity: 1, y: 0, scale };
 
   const baseTransition = {

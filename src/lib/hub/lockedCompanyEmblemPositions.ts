@@ -64,11 +64,11 @@ export const LOCKED_FINANCIALS_HUB_SAFE_EMBLEM_INNER =
 
 /** Business hub — tower on `public/screens/biz-quest.png`. */
 export const LOCKED_BUSINESS_HUB_TOWER_EMBLEM: CSSProperties = {
-  top: "41%",
+  top: "40%",
   left: "50%",
   ...EMBLEM_CENTER,
-  height: "clamp(3.75rem, 10.5%, 5.5rem)",
-  width: "clamp(3.5rem, 9.5%, 5rem)",
-  maxHeight: "88px",
-  maxWidth: "80px"
+  height: "clamp(2.65rem, 7.2%, 3.85rem)",
+  width: "clamp(2.45rem, 6.6%, 3.55rem)",
+  maxHeight: "62px",
+  maxWidth: "58px"
 };

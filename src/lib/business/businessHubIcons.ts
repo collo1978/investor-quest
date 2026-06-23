@@ -8,6 +8,7 @@ export const BUSINESS_HUB_ICON_GLYPHS: Record<string, string> = {
   "how-it-works": "⚙",
   "why-they-stay": "★",
   competition: "▣",
+  "who-competes": "⚔",
   snapshot: "◆",
   revenue: "◎",
   operations: "⚙",

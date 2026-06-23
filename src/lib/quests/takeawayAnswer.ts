@@ -1,8 +1,21 @@
 import { splitIntoSentences } from "@/lib/quests/scannableAnswer";
+import {
+  hasStructuredSupportBody,
+  parseScannableSupportBody,
+  type ScannableSupportChunk
+} from "@/lib/quests/scannableTakeawayBody";
+import {
+  inferLessonLayout,
+  parseLessonSupportingBody,
+  hasLessonSupportingFormat,
+  type LessonLayoutParts
+} from "@/lib/quests/lessonAnswer";
 
 export type TakeawayAnswerParts = {
   takeaway: string;
   supporting: string | null;
+  supportChunks?: ScannableSupportChunk[];
+  lesson?: LessonLayoutParts;
 };
 
 /** Hard cap for yellow hero takeaway — headline, not paragraph. */
@@ -65,7 +78,7 @@ function firstSentence(text: string): string {
   return sentences[0]?.trim() ?? collapseLines(text);
 }
 
-function supportingSentences(text: string, max = 2): string {
+function supportingSentences(text: string, max = 3): string {
   const sentences = splitIntoSentences(collapseLines(text));
   if (!sentences.length) return "";
   return sentences.slice(0, max).join(" ").trim();
@@ -90,11 +103,29 @@ export function parseTakeawayAnswerBody(body: string): TakeawayAnswerParts | nul
   const takeaway = firstSentence(mainBlock ?? "");
   if (!takeaway) return null;
 
-  const supporting = supportBlock?.trim()
-    ? supportingSentences(supportBlock) || null
+  const supportRaw = supportBlock?.trim() ?? "";
+  const structured =
+    supportRaw.length > 0 &&
+    (hasStructuredSupportBody(supportRaw) ||
+      hasLessonSupportingFormat(supportRaw));
+  const lessonParsed = supportRaw ? parseLessonSupportingBody(supportRaw) : null;
+
+  const supporting = supportRaw
+    ? structured
+      ? null
+      : supportingSentences(supportBlock!) || null
     : null;
 
-  return { takeaway, supporting };
+  const supportChunks = structured
+    ? lessonParsed?.middleChunks.length
+      ? lessonParsed.middleChunks
+      : parseScannableSupportBody(supportRaw)
+    : undefined;
+
+  const lesson: LessonLayoutParts =
+    lessonParsed ?? inferLessonLayout(supportChunks, supporting);
+
+  return { takeaway, supporting, supportChunks, lesson };
 }
 
 /** Legacy answers: first sentence = takeaway, next 1–2 = supporting. */
@@ -144,11 +175,27 @@ export function stripTakeawayLabelsForAnalysis(body: string): string {
   return body
     .replace(/MAIN TAKEAWAY:\s*/gi, "")
     .replace(/SUPPORTING EXPLANATION:\s*/gi, "")
+    .replace(/LESSON_INTRO:\s*/gi, "")
+    .replace(/LESSON_MIDDLE:\s*/gi, "")
+    .replace(/LESSON_FOCUS:\s*/gi, "")
+    .replace(/LESSON_CLOSING:\s*/gi, "")
+    .replace(/KEY TAKEAWAY:\s*/gi, "")
     .trim();
 }
 
 export function countTakeawayWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+/** Emoji section labels (🤝 PARTNERS) — not the gold takeaway sentence on legacy cards. */
+export function isEmojiSectionHeadline(text: string): boolean {
+  const trimmed = text.trim();
+  if (!trimmed) return false;
+  if (!/^(\p{Extended_Pictographic}+\s*)+/u.test(trimmed)) return false;
+  const words = countTakeawayWords(trimmed);
+  if (words > TAKEAWAY_MAX_WORDS) return false;
+  if (trimmed.endsWith(".") && words > 6) return false;
+  return true;
 }
 
 export function takeawayHasExampleLanguage(text: string): boolean {

@@ -18,6 +18,7 @@ import {
   advanceSchoolsDemoStoryStep,
   isSchoolsDemoStoryModeActive
 } from "@/lib/schools/schoolsDemoStoryMode";
+import { SCHOOLS_DEMO_RESET_EVENT } from "@/lib/schools/resetSchoolsDemoProgress";
 import { SCHOOLS_UNLOCK_LABEL_MS } from "@/lib/schools/schoolsMapUnlockAnimation";
 
 const CANONICAL_SCHOOLS_MAP_PATH = "/schools/map";
@@ -94,6 +95,16 @@ export default function SchoolsMapPageClient() {
     schoolsDemo.step,
     schoolsDemoFullscreen
   ]);
+
+  useEffect(() => {
+    const onDemoReset = () => {
+      setSchoolsBriefDismissed(true);
+      setGuidePhase("landed");
+      setShowBusinessGuideLabel(false);
+    };
+    window.addEventListener(SCHOOLS_DEMO_RESET_EVENT, onDemoReset);
+    return () => window.removeEventListener(SCHOOLS_DEMO_RESET_EVENT, onDemoReset);
+  }, []);
 
   return (
     <main

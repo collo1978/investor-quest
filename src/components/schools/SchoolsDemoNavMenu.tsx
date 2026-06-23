@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 
+import { useOptionalGame } from "@/components/GameProvider";
 import { useSchoolsDemoStory } from "@/components/schools/SchoolsDemoStoryProvider";
 import { isMobilePreviewEmbed } from "@/lib/bank/mobilePreviewEmbed";
 import { navigateSchoolsDemoMenuHref } from "@/lib/schools/navigateSchoolsDemoStep";
@@ -19,6 +20,7 @@ import {
   isSchoolsDemoPath,
   resolveSchoolsLearnerHref
 } from "@/lib/schools/schoolsDemoHref";
+import { resetSchoolsDemoProgress } from "@/lib/schools/resetSchoolsDemoProgress";
 import { isSchoolsDemoStoryModeActive } from "@/lib/schools/schoolsDemoStoryMode";
 
 /**
@@ -27,9 +29,11 @@ import { isSchoolsDemoStoryModeActive } from "@/lib/schools/schoolsDemoStoryMode
 export function SchoolsDemoNavMenu() {
   const pathname = usePathname();
   const router = useRouter();
+  const game = useOptionalGame();
   const { step } = useSchoolsDemoStory();
   const menuId = useId();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [resetBusy, setResetBusy] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [mapBriefDismissed, setMapBriefDismissed] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -58,6 +62,26 @@ export function SchoolsDemoNavMenu() {
     },
     [closeMenu, pathname, router]
   );
+
+  const onResetDemo = useCallback(() => {
+    if (resetBusy) return;
+    const ok = window.confirm(
+      "Reset Schools demo progress? Business card 1 unlocks again and quest completions are cleared. You'll return to the quest map."
+    );
+    if (!ok) return;
+
+    setResetBusy(true);
+    try {
+      resetSchoolsDemoProgress(
+        pathname,
+        router,
+        game ? { replaceGameState: game.actions.replaceGameState } : undefined
+      );
+      closeMenu();
+    } finally {
+      setResetBusy(false);
+    }
+  }, [closeMenu, game, pathname, resetBusy, router]);
 
   useEffect(() => {
     setMounted(true);
@@ -179,6 +203,23 @@ export function SchoolsDemoNavMenu() {
                   </Link>
                 );
               })}
+              {isSchoolsDemoStoryModeActive() ? (
+                <>
+                  <div
+                    aria-hidden
+                    className="relative mx-3 border-t border-violet-400/20"
+                  />
+                  <button
+                    type="button"
+                    role="menuitem"
+                    disabled={resetBusy}
+                    onClick={onResetDemo}
+                    className="relative block w-full px-4 py-3 text-left text-sm font-semibold text-amber-200/95 transition hover:bg-amber-400/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-300/70 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {resetBusy ? "Resetting…" : "Reset demo"}
+                  </button>
+                </>
+              ) : null}
             </div>
           </>
         ) : null}

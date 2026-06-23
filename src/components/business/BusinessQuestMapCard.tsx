@@ -2,7 +2,7 @@
 
 import type { CSSProperties } from "react";
 
-import { BUSINESS_MAP_CARD_WIDTH } from "@/app/business/businessQuestMapPositions";
+import { resolveBusinessMapCardWidth } from "@/app/business/businessQuestMapPositions";
 import { hubMapCardThemeFromPillar } from "@/components/quest/hub/hubMapCardTheme";
 import { SharedHubQuestMapCard } from "@/components/quest/hub/SharedHubQuestMapCard";
 import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
@@ -46,7 +46,7 @@ export function BusinessQuestMapCard(props: Props) {
       card={toHubCard(props.card)}
       mysteryLockedCards
       position={props.position}
-      cardWidth={BUSINESS_MAP_CARD_WIDTH}
+      cardWidth={resolveBusinessMapCardWidth(props.card.orderNumber)}
       cardSlotClassName={[
         "business-hub-quest-card",
         "business-hub-orbit-slot",

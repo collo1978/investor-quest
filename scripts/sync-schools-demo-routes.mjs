@@ -110,9 +110,9 @@ function main() {
     created++;
   }
 
-  const openingPath = path.join(schoolsRoot, "opening", "page.tsx");
+  const openingPath = path.join(schoolsRoot, "logo-intro", "page.tsx");
   if (fs.existsSync(openingPath)) {
-    const importPath = "@/app/schools/opening/page";
+    const importPath = "@/app/schools/logo-intro/page";
     const entrySource = buildMirrorSource(importPath, readExports(openingPath));
     const existingEntry = fs.existsSync(DEMO_ENTRY_PAGE)
       ? fs.readFileSync(DEMO_ENTRY_PAGE, "utf8")
@@ -123,7 +123,7 @@ function main() {
       created++;
     }
   } else if (!fs.existsSync(DEMO_ENTRY_PAGE)) {
-    console.warn("[sync-schools-demo] demo entry page missing — opening page not found");
+    console.warn("[sync-schools-demo] demo entry page missing — logo-intro page not found");
   }
 
   if (created > 0) {

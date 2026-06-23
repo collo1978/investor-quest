@@ -9,6 +9,18 @@ export type ConfettiBurstProps = {
   /** Particle count (capped for performance). */
   count?: number;
   className?: string;
+  /** How long the burst layer stays mounted (ms). */
+  activeDurationMs?: number;
+  /** Per-particle fall animation duration (seconds). */
+  particleDurationSec?: number;
+  /** Stagger particle starts up to this many seconds. */
+  maxParticleDelaySec?: number;
+  /** Horizontal spread in px (half-width). */
+  spreadX?: number;
+  /** Vertical fall distance in px. */
+  fallDistance?: number;
+  /** Vertical origin as % from top of container. */
+  originTopPct?: number;
 };
 
 type Particle = {
@@ -30,20 +42,29 @@ const PALETTE = [
 ];
 
 /** Deterministic offsets — safe for client-only mount (no render randomness). */
-function buildParticles(count: number, seed: number): Particle[] {
-  const n = Math.min(Math.max(count, 8), 36);
+function buildParticles(
+  count: number,
+  seed: number,
+  maxDelaySec: number,
+  spreadX: number,
+  _fallDistance: number
+): Particle[] {
+  const n = Math.min(Math.max(count, 8), 56);
   const out: Particle[] = [];
   for (let i = 0; i < n; i++) {
     const t = (seed + i * 17) % 97;
     const u = (seed + i * 31) % 89;
+    const delaySpread = maxDelaySec > 0 ? (i % 13) * (maxDelaySec / 12) : 0;
+    const lane = i % 3;
+    const xSpread = spreadX * (0.85 + lane * 0.12);
     out.push({
       id: i,
-      x: ((t / 97) * 2 - 1) * 140,
-      y: -20 - (u % 40),
+      x: ((t / 97) * 2 - 1) * xSpread,
+      y: -10 - (u % 40) + (lane - 1) * 8,
       rot: (t * 4 + u * 3) % 360,
       color: PALETTE[i % PALETTE.length],
-      delay: (i % 7) * 0.04,
-      size: 4 + (i % 3)
+      delay: delaySpread,
+      size: 4 + (i % 5)
     });
   }
   return out;
@@ -56,7 +77,13 @@ function buildParticles(count: number, seed: number): Particle[] {
 export function ConfettiBurst({
   triggerKey,
   count = 24,
-  className = ""
+  className = "",
+  activeDurationMs = 2200,
+  particleDurationSec = 1.35,
+  maxParticleDelaySec = 0.28,
+  spreadX = 160,
+  fallDistance = 140,
+  originTopPct = 38
 }: ConfettiBurstProps) {
   const reduceMotion = useReducedMotion();
   const [active, setActive] = useState(false);
@@ -65,16 +92,16 @@ export function ConfettiBurst({
     [triggerKey]
   );
   const particles = useMemo(
-    () => buildParticles(count, seed),
-    [count, seed, active]
+    () => buildParticles(count, seed, maxParticleDelaySec, spreadX, fallDistance),
+    [count, seed, active, maxParticleDelaySec, spreadX, fallDistance]
   );
 
   useEffect(() => {
     if (triggerKey == null || reduceMotion) return;
     setActive(true);
-    const t = window.setTimeout(() => setActive(false), 2200);
+    const t = window.setTimeout(() => setActive(false), activeDurationMs);
     return () => window.clearTimeout(t);
-  }, [triggerKey, reduceMotion]);
+  }, [triggerKey, reduceMotion, activeDurationMs]);
 
   if (!active || reduceMotion) return null;
 
@@ -86,8 +113,9 @@ export function ConfettiBurst({
       {particles.map((p) => (
         <motion.span
           key={`${triggerKey}-${p.id}`}
-          className="absolute left-1/2 top-[38%] rounded-[1px]"
+          className="absolute left-1/2 rounded-[1px]"
           style={{
+            top: `${originTopPct}%`,
             width: p.size,
             height: p.size * 1.6,
             background: p.color,
@@ -103,12 +131,12 @@ export function ConfettiBurst({
           animate={{
             opacity: [0, 1, 1, 0],
             x: p.x,
-            y: [p.y, p.y + 120 + (p.id % 5) * 18],
-            rotate: p.rot + 180,
-            scale: [0.6, 1, 0.85]
+            y: [p.y, p.y + fallDistance + (p.id % 6) * 22],
+            rotate: p.rot + 220,
+            scale: [0.6, 1.05, 0.9]
           }}
           transition={{
-            duration: 1.35,
+            duration: particleDurationSec,
             delay: p.delay,
             ease: [0.22, 0.9, 0.28, 1]
           }}

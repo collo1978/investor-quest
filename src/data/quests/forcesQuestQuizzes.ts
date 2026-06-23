@@ -33,11 +33,17 @@ export const FORCES_CATEGORY_QUEST_QUIZZES: Record<ForcesCategoryId, QuizConfig>
           "Positive inside forces are about what {Company.name} can control from within the business."
       },
       {
-        kind: "true-false",
+        kind: "scenario",
         id: "f-pi-q3",
         prompt:
-          "If {Company.name} loses an inside strength, customers might notice before Wall Street does.",
-        correct: true,
+          "Launch delays and slower chips start showing up in products. Who might notice before Wall Street headlines?",
+        choices: [
+          "Customers using the products day to day",
+          "Only people who never use the tech",
+          "Nobody — products never signal trouble",
+          "Only logo designers"
+        ],
+        correctIndex: 0,
         explain:
           "Slow chips, messy launches, or weak trust often show up in products before they show up in headlines."
       }
@@ -70,11 +76,12 @@ export const FORCES_CATEGORY_QUEST_QUIZZES: Record<ForcesCategoryId, QuizConfig>
           "Outside forces come from the world around {Company.name} — demand, policy, geography — not inside the building."
       },
       {
-        kind: "true-false",
+        kind: "fill-blank",
         id: "f-po-q3",
         prompt:
-          "A tailwind can fade even if {Company.name} still runs the business well.",
-        correct: true,
+          "Complete the sentence:\nA market tailwind can ___ even when {Company.name} still runs the business well.",
+        options: ["fade", "last forever", "ban rivals", "replace products"],
+        correctIndex: 0,
         explain:
           "Outside boosts aren't permanent — demand can cool while the company is still doing its job."
       }
@@ -149,11 +156,17 @@ export const FORCES_CATEGORY_QUEST_QUIZZES: Record<ForcesCategoryId, QuizConfig>
           "Negative outside forces come from competition, policy, macro — not from redecorating HQ."
       },
       {
-        kind: "true-false",
+        kind: "scenario",
         id: "f-no-q3",
         prompt:
-          "Export rules between countries can move {Company.name}'s stock without a product miss.",
-        correct: true,
+          "New export rules block chip sales to a huge market overnight. What is the realistic takeaway?",
+        choices: [
+          "Policy can move the stock without a product miss",
+          "Regulation never affects large companies",
+          "Rivals automatically disappear",
+          "Revenue must triple the next day"
+        ],
+        correctIndex: 0,
         explain:
           "Policy can block sales overnight — that's outside force hitting the business for real."
       }

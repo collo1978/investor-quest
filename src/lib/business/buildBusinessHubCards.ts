@@ -36,7 +36,8 @@ const SLUG_FALLBACK_ORDER: Record<string, number> = {
   "everyday-life": 3,
   "how-it-works": 4,
   "why-they-stay": 5,
-  competition: 6
+  competition: 6,
+  "who-competes": 7
 };
 
 /** Canonical prior quest slug for each hub slot (not “whatever occupies slot N−1”). */
@@ -45,7 +46,8 @@ const CANONICAL_PRIOR_SLUG: Record<number, string | undefined> = {
   3: "why-buying",
   4: "everyday-life",
   5: "how-it-works",
-  6: "why-they-stay"
+  6: "why-they-stay",
+  7: "competition"
 };
 
 

@@ -106,7 +106,7 @@ export type SchoolsMapIslandHotspot = {
  * Business only is playable in Schools — the other three stay locked.
  */
 export const SCHOOLS_MAP_ISLAND_HOTSPOTS: readonly SchoolsMapIslandHotspot[] = [
-  { id: "business", cx: 25.5, cy: 28, w: 24, h: 26 },
+  { id: "business", cx: 29, cy: 22, w: 14, h: 21 },
   { id: "forces", cx: 74.5, cy: 28, w: 24, h: 26 },
   { id: "financials", cx: 25.5, cy: 72, w: 26, h: 28 },
   { id: "management", cx: 74.5, cy: 72, w: 26, h: 28 }

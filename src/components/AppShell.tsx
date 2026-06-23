@@ -121,8 +121,9 @@ export function AppShell({
   const isEntryFunnel =
     learnerPath === "/opening" || learnerPath === "/welcome";
   const isSchoolsOpeningScreen =
-    learnerPath === "/schools" || learnerPath === "/schools/opening";
-  const isSchoolsAvatarScreen = learnerPath === "/schools/avatar";
+    learnerPath === "/schools" || learnerPath === "/schools/logo-intro";
+  const isSchoolsAvatarScreen =
+    learnerPath === "/schools/mission-brief-cards" || learnerPath === "/schools/logo-reveal";
   const isSchoolsPosterScreen =
     learnerPath === "/schools/profile" || learnerPath === "/schools/armor-guide";
   const isSchoolsPickCompanyScreen = learnerPath === "/schools/pick-company";
@@ -154,10 +155,21 @@ export function AppShell({
 
   const schoolsNav: readonly SidebarNavItem[] = [
     { href: "/schools/demo", label: "Schools Live Demo" },
-    { href: "/schools/opening", label: "Opening Logo" },
-    { href: "/schools/avatar", label: "Choose Identity" },
+    { href: "/schools/logo-intro", label: "Logo Intro" },
+    { href: "/schools/mission-brief-cards", label: "Mission Brief Cards" },
+    { href: "/schools/logo-reveal", label: "Logo Reveal" },
     { href: "/schools/screen5-onboarding", label: "Stocks Experience" },
     { href: "/schools/preview/mission-brief", label: "Mission Brief" },
+    { href: "/schools/preview/mission-brief-terminal", label: "Mission Brief Terminal" },
+    { href: "/schools/preview/jarvis-ai-briefing", label: "Jarvis AI Briefing" },
+    { href: "/schools/preview/mission-card-reveal", label: "Mission Card Reveal" },
+    { href: "/schools/preview/red-alert-system", label: "Red Alert System" },
+    { href: "/schools/preview/hacker-style", label: "Hacker Style" },
+    { href: "/schools/preview/final-mission-brief", label: "Final Mission Brief" },
+    { href: "/schools/preview/logo-intro", label: "Logo Intro" },
+    { href: "/schools/preview/mission-brief-cards", label: "Mission Brief Cards" },
+    { href: "/schools/preview/logo-reveal", label: "Logo Reveal" },
+    { href: "/schools/preview/tech-sector", label: "Technology Sector" },
     { href: "/schools/map", label: "Map" },
     { href: "/schools/business", label: "Business" },
     { href: "/schools/forces", label: "Forces" },

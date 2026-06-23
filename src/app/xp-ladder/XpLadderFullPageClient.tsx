@@ -11,11 +11,9 @@ import {
   type InvestorRung
 } from "@/data/progression/investorLadder";
 import { formatAnalyticsNumber } from "@/lib/analytics/formatDisplay";
-import { NeonButton } from "@/components/NeonButton";
 import {
   isSchoolsDemoPath,
-  resolveSchoolsDemoProfileHref,
-  resolveSchoolsLearnerHref
+  resolveSchoolsDemoProfileHref
 } from "@/lib/schools/schoolsDemoHref";
 
 const GOLD = "#F5C547";
@@ -156,10 +154,6 @@ export function XpLadderFullPageClient() {
   /** Pathname-only — avoids sessionStorage mismatch during SSR hydration. */
   const schoolsTour = isSchoolsDemoPath(pathname);
   const profileHref = resolveSchoolsDemoProfileHref(pathname);
-  const finalChallengeHref = resolveSchoolsLearnerHref(
-    "/schools/final-challenge",
-    pathname
-  );
 
   const ordered = useMemo(
     () => [...INVESTOR_RUNGS].sort((a, b) => b.xp - a.xp),
@@ -443,14 +437,6 @@ export function XpLadderFullPageClient() {
               {formatAnalyticsNumber(xp)}
             </span>
           </p>
-
-          {schoolsTour ? (
-            <div className="mt-8 flex justify-center">
-              <NeonButton href={finalChallengeHref} className="min-h-[44px]">
-                Final challenge →
-              </NeonButton>
-            </div>
-          ) : null}
         </div>
       </div>
     </div>

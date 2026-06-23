@@ -18,3 +18,12 @@ export function wasBusinessIslandBriefSeen(): boolean {
     return false;
   }
 }
+
+export function clearBusinessIslandBriefSeen(): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.removeItem(KEY);
+  } catch {
+    /* ignore */
+  }
+}

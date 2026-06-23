@@ -58,6 +58,7 @@ import {
   initialOrderPermutation,
   orderPermutationsEqual
 } from "@/lib/quests/quizOrderShuffle";
+import { createQuizAttemptLayout } from "@/lib/quests/quizChoiceShuffle";
 import {
   islandQuizLockedHint,
   islandQuizPlayingFeedback,
@@ -66,6 +67,7 @@ import {
   islandQuizStatusLabel,
   islandQuizUnlockedHeadline
 } from "@/lib/quests/islandQuizStyle";
+import { LOCK_IN_ANSWER_LABEL } from "@/lib/quests/gameActionCopy";
 import { resolveSchoolsDemoMapHref } from "@/lib/schools/schoolsDemoHref";
 import {
   SCHOOLS_CARD_COMPLETE_XP,
@@ -149,15 +151,6 @@ type Phase = "locked" | "ready" | "playing" | "summary";
 type AnswerMap = Record<string, unknown>;
 type PerQuestionStatus = "upcoming" | "current" | "correct" | "wrong";
 
-function shuffleArray<T>(arr: T[]): T[] {
-  const out = arr.slice();
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
-
 export function QuestQuizPanel({
   pillarId,
   slug,
@@ -223,21 +216,21 @@ export function QuestQuizPanel({
   const threshold = quiz?.passThreshold ?? 0.66;
   const requiredCorrect = Math.max(1, Math.ceil(total * threshold));
 
-  // Identity-stable initial order (questions in their original order).
-  // First paint is always `locked` or `ready` â€” never `playing` â€” so this
-  // never causes a hydration mismatch.
-  const initialOrder = useMemo(
-    () => questions.map((_, i) => i),
-    [questions]
+  const shouldShuffleOnMount =
+    !alreadyCompleted && autoStart && unlocked;
+  const initialLayoutRef = useRef(
+    shouldShuffleOnMount
+      ? createQuizAttemptLayout(questions, true)
+      : {
+          order: questions.map((_, i) => i),
+          displayQuestions: questions.map((q) => q)
+        }
   );
 
-  const [order, setOrder] = useState<number[]>(() => {
-    // Client-only panel. When `autoStart` is true, skip the Ready interstitial
-    // without a flash by starting in `playing` with a shuffled order.
-    if (alreadyCompleted) return initialOrder;
-    if (autoStart && unlocked) return shuffleArray(initialOrder);
-    return initialOrder;
-  });
+  const [order, setOrder] = useState<number[]>(() => initialLayoutRef.current.order);
+  const [displayQuestions, setDisplayQuestions] = useState<QuizQuestion[]>(
+    () => initialLayoutRef.current.displayQuestions
+  );
   const [answers, setAnswers] = useState<AnswerMap>({});
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
@@ -301,7 +294,9 @@ export function QuestQuizPanel({
       (lastFraction !== null && lastFraction >= 0.9));
 
   const startQuiz = useCallback(() => {
-    setOrder(shuffleArray(questions.map((_, i) => i)));
+    const layout = createQuizAttemptLayout(questions, true);
+    setOrder(layout.order);
+    setDisplayQuestions(layout.displayQuestions);
     setAnswers({});
     setCheckedIds([]);
     setCurrentIndex(0);
@@ -326,8 +321,27 @@ export function QuestQuizPanel({
   }, [autoStart, alreadyCompleted, unlocked, phase, startQuiz]);
 
   function setAnswer(qid: string, value: unknown) {
+    if (checkedIdsRef.current.includes(qid)) return;
     setAnswers((prev) => ({ ...prev, [qid]: value }));
   }
+
+  const lockInCurrentAnswer = useCallback(() => {
+    const q = currentQRef.current;
+    if (!q || checkedIdsRef.current.includes(q.id)) return;
+    const ans = answers[q.id];
+    if (!isQuizAnswerProvided(q, ans)) return;
+    if (q.kind === "order") {
+      const oq = q as OrderQuestion;
+      const initial = initialOrderPermutation(oq.id, oq.steps.length);
+      if (
+        Array.isArray(ans) &&
+        orderPermutationsEqual(ans as number[], initial)
+      ) {
+        return;
+      }
+    }
+    setCheckedIds((prev) => (prev.includes(q.id) ? prev : [...prev, q.id]));
+  }, [answers]);
 
   function advance() {
     if (currentIndex < total - 1) {
@@ -336,7 +350,7 @@ export function QuestQuizPanel({
     }
     // Last question â€” tally final score and transition to summary.
     const correctCount = order.reduce((n, idx) => {
-      const q = questions[idx];
+      const q = displayQuestions[idx]!;
       return isQuizAnswerCorrect(q, answers[q.id]) ? n + 1 : n;
     }, 0);
     setLastScore(correctCount);
@@ -370,7 +384,7 @@ export function QuestQuizPanel({
 
   const currentQ: QuizQuestion | null =
     phase === "playing" && order[currentIndex] !== undefined
-      ? questions[order[currentIndex]]
+      ? displayQuestions[order[currentIndex]] ?? null
       : null;
   currentQRef.current = currentQ;
   const currentQuestionId = currentQ?.id ?? null;
@@ -383,6 +397,24 @@ export function QuestQuizPanel({
   const isCurrentCorrect = currentQ
     ? isQuizAnswerCorrect(currentQ, answers[currentQ.id])
     : false;
+  const isCurrentAnswerProvided = currentQ
+    ? isQuizAnswerProvided(currentQ, currentAnswerValue)
+    : false;
+  const isOrderAtDefault =
+    currentQ?.kind === "order" &&
+    Array.isArray(currentAnswerValue) &&
+    orderPermutationsEqual(
+      currentAnswerValue as number[],
+      initialOrderPermutation(
+        currentQ.id,
+        (currentQ as OrderQuestion).steps.length
+      )
+    );
+  const canLockIn =
+    isCurrentAnswerProvided &&
+    !isCurrentChecked &&
+    (currentQ?.kind !== "order" || !isOrderAtDefault);
+
   const isLast = currentIndex >= total - 1;
 
   const questViews = usePillarQuestViews(pillarId);
@@ -406,38 +438,16 @@ export function QuestQuizPanel({
     if (phase !== "summary" || lastScore === null) return [];
     const snippets: string[] = [];
     for (const idx of order) {
-      const q = questions[idx];
+      const q = displayQuestions[idx]!;
       if (isQuizAnswerCorrect(q, answers[q.id])) continue;
       if (q.explain?.trim()) snippets.push(q.explain.trim());
       if (snippets.length >= 2) break;
     }
     return snippets;
-  }, [phase, lastScore, order, questions, answers]);
+  }, [phase, lastScore, order, displayQuestions, answers]);
 
   // Instant inline feedback once the answer is complete (same screen).
-  useEffect(() => {
-    const q = currentQRef.current;
-    if (phase !== "playing" || !q || !currentQuestionId) return;
-    if (checkedIdsRef.current.includes(currentQuestionId)) return;
-    const ans = currentAnswerValue;
-    if (!isQuizAnswerProvided(q, ans)) return;
-    if (q.kind === "order") {
-      const oq = q as OrderQuestion;
-      const initial = initialOrderPermutation(oq.id, oq.steps.length);
-      if (
-        Array.isArray(ans) &&
-        orderPermutationsEqual(ans as number[], initial)
-      ) {
-        return;
-      }
-    }
-    const qid = currentQuestionId;
-    clearAnswerCheckTimer();
-    answerCheckTimerRef.current = window.setTimeout(() => {
-      answerCheckTimerRef.current = null;
-      setCheckedIds((prev) => (prev.includes(qid) ? prev : [...prev, qid]));
-    }, 120);
-  }, [phase, currentQuestionId, currentAnswerValue, clearAnswerCheckTimer]);
+  // Removed: answers lock in only via explicit "LOCK IN ANSWER" CTA.
 
   useEffect(() => {
     setMicroBeat(null);
@@ -489,7 +499,7 @@ export function QuestQuizPanel({
   ]);
 
   const perQuestionStatus: PerQuestionStatus[] = order.map((origIdx, slot) => {
-    const q = questions[origIdx];
+    const q = displayQuestions[origIdx]!;
     const checked = checkedIds.includes(q.id);
     if (!checked) {
       return slot === currentIndex ? "current" : "upcoming";
@@ -717,12 +727,8 @@ export function QuestQuizPanel({
                         question={currentQ}
                         value={answers[currentQ.id]}
                         onChange={(v) => setAnswer(currentQ.id, v)}
-                        mode={
-                          isCurrentChecked && currentQ.kind !== "order"
-                            ? "review"
-                            : "input"
-                        }
-                        showFeedback={isCurrentChecked}
+                        mode={isCurrentChecked ? "review" : "input"}
+                        showFeedback={false}
                         variant={isPlayingFocus ? "focus" : "default"}
                         celebrateCorrect={
                           isSchoolsReward &&
@@ -762,40 +768,60 @@ export function QuestQuizPanel({
                 }
                 initial={false}
                 animate={{
-                  opacity: isCurrentChecked ? 1 : 0.45
+                  opacity: canLockIn || isCurrentChecked ? 1 : 0.55
                 }}
               >
-                {isCurrentChecked && !isSchoolsReward ? (
-                  <span
-                    className={
-                      isPlayingFocus
-                        ? "text-center text-sm font-medium sm:text-left"
-                        : "text-[11.5px] uppercase tracking-[0.16em] text-ink-2"
-                    }
-                    style={{
-                      color: isCurrentCorrect ? GREEN_HI : RED_HI
-                    }}
-                  >
-                    {isCurrentCorrect
-                      ? quizPlayingCopy.correct
-                      : quizPlayingCopy.wrong}
-                  </span>
-                ) : isPlayingFocus ? (
-                  <span className="sr-only">Select an answer to continue</span>
+                {isCurrentChecked ? (
+                  <>
+                    {!isSchoolsReward ? (
+                      <span
+                        className={
+                          isPlayingFocus
+                            ? "text-center text-sm font-medium sm:text-left"
+                            : "text-[11.5px] uppercase tracking-[0.16em] text-ink-2"
+                        }
+                        style={{
+                          color: isCurrentCorrect ? GREEN_HI : RED_HI
+                        }}
+                      >
+                        {isCurrentCorrect
+                          ? quizPlayingCopy.correct
+                          : quizPlayingCopy.wrong}
+                      </span>
+                    ) : null}
+                    <PrimaryGoldButton
+                      onClick={advance}
+                      variant={isPlayingFocus ? "trail" : "default"}
+                    >
+                      {isLast ? "See results" : "Next question"}
+                    </PrimaryGoldButton>
+                  </>
                 ) : (
-                  <span className="text-[11.5px] uppercase tracking-[0.16em] text-ink-2">
-                    {currentQ?.kind === "order"
-                      ? "Reorder the steps, then continue"
-                      : quizPlayingCopy.prompt}
-                  </span>
+                  <>
+                    {isPlayingFocus ? (
+                      <span className="sr-only">
+                        {canLockIn
+                          ? "Lock in your answer to continue"
+                          : "Select an answer to continue"}
+                      </span>
+                    ) : (
+                      <span className="text-[11.5px] uppercase tracking-[0.16em] text-ink-2">
+                        {currentQ?.kind === "order"
+                          ? "Reorder the steps, then lock in your answer"
+                          : canLockIn
+                            ? "Tap another option to change your mind"
+                            : quizPlayingCopy.prompt}
+                      </span>
+                    )}
+                    <PrimaryGoldButton
+                      onClick={lockInCurrentAnswer}
+                      disabled={!canLockIn}
+                      variant={isPlayingFocus ? "trail" : "default"}
+                    >
+                      {LOCK_IN_ANSWER_LABEL}
+                    </PrimaryGoldButton>
+                  </>
                 )}
-                <PrimaryGoldButton
-                  onClick={advance}
-                  disabled={!isCurrentChecked}
-                  variant={isPlayingFocus ? "trail" : "default"}
-                >
-                  {isLast ? "See results" : "Next question"}
-                </PrimaryGoldButton>
               </motion.div>
             </motion.div>
           ) : isSchoolsReward && didPass && onBackToIsland ? (
@@ -807,7 +833,11 @@ export function QuestQuizPanel({
               transition={{ duration: 0.22 }}
             >
               <SchoolsQuestQuizCompletionFlow
+                key={`schools-complete-${slug}`}
                 rewardXp={cardCompleteXp > 0 ? cardCompleteXp : rewardXp}
+                quizMicroXp={
+                  lastScore != null ? lastScore * microXpPerCorrect : 0
+                }
                 prideLine={
                   schoolsPrideLine ??
                   "You now understand this company better than most beginners."
@@ -815,6 +845,7 @@ export function QuestQuizPanel({
                 takeaways={schoolsLearnings}
                 accent={accent}
                 onBackToIsland={onBackToIsland}
+                questSlug={slug}
               />
             </motion.div>
           ) : (

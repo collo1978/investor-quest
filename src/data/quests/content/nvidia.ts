@@ -14,7 +14,7 @@ import {
   NVDA_DEMO_SOURCE,
   NVDA_DEMO_SOURCE_TEAM
 } from "@/lib/demo/nvidiaDemoSources";
-import { goldAnswer } from "@/lib/demo/nvidiaDemoGoldAnswer";
+import { goldAnswer, lessonAnswer } from "@/lib/demo/nvidiaDemoGoldAnswer";
 import { NVIDIA_FORCES_DEMO_OVERRIDES } from "@/data/quests/content/nvidiaForcesDemo";
 
 const PASS = 0.66 as const;
@@ -39,15 +39,27 @@ export const NVIDIA_CONTENT: CompanyContent = {
         "card-1": {
           investorQuestion: "What does NVIDIA actually sell?",
           plainEnglishAnswer: goldAnswer(
-            "NVIDIA builds powerful computer chips that help run AI and advanced graphics.",
-            "When you use ChatGPT, watch realistic video games, or see AI create images, there is a good chance NVIDIA technology is helping behind the scenes. Their chips are designed to process huge amounts of data much faster than a normal computer can."
+            "NVIDIA sells powerful computer chips called GPUs (Graphics Processing Units).",
+            `• Think of a GPU as a super-powered brain built for difficult computer tasks.
+• Used in:
+  - AI
+  - Video games
+  - Data centers
+  - Scientific research
+• 🏆 NVIDIA is one of the world's leading GPU companies.`
           )
         },
         "card-2": {
-          investorQuestion: "Why do customers buy NVIDIA products?",
+          investorQuestion: "Why do customers buy NVIDIA chips?",
           plainEnglishAnswer: goldAnswer(
-            "NVIDIA helps computers do difficult tasks faster and more efficiently.",
-            "Companies use NVIDIA chips to train AI models, gamers use them for smoother graphics, and businesses use them to process large amounts of information. By reducing waiting time and improving performance, NVIDIA helps customers save time and get more done."
+            "Because they help computers think faster.",
+            `Imagine trying to solve 1,000 maths questions at once.
+A normal computer might take a long time.
+NVIDIA's chips are designed to work on many problems at the same time.
+This helps:
+- AI answer questions faster
+- Video games run more smoothly
+- Companies process information more quickly`
           )
         }
       }),
@@ -57,60 +69,89 @@ export const NVIDIA_CONTENT: CompanyContent = {
           {
             kind: "multiple-choice",
             id: "nvda-snap-q1",
-            prompt: "What does NVIDIA mostly sell?",
+            prompt: "What does NVIDIA actually sell?",
             choices: [
-              "Chips that help AI and games run",
-              "A streaming TV app",
-              "Electric cars",
-              "Coffee shops"
+              "Powerful computer chips called GPUs",
+              "Smartphones",
+              "Streaming subscriptions",
+              "Electric cars"
             ],
             correctIndex: 0,
             explain:
-              "Chips for AI and games — that's what they sell, even if you never buy one yourself."
+              "NVIDIA sells GPUs — specialized chips built for heavy computing work."
           },
           {
             kind: "true-false",
             id: "nvda-snap-q2",
-            prompt: "True or False: ChatGPT and many AI apps rely on NVIDIA chips.",
+            prompt:
+              "GPUs help computers process lots of information at the same time.",
             correct: true,
             explain:
-              "Lots of AI apps you touch often run on gear that includes NVIDIA chips."
+              "GPUs handle many calculations in parallel — that's what makes AI and games faster."
           },
           {
             kind: "fill-blank",
             id: "nvda-snap-q3",
-            prompt: "Think of NVIDIA like the ___ that helps AI and games run faster.",
-            options: ["Turbocharger", "Museum", "Airline", "Grocery store"],
+            prompt:
+              "Complete the sentence:\nNVIDIA's chips help computers think ______.",
+            options: ["Faster", "Smaller", "Slower", "Louder"],
             correctIndex: 0,
             explain:
-              "Not the whole car — the part that adds serious speed behind the scenes."
+              "NVIDIA chips are built for speed — that's what powers AI and smooth games."
           }
         ]
       })
     },
 
     [contentKey("business", "why-buying")]: {
+      title: "WHAT'S NVIDIA'S PRODUCT SEGMENTS?",
       cards: cards({
         "card-1": {
-          investorQuestion: "Who spends the most money with NVIDIA?",
-          plainEnglishAnswer: goldAnswer(
-            "A few giant tech buyers drive most revenue.",
-            "Picture Microsoft, Google, and Amazon placing massive orders — not you buying one graphics card at Best Buy. If one of those giants pauses spending, NVIDIA feels it fast."
-          )
+          investorQuestion: "What are NVIDIA's two main product segments?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🧩 Two main product segments",
+            intro: "NVIDIA splits its business into two big areas.",
+            middle: `🤖 Compute & Networking
+• AI
+• Data Centers
+• Cloud Computing
+• Robotics
+🎮 Graphics
+• Gaming
+• PC Graphics
+• Creative & Design Software`,
+            closing:
+              "Different segments serve different types of customers."
+          })
         },
         "card-2": {
-          investorQuestion: "What products make NVIDIA the most money?",
-          plainEnglishAnswer: goldAnswer(
-            "Server AI chips pay most bills now.",
-            "Gaming gear still sells, but the big money lately is companies building AI — like buying engines for every new chatbot and cloud service they launch."
-          )
+          investorQuestion: "What does the Compute & Networking segment do?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "⚡ Powers AI and large data centers",
+            intro:
+              "Think of a data center as a giant warehouse filled with computers.",
+            focusTitle: "What do these computers power?",
+            focusBullets: ["AI tools", "Websites", "Apps", "Cloud services"],
+            closing:
+              "NVIDIA helps these systems process huge amounts of information quickly."
+          })
         },
         "card-3": {
-          investorQuestion: "Why are companies rushing to buy AI chips?",
-          plainEnglishAnswer: goldAnswer(
-            "The AI race needs more computing power fast.",
-            "Every company racing to launch AI needs serious horsepower behind the scenes. NVIDIA is the name a lot of them call when they need to move fast and not fall behind."
-          )
+          investorQuestion: "What does the Graphics segment do?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🎮 Focuses on gaming and visual computing",
+            intro:
+              "NVIDIA's graphics technology helps video games look more realistic and run more smoothly.",
+            focusTitle: "Who uses this segment?",
+            focusBullets: [
+              "Video game players",
+              "Designers and engineers",
+              "Architects",
+              "Movie creators"
+            ],
+            closing:
+              "Powerful graphics tools help creative work look real and run fast."
+          })
         }
       }),
       quizConfig: q({
@@ -119,71 +160,117 @@ export const NVIDIA_CONTENT: CompanyContent = {
           {
             kind: "multiple-choice",
             id: "nvda-wb-q1",
-            prompt: "Who spends the most money with NVIDIA?",
+            prompt: "What are NVIDIA's two main product segments?",
             choices: [
-              "A few giant tech companies placing huge orders",
-              "Individual shoppers buying one graphics card at a time",
-              "Small local restaurants",
-              "Movie theaters"
+              "Compute & Networking and Graphics",
+              "AI and Smartphones",
+              "Gaming and Restaurants",
+              "Cars and Streaming"
             ],
             correctIndex: 0,
             explain:
-              "Think Microsoft, Google, and Amazon — not you picking up one card at Best Buy."
+              "NVIDIA splits its business into Compute & Networking and Graphics."
           },
           {
-            kind: "multiple-choice",
+            kind: "true-false",
             id: "nvda-wb-q2",
-            prompt: "Which product line brings in the most money for NVIDIA lately?",
-            choices: [
-              "Server AI chips for cloud and data centers",
-              "Gaming graphics cards alone",
-              "Movie tickets and streaming apps",
-              "Restaurant and retail store sales"
-            ],
-            correctIndex: 0,
+            prompt:
+              "NVIDIA's Graphics segment focuses on gaming and visual computing.",
+            correct: true,
             explain:
-              "Gaming still sells — but huge AI orders from cloud and tech companies pay most bills now."
+              "Gaming, PC graphics, and creative tools live in the Graphics segment."
           },
           {
-            kind: "multiple-choice",
+            kind: "scenario",
             id: "nvda-wb-q3",
-            prompt: "Why are companies rushing to buy NVIDIA AI chips right now?",
+            prompt:
+              "A company wants to build a new AI chatbot. Which NVIDIA segment would most likely help them?",
             choices: [
-              "The AI race needs more computing power fast",
-              "NVIDIA stopped selling chips to tech companies",
-              "Governments banned gaming graphics cards",
-              "Customers only buy one chip at a time now"
+              "Compute & Networking",
+              "Graphics",
+              "Gaming Services",
+              "Design Software"
             ],
             correctIndex: 0,
             explain:
-              "Every company launching AI needs serious horsepower — and many do not want to fall behind rivals."
+              "AI chatbots need the heavy computing power this segment provides."
           }
         ]
       })
     },
 
     [contentKey("business", "everyday-life")]: {
+      title: "HOW NVIDIA STAYS AHEAD",
       cards: cards({
         "card-1": {
-          investorQuestion: "Where do people interact with NVIDIA technology?",
-          plainEnglishAnswer: goldAnswer(
-            "You meet NVIDIA inside apps and games.",
-            "You never buy an NVIDIA part at the mall — you feel it when ChatGPT answers quick or a game looks insane. That speed often starts in giant server rooms packed with their gear."
-          )
+          investorQuestion: "How does NVIDIA stay ahead through technology?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "⚡ BETTER TECHNOLOGY",
+            intro: "NVIDIA doesn't just build computer chips.",
+            focusTitle: "It builds a complete technology platform:",
+            focusBullets: [
+              "Chips",
+              "Software",
+              "Networking",
+              "AI tools that work together"
+            ],
+            closing:
+              "By improving the whole system, NVIDIA aims to help customers solve problems faster than competing technologies."
+          })
         },
         "card-2": {
-          investorQuestion: "How does NVIDIA affect gaming and AI apps?",
-          plainEnglishAnswer: goldAnswer(
-            "NVIDIA helps games look better and AI respond faster.",
-            "Smooth frame rates in a new game? Faster replies from an AI helper? Same idea — powerful chips doing math-heavy work so your experience does not lag."
-          )
+          investorQuestion: "How does NVIDIA stay ahead in AI?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🤖 ARTIFICIAL INTELLIGENCE",
+            intro: "NVIDIA is investing heavily in AI.",
+            focusTitle: "It builds:",
+            focusBullets: [
+              "AI chips",
+              "Software and tools",
+              "Services that help businesses create and run AI apps"
+            ],
+            closing:
+              "Today, millions of developers use NVIDIA's technology, helping strengthen its position in the AI industry."
+          })
         },
         "card-3": {
-          investorQuestion: "Why do AI companies rely on NVIDIA?",
-          plainEnglishAnswer: goldAnswer(
-            "AI teams trust NVIDIA because it already works.",
-            "Coders already know how to build on NVIDIA's tools from school and work projects. Starting fresh on a rival system feels like switching game consoles mid-season — slow and risky."
-          )
+          investorQuestion: "How does NVIDIA stay ahead in graphics?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🎮 COMPUTER GRAPHICS",
+            intro:
+              "NVIDIA is constantly improving the technology behind gaming and computer graphics.",
+            focusTitle: "Its products are used by:",
+            focusBullets: [
+              "Gamers",
+              "Designers and engineers",
+              "Content creators around the world"
+            ],
+            closing:
+              "By combining graphics with AI, NVIDIA hopes to stay at the forefront of visual computing."
+          })
+        },
+        "card-4": {
+          investorQuestion: "How does NVIDIA stay ahead in self-driving cars?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🚗 SELF-DRIVING CARS",
+            intro:
+              "NVIDIA believes self-driving cars could become a major future market.",
+            middle:
+              "Its DRIVE platform helps car companies develop vehicles that can use AI to assist drivers or even drive themselves.",
+            closing:
+              "By investing early in this technology, NVIDIA hopes to stay ahead as the transportation industry evolves."
+          })
+        },
+        "card-5": {
+          investorQuestion: "How does NVIDIA stay ahead through its technology?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🔒 NVIDIA'S TECHNOLOGY",
+            intro: "NVIDIA owns valuable technology, software, and inventions.",
+            middle:
+              "Other companies can sometimes pay to use NVIDIA's technology in their own products.",
+            closing:
+              "This helps NVIDIA expand the reach of its innovations beyond the products it sells directly."
+          })
         }
       }),
       quizConfig: q({
@@ -227,27 +314,43 @@ export const NVIDIA_CONTENT: CompanyContent = {
     },
 
     [contentKey("business", "how-it-works")]: {
+      title: "HOW NVIDIA SELLS AND MARKETS",
       cards: cards({
         "card-1": {
-          investorQuestion: "How are NVIDIA chips designed and built?",
-          plainEnglishAnswer: goldAnswer(
-            "NVIDIA designs chips; other companies build them.",
-            "Think of NVIDIA as the architect drawing blueprints, and partner factories as the construction crew actually building the chips. Finished parts ship to tech giants and gaming PC makers worldwide."
-          )
+          investorQuestion: "How does NVIDIA reach customers around the world?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🤝 PARTNERS",
+            intro:
+              "NVIDIA works with a large network of partners around the world.",
+            middle:
+              "These partners help sell, distribute, and support NVIDIA products across different industries and countries.",
+            closing:
+              "By working together, NVIDIA can reach more customers than it could on its own."
+          })
         },
         "card-2": {
-          investorQuestion: "Who helps manufacture NVIDIA products?",
-          plainEnglishAnswer: goldAnswer(
-            "Partner factories actually build the chips.",
-            "NVIDIA does not own every factory on Earth — like a clothing brand that designs but does not sew every shirt. That helps them scale fast, but a factory slowdown could leave customers waiting."
-          )
+          investorQuestion: "How does NVIDIA help customers use its technology?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🛠️ HELPING CUSTOMERS SUCCEED",
+            intro:
+              "NVIDIA employs engineers and technology experts who work closely with customers.",
+            middle:
+              "They help businesses design, test, and improve systems that use NVIDIA products.",
+            closing:
+              "This support helps customers get the most value from NVIDIA's technology."
+          })
         },
         "card-3": {
-          investorQuestion: "How does NVIDIA deliver its technology worldwide?",
-          plainEnglishAnswer: goldAnswer(
-            "Chips ship worldwide to big tech partners.",
-            "Orders go to cloud companies, PC makers, and distributors everywhere. Who gets the next batch can decide whose AI launch ships on time."
-          )
+          investorQuestion: "Why are developers important to NVIDIA?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "👨‍💻 DEVELOPERS",
+            intro:
+              "NVIDIA works closely with software developers around the world.",
+            middle:
+              "It provides tools, training, and educational programs that help developers build applications using NVIDIA technology.",
+            closing:
+              "The more developers who use NVIDIA's platform, the stronger its ecosystem becomes."
+          })
         }
       }),
       quizConfig: q({
@@ -256,63 +359,83 @@ export const NVIDIA_CONTENT: CompanyContent = {
           {
             kind: "multiple-choice",
             id: "nvda-hiw-q1",
-            prompt: "Who actually makes the physical chips?",
+            prompt: "How does NVIDIA reach customers around the world?",
             choices: [
-              "Partner factories — not NVIDIA-owned plants everywhere",
-              "NVIDIA owns every factory on Earth",
-              "Chips are built in grocery stores",
-              "Banks print them"
+              "Through a large network of partners that sell, distribute, and support its products",
+              "Only through NVIDIA-owned stores in every country",
+              "By shipping chips directly to every household",
+              "Through banks that manage chip orders"
             ],
             correctIndex: 0,
             explain:
-              "NVIDIA designs; partner factories build — architect plus construction crew."
+              "Partners help NVIDIA reach more customers across industries and countries than it could on its own."
           },
           {
             kind: "true-false",
             id: "nvda-hiw-q2",
-            prompt: "A lot of their strength is smart people designing chips and software.",
+            prompt:
+              "NVIDIA employs engineers and technology experts who work closely with customers to help them use its products.",
             correct: true,
             explain:
-              "Brains and tools matter more here than owning every factory."
+              "Hands-on support helps customers get the most value from NVIDIA's technology."
           },
           {
-            kind: "order",
+            kind: "fill-blank",
             id: "nvda-hiw-q3",
-            prompt: "Put NVIDIA's typical chip journey in order.",
-            steps: [
-              "Design the chip",
-              "Partner factory builds it",
-              "Ship to cloud and tech customers",
-              "Runs inside apps you use"
-            ],
-            explain: "Design → build → ship → show up in products you touch."
+            prompt:
+              "Complete the sentence:\nThe more developers who use NVIDIA's platform, the ______ its ecosystem becomes.",
+            options: ["Stronger", "Smaller", "Slower", "Quieter"],
+            correctIndex: 0,
+            explain:
+              "Tools, training, and educational programs help developers build on NVIDIA — and a stronger ecosystem attracts more users."
           }
         ]
       })
     },
 
     [contentKey("business", "why-they-stay")]: {
+      title: "WHO MAKES NVIDIA'S CHIPS?",
       cards: cards({
         "card-1": {
-          investorQuestion: "Why is NVIDIA hard to replace?",
-          plainEnglishAnswer: goldAnswer(
-            "Switching off NVIDIA is slow and costly.",
-            "Big AI and gaming teams already built everything on NVIDIA. Switching feels like rebuilding a whole app from scratch — expensive, slow, and risky."
-          )
+          investorQuestion: "Does NVIDIA manufacture its own chips?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🏭 WHO MAKES NVIDIA'S CHIPS?",
+            intro: "No.",
+            middle:
+              "NVIDIA designs its chips, but other companies manufacture them.",
+            closing:
+              "This allows NVIDIA to focus on creating new products while relying on specialist manufacturers to produce them."
+          })
         },
         "card-2": {
-          investorQuestion: "What makes NVIDIA different from competitors?",
-          plainEnglishAnswer: goldAnswer(
-            "Speed plus software habit sets NVIDIA apart.",
-            "Rivals can ship fast chips too, but retraining every coder and retesting every model takes forever. Teams stay with what already works when deadlines are tight."
-          )
+          investorQuestion: "Why does NVIDIA work with suppliers?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🤝 WORKING WITH SUPPLIERS",
+            intro:
+              "NVIDIA relies on specialist suppliers for manufacturing, testing, and packaging its products.",
+            closing:
+              "By partnering with experts, NVIDIA can avoid the costs of operating its own factories."
+          })
         },
         "card-3": {
-          investorQuestion: "Why do developers keep building around NVIDIA?",
-          plainEnglishAnswer: goldAnswer(
-            "Developers build on tools they already know.",
-            "Years of school projects, tutorials, and job experience taught coders NVIDIA's stack. New AI projects often default there because nobody wants to learn a whole new system from zero."
-          )
+          investorQuestion: "Where are NVIDIA's products made?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🌏 A GLOBAL SUPPLY CHAIN",
+            intro:
+              "NVIDIA's supply chain spans multiple countries, with many suppliers located in the Asia-Pacific region.",
+            closing:
+              "This allows NVIDIA to access some of the world's leading manufacturing companies."
+          })
+        },
+        "card-4": {
+          investorQuestion: "Which companies help manufacture NVIDIA's chips?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🏢 TSMC AND SAMSUNG",
+            intro:
+              "Companies such as TSMC and Samsung manufacture many of NVIDIA's semiconductor wafers.",
+            closing:
+              "These partnerships are important because NVIDIA depends on them to meet customer demand."
+          })
         }
       }),
       quizConfig: q({
@@ -321,58 +444,85 @@ export const NVIDIA_CONTENT: CompanyContent = {
           {
             kind: "multiple-choice",
             id: "nvda-wts-q1",
-            prompt: "Why is NVIDIA hard to replace for many AI teams?",
+            prompt: "Does NVIDIA manufacture its own chips?",
             choices: [
-              "Trust, speed, and tools teams already know",
-              "They are the only legal chip seller",
-              "Chips never change",
-              "Only ads matter"
+              "No — it designs chips and other companies manufacture them",
+              "Yes — NVIDIA owns all chip factories worldwide",
+              "Yes — every chip is built only in the United States",
+              "No — NVIDIA only sells software, not chips"
             ],
             correctIndex: 0,
-            explain: "Habit and trust make switching slow and risky — that is stickiness."
+            explain:
+              "NVIDIA designs its chips and relies on specialist manufacturers to produce them."
           },
           {
             kind: "true-false",
             id: "nvda-wts-q2",
-            prompt: "When coders already know your tools, rivals have a harder time stealing customers.",
+            prompt:
+              "NVIDIA's supply chain spans multiple countries, with many suppliers in the Asia-Pacific region.",
             correct: true,
             explain:
-              "Habit and trust make switching painful — that is a moat, not magic."
+              "A global supply chain helps NVIDIA access leading manufacturing companies."
           },
           {
             kind: "fill-blank",
             id: "nvda-wts-q3",
-            prompt: "Developers keeping code on NVIDIA is a form of customer ___ .",
-            options: ["loyalty", "confusion", "luck", "noise"],
+            prompt:
+              "Complete the sentence:\nCompanies such as TSMC and Samsung help manufacture NVIDIA's ______.",
+            options: [
+              "semiconductor wafers",
+              "office furniture",
+              "streaming apps",
+              "electric cars"
+            ],
             correctIndex: 0,
-            explain: "Code and habit outlast one hot product year."
+            explain:
+              "NVIDIA depends on partners like TSMC and Samsung to meet customer demand."
           }
         ]
       })
     },
 
     [contentKey("business", "competition")]: {
+      title: "HOW TOUGH IS THIS INDUSTRY?",
       cards: cards({
         "card-1": {
-          investorQuestion: "Who is trying to compete with NVIDIA?",
-          plainEnglishAnswer: goldAnswer(
-            "AMD, Intel, and cloud rivals compete hard.",
-            "AMD and Intel want in, and big cloud companies are trying to build their own chips — like making your own sneakers instead of buying Nike. NVIDIA still wins a lot of deals, but the crowd keeps growing."
-          )
+          investorQuestion: "Why is this industry difficult to compete in?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "⚡ TECHNOLOGY MOVES FAST",
+            intro: "Technology changes quickly.",
+            closing:
+              "Companies must constantly improve their products to keep up with customer demands and stay ahead of competitors."
+          })
         },
         "card-2": {
-          investorQuestion: "What trends could help NVIDIA grow even faster?",
-          plainEnglishAnswer: goldAnswer(
-            "More AI spending pulls more chip orders.",
-            "More chatbots, smarter search, AI in your phone — all of that needs more computing power. As long as the AI race keeps heating up, NVIDIA keeps selling."
-          )
+          investorQuestion: "What helps companies win customers?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🏆 WHAT CUSTOMERS WANT",
+            intro:
+              "Customers look for products that perform well, are reasonably priced, and have strong software support.",
+            closing:
+              "Companies that meet these needs are more likely to win customers."
+          })
         },
         "card-3": {
-          investorQuestion: "What could slow NVIDIA down in the future?",
-          plainEnglishAnswer: goldAnswer(
-            "Rivals, custom chips, or export rules bite.",
-            "If a rival catches up on speed and price, or government rules block sales to a huge market, growth could cool fast — even if the products stay great."
-          )
+          investorQuestion: "Why does NVIDIA need to predict future demand?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🔮 STAYING RELEVANT",
+            intro: "Customer needs can change over time.",
+            middle:
+              "NVIDIA tries to predict what customers will want in the future so it can build products that stay relevant."
+          })
+        },
+        "card-4": {
+          investorQuestion: "What could threaten NVIDIA's position?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "⚠️ NEW CHALLENGERS",
+            intro:
+              "New competitors may create products that are cheaper, faster, or offer features NVIDIA does not have.",
+            closing:
+              "This means NVIDIA must continue innovating to stay competitive."
+          })
         }
       }),
       quizConfig: q({
@@ -381,24 +531,155 @@ export const NVIDIA_CONTENT: CompanyContent = {
           {
             kind: "multiple-choice",
             id: "nvda-comp-q1",
-            prompt: "Why so much fighting over chips?",
+            prompt: "Why is this industry difficult to compete in?",
             choices: [
-              "AI money is huge and everyone wants in",
-              "Only one company is allowed",
-              "Chips are disappearing",
-              "Rivals are banned"
+              "Technology changes quickly and companies must keep improving",
+              "Technology never changes",
+              "Only one company is allowed to sell chips",
+              "Customers never want new products"
             ],
             correctIndex: 0,
             explain:
-              "Huge prize, huge crowd — everyone wants a piece of AI chip demand."
+              "Fast-moving tech means companies must constantly improve to stay ahead."
           },
           {
             kind: "true-false",
             id: "nvda-comp-q2",
-            prompt: "Government rules about who can buy chips can hurt or help NVIDIA.",
+            prompt:
+              "Customers look for products that perform well, are reasonably priced, and have strong software support.",
             correct: true,
             explain:
-              "Export limits can shut doors fast — that's regulation hitting sales, not theory."
+              "Companies that meet these needs are more likely to win customers."
+          },
+          {
+            kind: "fill-blank",
+            id: "nvda-comp-q3",
+            prompt:
+              "Complete the sentence:\nNew competitors may offer cheaper or faster products — so NVIDIA must keep ______ to stay competitive.",
+            options: ["innovating", "advertising only", "closing factories", "raising prices only"],
+            correctIndex: 0,
+            explain:
+              "Even strong leaders must keep innovating when new challengers enter the market."
+          }
+        ]
+      })
+    },
+
+    [contentKey("business", "who-competes")]: {
+      title: "WHO IS NVIDIA COMPETING AGAINST?",
+      cards: cards({
+        "card-1": {
+          investorQuestion: "Which chip companies compete with NVIDIA?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "💻 AI CHIP COMPANIES",
+            focusTitle: "NVIDIA competes with:",
+            focusBullets: ["AMD", "Intel", "Huawei"],
+            closing:
+              "These companies develop chips and processors used for AI and advanced computing."
+          })
+        },
+        "card-2": {
+          investorQuestion: "Which technology companies compete with NVIDIA?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "☁️ BIG TECH COMPANIES",
+            focusTitle: "NVIDIA competes with:",
+            focusBullets: [
+              "Amazon",
+              "Microsoft",
+              "Alphabet (Google)",
+              "Alibaba",
+              "Baidu",
+              "Huawei"
+            ],
+            closing:
+              "Many of these companies are developing their own AI chips and computing systems."
+          })
+        },
+        "card-3": {
+          investorQuestion: "Which companies compete with NVIDIA in CPUs?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🖥️ CPU COMPANIES",
+            focusTitle: "NVIDIA competes with:",
+            focusBullets: ["Amazon", "Microsoft", "Huawei"],
+            closing:
+              "These companies are developing CPU technologies and computing platforms that compete with parts of NVIDIA's business."
+          })
+        },
+        "card-4": {
+          investorQuestion:
+            "Which companies compete with NVIDIA in vehicles and smart devices?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🚗 AUTOMOTIVE AND SMART DEVICES",
+            focusTitle: "NVIDIA competes with:",
+            focusBullets: [
+              "AMD",
+              "Intel",
+              "Qualcomm",
+              "Samsung",
+              "Broadcom",
+              "Renesas",
+              "Ambarella",
+              "Tesla"
+            ],
+            closing:
+              "These companies develop technology used in vehicles, machines, servers, and smart devices."
+          })
+        },
+        "card-5": {
+          investorQuestion: "Which companies compete with NVIDIA in networking?",
+          plainEnglishAnswer: lessonAnswer({
+            headline: "🌐 NETWORKING COMPANIES",
+            focusTitle: "NVIDIA competes with:",
+            focusBullets: [
+              "AMD",
+              "Intel",
+              "Cisco",
+              "Broadcom",
+              "Arista Networks",
+              "Hewlett Packard Enterprise",
+              "Huawei",
+              "Marvell"
+            ],
+            closing:
+              "These companies provide networking products used in data centers and cloud computing."
+          })
+        }
+      }),
+      quizConfig: q({
+        passThreshold: PASS,
+        questions: [
+          {
+            kind: "multiple-choice",
+            id: "nvda-wc-q1",
+            prompt: "Which chip companies compete with NVIDIA?",
+            choices: [
+              "AMD, Intel, and Huawei",
+              "Only grocery store brands",
+              "Banks and insurance companies",
+              "Streaming video services"
+            ],
+            correctIndex: 0,
+            explain:
+              "These companies develop chips and processors used for AI and advanced computing."
+          },
+          {
+            kind: "true-false",
+            id: "nvda-wc-q2",
+            prompt:
+              "Many big tech companies are developing their own AI chips and computing systems.",
+            correct: true,
+            explain:
+              "Companies like Amazon, Microsoft, and Google are building their own AI computing platforms."
+          },
+          {
+            kind: "fill-blank",
+            id: "nvda-wc-q3",
+            prompt:
+              "Complete the sentence:\nUnderstanding the competition helps investors judge whether a company can protect its ______ position.",
+            options: ["market", "logo", "headline", "slogan"],
+            correctIndex: 0,
+            explain:
+              "Knowing the rivals helps you see whether a company can defend its place in the industry."
           }
         ]
       })
@@ -688,18 +969,14 @@ export const NVIDIA_CONTENT: CompanyContent = {
               "They pushed AI chips early — before AI was on every phone and feed."
           },
           {
-            kind: "multiple-choice",
+            kind: "fill-blank",
             id: "nvda-m1-q3",
-            prompt: "Why do people like bosses paid in stock?",
-            choices: [
-              "They win or lose when owners do",
-              "Stock pay never matters",
-              "Pay is random",
-              "Bonuses are guaranteed forever"
-            ],
+            prompt:
+              "Complete the sentence:\nWhen leaders are paid in stock, they win or lose ______ owners do.",
+            options: ["when", "before", "never like", "without"],
             correctIndex: 0,
             explain:
-              "When leaders own stock, a price drop hits their wallet too."
+              "Stock-heavy pay ties leader wealth to the share price — same ride as owners."
           }
         ]
       })
