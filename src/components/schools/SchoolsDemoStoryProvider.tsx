@@ -64,7 +64,7 @@ export function useSchoolsDemoStory(): SchoolsDemoStoryContextValue {
   if (!ctx) {
     return {
       active: false,
-      step: "logo-intro",
+      step: "mission-brief-invitation",
       advance: () => undefined,
       exit: () => undefined
     };

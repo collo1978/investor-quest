@@ -8,7 +8,6 @@ export const SCHOOLS_DEMO_STORY_SESSION_KEY = "iq-schools-demo-story-active";
 export const SCHOOLS_DEMO_STORY_LAUNCHED_KEY = "iq-schools-demo-story-launched";
 
 export const SCHOOLS_DEMO_STORY_STEPS = [
-  "logo-intro",
   "mission-brief-invitation",
   "onboarding",
   "map-brief",
@@ -35,7 +34,7 @@ type Listener = () => void;
 
 let snapshot: SchoolsDemoStorySnapshot = {
   active: false,
-  step: "logo-intro",
+  step: "mission-brief-invitation",
   productionRoutes: false
 };
 const listeners = new Set<Listener>();
@@ -130,7 +129,7 @@ export function activateSchoolsDemoStory(options?: {
 }): void {
   snapshot = {
     active: true,
-    step: "logo-intro",
+    step: "mission-brief-invitation",
     productionRoutes: options?.productionRoutes === true
   };
   writeSessionFlag(true);
@@ -138,7 +137,7 @@ export function activateSchoolsDemoStory(options?: {
 }
 
 export function deactivateSchoolsDemoStory(): void {
-  snapshot = { active: false, step: "logo-intro", productionRoutes: false };
+  snapshot = { active: false, step: "mission-brief-invitation", productionRoutes: false };
   writeSessionFlag(false);
   writeLaunchedFlag(false);
   emit();
@@ -160,8 +159,6 @@ export function advanceSchoolsDemoStoryStep(next: SchoolsDemoStoryStep): void {
 
 function basePathForStep(step: SchoolsDemoStoryStep): string {
   switch (step) {
-    case "logo-intro":
-      return "/schools/logo-intro";
     case "mission-brief-invitation":
       return "/schools/mission-brief-invitation";
     case "onboarding":
@@ -184,7 +181,7 @@ function basePathForStep(step: SchoolsDemoStoryStep): string {
     case "map-return":
       return "/schools/map";
     default:
-      return "/schools/logo-intro";
+      return "/schools/mission-brief-invitation";
   }
 }
 
@@ -225,7 +222,7 @@ export function ensureProductionSchoolsDemoFromPath(pathname: string): void {
   if (!pathname.startsWith("/schools/demo")) return;
   if (!wasSchoolsDemoLaunchedInSession()) return;
 
-  const inferred = schoolsDemoStepFromPathname(pathname) ?? "logo-intro";
+  const inferred = schoolsDemoStepFromPathname(pathname) ?? "mission-brief-invitation";
   let step = inferred;
 
   if (snapshot.active) {
@@ -265,10 +262,7 @@ export function schoolsDemoStepFromPathname(
     : pathname;
 
   if (!path.startsWith("/schools")) return null;
-  if (path === "/schools" || path === "/schools/logo-intro") {
-    return "logo-intro";
-  }
-  if (path === "/schools/mission-brief-invitation") {
+  if (path === "/schools" || path === "/schools/mission-brief-invitation") {
     return "mission-brief-invitation";
   }
   if (

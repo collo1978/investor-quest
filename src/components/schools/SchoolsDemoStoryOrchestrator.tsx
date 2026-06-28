@@ -30,14 +30,14 @@ function stepIndex(step: (typeof SCHOOLS_DEMO_STORY_STEPS)[number]): number {
   return SCHOOLS_DEMO_STORY_STEPS.indexOf(step);
 }
 
-/** `/schools/demo` and `/schools/demo/logo-intro` are both valid opener beats. */
+/** `/schools/demo` and `/schools/demo/mission-brief-invitation` are both valid opener beats. */
 function pathnameMatchesDemoStepRoute(
   pathname: string,
   storyStep: (typeof SCHOOLS_DEMO_STORY_STEPS)[number]
 ): boolean {
   const expected = getRouteForSchoolsDemoStoryStep(storyStep);
   if (pathname === expected) return true;
-  if (storyStep === "logo-intro" && pathname === SCHOOLS_DEMO_ROUTE_PREFIX) {
+  if (storyStep === "mission-brief-invitation" && pathname === SCHOOLS_DEMO_ROUTE_PREFIX) {
     return true;
   }
   if (storyStep === "onboarding") {
