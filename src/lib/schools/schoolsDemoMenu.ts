@@ -99,6 +99,7 @@ export function shouldOffsetSchoolsNavMenuForDevSidebar(pathname: string): boole
   const immersive =
     learner === "/schools" ||
     learner === "/schools/logo-intro" ||
+    learner === "/schools/mission-brief-invitation" ||
     learner === "/schools/mission-brief-cards" ||
     learner === "/schools/logo-reveal" ||
     learner === "/schools/opening" ||

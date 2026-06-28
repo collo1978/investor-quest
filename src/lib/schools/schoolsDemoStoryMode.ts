@@ -9,8 +9,7 @@ export const SCHOOLS_DEMO_STORY_LAUNCHED_KEY = "iq-schools-demo-story-launched";
 
 export const SCHOOLS_DEMO_STORY_STEPS = [
   "logo-intro",
-  "mission-brief-cards",
-  "logo-reveal",
+  "mission-brief-invitation",
   "onboarding",
   "map-brief",
   "map",
@@ -163,10 +162,8 @@ function basePathForStep(step: SchoolsDemoStoryStep): string {
   switch (step) {
     case "logo-intro":
       return "/schools/logo-intro";
-    case "mission-brief-cards":
-      return "/schools/mission-brief-cards";
-    case "logo-reveal":
-      return "/schools/logo-reveal";
+    case "mission-brief-invitation":
+      return "/schools/mission-brief-invitation";
     case "onboarding":
       return "/schools/screen5-onboarding";
     case "map-brief":
@@ -202,6 +199,7 @@ export function getRouteForSchoolsDemoStoryStep(step: SchoolsDemoStoryStep): str
 
 export const SCHOOLS_DEMO_STORY_PREFETCH_ROUTES = [
   "/schools/logo-intro",
+  "/schools/mission-brief-invitation",
   "/schools/mission-brief-cards",
   "/schools/logo-reveal",
   "/schools/screen5-onboarding",
@@ -270,10 +268,9 @@ export function schoolsDemoStepFromPathname(
   if (path === "/schools" || path === "/schools/logo-intro") {
     return "logo-intro";
   }
-  if (path === "/schools/mission-brief-cards") {
-    return "mission-brief-cards";
+  if (path === "/schools/mission-brief-invitation") {
+    return "mission-brief-invitation";
   }
-  if (path === "/schools/logo-reveal") return "logo-reveal";
   if (
     path === "/schools/onboarding" ||
     path === "/schools/screen5-onboarding" ||

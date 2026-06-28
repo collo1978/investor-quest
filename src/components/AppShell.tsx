@@ -39,7 +39,6 @@ import { isDemoPath, stripDemoPrefix } from "@/lib/demo/demoHref";
 import { isSchoolsDemoPath, stripSchoolsDemoPrefix } from "@/lib/schools/schoolsDemoHref";
 import { deactivateSchoolsDemoStory } from "@/lib/schools/schoolsDemoStoryMode";
 import {
-  prefetchSchoolsDevNav,
   prefetchSchoolsDevRoute
 } from "@/lib/schools/prefetchSchoolsDevRoutes";
 
@@ -123,7 +122,9 @@ export function AppShell({
   const isSchoolsOpeningScreen =
     learnerPath === "/schools" || learnerPath === "/schools/logo-intro";
   const isSchoolsAvatarScreen =
-    learnerPath === "/schools/mission-brief-cards" || learnerPath === "/schools/logo-reveal";
+    learnerPath === "/schools/mission-brief-cards" ||
+    learnerPath === "/schools/mission-brief-invitation" ||
+    learnerPath === "/schools/logo-reveal";
   const isSchoolsPosterScreen =
     learnerPath === "/schools/profile" || learnerPath === "/schools/armor-guide";
   const isSchoolsPickCompanyScreen = learnerPath === "/schools/pick-company";
@@ -156,9 +157,12 @@ export function AppShell({
   const schoolsNav: readonly SidebarNavItem[] = [
     { href: "/schools/demo", label: "Schools Live Demo" },
     { href: "/schools/logo-intro", label: "Logo Intro" },
+    { href: "/schools/mission-brief-invitation", label: "Confidential Invitation" },
     { href: "/schools/mission-brief-cards", label: "Mission Brief Cards" },
     { href: "/schools/logo-reveal", label: "Logo Reveal" },
     { href: "/schools/screen5-onboarding", label: "Stocks Experience" },
+    { href: "/schools/preview/mission-brief-opening", label: "Mission Brief Opening" },
+    { href: "/schools/preview/mission-brief-invitation", label: "Confidential Invitation" },
     { href: "/schools/preview/mission-brief", label: "Mission Brief" },
     { href: "/schools/preview/mission-brief-terminal", label: "Mission Brief Terminal" },
     { href: "/schools/preview/jarvis-ai-briefing", label: "Jarvis AI Briefing" },
@@ -170,17 +174,20 @@ export function AppShell({
     { href: "/schools/preview/mission-brief-cards", label: "Mission Brief Cards" },
     { href: "/schools/preview/logo-reveal", label: "Logo Reveal" },
     { href: "/schools/preview/tech-sector", label: "Technology Sector" },
-    { href: "/schools/map", label: "Map" },
+    { href: "/schools/preview/map-duolingo", label: "Map (Duolingo Path)" },
+    { href: "/schools/preview/map-cartoon", label: "Cartoon World (B)" },
+    { href: "/schools/preview/map-prodigy", label: "Prodigy World (C)" },
+    { href: "/schools/preview/map-dragonbox", label: "DragonBox World (D)" },
+    { href: "/schools/preview/map-roblox", label: "Roblox World (E)" },
+    { href: "/schools/preview/map-khan", label: "Khan Academy (F)" },
+    { href: "/schools/preview/map-legends", label: "Legends of Learning (G)" },
+    { href: "/schools/map", label: "Cinematic Map (A)" },
     { href: "/schools/business", label: "Business" },
     { href: "/schools/forces", label: "Forces" },
     { href: "/schools/financials", label: "Financials" },
     { href: "/schools/management", label: "Management" },
     { href: "/schools/profile", label: "Profile" }
   ] as const;
-
-  const warmSchoolsDevNav = useCallback(() => {
-    prefetchSchoolsDevNav(router.prefetch);
-  }, [router]);
 
   /** Sidebar dev links — leave presenter demo; only "Schools Live Demo" starts it. */
   const handleSchoolsSidebarClick = useCallback((href: string) => {
@@ -209,7 +216,7 @@ export function AppShell({
 
   if (isSchoolsPreviewSurface) {
     return (
-      <div className="pointer-events-auto h-[100vh] w-[100vw] overflow-hidden bg-[#05010f]">
+      <div className="pointer-events-auto min-h-[100dvh] w-full overflow-x-hidden overflow-y-auto bg-[#05010f]">
         {children}
       </div>
     );
@@ -437,7 +444,6 @@ export function AppShell({
                 <DevSidebarSection
                   title="Schools"
                   defaultOpen={learnerPath.startsWith("/schools")}
-                  onOpen={warmSchoolsDevNav}
                 >
                   {schoolsNav.map((item) => {
                     const active =
@@ -447,7 +453,7 @@ export function AppShell({
                       <Link
                         key={item.href}
                         href={item.href}
-                        prefetch
+                        prefetch={false}
                         onClick={() => handleSchoolsSidebarClick(item.href)}
                         onMouseEnter={() =>
                           prefetchSchoolsDevRoute(router.prefetch, item.href)

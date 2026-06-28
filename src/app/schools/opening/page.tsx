@@ -8,7 +8,6 @@ import { useDemoStory } from "@/components/demo/DemoStoryProvider";
 import { useGame } from "@/components/GameProvider";
 import { MOBILE_PREVIEW_SEARCH_PARAM } from "@/lib/bank/mobilePreviewEmbed";
 import { clearDemoFreshStart } from "@/lib/demo/demoSessionReset";
-import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
 import {
   isSchoolsDemoPath,
   resolveSchoolsLearnerHref
@@ -136,7 +135,9 @@ export default function SchoolsOpeningPage() {
     leavingRef.current = true;
 
     if (isSchoolsDemoPath(pathname)) {
-      navigateSchoolsDemoStep("logo-reveal", pathname, router);
+      router.replace(
+        resolveSchoolsLearnerHref("/schools/logo-reveal", pathname)
+      );
       return;
     }
 

@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { SCHOOLS_MISSION_BRIEF_CARDS_ROUTE } from "@/lib/schools/missionBriefCardsContent";
+import { SCHOOLS_MISSION_BRIEF_INVITATION_ROUTE } from "@/lib/schools/schoolsMissionBriefInvitationContent";
 import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
 import { isSchoolsDemoPath, resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
 import {
@@ -31,7 +31,7 @@ const INTRO_MOTES: ReadonlyArray<{
   { x: 84, y: 64, size: 1, opacity: 0.2, dur: 30, delay: 0.3 }
 ];
 
-/** Cinematic logo float-in — auto-advances to mission brief cards. */
+/** Cinematic logo float-in — auto-advances to confidential invitation. */
 export function SchoolsLogoIntroScreen() {
   const router = useRouter();
   const pathname = usePathname();
@@ -62,7 +62,7 @@ export function SchoolsLogoIntroScreen() {
     timersRef.current.push(id);
   }, []);
 
-  const goToMissionBriefCards = useCallback(() => {
+  const goToMissionBriefInvitation = useCallback(() => {
     if (leavingRef.current) return;
     leavingRef.current = true;
     clearAllTimers();
@@ -71,11 +71,13 @@ export function SchoolsLogoIntroScreen() {
     const activeRouter = routerRef.current;
 
     if (isSchoolsDemoPath(path)) {
-      navigateSchoolsDemoStep("mission-brief-cards", path, activeRouter);
+      navigateSchoolsDemoStep("mission-brief-invitation", path, activeRouter);
       return;
     }
 
-    activeRouter.replace(resolveSchoolsLearnerHref(SCHOOLS_MISSION_BRIEF_CARDS_ROUTE, path));
+    activeRouter.replace(
+      resolveSchoolsLearnerHref(SCHOOLS_MISSION_BRIEF_INVITATION_ROUTE, path)
+    );
   }, [clearAllTimers]);
 
   useEffect(() => {
@@ -93,7 +95,7 @@ export function SchoolsLogoIntroScreen() {
     if (prefersReducedMotion) {
       setLogoRevealed(true);
       setGlowStrength(1);
-      schedule(goToMissionBriefCards, 220);
+      schedule(goToMissionBriefInvitation, 220);
     } else {
       schedule(() => setLogoRevealed(true), 40);
 
@@ -111,7 +113,7 @@ export function SchoolsLogoIntroScreen() {
       }, SCHOOLS_LOGO_INTRO_GLOW_DELAY_MS);
 
       schedule(
-        goToMissionBriefCards,
+        goToMissionBriefInvitation,
         40 + SCHOOLS_LOGO_INTRO_ENTER_MS + SCHOOLS_LOGO_INTRO_HOLD_MS
       );
     }
@@ -127,12 +129,14 @@ export function SchoolsLogoIntroScreen() {
   useEffect(() => {
     const img = new Image();
     img.src = SCHOOLS_LOGO_INTRO_LOGO_SRC;
-    router.prefetch(resolveSchoolsLearnerHref(SCHOOLS_MISSION_BRIEF_CARDS_ROUTE, pathname));
+    router.prefetch(
+      resolveSchoolsLearnerHref(SCHOOLS_MISSION_BRIEF_INVITATION_ROUTE, pathname)
+    );
   }, [pathname, router]);
 
   const handleSkip = useCallback(() => {
-    goToMissionBriefCards();
-  }, [goToMissionBriefCards]);
+    goToMissionBriefInvitation();
+  }, [goToMissionBriefInvitation]);
 
   return (
     <main

@@ -18,8 +18,7 @@ import {
   type MissionBriefTypedLine
 } from "@/lib/schools/missionBriefCardsContent";
 import { SCHOOLS_LOGO_REVEAL_ROUTE } from "@/lib/schools/schoolsLogoRevealContent";
-import { isSchoolsDemoPath, resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
-import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
+import { resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
 import {
   playMissionBriefKeystroke,
   primeMissionBriefAudio,
@@ -338,10 +337,6 @@ export function SchoolsMissionBriefCardsScreen() {
 
   const goToLogoReveal = useCallback(() => {
     clearTimers();
-    if (isSchoolsDemoPath(pathname)) {
-      navigateSchoolsDemoStep("logo-reveal", pathname, router);
-      return;
-    }
     router.push(resolveSchoolsLearnerHref(SCHOOLS_LOGO_REVEAL_ROUTE, pathname));
   }, [clearTimers, pathname, router]);
 
