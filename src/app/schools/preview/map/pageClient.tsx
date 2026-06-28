@@ -12,7 +12,15 @@ import { DESKTOP_MAP_PATH } from "@/lib/screenAssetUrls";
  * - Background uses `cover` so editors/sidebars don't skew judgement
  * - Interactive scene remains centered and letterbox-aligned to protect hotspots
  */
-export default function SchoolsPreviewMapPageClient() {
+type SchoolsPreviewMapPageClientProps = {
+  desktopMapPath?: string;
+  showBridgeFlows?: boolean;
+};
+
+export default function SchoolsPreviewMapPageClient({
+  desktopMapPath = DESKTOP_MAP_PATH,
+  showBridgeFlows = true
+}: SchoolsPreviewMapPageClientProps = {}) {
   const [hydrationReady, setHydrationReady] = useState(false);
 
   useEffect(() => {
@@ -26,7 +34,7 @@ export default function SchoolsPreviewMapPageClient() {
         hydrationReady ? "" : "static-ui"
       ].join(" ")}
       style={{
-        backgroundImage: `url(${DESKTOP_MAP_PATH})`,
+        backgroundImage: `url(${desktopMapPath})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat"
@@ -44,7 +52,10 @@ export default function SchoolsPreviewMapPageClient() {
 
       {/* Interactive scene: centered, letterbox-safe. */}
       <div className="absolute inset-0">
-        <QuestMapScene />
+        <QuestMapScene
+          desktopMapPath={desktopMapPath}
+          showBridgeFlows={showBridgeFlows}
+        />
       </div>
     </main>
   );

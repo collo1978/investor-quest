@@ -254,6 +254,13 @@ type IslandModel = {
   totalQuests: number;
 };
 
+type QuestMapSceneProps = {
+  /** Toggle animated island-to-reactor bridge flows for art-review variants. */
+  showBridgeFlows?: boolean;
+  /** Desktop map artwork override for route-specific preview variants. */
+  desktopMapPath?: string;
+};
+
 /** Overall campaign progress — top-right inside the letterboxed map artwork. */
 function QuestMapOverallProgressHud({ progressPct }: { progressPct: number }) {
   const pct = Math.max(0, Math.min(100, Math.round(progressPct)));
@@ -329,7 +336,10 @@ function QuestMapOverallProgressHud({ progressPct }: { progressPct: number }) {
 // ===========================================================================
 // QuestMapScene
 // ===========================================================================
-export function QuestMapScene() {
+export function QuestMapScene({
+  desktopMapPath = DESKTOP_MAP_PATH,
+  showBridgeFlows = true
+}: QuestMapSceneProps = {}) {
   const pathname = usePathname();
   const { state, raw } = useGame();
   const bankMobileGame = useBankMobileGameMap();
@@ -558,7 +568,7 @@ export function QuestMapScene() {
 
           {/* (0) Artwork — the hero. Very subtle parallax drift. */}
           <motion.img
-            src={bankMobileGame ? BANK_MOBILE_MAP_PATH : DESKTOP_MAP_PATH}
+            src={bankMobileGame ? BANK_MOBILE_MAP_PATH : desktopMapPath}
             alt="Quest Map"
             draggable={false}
             className={[
@@ -580,7 +590,7 @@ export function QuestMapScene() {
           ) : null}
 
           {/* (2) Bridge flow — desktop widescreen map only */}
-          {desktopGameMap ? (
+          {desktopGameMap && showBridgeFlows ? (
             <BridgeFlows
               islands={islands}
               clickedId={clickedId}
