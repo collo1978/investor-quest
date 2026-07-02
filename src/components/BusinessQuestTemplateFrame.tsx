@@ -52,9 +52,17 @@ const JEWEL_CARD_BG = "rgba(6, 6, 14, 0.995)";
 const JEWEL_CARD_SHADOW =
   "0 24px 56px -32px rgba(0,0,0,0.94), inset 0 1px 0 rgba(255, 228, 170, 0.18)";
 
+/** Schools mission card — cream/gold (matches Business Island hub). */
+const MISSION_CARD_BORDER = "rgba(251, 191, 36, 0.88)";
+const MISSION_SECTION_DIVIDER = "rgba(202, 138, 4, 0.35)";
+const MISSION_CARD_BG =
+  "linear-gradient(168deg, #fffbeb 0%, #fef3c7 46%, #fde68a 100%)";
+const MISSION_CARD_SHADOW =
+  "inset 0 1px 0 rgba(255, 255, 255, 0.78), inset 0 -2px 0 rgba(180, 83, 9, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.42), 0 10px 26px rgba(2, 6, 23, 0.22)";
+
 /** Premium jewel cards — Q/A circle badges beside question and answer. */
-const BADGE_SIZE_CLASS = "h-11 w-11 shrink-0 sm:h-12 sm:w-12";
-const BADGE_COMPACT_CLASS = "h-9 w-9 shrink-0 sm:h-10 sm:w-10";
+const BADGE_SIZE_CLASS = "h-9 w-9 shrink-0 sm:h-10 sm:w-10";
+const BADGE_COMPACT_CLASS = "h-7 w-7 shrink-0 sm:h-8 sm:w-8";
 
 function badgeShellClass(size: "default" | "compact"): string {
   return size === "compact" ? BADGE_COMPACT_CLASS : BADGE_SIZE_CLASS;
@@ -62,13 +70,24 @@ function badgeShellClass(size: "default" | "compact"): string {
 
 function badgeLabelClass(size: "default" | "compact"): string {
   return size === "compact"
-    ? "text-[1rem] font-extrabold uppercase tracking-[0.06em] sm:text-[1.12rem]"
-    : "text-[1.15rem] font-extrabold uppercase tracking-[0.08em] sm:text-[1.3rem]";
+    ? "text-[0.85rem] font-extrabold uppercase tracking-[0.06em] sm:text-[0.95rem]"
+    : "text-[0.95rem] font-extrabold uppercase tracking-[0.08em] sm:text-[1.08rem]";
 }
 
 /** Gold (or pillar) letter on jewel cards — dark on neon fills. */
 function badgeLetterColor(theme: PillarQuestTheme): string {
+  if (theme.cardChrome === "mission") return "#451a03";
   return theme.cardChrome === "neon" ? theme.badgeText : theme.hi;
+}
+
+function missionBadgeShellStyle(theme: PillarQuestTheme): CSSProperties {
+  return {
+    background: "linear-gradient(180deg, #fde047 0%, #fbbf24 48%, #d97706 100%)",
+    border: "2px solid rgba(180, 83, 9, 0.42)",
+    boxShadow:
+      "inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 4px 0 rgba(120, 53, 15, 0.32)",
+    color: badgeLetterColor(theme)
+  };
 }
 
 function jewelBadgeShellStyle(theme: PillarQuestTheme): CSSProperties {
@@ -84,6 +103,9 @@ function circleBadgeShellStyle(
   theme: PillarQuestTheme,
   emphasis: BadgeEmphasis = "default"
 ): CSSProperties {
+  if (theme.cardChrome === "mission") {
+    return missionBadgeShellStyle(theme);
+  }
   if (theme.cardChrome === "jewel") {
     return jewelBadgeShellStyle(theme);
   }
@@ -97,6 +119,8 @@ function circleBadgeShellStyle(
 
 export type PillarQuestTemplateFrameProps = {
   pillarId: PillarId;
+  /** Override pillar default — schools Business Island uses mission chrome. */
+  theme?: PillarQuestTheme;
   questionText: string;
   answerSlot: ReactNode;
   companyName: string;
@@ -109,6 +133,8 @@ export type PillarQuestTemplateFrameProps = {
     revealed: boolean;
     onRevealComplete: () => void;
   };
+  /** Schools mission — progress bar reflects cards marked read (not card index). */
+  readProgressCount?: number;
 };
 
 /** @deprecated Use {@link PillarQuestTemplateFrame} */
@@ -117,10 +143,11 @@ export type BusinessQuestTemplateFrameProps = PillarQuestTemplateFrameProps;
 function HeaderCompanyName({ name, theme }: { name: string; theme: PillarQuestTheme }) {
   const label = name.trim();
   if (!label) return null;
+  const isMission = theme.cardChrome === "mission";
   return (
     <span
       className="max-w-[52%] truncate text-right font-[var(--font-grotesk)] text-[10.5px] font-medium tracking-wide sm:max-w-none sm:text-[11px]"
-      style={{ color: "rgba(210,210,220,0.72)" }}
+      style={{ color: isMission ? theme.textMuted ?? "#475569" : "rgba(210,210,220,0.72)" }}
       title={label}
     >
       {label}
@@ -135,18 +162,27 @@ function ShowMeButton({
   theme: PillarQuestTheme;
   onClick: () => void;
 }) {
+  const isMission = theme.cardChrome === "mission";
   return (
     <motion.button
       type="button"
       onClick={onClick}
       whileHover={{ y: -1 }}
       whileTap={{ scale: 0.98 }}
-      className="inline-flex h-9 min-h-[36px] w-[11rem] max-w-[12.5rem] items-center justify-center rounded-full border px-4 text-[11px] font-semibold uppercase tracking-[0.16em] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
-      style={{
-        borderColor: theme.borderSoft,
-        background: "rgba(245,197,71,0.08)",
-        color: theme.hi
-      }}
+      className={
+        isMission
+          ? "iq-schools-mission-cta inline-flex min-h-[40px] w-[11rem] max-w-[12.5rem] items-center justify-center px-4 text-[11px] font-black uppercase tracking-[0.08em] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
+          : "inline-flex h-9 min-h-[36px] w-[11rem] max-w-[12.5rem] items-center justify-center rounded-full border px-4 text-[11px] font-semibold uppercase tracking-[0.16em] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
+      }
+      style={
+        isMission
+          ? undefined
+          : {
+              borderColor: theme.borderSoft,
+              background: "rgba(245,197,71,0.08)",
+              color: theme.hi
+            }
+      }
     >
       {SHOW_ME_LABEL}
     </motion.button>
@@ -221,13 +257,16 @@ function InvestigationQABadge({
   const showQ = phase === "q-shrink";
   const showA = phase === "a-arrive" || phase === "answer";
   const isJewel = theme.cardChrome === "jewel";
-  const investigationShell = isJewel
-    ? jewelBadgeShellStyle(theme)
-    : {
-        background: circleBadgeBackground(theme),
-        color: theme.badgeText,
-        boxShadow: baseShadow
-      };
+  const isMission = theme.cardChrome === "mission";
+  const investigationShell = isMission
+    ? missionBadgeShellStyle(theme)
+    : isJewel
+      ? jewelBadgeShellStyle(theme)
+      : {
+          background: circleBadgeBackground(theme),
+          color: theme.badgeText,
+          boxShadow: baseShadow
+        };
 
   return (
     <div className={`relative ${BADGE_SIZE_CLASS} ${className}`}>
@@ -252,15 +291,17 @@ function InvestigationQABadge({
             aria-hidden
             className="absolute inset-0 flex items-center justify-center rounded-full"
             style={
-              isJewel
-                ? jewelBadgeShellStyle(theme)
+              isMission || isJewel
+                ? isMission
+                  ? missionBadgeShellStyle(theme)
+                  : jewelBadgeShellStyle(theme)
                 : { background: circleBadgeBackground(theme), color: theme.badgeText }
             }
-            initial={{ scale: 0.85, opacity: 0, boxShadow: isJewel ? "none" : baseShadow }}
+            initial={{ scale: 0.85, opacity: 0, boxShadow: isJewel || isMission ? "none" : baseShadow }}
             animate={{
               scale: 1,
               opacity: 1,
-              boxShadow: isJewel
+              boxShadow: isJewel || isMission
                 ? "none"
                 : phase === "a-arrive"
                   ? [peakShadow, baseShadow]
@@ -311,6 +352,7 @@ function InvestigationCardHighlight({
 
 export function PillarQuestTemplateFrame({
   pillarId,
+  theme: themeProp,
   questionText,
   answerSlot,
   companyName,
@@ -318,15 +360,28 @@ export function PillarQuestTemplateFrame({
   cardTotal,
   footerSlot,
   trailSlot,
-  answerReveal
+  answerReveal,
+  readProgressCount
 }: PillarQuestTemplateFrameProps) {
-  const theme = getPillarQuestTheme(pillarId);
+  const theme = themeProp ?? getPillarQuestTheme(pillarId);
   const isNeon = theme.cardChrome === "neon";
   const isJewel = theme.cardChrome === "jewel";
+  const isMission = theme.cardChrome === "mission";
   const pct = Math.min(100, (cardIndex / Math.max(1, cardTotal)) * 100);
+  const displayPct =
+    isMission && readProgressCount != null
+      ? Math.min(100, (readProgressCount / Math.max(1, cardTotal)) * 100)
+      : pct;
   const pulsePeakBorder = isNeon ? theme.hi : theme.rim;
+  const innerRounded = isMission ? "rounded-[18px]" : isNeon ? "rounded-[1.35rem]" : "rounded-[1.2rem]";
+  const sectionDivider = isMission
+    ? MISSION_SECTION_DIVIDER
+    : isJewel
+      ? JEWEL_SECTION_DIVIDER
+      : theme.borderSoft;
+  const bodyTextColor = isMission ? theme.text ?? "#0f172a" : undefined;
+  const labelTextColor = isMission ? theme.badgeText ?? "#92400e" : undefined;
   const pulsePeakGlow = isNeon ? theme.glow : theme.whyGlow;
-  const innerRounded = isNeon ? "rounded-[1.35rem]" : "rounded-[1.2rem]";
 
   const [revealPhase, setRevealPhase] = useState<RevealPhase>(() =>
     answerReveal?.revealed ? "complete" : "hidden"
@@ -383,56 +438,64 @@ export function PillarQuestTemplateFrame({
       <motion.div
         initial={false}
         animate={
-          isNeon
+          isNeon || isJewel || isMission
             ? false
-            : isJewel
-              ? false
-              : {
-                  boxShadow: [
-                    `0 22px 64px -36px rgba(0,0,0,0.72), 0 0 0 2px ${theme.border}, 0 0 24px -18px ${theme.glow}`,
-                    `0 28px 76px -32px rgba(0,0,0,0.78), 0 0 0 2px ${pulsePeakBorder}, 0 0 32px -16px ${theme.glow}`,
-                    `0 22px 64px -36px rgba(0,0,0,0.72), 0 0 0 2px ${theme.border}, 0 0 24px -18px ${theme.glow}`
-                  ]
-                }
+            : {
+                boxShadow: [
+                  `0 22px 64px -36px rgba(0,0,0,0.72), 0 0 0 2px ${theme.border}, 0 0 24px -18px ${theme.glow}`,
+                  `0 28px 76px -32px rgba(0,0,0,0.78), 0 0 0 2px ${pulsePeakBorder}, 0 0 32px -16px ${theme.glow}`,
+                  `0 22px 64px -36px rgba(0,0,0,0.72), 0 0 0 2px ${theme.border}, 0 0 24px -18px ${theme.glow}`
+                ]
+              }
         }
         transition={
-          isNeon || isJewel
+          isNeon || isJewel || isMission
             ? undefined
             : { duration: 5.5, repeat: Infinity, ease: "easeInOut" }
         }
         className={
-          isNeon
-            ? "relative flex flex-col overflow-visible rounded-[1.35rem] border-2 bg-[rgba(6,6,12,0.97)] backdrop-blur-xl"
-            : `relative flex flex-col overflow-visible ${innerRounded} border-2 bg-[rgba(4,4,9,0.98)] backdrop-blur-md`
+          isMission
+            ? `relative flex flex-col overflow-visible rounded-[18px] border-2 ${innerRounded}`
+            : isNeon
+              ? "relative flex flex-col overflow-visible rounded-[1.35rem] border-2 bg-[rgba(6,6,12,0.97)] backdrop-blur-xl"
+              : `relative flex flex-col overflow-visible ${innerRounded} border-2 bg-[rgba(4,4,9,0.98)] backdrop-blur-md`
         }
         style={
-          isNeon
+          isMission
             ? {
-                borderColor: theme.hi,
-                boxShadow: `0 0 0 1px ${theme.border}, 0 0 28px -4px ${theme.glow}, 0 0 0 1.5px ${theme.hi}`
+                borderColor: MISSION_CARD_BORDER,
+                background: MISSION_CARD_BG,
+                boxShadow: MISSION_CARD_SHADOW
               }
-            : isJewel
+            : isNeon
               ? {
-                  borderColor: JEWEL_CARD_BORDER,
-                  background: JEWEL_CARD_BG,
-                  boxShadow: JEWEL_CARD_SHADOW
+                  borderColor: theme.hi,
+                  boxShadow: `0 0 0 1px ${theme.border}, 0 0 28px -4px ${theme.glow}, 0 0 0 1.5px ${theme.hi}`
                 }
-              : {
-                  background: outerRimGradient(theme),
-                  boxShadow: `0 0 20px -12px ${theme.glow}`
-                }
+              : isJewel
+                ? {
+                    borderColor: JEWEL_CARD_BORDER,
+                    background: JEWEL_CARD_BG,
+                    boxShadow: JEWEL_CARD_SHADOW
+                  }
+                : {
+                    background: outerRimGradient(theme),
+                    boxShadow: `0 0 20px -12px ${theme.glow}`
+                  }
         }
       >
         <motion.div
           className={
-            isNeon
+            isMission
               ? "relative flex flex-col overflow-visible"
-              : isJewel
+              : isNeon
                 ? "relative flex flex-col overflow-visible"
-                : `relative flex flex-col overflow-visible rounded-[1.22rem] border-2 border-white/[0.14] bg-[rgba(6,6,12,0.97)] shadow-[inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-20px_40px_-24px_rgba(0,0,0,0.5)] backdrop-blur-xl ${innerRounded}`
+                : isJewel
+                  ? "relative flex flex-col overflow-visible"
+                  : `relative flex flex-col overflow-visible rounded-[1.22rem] border-2 border-white/[0.14] bg-[rgba(6,6,12,0.97)] shadow-[inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-20px_40px_-24px_rgba(0,0,0,0.5)] backdrop-blur-xl ${innerRounded}`
           }
           style={
-            isNeon || isJewel
+            isNeon || isJewel || isMission
               ? undefined
               : {
                   borderTopColor: theme.rim,
@@ -443,7 +506,7 @@ export function PillarQuestTemplateFrame({
                 }
           }
         >
-          {!isJewel ? (
+          {!isJewel && !isMission ? (
             <motion.div
               aria-hidden
               className="pointer-events-none absolute inset-0"
@@ -454,7 +517,7 @@ export function PillarQuestTemplateFrame({
               }}
             />
           ) : null}
-          {!isJewel ? (
+          {!isJewel && !isMission ? (
             <motion.div
               aria-hidden
               className="pointer-events-none absolute inset-0 opacity-[0.35]"
@@ -477,7 +540,7 @@ export function PillarQuestTemplateFrame({
               "relative z-[1] shrink-0 border-b px-4 sm:px-5",
               answerDominant ? "py-2.5 sm:py-3" : "py-3.5 sm:py-4"
             ].join(" ")}
-            style={{ borderColor: isJewel ? JEWEL_SECTION_DIVIDER : theme.borderSoft }}
+            style={{ borderColor: sectionDivider }}
           >
             <motion.div
               className={[
@@ -488,11 +551,13 @@ export function PillarQuestTemplateFrame({
               <p
                 className={[
                   "shrink-0 font-medium uppercase",
-                  isJewel
-                    ? "text-[9.5px] tracking-[0.22em] text-ink-2"
-                    : "text-[10px] font-bold tracking-[0.28em]"
+                  isMission
+                    ? "text-[9.5px] tracking-[0.22em]"
+                    : isJewel
+                      ? "text-[9.5px] tracking-[0.22em] text-ink-2"
+                      : "text-[10px] font-bold tracking-[0.28em]"
                 ].join(" ")}
-                style={{ color: isJewel ? undefined : theme.hi }}
+                style={{ color: isMission ? labelTextColor : isJewel ? undefined : theme.hi }}
               >
                 Card {cardIndex} of {cardTotal}
               </p>
@@ -503,30 +568,45 @@ export function PillarQuestTemplateFrame({
             </motion.div>
             <motion.div
               className={[
-                "relative overflow-hidden rounded-full bg-white/[0.04]",
-                isJewel
+                "relative overflow-hidden rounded-full",
+                isMission
                   ? answerDominant
                     ? "mt-2 h-[3px]"
                     : "mt-2.5 h-[3px]"
-                  : answerDominant
-                    ? "mt-2 h-1.5 ring-2 ring-offset-0"
-                    : "mt-3 h-1.5 ring-2 ring-offset-0"
+                  : isJewel
+                    ? answerDominant
+                      ? "mt-2 h-[3px]"
+                      : "mt-2.5 h-[3px]"
+                    : answerDominant
+                      ? "mt-2 h-1.5 ring-2 ring-offset-0"
+                      : "mt-3 h-1.5 ring-2 ring-offset-0"
               ].join(" ")}
-              style={isJewel ? undefined : { boxShadow: `0 0 0 2px ${theme.borderSoft}` }}
+              style={
+                isMission
+                  ? { background: "rgba(202, 138, 4, 0.22)" }
+                  : isJewel
+                    ? undefined
+                    : { boxShadow: `0 0 0 2px ${theme.borderSoft}` }
+              }
               role="presentation"
             >
               <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${pct}%` }}
-                transition={{ duration: 0.85, ease: "easeOut" }}
+                initial={false}
+                animate={{ width: `${displayPct}%` }}
+                transition={{
+                  duration: isMission ? 0.72 : 0.85,
+                  ease: [0.22, 1, 0.36, 1]
+                }}
                 className="h-full rounded-full"
                 style={{
-                  background: isJewel
+                  background: isMission || isJewel
                     ? `linear-gradient(90deg, ${theme.hi}88, ${theme.hi})`
                     : progressBarGradient(theme),
-                  boxShadow: isJewel
-                    ? "none"
-                    : `0 0 18px ${theme.glow}, 0 0 8px rgba(255,255,255,0.25)`
+                  boxShadow: isMission
+                    ? `0 0 10px ${theme.glowSoft}`
+                    : isJewel
+                      ? "none"
+                      : `0 0 18px ${theme.glow}, 0 0 8px rgba(255,255,255,0.25)`
                 }}
               />
             </motion.div>
@@ -536,17 +616,27 @@ export function PillarQuestTemplateFrame({
             layout
             className={[
               "relative z-[1] shrink-0 border-b px-4 sm:px-5",
-              answerDominant ? "py-2 sm:py-2.5" : "py-4 sm:py-5"
+              isMission ? "bg-[rgba(255,251,235,0.58)]" : "",
+              isMission
+                ? answerDominant
+                  ? "py-2 sm:py-2.5"
+                  : "py-3 sm:py-3.5"
+                : answerDominant
+                  ? "py-2 sm:py-2.5"
+                  : "py-4 sm:py-5"
             ].join(" ")}
-            style={{ borderColor: isJewel ? JEWEL_SECTION_DIVIDER : theme.borderSoft }}
+            style={{
+              borderColor: isMission ? "rgba(202, 138, 4, 0.38)" : sectionDivider,
+              borderBottomWidth: isMission ? 2 : undefined
+            }}
           >
             <h2 className="sr-only">Question</h2>
             <motion.div
               layout
               className={
                 answerDominant
-                  ? "flex items-center gap-2.5 sm:gap-3"
-                  : "flex gap-4 sm:gap-6"
+                  ? "flex items-center gap-2 sm:gap-2.5"
+                  : "flex gap-3 sm:gap-4"
               }
             >
               {investigationActive ? (
@@ -570,9 +660,10 @@ export function PillarQuestTemplateFrame({
                   animate={{ opacity: answerDominant ? 0.82 : 1 }}
                   transition={{ duration: HIERARCHY_SHIFT_MS, ease: REVEAL_EASE }}
                   className={[
-                    "font-[var(--font-grotesk)] tracking-tight text-ink-0",
+                    "font-[var(--font-grotesk)] tracking-tight",
+                    isMission ? "" : "text-ink-0",
                     answerDominant
-                      ? "text-[13px] font-medium leading-snug text-ink-0/82 sm:text-[14px]"
+                      ? "text-[13px] font-medium leading-snug sm:text-[14px]"
                       : [
                           "text-balance font-semibold leading-snug",
                           answerReveal
@@ -580,6 +671,15 @@ export function PillarQuestTemplateFrame({
                             : "text-[clamp(1.05rem,3vw,1.45rem)] sm:text-[clamp(1.1rem,2.6vw,1.55rem)]"
                         ].join(" ")
                   ].join(" ")}
+                  style={{
+                    color: isMission
+                      ? answerDominant
+                        ? `${bodyTextColor}cc`
+                        : bodyTextColor
+                      : answerDominant
+                        ? undefined
+                        : undefined
+                  }}
                 >
                   {questionText}
                 </motion.p>
@@ -603,7 +703,7 @@ export function PillarQuestTemplateFrame({
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: ANSWER_REVEAL_MS, ease: REVEAL_EASE }}
               >
-                {!isJewel ? (
+                {!isJewel && !isMission ? (
                   <motion.div
                     aria-hidden
                     className="pointer-events-none absolute inset-0"
@@ -621,8 +721,12 @@ export function PillarQuestTemplateFrame({
                   className={[
                     "relative flex items-start",
                     answerDominant
-                      ? "gap-4 px-4 py-4 sm:gap-5 sm:px-5 sm:py-6"
-                      : "gap-4 px-4 py-4 sm:gap-5 sm:px-5 sm:py-5"
+                      ? isMission
+                        ? "gap-4 px-4 py-5 sm:gap-5 sm:px-5 sm:py-6"
+                        : "gap-4 px-4 py-4 sm:gap-5 sm:px-5 sm:py-6"
+                      : isMission
+                        ? "gap-4 px-4 py-5 sm:gap-5 sm:px-5 sm:py-7"
+                        : "gap-4 px-4 py-4 sm:gap-5 sm:px-5 sm:py-5"
                   ].join(" ")}
                   animate={{
                     filter: answerDominant
@@ -641,7 +745,10 @@ export function PillarQuestTemplateFrame({
                       emphasis={answerDominant ? "hero" : "default"}
                     />
                   )}
-                  <motion.div layout className="min-w-0 flex-1 pt-0.5">
+                  <motion.div
+                    layout
+                    className={`min-w-0 flex-1 pt-0.5${isMission ? " iq-mission-answer-content" : ""}`}
+                  >
                     {answerSlot}
                   </motion.div>
                 </motion.div>
@@ -652,10 +759,17 @@ export function PillarQuestTemplateFrame({
           {showFooter ? (
             <footer
               className={[
-                "relative z-[1] shrink-0 border-t bg-black/20 px-4 sm:px-5",
-                answerDominant ? "py-2.5 sm:py-3" : "py-3.5 sm:py-4"
+                "relative z-[1] shrink-0 border-t px-4 sm:px-5",
+                isMission ? "bg-white/35" : "bg-black/20",
+                isMission
+                  ? answerDominant
+                    ? "py-4 sm:py-5"
+                    : "py-5 sm:py-6"
+                  : answerDominant
+                    ? "py-2.5 sm:py-3"
+                    : "py-3.5 sm:py-4"
               ].join(" ")}
-              style={{ borderColor: isJewel ? JEWEL_SECTION_DIVIDER : theme.border }}
+              style={{ borderColor: isMission ? sectionDivider : isJewel ? JEWEL_SECTION_DIVIDER : theme.border }}
             >
               <motion.div className="flex flex-wrap items-center gap-3">{footerSlot}</motion.div>
             </footer>

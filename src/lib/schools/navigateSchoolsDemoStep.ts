@@ -9,6 +9,7 @@ import {
   wasSchoolsDemoLaunchedInSession,
   type SchoolsDemoStoryStep
 } from "@/lib/schools/schoolsDemoStoryMode";
+import { clearSchoolsMapMissionBriefDismiss } from "@/lib/schools/schoolsMapMissionBriefState";
 import { seedSchoolsDemoGameStateOncePerSession } from "@/lib/schools/seedSchoolsDemoSession";
 
 type RouterLike = { replace: (href: string) => void; push?: (href: string) => void };
@@ -44,6 +45,9 @@ export function navigateSchoolsDemoStep(
   router: RouterLike
 ): string {
   ensureSchoolsDemoStoryReady(pathname);
+  if (next === "map-brief") {
+    clearSchoolsMapMissionBriefDismiss();
+  }
   advanceSchoolsDemoStoryStep(next);
   const target = resolveNavigateTarget(next, pathname);
   router.replace(target);

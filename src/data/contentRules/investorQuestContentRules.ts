@@ -210,7 +210,7 @@ export const ISLAND_QUIZ_RULES: Record<PillarId, IslandQuizRule> = {
       "true-false"
     ],
     playingFeedback: {
-      prompt: "Pick the answer you'd tell a friend",
+      prompt: "",
       correct: "Yep — you get what they do",
       wrong: "Close — read the why, then keep going"
     }
@@ -349,7 +349,7 @@ export const BUSINESS_SECTION_QUIZ_RULES: Record<
     defaultPassMessage:
       "You can explain what this company does in normal life terms — that's the foundation.",
     playingFeedback: {
-      prompt: "Pick the answer you'd tell a friend",
+      prompt: "",
       correct: "Yep — you get what they do",
       wrong: "Close — read the why, then keep going"
     }

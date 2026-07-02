@@ -17,8 +17,8 @@ export async function middleware(request: NextRequest) {
 
   if (pathname === "/schools") {
     const url = request.nextUrl.clone();
-    url.pathname = "/schools/opening";
-    return withRequestPathname(NextResponse.redirect(url), "/schools/opening");
+    url.pathname = "/schools/demo";
+    return withRequestPathname(NextResponse.redirect(url), "/schools/demo");
   }
 
   const redirectTo = getControlledDemoRedirect(pathname, request.nextUrl.search);

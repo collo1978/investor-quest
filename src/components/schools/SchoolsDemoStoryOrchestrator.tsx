@@ -25,9 +25,19 @@ import {
   SCHOOLS_DEMO_ROUTE_PREFIX,
   stripSchoolsDemoPrefix
 } from "@/lib/schools/schoolsDemoHref";
+import { hasSchoolsBusinessIslandHubEntered } from "@/lib/schools/schoolsBusinessIslandZoomEnter";
+import { peekSchoolsQuestSummaryExited } from "@/lib/schools/schoolsQuestRewardFlow";
 
 function stepIndex(step: (typeof SCHOOLS_DEMO_STORY_STEPS)[number]): number {
   return SCHOOLS_DEMO_STORY_STEPS.indexOf(step);
+}
+
+/** `map-brief` and `map` share `/schools/demo/map` — never skip the envelope beat via URL sync. */
+function shouldPreserveMapBriefBeat(
+  step: (typeof SCHOOLS_DEMO_STORY_STEPS)[number],
+  inferred: (typeof SCHOOLS_DEMO_STORY_STEPS)[number]
+): boolean {
+  return step === "map-brief" && inferred === "map";
 }
 
 /** `/schools/demo` and `/schools/demo/mission-brief-invitation` are both valid opener beats. */
@@ -44,7 +54,20 @@ function pathnameMatchesDemoStepRoute(
     const learnerPath = stripSchoolsDemoPrefix(pathname);
     if (isSchoolsOnboardingFlowRoute(learnerPath)) return true;
   }
+  if (storyStep === "business-island") {
+    const learnerPath = stripSchoolsDemoPrefix(pathname);
+    if (learnerPath === "/schools/map" && hasSchoolsBusinessIslandHubEntered()) {
+      return true;
+    }
+    if (learnerPath === "/schools/business") return true;
+  }
   return false;
+}
+
+function businessQuestSlugFromPath(pathname: string): string | null {
+  const learnerPath = stripSchoolsDemoPrefix(pathname);
+  const match = learnerPath.match(/^\/schools\/business\/([^/]+)$/);
+  return match?.[1] ?? null;
 }
 
 /**
@@ -92,7 +115,7 @@ export function SchoolsDemoStoryOrchestrator() {
           const inferredIdx = stepIndex(inferred);
           const currentIdx = stepIndex(step);
           // Never downgrade an in-flight CTA advance while the URL still shows logo.
-          if (inferredIdx > currentIdx) {
+          if (inferredIdx > currentIdx && !shouldPreserveMapBriefBeat(step, inferred)) {
             setSchoolsDemoStoryStep(inferred);
           }
         }
@@ -101,7 +124,7 @@ export function SchoolsDemoStoryOrchestrator() {
       }
       const inferredIdx = stepIndex(inferred);
       const currentIdx = stepIndex(step);
-      if (inferredIdx > currentIdx) {
+      if (inferredIdx > currentIdx && !shouldPreserveMapBriefBeat(step, inferred)) {
         advanceSchoolsDemoStoryStep(inferred);
         return;
       }
@@ -120,11 +143,41 @@ export function SchoolsDemoStoryOrchestrator() {
     if (prevStepRef.current === step) return;
     prevStepRef.current = step;
 
+    // Quest summary dismissed — return to hub even if story step is still on quest beats.
+    const exitingQuestSlug = businessQuestSlugFromPath(pathname);
+    if (
+      exitingQuestSlug &&
+      peekSchoolsQuestSummaryExited(exitingQuestSlug) &&
+      isSchoolsBusinessQuestDetailPath(pathname)
+    ) {
+      routerRef.current.replace(getRouteForSchoolsDemoStoryStep("business-island"));
+      return;
+    }
+
     // Quest 1 summary + check-in — stay on the quest URL until the learner taps Back.
     if (
       isSchoolsBusinessQuestDetailPath(pathname) &&
       (step === "business-island" || step === "conviction")
     ) {
+      return;
+    }
+
+    const learnerPathForRedirect = stripSchoolsDemoPrefix(pathname);
+
+    if (
+      learnerPathForRedirect === "/schools/map" &&
+      (step === "business-island" || step === "conviction")
+    ) {
+      prevStepRef.current = step;
+      return;
+    }
+
+    if (
+      learnerPathForRedirect === "/schools/business" &&
+      stepIndex(step) < stepIndex("business-island")
+    ) {
+      setSchoolsDemoStoryStep("business-island");
+      prevStepRef.current = "business-island";
       return;
     }
 

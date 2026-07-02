@@ -1,7 +1,7 @@
 import type { PillarId } from "@/data/pillars";
 
-/** Schools quest map artwork (`public/logos/latest-map-schools.png`). */
-export const SCHOOLS_MAP_IMAGE_SRC = "/logos/latest-map-schools.png";
+/** Schools quest map artwork (`public/logos/new-map.png`). */
+export const SCHOOLS_MAP_IMAGE_SRC = "/logos/new-map.png";
 
 /** First-visit mission brief on canonical `/schools/map`. */
 export const SCHOOLS_MISSION_BRIEF_IMG_SRC = "/logos/schools-mission-brief.png";
@@ -14,6 +14,7 @@ export const SCHOOLS_MAP_NATURAL = {
 export type SchoolsMapDescriptionBox = {
   id: PillarId;
   title: string;
+  description: string;
   accent: string;
   unlocked: boolean;
   left: number;
@@ -24,7 +25,7 @@ export type SchoolsMapDescriptionBox = {
 
 type PixelRect = { x: number; y: number; w: number; h: number };
 
-function toPercentRect({ x, y, w, h }: PixelRect): Omit<SchoolsMapDescriptionBox, "id" | "title" | "accent" | "unlocked"> {
+function toPercentRect({ x, y, w, h }: PixelRect): Omit<SchoolsMapDescriptionBox, "id" | "title" | "description" | "accent" | "unlocked"> {
   const { width: W, height: H } = SCHOOLS_MAP_NATURAL;
   return {
     left: (x / W) * 100,
@@ -34,59 +35,64 @@ function toPercentRect({ x, y, w, h }: PixelRect): Omit<SchoolsMapDescriptionBox
   };
 }
 
-/** Corner description panels on the 1672×941 schools map art. */
+/** Interactive pillar cards on `new-map.png` (1672×941). */
 const BOX_PIXELS: Record<
   PillarId,
-  PixelRect & { title: string; accent: string; unlocked: boolean }
+  PixelRect & { title: string; description: string; accent: string; unlocked: boolean }
 > = {
   business: {
-    x: 42,
-    y: 36,
-    w: 368,
-    h: 118,
-    title: "Business Kingdom",
+    x: 16,
+    y: 72,
+    w: 300,
+    h: 108,
+    title: "Business",
+    description: "How do they make money?",
     accent: "#f59e0b",
     unlocked: true
   },
   forces: {
-    x: 1262,
-    y: 36,
-    w: 368,
-    h: 118,
-    title: "Force Frontier",
+    x: 1356,
+    y: 72,
+    w: 300,
+    h: 108,
+    title: "Risks",
+    description: "What are the threats?",
     accent: "#ef4444",
-    unlocked: false
+    unlocked: true
   },
   financials: {
-    x: 42,
-    y: 787,
-    w: 368,
-    h: 118,
-    title: "Financial Fortress",
+    x: 16,
+    y: 760,
+    w: 300,
+    h: 108,
+    title: "Financial",
+    description: "Are they financially strong?",
     accent: "#22c55e",
-    unlocked: false
+    unlocked: true
   },
   management: {
-    x: 1262,
-    y: 787,
-    w: 368,
-    h: 118,
-    title: "Leadership Council",
+    x: 1356,
+    y: 760,
+    w: 300,
+    h: 108,
+    title: "Management",
+    description: "Would you trust them?",
     accent: "#3b82f6",
-    unlocked: false
+    unlocked: true
   }
 };
 
 export const SCHOOLS_MAP_DESCRIPTION_BOXES: readonly SchoolsMapDescriptionBox[] = (
   Object.entries(BOX_PIXELS) as [
     PillarId,
-    PixelRect & { title: string; accent: string; unlocked: boolean }
+    PixelRect & { title: string; description: string; accent: string; unlocked: boolean }
   ][]
 ).map(([id, rect]) => {
-  const { title, accent, unlocked, ...pixels } = rect;
+  const { title, description, accent, unlocked, ...pixels } = rect;
   return {
     id,
     title,
+    description,
     accent,
     unlocked,
     ...toPercentRect(pixels)
@@ -101,15 +107,12 @@ export type SchoolsMapIslandHotspot = {
   h: number;
 };
 
-/**
- * Elliptical hit areas over each island mass on `latest-map-schools.png`.
- * Business only is playable in Schools — the other three stay locked.
- */
+/** Elliptical hit areas over each island on `new-map.png`. */
 export const SCHOOLS_MAP_ISLAND_HOTSPOTS: readonly SchoolsMapIslandHotspot[] = [
-  { id: "business", cx: 29, cy: 22, w: 14, h: 21 },
-  { id: "forces", cx: 74.5, cy: 28, w: 24, h: 26 },
-  { id: "financials", cx: 25.5, cy: 72, w: 26, h: 28 },
-  { id: "management", cx: 74.5, cy: 72, w: 26, h: 28 }
+  { id: "business", cx: 25, cy: 24, w: 15, h: 22 },
+  { id: "forces", cx: 75, cy: 24, w: 15, h: 22 },
+  { id: "financials", cx: 25, cy: 74, w: 15, h: 22 },
+  { id: "management", cx: 75, cy: 74, w: 15, h: 22 }
 ];
 
 const SCHOOLS_MAP_UNLOCKED_BY_ID = Object.fromEntries(

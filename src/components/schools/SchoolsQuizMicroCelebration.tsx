@@ -17,7 +17,7 @@ export function SchoolsQuizMicroCelebration({ message }: Props) {
       exit={{ opacity: 0, y: -4 }}
       transition={{ duration: 0.22, ease: "easeOut" }}
       className="mt-4 text-center text-[13px] font-semibold"
-      style={{ color: "rgba(244,180,180,0.95)" }}
+      style={{ color: "#b45309" }}
       aria-live="polite"
     >
       {message}

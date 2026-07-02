@@ -42,6 +42,15 @@ export function clearSchoolsQuestSummaryExited(slug?: string): void {
   }
 }
 
+export function clearSchoolsHubCelebrateReturn(): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.removeItem(SCHOOLS_HUB_CELEBRATE_SESSION_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export const SCHOOLS_MICRO_XP_PER_CORRECT = 10;
 /** Quest-clear bonus shown on the post-quiz skill summary. */
 export const SCHOOLS_CARD_COMPLETE_XP = 75;
@@ -54,11 +63,6 @@ export const SCHOOLS_CORRECT_MESSAGES = [
   "You got it!",
   "Investor skill +1",
   "You're getting the hang of this."
-] as const;
-
-export const SCHOOLS_WRONG_MESSAGES = [
-  "Not quite. Try again.",
-  "Almost. Give it another shot."
 ] as const;
 
 /** Hub slot index after completing each Business quest slug. */
@@ -75,10 +79,27 @@ export const SCHOOLS_BUSINESS_HUB_SLOT: Record<string, number> = {
 export const SCHOOLS_COMPLETION_HEADLINE = "You Did the Work";
 export const SCHOOLS_COMPLETION_SKILL_HEADING = "Stack Another Skill";
 
+export type SchoolsQuestInsightField = {
+  label: string;
+  /** Populated dynamically later — omit for blank placeholder. */
+  value?: string;
+};
+
 export type SchoolsQuestCompletionCopy = {
   headline: string;
+  /** Principle-unlock hero — e.g. "Value Proposition". */
+  principleName?: string;
+  /** Supports **bold** markers. */
+  principleBody?: string;
+  /** e.g. "YOUR {Company} INSIGHT" — {Company} → uppercase company name. */
+  companyInsightHeading?: string;
+  companyInsightFields?: readonly SchoolsQuestInsightField[];
   investorSkillHeading: string;
-  /** Intro line before optional bullet list (e.g. "The best investors first ask:"). */
+  /** Achievement title — e.g. "Understand the Business". */
+  skillName?: string;
+  /** Line before skill bullets on the completion card. */
+  skillEvaluateIntro?: string;
+  /** @deprecated Prefer skillEvaluateIntro */
   skillIntro?: string;
   skillBullets?: readonly string[];
   investorSkillLines: readonly string[];
@@ -91,23 +112,25 @@ export const SCHOOLS_QUEST_COMPLETION_COPY: Partial<
   Record<string, SchoolsQuestCompletionCopy>
 > = {
   "what-they-do": {
-    headline: "First Quest Complete",
-    investorSkillHeading: "New Investor Skill Unlocked",
-    skillIntro: "The best investors first ask:",
-    skillBullets: [
-      "What does the company sell?",
-      "What problem does it solve?"
+    headline: "Your First Investing Principle Unlocked",
+    principleName: "Value Proposition",
+    principleBody:
+      "Companies with a strong **value proposition** solve real customer problems in a way that is **valuable, different, or better** than the alternatives.",
+    companyInsightHeading: "Your {Company} Insight",
+    companyInsightFields: [
+      { label: "What they sell:" },
+      { label: "Why customers buy it:" }
     ],
-    investorSkillLines: [
-      "Companies that solve important problems often attract more customers."
-    ],
+    investorSkillHeading: "",
+    investorSkillLines: [],
     ctaLabel: "Unlock Next Quest →"
   },
   "why-buying": {
     headline: "Second Quest Complete",
     investorSkillHeading: "New Investor Skill Unlocked",
-    skillIntro: "The best investors ask:",
-    skillBullets: ["What are all the company's revenue sources?"],
+    skillName: "Map the Revenue Engine",
+    skillEvaluateIntro: "You can now evaluate:",
+    skillBullets: ["Where the company makes its money."],
     investorSkillLines: [
       "Knowing where a company makes its money helps investors understand what is driving the business."
     ],
@@ -116,9 +139,10 @@ export const SCHOOLS_QUEST_COMPLETION_COPY: Partial<
   "everyday-life": {
     headline: "Third Quest Complete",
     investorSkillHeading: "New Investor Skill Unlocked",
-    skillIntro: "The best investors ask:",
+    skillName: "Spot the Innovation Edge",
+    skillEvaluateIntro: "You can now evaluate:",
     skillBullets: [
-      "How is the company trying to stay ahead of competitors?"
+      "How the company stays ahead of competitors."
     ],
     investorSkillLines: [
       "Companies that keep innovating often have a better chance of long-term success."
@@ -128,9 +152,10 @@ export const SCHOOLS_QUEST_COMPLETION_COPY: Partial<
   "how-it-works": {
     headline: "Fourth Quest Complete",
     investorSkillHeading: "New Investor Skill Unlocked",
-    skillIntro: "The best investors ask:",
+    skillName: "Trace the Business Model",
+    skillEvaluateIntro: "You can now evaluate:",
     skillBullets: [
-      "How does the company get its products or services to customers?"
+      "How the company reaches its customers."
     ],
     investorSkillLines: [
       "Companies with strong partnerships, customer relationships, and distribution networks can often grow faster and reach more customers."
@@ -140,10 +165,11 @@ export const SCHOOLS_QUEST_COMPLETION_COPY: Partial<
   "why-they-stay": {
     headline: "Fifth Quest Complete",
     investorSkillHeading: "New Investor Skill Unlocked",
-    skillIntro: "The best investors ask:",
+    skillName: "Read the Supply Chain",
+    skillEvaluateIntro: "You can now evaluate:",
     skillBullets: [
-      "Who helps the company make its products?",
-      "What happens if those suppliers run into problems?"
+      "Who makes the company's products.",
+      "What happens if suppliers run into trouble."
     ],
     investorSkillLines: [
       "Even great products depend on a strong supply chain."
@@ -153,10 +179,11 @@ export const SCHOOLS_QUEST_COMPLETION_COPY: Partial<
   competition: {
     headline: "Sixth Quest Complete",
     investorSkillHeading: "New Investor Skill Unlocked",
-    skillIntro: "The best investors ask:",
+    skillName: "Judge Industry Intensity",
+    skillEvaluateIntro: "You can now evaluate:",
     skillBullets: [
-      "How difficult is this industry to compete in?",
-      "What does a company need to do to stay successful?"
+      "How hard it is to compete in this industry.",
+      "What it takes to stay successful."
     ],
     investorSkillLines: [
       "Companies in highly competitive industries must constantly innovate to stay ahead."
@@ -166,10 +193,11 @@ export const SCHOOLS_QUEST_COMPLETION_COPY: Partial<
   "who-competes": {
     headline: "Seventh Quest Complete",
     investorSkillHeading: "New Investor Skill Unlocked",
-    skillIntro: "The best investors ask:",
+    skillName: "Know the Rival Landscape",
+    skillEvaluateIntro: "You can now evaluate:",
     skillBullets: [
-      "Who are the company's competitors?",
-      "What advantages does the company have over them?"
+      "Who the company's competitors are.",
+      "What advantages it has over them."
     ],
     investorSkillLines: [
       "Understanding the competition helps investors judge whether a company can protect its market position."
@@ -182,6 +210,14 @@ export function resolveSchoolsQuestCompletionCopy(
   slug: string
 ): SchoolsQuestCompletionCopy | null {
   return SCHOOLS_QUEST_COMPLETION_COPY[slug] ?? null;
+}
+
+export function resolveSchoolsCompanyInsightHeading(
+  template: string,
+  companyName: string
+): string {
+  const company = companyName.trim() || "This Company";
+  return template.replace(/\{Company\}/gi, company);
 }
 
 export const SCHOOLS_COMPLETION_PRIDE_LINE =
@@ -258,8 +294,8 @@ export function schoolsCorrectMessage(questionIndex: number): string {
   ];
 }
 
-export function schoolsWrongMessage(questionIndex: number): string {
-  return SCHOOLS_WRONG_MESSAGES[questionIndex % SCHOOLS_WRONG_MESSAGES.length];
+export function schoolsWrongMessage(_questionIndex: number): string {
+  return "";
 }
 
 export function markSchoolsHubCelebrateReturn(): void {

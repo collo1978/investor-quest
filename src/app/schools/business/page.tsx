@@ -1,3 +1,2 @@
-/** Schools variant — Business island hub (mirrors main hub for now). */
-export { default } from "@/app/business/page";
-
+/** Schools Business Island hub — camera zoom on the Prodigy map (legacy URL redirects). */
+export { default } from "@/components/schools/SchoolsBusinessHubRedirect";

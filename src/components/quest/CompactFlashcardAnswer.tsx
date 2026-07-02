@@ -4,7 +4,7 @@
 
 import { motion } from "framer-motion";
 
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 
 
 
@@ -23,10 +23,74 @@ import {
   isEmojiSectionHeadline
 } from "@/lib/quests/takeawayAnswer";
 
+/** Schools mission cards — high-contrast readable palette on cream. */
+const MISSION_HEADING = "#0f172a";
+const MISSION_BODY = "#475569";
+const MISSION_BODY_STRONG = "#334155";
+const MISSION_ACCENT = "#92400e";
+const MISSION_BULLET = "#d97706";
 
+function isMissionTheme(theme?: PillarQuestTheme): boolean {
+  return theme?.cardChrome === "mission";
+}
+
+function missionHeading(theme?: PillarQuestTheme): string {
+  return isMissionTheme(theme) ? MISSION_HEADING : theme?.hi ?? "#F5C547";
+}
+
+function missionBodyClass(theme?: PillarQuestTheme, emphasized?: boolean): string {
+  if (!isMissionTheme(theme)) {
+    return emphasized
+      ? "text-[13.5px] leading-[1.45] text-ink-0/90 sm:text-[14px]"
+      : "text-[13px] leading-[1.42] text-ink-0/88 sm:text-[13.5px]";
+  }
+  return emphasized
+    ? "text-[14px] leading-[1.55] sm:text-[14.5px]"
+    : "text-[13.5px] leading-[1.52] sm:text-[14px]";
+}
+
+function missionBodyStyle(theme?: PillarQuestTheme): CSSProperties | undefined {
+  return isMissionTheme(theme) ? { color: MISSION_BODY } : undefined;
+}
+
+function missionInfoPanelStyle(theme?: PillarQuestTheme): CSSProperties {
+  if (!isMissionTheme(theme)) {
+    return {
+      borderColor: theme?.borderSoft ?? "rgba(245, 197, 71, 0.18)",
+      background: theme
+        ? `linear-gradient(155deg, ${theme.glowSoft} 0%, rgba(8, 10, 18, 0.42) 58%, rgba(0, 0, 0, 0.28) 100%)`
+        : "rgba(0, 0, 0, 0.24)",
+      boxShadow: theme
+        ? `inset 0 1px 0 ${theme.rim}, 0 10px 28px rgba(0, 0, 0, 0.22)`
+        : undefined
+    };
+  }
+  return {
+    borderColor: "rgba(191, 219, 254, 0.55)",
+    background:
+      "linear-gradient(168deg, rgba(240, 249, 255, 0.72) 0%, rgba(255, 251, 235, 0.58) 100%)",
+    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.82)"
+  };
+}
+
+function missionTakeawayPanelStyle(theme?: PillarQuestTheme): CSSProperties {
+  if (!isMissionTheme(theme)) {
+    return {
+      borderColor: theme?.whyGlow ?? "rgba(168, 85, 247, 0.35)",
+      background: theme
+        ? `linear-gradient(160deg, ${theme.whyWash} 0%, rgba(8, 10, 18, 0.5) 100%)`
+        : "rgba(88, 28, 135, 0.12)",
+      boxShadow: theme ? `inset 0 1px 0 rgba(255,255,255,0.06)` : undefined
+    };
+  }
+  return {
+    borderColor: "rgba(251, 191, 36, 0.42)",
+    background: "rgba(255, 255, 255, 0.48)",
+    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.75)"
+  };
+}
 
 type Props = {
-
   paragraphs: string[];
 
   theme?: PillarQuestTheme;
@@ -64,11 +128,12 @@ function SupportDot({ theme, large = false }: { theme?: PillarQuestTheme; large?
       }
 
       style={{
-
-        background: theme?.hi ?? "rgba(245,197,71,0.85)",
-
-        boxShadow: theme ? `0 0 10px ${theme.glowSoft}` : undefined
-
+        background: isMissionTheme(theme) ? MISSION_BULLET : theme?.hi ?? "rgba(245,197,71,0.85)",
+        boxShadow: isMissionTheme(theme)
+          ? undefined
+          : theme
+            ? `0 0 10px ${theme.glowSoft}`
+            : undefined
       }}
 
     />
@@ -93,6 +158,19 @@ function formatSegmentTitle(title: string): string {
 
 }
 
+/** Small contextual icon for Used In / segment list items (mission cards). */
+function segmentItemIcon(label: string): string | null {
+  const t = label.toLowerCase();
+  if (/\bai\b|artificial intelligence|machine learning|generative/.test(t)) return "🤖";
+  if (/video game|gaming|game console/.test(t)) return "🎮";
+  if (/data cent|datacenter|cloud server|server farm/.test(t)) return "🖥️";
+  if (/scientific|research|laboratory|lab\b|physics|biology/.test(t)) return "🔬";
+  if (/automotive|self-driving|vehicle|car\b/.test(t)) return "🚗";
+  if (/healthcare|medical|hospital/.test(t)) return "🏥";
+  if (/finance|bank|trading/.test(t)) return "💹";
+  return null;
+}
+
 
 
 function SegmentGridPanel({
@@ -113,104 +191,76 @@ function SegmentGridPanel({
 
 }) {
 
-  const bulletClass = emphasized
+  const bulletClass = missionBodyClass(theme, emphasized);
+  const panelGap = isMissionTheme(theme) ? "gap-4 sm:gap-5" : "gap-3.5 sm:gap-4";
+  const activeSegments = segments.filter((segment) => segment.items.length > 0);
+  const singleMissionPanel = isMissionTheme(theme) && activeSegments.length === 1;
 
-    ? "text-[13.5px] leading-[1.45] text-ink-0/90 sm:text-[14px]"
-
-    : "text-[13px] leading-[1.42] text-ink-0/88 sm:text-[13.5px]";
-
-
-
-  return (
-
-    <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:gap-4">
-
-      {segments.map((segment) => (
-
-        <div
-
-          key={segment.title}
-
-          className="flex min-h-0 flex-col rounded-xl border px-3.5 py-4 sm:px-4 sm:py-5"
-
-          style={{
-
-            borderColor: theme?.borderSoft ?? "rgba(245, 197, 71, 0.18)",
-
-            background: theme
-
-              ? `linear-gradient(155deg, ${theme.glowSoft} 0%, rgba(8, 10, 18, 0.42) 58%, rgba(0, 0, 0, 0.28) 100%)`
-
-              : "rgba(0, 0, 0, 0.24)",
-
-            boxShadow: theme
-
-              ? `inset 0 1px 0 ${theme.rim}, 0 10px 28px rgba(0, 0, 0, 0.22)`
-
-              : undefined
-
-          }}
-
-        >
-
-          <h3
-
-            className={
-
-              emphasized
-
-                ? "text-[17px] font-extrabold leading-[1.2] tracking-[0.03em] sm:text-[18px]"
-
-                : "text-[16px] font-extrabold leading-[1.2] tracking-[0.03em] sm:text-[17px]"
-
-            }
-
-            style={
-
-              theme
-
-                ? {
-
-                    color: theme.hi,
-
-                    textShadow: `0 0 22px ${theme.glowSoft}`
-
-                  }
-
-                : { color: "#F5C547" }
-
-            }
-
-          >
-
-            {formatSegmentTitle(segment.title)}
-
-          </h3>
-
-          <ul className="mt-4 space-y-1 sm:mt-5">
-
-            {segment.items.map((item) => (
-
-              <li key={item} className={`flex gap-2 ${bulletClass}`}>
-
+  const renderSegment = (segment: SegmentPanel) => (
+    <div
+      key={segment.title}
+      className={`flex min-h-0 flex-col rounded-xl border ${
+        isMissionTheme(theme)
+          ? "px-4 py-3.5 sm:px-5 sm:py-4"
+          : "px-3.5 py-4 sm:px-4 sm:py-5"
+      }`}
+      style={missionInfoPanelStyle(theme)}
+    >
+      <h3
+        className={
+          isMissionTheme(theme)
+            ? "text-[11px] font-extrabold uppercase tracking-[0.18em]"
+            : emphasized
+              ? "text-[17px] font-extrabold leading-[1.2] tracking-[0.03em] sm:text-[18px]"
+              : "text-[16px] font-extrabold leading-[1.2] tracking-[0.03em] sm:text-[17px]"
+        }
+        style={
+          isMissionTheme(theme)
+            ? { color: MISSION_ACCENT }
+            : theme
+              ? { color: theme.hi, textShadow: `0 0 22px ${theme.glowSoft}` }
+              : { color: "#F5C547" }
+        }
+      >
+        {formatSegmentTitle(segment.title)}
+      </h3>
+      <ul
+        className={
+          isMissionTheme(theme) ? "mt-3 space-y-2 sm:mt-3.5" : "mt-4 space-y-1 sm:mt-5"
+        }
+      >
+        {segment.items.map((item) => {
+          const icon = isMissionTheme(theme) ? segmentItemIcon(item) : null;
+          return (
+            <li key={item} className={`flex gap-2.5 ${bulletClass}`} style={missionBodyStyle(theme)}>
+              {icon ? (
+                <span aria-hidden className="mt-0.5 shrink-0 text-[15px] leading-none">
+                  {icon}
+                </span>
+              ) : (
                 <SupportDot theme={theme} />
-
-                <span className="min-w-0 flex-1">{item}</span>
-
-              </li>
-
-            ))}
-
-          </ul>
-
-        </div>
-
-      ))}
-
+              )}
+              <span className="min-w-0 flex-1">{item}</span>
+            </li>
+          );
+        })}
+      </ul>
     </div>
-
   );
 
+  if (singleMissionPanel) {
+    return (
+      <div className="mx-auto w-full max-w-sm">{renderSegment(activeSegments[0]!)}</div>
+    );
+  }
+
+  return (
+    <div className={`grid grid-cols-1 ${panelGap} sm:grid-cols-2`}>
+      {segments.map((segment) =>
+        segment.items.length > 0 ? renderSegment(segment) : null
+      )}
+    </div>
+  );
 }
 
 
@@ -237,94 +287,73 @@ function LessonFocusPanel({
 
 }) {
 
-  const bulletClass = emphasized
-
-    ? "text-[14px] leading-[1.5] text-ink-0/92 sm:text-[14.5px]"
-
-    : "text-[13.5px] leading-[1.48] text-ink-0/90 sm:text-[14px]";
-
-
+  const bulletClass = missionBodyClass(theme, emphasized);
 
   return (
-
     <div
-
-      className="rounded-xl border px-4 py-3 sm:px-5 sm:py-3.5"
-
-      style={{
-
-        borderColor: theme?.whyGlow ?? "rgba(168, 85, 247, 0.35)",
-
-        background: theme
-
-          ? `linear-gradient(160deg, ${theme.whyWash} 0%, rgba(8, 10, 18, 0.5) 100%)`
-
-          : "rgba(88, 28, 135, 0.12)",
-
-        boxShadow: theme ? `inset 0 1px 0 rgba(255,255,255,0.06)` : undefined
-
-      }}
-
+      className={`rounded-xl border ${
+        isMissionTheme(theme) ? "px-4 py-4 sm:px-5 sm:py-5" : "px-4 py-3 sm:px-5 sm:py-3.5"
+      }`}
+      style={missionTakeawayPanelStyle(theme)}
     >
-
       <p
-
         className={
-
-          emphasized
-
-            ? "text-[15px] font-bold leading-[1.35] text-ink-0 sm:text-[16px]"
-
-            : "text-[14.5px] font-bold leading-[1.35] text-ink-0 sm:text-[15px]"
-
+          isMissionTheme(theme)
+            ? "text-[13px] font-extrabold uppercase tracking-[0.14em]"
+            : emphasized
+              ? "text-[15px] font-bold leading-[1.35] text-ink-0 sm:text-[16px]"
+              : "text-[14.5px] font-bold leading-[1.35] text-ink-0 sm:text-[15px]"
         }
-
-        style={theme ? { color: theme.whyHi } : undefined}
-
+        style={
+          isMissionTheme(theme)
+            ? { color: MISSION_ACCENT }
+            : theme
+              ? { color: theme.whyHi }
+              : undefined
+        }
       >
-
         {title}
-
       </p>
-
-      <ul className="mt-3 space-y-1 sm:mt-3.5">
-
+      <ul
+        className={
+          isMissionTheme(theme) ? "mt-3.5 space-y-2 sm:mt-4" : "mt-3 space-y-1 sm:mt-3.5"
+        }
+      >
         {bullets.map((item) => (
-
-          <li key={item} className={`flex gap-2.5 ${bulletClass}`}>
-
+          <li key={item} className={`flex gap-2.5 ${bulletClass}`} style={missionBodyStyle(theme)}>
             <SupportDot theme={theme} large />
-
             <span className="min-w-0 flex-1">{item}</span>
-
           </li>
-
         ))}
-
       </ul>
-
     </div>
-
   );
-
 }
 
 
 
 function LessonClosingLine({
   text,
-  emphasized
+  emphasized,
+  theme
 }: {
   text: string;
   emphasized?: boolean;
+  theme?: PillarQuestTheme;
 }) {
+  const mission = isMissionTheme(theme);
   return (
     <p
       className={
-        emphasized
-          ? "text-[15px] font-semibold leading-[1.68] text-ink-0 sm:text-[15.5px] sm:leading-[1.72]"
-          : "text-[14.5px] font-semibold leading-[1.65] text-ink-0 sm:text-[15px]"
+        mission
+          ? emphasized
+            ? "text-[15px] font-semibold leading-[1.72] sm:text-[15.5px]"
+            : "text-[14.5px] font-semibold leading-[1.68] sm:text-[15px]"
+          : emphasized
+            ? "text-[15px] font-semibold leading-[1.68] text-ink-0 sm:text-[15.5px] sm:leading-[1.72]"
+            : "text-[14.5px] font-semibold leading-[1.65] text-ink-0 sm:text-[15px]"
       }
+      style={mission ? { color: MISSION_BODY_STRONG } : undefined}
     >
       {text}
     </p>
@@ -355,7 +384,7 @@ function LessonMiddleChunks({
 
   return (
 
-    <div className="space-y-4">
+    <div className={isMissionTheme(theme) ? "space-y-5 sm:space-y-6" : "space-y-4"}>
 
       {chunks.map((chunk, index) => {
 
@@ -413,74 +442,62 @@ function LessonFlashcardLayout({
 
 }) {
 
-  const introClass = emphasized
-
-    ? "text-[15px] font-normal leading-[1.68] text-ink-0 sm:text-[15.5px] sm:leading-[1.72]"
-
-    : "text-[14.5px] font-normal leading-[1.65] text-ink-0/94 sm:text-[15px]";
-
-
+  const introClass = isMissionTheme(theme)
+    ? emphasized
+      ? "text-[15px] font-normal leading-[1.72] sm:text-[16px] sm:leading-[1.76]"
+      : "text-[14.5px] font-normal leading-[1.68] sm:text-[15px]"
+    : emphasized
+      ? "text-[15px] font-normal leading-[1.68] text-ink-0 sm:text-[15.5px] sm:leading-[1.72]"
+      : "text-[14.5px] font-normal leading-[1.65] text-ink-0/94 sm:text-[15px]";
 
   const hasFocus = Boolean(lesson.focusTitle && lesson.focusBullets.length > 0);
-
   const hasMiddle = lesson.middleChunks.length > 0;
   const showYellowHeadline = Boolean(
     headline.trim() && !isEmojiSectionHeadline(headline)
   );
+  const sectionGap = isMissionTheme(theme)
+    ? emphasized
+      ? "w-full space-y-7 sm:space-y-8"
+      : "w-full space-y-6 sm:space-y-7"
+    : emphasized
+      ? "w-full space-y-6 sm:space-y-7"
+      : "w-full space-y-5 sm:space-y-6";
 
   return (
-
     <motion.div
-
-      className={emphasized ? "w-full space-y-6 sm:space-y-7" : "w-full space-y-5 sm:space-y-6"}
-
+      className={sectionGap}
       initial={{ opacity: 0 }}
-
       animate={{ opacity: 1 }}
-
       transition={{ duration: 0.2 }}
-
     >
-
       {showYellowHeadline ? (
-      <h2
-
-        className={
-
-          emphasized
-
-            ? "text-[20px] font-extrabold leading-[1.3] sm:text-[22px] sm:leading-[1.28]"
-
-            : "text-[18px] font-extrabold leading-[1.32] sm:text-[20px]"
-
-        }
-
-        style={
-
-          theme
-
-            ? {
-
-                color: theme.hi,
-
-                textShadow: `0 0 28px ${theme.glowSoft}`
-
-              }
-
-            : { color: "#F5C547" }
-
-        }
-
-      >
-
-        {headline}
-
-      </h2>
+        <h2
+          className={
+            isMissionTheme(theme)
+              ? emphasized
+                ? "text-[clamp(1.35rem,4.2vw,1.65rem)] font-bold leading-[1.28] tracking-[-0.02em]"
+                : "text-[clamp(1.25rem,3.8vw,1.5rem)] font-bold leading-[1.3] tracking-[-0.02em]"
+              : emphasized
+                ? "text-[20px] font-extrabold leading-[1.3] sm:text-[22px] sm:leading-[1.28]"
+                : "text-[18px] font-extrabold leading-[1.32] sm:text-[20px]"
+          }
+          style={
+            isMissionTheme(theme)
+              ? { color: missionHeading(theme) }
+              : theme
+                ? { color: theme.hi, textShadow: `0 0 28px ${theme.glowSoft}` }
+                : { color: "#F5C547" }
+          }
+        >
+          {headline}
+        </h2>
       ) : null}
 
-
-
-      {lesson.intro ? <p className={introClass}>{lesson.intro}</p> : null}
+      {lesson.intro ? (
+        <p className={introClass} style={missionBodyStyle(theme)}>
+          {lesson.intro}
+        </p>
+      ) : null}
 
 
 
@@ -519,9 +536,7 @@ function LessonFlashcardLayout({
 
 
       {lesson.closing ? (
-
-        <LessonClosingLine text={lesson.closing} emphasized={emphasized} />
-
+        <LessonClosingLine text={lesson.closing} emphasized={emphasized} theme={theme} />
       ) : null}
 
     </motion.div>

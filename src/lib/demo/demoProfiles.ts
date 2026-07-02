@@ -130,6 +130,16 @@ function buildFreshCompanyProgress(): CompanyProgress {
   };
 }
 
+/** Fresh Business Island save — 0/7 complete, quest 1 unlocked, slots 2–7 locked. */
+export function buildFreshSchoolsBusinessDemoProgress(): CompanyProgress {
+  const now = Date.now();
+  return {
+    ...buildFreshCompanyProgress(),
+    progressRevision: now,
+    lastActivityAt: now
+  };
+}
+
 function buildInvestorCompanyProgress(): CompanyProgress {
   const now = Date.now();
   const xp = XP_SECTION_QUIZ + 70;

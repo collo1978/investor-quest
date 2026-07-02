@@ -31,6 +31,9 @@ export function clearSchoolsMapMissionBriefDismiss(): void {
   if (typeof sessionStorage === "undefined") return;
   try {
     sessionStorage.removeItem(SCHOOLS_MAP_MISSION_BRIEF_STORAGE_KEY);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("iq-schools-map-brief-dismissed"));
+    }
   } catch {
     /* ignore */
   }

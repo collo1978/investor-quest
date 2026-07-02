@@ -68,6 +68,11 @@ import {
   CONTROLLED_DEMO_MODE
 } from "@/lib/demo/controlledDemo";
 import { isIsolatedDemoStoryModeActive } from "@/lib/demo/isolatedDemoStoryMode";
+import { getMaxProgressRevision } from "@/lib/gameState/stateActivity";
+import {
+  buildSchoolsDemoPresenterResetState,
+  SCHOOLS_DEMO_RESET_EVENT
+} from "@/lib/schools/resetSchoolsDemoProgress";
 
 type Toast = {
   id: string;
@@ -353,7 +358,13 @@ export function GameProvider({
           merged.onboarding.welcomeScreenSeenAt ===
             prev.onboarding.welcomeScreenSeenAt &&
           merged.onboarding.completedAt === prev.onboarding.completedAt;
-        if (onboardingUnchanged && merged.activeCompanyId === prev.activeCompanyId) {
+        const diskRevision = getMaxProgressRevision(merged);
+        const memoryRevision = getMaxProgressRevision(prev);
+        if (
+          onboardingUnchanged &&
+          merged.activeCompanyId === prev.activeCompanyId &&
+          diskRevision <= memoryRevision
+        ) {
           return prev;
         }
         logQuestProgress("hydrate.merged", summarizeReadProgress(merged));
@@ -383,6 +394,29 @@ export function GameProvider({
       unsub?.();
     };
   }, [store, corruptSaveBlocked]);
+
+  useEffect(() => {
+    const applySchoolsDemoReset = () => {
+      const next = buildSchoolsDemoPresenterResetState();
+      const stamped: GameState = {
+        ...next,
+        version: next.version,
+        lastActivityAt: Date.now()
+      };
+      bootstrapLockUntilRef.current = Date.now() + 8000;
+      clearPersistedSnapshots();
+      savePersistedSnapshot(stamped, { mergeIfDiskNewer: false });
+      setState(stamped);
+      persistReadyRef.current = true;
+      setHydrated(true);
+      setToasts([]);
+      setFx(initialFx);
+      logQuestProgress("demo.reset", summarizeReadProgress(stamped));
+    };
+    window.addEventListener(SCHOOLS_DEMO_RESET_EVENT, applySchoolsDemoReset);
+    return () =>
+      window.removeEventListener(SCHOOLS_DEMO_RESET_EVENT, applySchoolsDemoReset);
+  }, []);
 
   useEffect(() => {
     if (isIsolatedDemoStoryModeActive()) return;

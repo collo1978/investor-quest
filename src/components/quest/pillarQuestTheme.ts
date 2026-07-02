@@ -2,6 +2,7 @@ import type { PillarId } from "@/data/pillars";
 
 import { FINANCIALS_ISLAND } from "@/components/quest/financialsIslandColors";
 import { FORCES_ISLAND } from "@/components/quest/forcesIslandColors";
+import { isSchoolsBusinessQuestPath } from "@/lib/schools/schoolsDemoHref";
 
 /** Premium Q/A quest card + island reading chrome per pillar. */
 export type PillarQuestTheme = {
@@ -18,8 +19,12 @@ export type PillarQuestTheme = {
   whyWash: string;
   badgeText: string;
   markReadPulse: string;
-  /** Single-hue neon rim (financials artwork) vs jewel multi-stop (business). */
-  cardChrome?: "neon" | "jewel";
+  /** Single-hue neon rim (financials) vs jewel (business) vs mission (schools). */
+  cardChrome?: "neon" | "jewel" | "mission";
+  /** Body text on mission cards */
+  text?: string;
+  textMuted?: string;
+  surface?: string;
 };
 
 const BUSINESS_THEME: PillarQuestTheme = {
@@ -36,6 +41,28 @@ const BUSINESS_THEME: PillarQuestTheme = {
   badgeText: "rgba(14, 12, 8, 0.92)",
   markReadPulse: "rgba(245,197,71,0.14)",
   cardChrome: "jewel"
+};
+
+/** Schools Business Island — cream/gold mission cards (matches hub). */
+export const SCHOOLS_BUSINESS_MISSION_THEME: PillarQuestTheme = {
+  hi: "#d97706",
+  lo: "#fbbf24",
+  light: "#fde047",
+  glow: "rgba(251, 191, 36, 0.38)",
+  glowSoft: "rgba(251, 191, 36, 0.14)",
+  border: "rgba(251, 191, 36, 0.88)",
+  borderSoft: "rgba(202, 138, 4, 0.48)",
+  rim: "rgba(253, 224, 71, 0.95)",
+  whyHi: "#1e3a5f",
+  whyGlow: "rgba(56, 189, 248, 0.22)",
+  whyWash: "rgba(191, 219, 254, 0.42)",
+  badgeText: "#92400e",
+  markReadPulse: "rgba(251, 191, 36, 0.22)",
+  cardChrome: "mission",
+  text: "#0f172a",
+  textMuted: "#475569",
+  surface:
+    "linear-gradient(168deg, #fffbeb 0%, #fef3c7 46%, #fde68a 100%)"
 };
 
 const FINANCIALS_THEME: PillarQuestTheme = {
@@ -110,4 +137,15 @@ export function usesPillarQuestCardTemplate(pillarId: PillarId): boolean {
 
 export function getPillarQuestTheme(pillarId: PillarId): PillarQuestTheme {
   return THEMES[pillarId] ?? BUSINESS_THEME;
+}
+
+/** Business quest chrome — schools mission cards vs investor jewel cards. */
+export function resolveBusinessQuestTheme(
+  pillarId: PillarId,
+  pathname: string
+): PillarQuestTheme {
+  if (pillarId === "business" && isSchoolsBusinessQuestPath(pathname)) {
+    return SCHOOLS_BUSINESS_MISSION_THEME;
+  }
+  return getPillarQuestTheme(pillarId);
 }

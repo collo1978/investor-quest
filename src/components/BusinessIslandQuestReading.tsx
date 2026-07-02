@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { PillarQuestTemplateFrame } from "@/components/BusinessQuestTemplateFrame";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@/components/quest/islandQuizPassMessages";
 import {
   getPillarQuestTheme,
+  resolveBusinessQuestTheme,
   type PillarQuestTheme
 } from "@/components/quest/pillarQuestTheme";
 import { QuestQuizPanel } from "@/components/QuestQuizPanel";
@@ -51,13 +52,11 @@ import { parseRelatableQuestAnswer } from "@/lib/quests/questAnswerFormat";
 import { islandQuizSectionTitle } from "@/lib/quests/islandQuizStyle";
 import {
   isSchoolsBusinessQuestPath,
+  isSchoolsDemoPath,
   isSchoolsLearnerPath,
   resolveSchoolsLearnerHref
 } from "@/lib/schools/schoolsDemoHref";
-import {
-  advanceSchoolsDemoStoryStep,
-  getSchoolsDemoStoryStep
-} from "@/lib/schools/schoolsDemoStoryMode";
+import { navigateSchoolsDemoMenuHref } from "@/lib/schools/navigateSchoolsDemoStep";
 import {
   isSchoolsDemoPlaythroughActive,
   SCHOOLS_DEMO_BUSINESS_TILE
@@ -365,7 +364,7 @@ function MarkAsReadGlowWrap({
 }: {
   isRead: boolean;
   theme: PillarQuestTheme;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <motion.div
@@ -403,8 +402,10 @@ function MarkAsReadCheckbox({
   allowToggle?: boolean;
   theme: PillarQuestTheme;
 }) {
+  const isMission = theme.cardChrome === "mission";
   const GREEN_HI = "#22C58B";
   const GREEN_BORDER = "rgba(34, 197, 139, 0.55)";
+  const showReadLabel = !(isMission && isRead);
 
   return (
     <motion.button
@@ -421,28 +422,73 @@ function MarkAsReadCheckbox({
       }
       whileHover={isRead && !allowToggle ? undefined : { y: -1 }}
       whileTap={isRead && !allowToggle ? undefined : { scale: 0.98 }}
-      className="group relative inline-flex items-center gap-3 rounded-2xl border px-3.5 py-2.5 text-[13.5px] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/75"
-      style={{
-        borderColor: isRead ? GREEN_BORDER : theme.border,
-        background: isRead ? "rgba(34,197,139,0.10)" : `${theme.glowSoft}`,
-        color: isRead ? GREEN_HI : theme.hi,
-        cursor: isRead && !allowToggle ? "default" : "pointer",
-        boxShadow: isRead
-          ? "0 0 24px -10px rgba(34,197,139,0.55)"
-          : `0 0 24px -10px ${theme.glow}`
-      }}
+      animate={
+        isMission && isRead
+          ? {
+              scale: [1, 1.04, 1],
+              borderColor: GREEN_BORDER,
+              background: "rgba(34,197,139,0.14)"
+            }
+          : { scale: 1 }
+      }
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className={
+        isMission && !isRead
+          ? "iq-schools-mission-cta group relative inline-flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-black uppercase tracking-[0.08em] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/75"
+          : isMission && isRead
+            ? "group relative inline-flex items-center justify-center rounded-full border-2 p-2.5 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/75"
+            : "group relative inline-flex items-center gap-3 rounded-2xl border px-3.5 py-2.5 text-[13.5px] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/75"
+      }
+      style={
+        isMission && !isRead
+          ? { cursor: "pointer" }
+          : isMission && isRead
+            ? {
+                borderColor: GREEN_BORDER,
+                color: GREEN_HI,
+                cursor: allowToggle ? "pointer" : "default",
+                boxShadow: "0 0 18px -6px rgba(34,197,139,0.45)"
+              }
+            : {
+                borderColor: isRead ? GREEN_BORDER : theme.border,
+                background: isRead ? "rgba(34,197,139,0.10)" : `${theme.glowSoft}`,
+                color: isRead ? GREEN_HI : theme.hi,
+                cursor: isRead && !allowToggle ? "default" : "pointer",
+                boxShadow: isRead
+                  ? "0 0 24px -10px rgba(34,197,139,0.55)"
+                  : `0 0 24px -10px ${theme.glow}`
+              }
+      }
     >
-      <span
-        aria-hidden
-        className="flex h-5 w-5 items-center justify-center rounded-md border text-[11px]"
-        style={{
-          borderColor: isRead ? GREEN_BORDER : theme.border,
-          background: isRead ? "rgba(34,197,139,0.15)" : theme.glowSoft
-        }}
-      >
-        {isRead ? "✓" : ""}
-      </span>
-      {MARK_AS_READ_LABEL}
+      {!isMission || isRead ? (
+        <motion.span
+          aria-hidden
+          key={isRead ? "read" : "unread"}
+          initial={isMission && isRead ? { scale: 0.6, opacity: 0 } : false}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 420, damping: 22 }}
+          className="flex h-5 w-5 items-center justify-center rounded-md border text-[11px]"
+          style={{
+            borderColor: isRead ? GREEN_BORDER : theme.border,
+            background: isRead ? "rgba(34,197,139,0.15)" : theme.glowSoft
+          }}
+        >
+          {isRead ? "✓" : ""}
+        </motion.span>
+      ) : null}
+      {showReadLabel ? (
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={isRead ? "read-label" : "mark-label"}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.22 }}
+          >
+            {MARK_AS_READ_LABEL}
+          </motion.span>
+        </AnimatePresence>
+      ) : null}
     </motion.button>
   );
 }
@@ -454,6 +500,7 @@ function QuestReadingHeader({
   title: string;
   theme: PillarQuestTheme;
 }) {
+  const isMission = theme.cardChrome === "mission";
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -462,12 +509,57 @@ function QuestReadingHeader({
       className="mx-auto mb-5 max-w-2xl text-center sm:mb-6"
     >
       <p
-        className="font-[var(--font-grotesk)] text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-0/90 sm:text-[12px]"
-        style={{ color: theme.hi }}
+        className="font-[var(--font-grotesk)] text-[11px] font-semibold uppercase tracking-[0.2em] sm:text-[12px]"
+        style={{
+          color: isMission ? "#fde68a" : theme.hi
+        }}
       >
         {title}
       </p>
     </motion.div>
+  );
+}
+
+function MissionNavButton({
+  enabled,
+  onClick,
+  theme,
+  highlighted = false,
+  children
+}: {
+  enabled: boolean;
+  onClick: () => void;
+  theme: PillarQuestTheme;
+  highlighted?: boolean;
+  children: ReactNode;
+}) {
+  const isMission = theme.cardChrome === "mission";
+
+  return (
+    <button
+      type="button"
+      disabled={!enabled}
+      onClick={onClick}
+      className={
+        isMission
+          ? [
+              "iq-schools-mission-nav-btn px-3.5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] transition disabled:cursor-not-allowed sm:px-4 sm:py-2 sm:text-[11px]",
+              highlighted && enabled ? "iq-schools-mission-nav-btn--ready" : ""
+            ].join(" ")
+          : "rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] transition disabled:cursor-not-allowed disabled:opacity-35"
+      }
+      style={
+        isMission
+          ? undefined
+          : {
+              borderColor: theme.border,
+              color: theme.hi,
+              background: enabled ? theme.glowSoft : "transparent"
+            }
+      }
+    >
+      {children}
+    </button>
   );
 }
 
@@ -480,7 +572,8 @@ function BusinessCardPager({
   quizReady,
   hasQuiz,
   missingCardCount,
-  theme
+  theme,
+  nextHighlighted = false
 }: {
   index: number;
   total: number;
@@ -491,7 +584,9 @@ function BusinessCardPager({
   hasQuiz: boolean;
   missingCardCount: number;
   theme: PillarQuestTheme;
+  nextHighlighted?: boolean;
 }) {
+  const isMission = theme.cardChrome === "mission";
   const canPrev = index > 0;
   const onLastCard = index >= total - 1;
   const showQuizHandoff = onLastCard && hasQuiz;
@@ -499,24 +594,26 @@ function BusinessCardPager({
   if (showQuizHandoff) {
     return (
       <nav
-        className="mx-auto mt-5 flex max-w-2xl flex-col items-stretch gap-2"
+        className="mx-auto mt-5 flex max-w-2xl flex-col items-center gap-2"
         aria-label="Quest card navigation"
       >
-        <div className="flex items-center justify-between gap-3">
-          <button
-            type="button"
-            disabled={!canPrev}
-            onClick={onPrev}
-            className="rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] transition disabled:cursor-not-allowed disabled:opacity-35"
-            style={{
-              borderColor: theme.border,
-              color: theme.hi,
-              background: canPrev ? theme.glowSoft : "transparent"
-            }}
-          >
+        <div
+          className={
+            isMission
+              ? "iq-schools-mission-nav-group flex w-full max-w-md items-center justify-between"
+              : "flex w-full items-center justify-between gap-3"
+          }
+        >
+          <MissionNavButton enabled={canPrev} onClick={onPrev} theme={theme}>
             ← Previous
-          </button>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-2">
+          </MissionNavButton>
+          <span
+            className={
+              isMission
+                ? "iq-schools-mission-nav-group__count"
+                : "text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-2"
+            }
+          >
             {index + 1} / {total}
           </span>
           <QuizUnlockedCtaButton
@@ -529,7 +626,13 @@ function BusinessCardPager({
           />
         </div>
         {!quizReady && missingCardCount > 0 ? (
-          <p className="text-center text-[11.5px] leading-snug text-ink-2">
+          <p
+            className={
+              isMission
+                ? "iq-schools-ocean-muted-text text-center text-[11.5px] font-medium leading-snug"
+                : "text-center text-[11.5px] leading-snug text-ink-2"
+            }
+          >
             You still need to complete {missingCardCount} card
             {missingCardCount === 1 ? "" : "s"} — mark each card as read above.
           </p>
@@ -542,38 +645,37 @@ function BusinessCardPager({
 
   return (
     <nav
-      className="mx-auto mt-5 flex max-w-2xl items-center justify-between gap-3"
+      className="mx-auto mt-5 flex max-w-2xl justify-center"
       aria-label="Quest card navigation"
     >
-      <button
-        type="button"
-        disabled={!canPrev}
-        onClick={onPrev}
-        className="rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] transition disabled:cursor-not-allowed disabled:opacity-35"
-        style={{
-          borderColor: theme.border,
-          color: theme.hi,
-          background: canPrev ? theme.glowSoft : "transparent"
-        }}
+      <div
+        className={
+          isMission
+            ? "iq-schools-mission-nav-group inline-flex items-center"
+            : "flex items-center gap-3"
+        }
       >
-        ← Previous
-      </button>
-      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-2">
-        {index + 1} / {total}
-      </span>
-      <button
-        type="button"
-        disabled={!canNext}
-        onClick={onNext}
-        className="rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] transition disabled:cursor-not-allowed disabled:opacity-35"
-        style={{
-          borderColor: theme.border,
-          color: theme.hi,
-          background: canNext ? theme.glowSoft : "transparent"
-        }}
-      >
-        Next →
-      </button>
+        <MissionNavButton enabled={canPrev} onClick={onPrev} theme={theme}>
+          ← Previous
+        </MissionNavButton>
+        <span
+          className={
+            isMission
+              ? "iq-schools-mission-nav-group__count"
+              : "text-[10px] font-semibold uppercase tracking-[0.2em] text-ink-2"
+          }
+        >
+          {index + 1} / {total}
+        </span>
+        <MissionNavButton
+          enabled={canNext}
+          onClick={onNext}
+          theme={theme}
+          highlighted={nextHighlighted}
+        >
+          Next →
+        </MissionNavButton>
+      </div>
     </nav>
   );
 }
@@ -638,7 +740,7 @@ export function BusinessIslandQuestReading(
       slug
     ) ?? false;
 
-  const theme = getPillarQuestTheme(pillarId);
+  const theme = resolveBusinessQuestTheme(pillarId, pathname);
   // Host / demo / testing needs reversible progress to reset flows quickly.
   // Enable in non-production by default, and also when explicitly requested via query params.
   const allowReadToggle =
@@ -647,8 +749,9 @@ export function BusinessIslandQuestReading(
     (schoolsRewardFlow && isSchoolsDemoPlaythroughActive());
   const [cardIndex, setCardIndex] = useState(0);
   const [screen, setScreen] = useState<"cards" | "quiz">("cards");
+  const [quizSessionKey, setQuizSessionKey] = useState(0);
   const [answerRevealed, setAnswerRevealed] = useState(false);
-  const [leavingForHub, setLeavingForHub] = useState(false);
+  const [continueHint, setContinueHint] = useState(false);
   const prevQuestCompletedRef = useRef(questCompleted);
   /** Q → SHOW ME → A reveal for every Business quest card (same flow as Quest 1). */
   const useAnswerReveal = pillarId === "business";
@@ -669,12 +772,28 @@ export function BusinessIslandQuestReading(
   );
   const missingCardCount = readProgress.missingCardIds.length;
   const quizReady = readProgress.quizUnlocked;
+  const isMissionCard = theme.cardChrome === "mission";
+  const cardsReadCount = cardReadFlags.filter(Boolean).length;
+
+  const handleMarkRead = useCallback(
+    (markSlug: string) => {
+      onMarkRead(markSlug);
+      if (schoolsRewardFlow && isMissionCard) {
+        setContinueHint(true);
+        window.setTimeout(() => setContinueHint(false), 3200);
+      }
+    },
+    [onMarkRead, schoolsRewardFlow, isMissionCard]
+  );
+
+  useEffect(() => {
+    setContinueHint(false);
+  }, [cardIndex, slug]);
 
   useEffect(() => {
     setCardIndex(0);
     setScreen("cards");
     setAnswerRevealed(false);
-    setLeavingForHub(false);
     if (schoolsRewardFlow) {
       clearSchoolsQuestSummaryExited(slug);
     }
@@ -707,6 +826,11 @@ export function BusinessIslandQuestReading(
 
   const fastQuizHandoff = useControlledDemoFastQuizHandoff();
 
+  const handleStartQuiz = useCallback(() => {
+    setQuizSessionKey((key) => key + 1);
+    setScreen("quiz");
+  }, []);
+
   // Removed mastery interstitial — keep momentum (cards → quiz).
 
   useEffect(() => {
@@ -726,8 +850,13 @@ export function BusinessIslandQuestReading(
   const handleSchoolsBackToIsland = useCallback(() => {
     markSchoolsHubCelebrateReturn();
     markSchoolsQuestSummaryExited(slug);
-    setLeavingForHub(true);
-    const hubHref = resolveSchoolsLearnerHref("/schools/business", pathname);
+
+    if (isSchoolsDemoPath(pathname)) {
+      navigateSchoolsDemoMenuHref("/schools/business", pathname, router);
+    } else {
+      router.push(resolveSchoolsLearnerHref("/schools/business", pathname));
+    }
+
     const needsQuest1CheckIn =
       isSchoolsLearnerPath(pathname) && slug === SCHOOLS_DEMO_BUSINESS_TILE;
 
@@ -740,19 +869,9 @@ export function BusinessIslandQuestReading(
         (item) => item.completedPillarId === "business"
       );
       if (!convictionDone && !convictionPending) {
-        router.replace(hubHref);
         actions.enqueuePillarConviction("business", { pillarToUnlock: null });
-        if (
-          isSchoolsDemoPlaythroughActive() &&
-          getSchoolsDemoStoryStep() === "business-quest"
-        ) {
-          advanceSchoolsDemoStoryStep("conviction");
-        }
-        return;
       }
     }
-
-    router.replace(hubHref);
   }, [
     actions,
     pathname,
@@ -839,16 +958,7 @@ export function BusinessIslandQuestReading(
 
   const sourceLine = <QuestSourceFooter source={source} theme={theme} />;
 
-  if (screen === "quiz" && quiz) {
-    if (leavingForHub) {
-      return (
-        <motion.div
-          className="relative px-3 pb-2 pt-4 sm:px-4 md:px-5 md:pt-6"
-          aria-hidden
-        />
-      );
-    }
-
+  if (screen === "quiz" && hasQuiz) {
     return (
       <motion.div className="relative px-3 pb-2 pt-2 sm:px-4 md:px-5 md:pt-3">
         <AnimatePresence mode="wait" initial={false}>
@@ -861,11 +971,13 @@ export function BusinessIslandQuestReading(
             className="mx-auto w-full max-w-3xl"
           >
             <QuestQuizPanel
+              key={`${slug}-quiz-${quizSessionKey}`}
               pillarId={pillarId}
               slug={slug}
               quiz={quiz}
               unlocked
               autoStart
+              freshAttemptOnMount={schoolsRewardFlow}
               title={islandQuizSectionTitle(pillarId, quest.type)}
               rewardXp={quest.rewardXp}
               cardsRead={cardReadFlags.filter(Boolean).length}
@@ -877,6 +989,7 @@ export function BusinessIslandQuestReading(
               onReviewQuestCards={() => setScreen("cards")}
               rewardFlow={schoolsRewardFlow ? "schools" : "default"}
               schoolsPrideLine={resolveSchoolsCompletionPrideLine(company.name)}
+              companyName={company.name}
               whatYouNowKnow={resolveSchoolsQuestTakeaways(slug)}
               microXpPerCorrect={SCHOOLS_MICRO_XP_PER_CORRECT}
               cardCompleteXp={SCHOOLS_CARD_COMPLETE_XP}
@@ -926,6 +1039,7 @@ export function BusinessIslandQuestReading(
         >
           <PillarQuestTemplateFrame
             pillarId={pillarId}
+            theme={theme}
             questionText={cardView.question}
             answerSlot={
               <BusinessTemplateAnswerSlot
@@ -943,6 +1057,7 @@ export function BusinessIslandQuestReading(
             companyName={company.name}
             cardIndex={cardView.cardIndex}
             cardTotal={cardView.cardTotal}
+            readProgressCount={isMissionCard ? cardsReadCount : undefined}
             answerReveal={
               useAnswerReveal
                 ? {
@@ -962,7 +1077,7 @@ export function BusinessIslandQuestReading(
                       if (allowReadToggle && cardView.isRead) {
                         onMarkUnread(cardView.markReadSlug);
                       } else {
-                        onMarkRead(cardView.markReadSlug);
+                        handleMarkRead(cardView.markReadSlug);
                       }
                     }}
                   />
@@ -974,19 +1089,69 @@ export function BusinessIslandQuestReading(
       </AnimatePresence>
 
       {cardView.cardTotal > 1 ? (
-        <BusinessCardPager
-          index={cardIndex}
-          total={cardView.cardTotal}
-          theme={theme}
-          hasQuiz={hasQuiz}
-          quizReady={quizReady}
-          missingCardCount={missingCardCount}
-          onStartQuiz={() => setScreen("quiz")}
-          onPrev={() => setCardIndex((i) => Math.max(0, i - 1))}
-          onNext={() =>
-            setCardIndex((i) => Math.min(cards.length - 1, i + 1))
-          }
-        />
+        <>
+          <BusinessCardPager
+            index={cardIndex}
+            total={cardView.cardTotal}
+            theme={theme}
+            hasQuiz={hasQuiz}
+            quizReady={quizReady}
+            missingCardCount={missingCardCount}
+            onStartQuiz={handleStartQuiz}
+            onPrev={() => setCardIndex((i) => Math.max(0, i - 1))}
+            onNext={() =>
+              setCardIndex((i) => Math.min(cards.length - 1, i + 1))
+            }
+            nextHighlighted={
+              isMissionCard &&
+              cardView.isRead &&
+              cardIndex < cardView.cardTotal - 1
+            }
+          />
+          <AnimatePresence initial={false}>
+            {continueHint &&
+            isMissionCard &&
+            cardView.isRead &&
+            cardIndex < cardView.cardTotal - 1 ? (
+              <motion.p
+                key="continue-hint"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.28, ease: "easeOut" }}
+                className="iq-schools-mission-read-hint mx-auto block w-fit max-w-md"
+                aria-live="polite"
+              >
+                Great! Continue to the next card.
+              </motion.p>
+            ) : null}
+          </AnimatePresence>
+        </>
+      ) : hasQuiz ? (
+        <nav
+          className="mx-auto mt-5 flex max-w-2xl flex-col items-center gap-2"
+          aria-label="Quest card navigation"
+        >
+          <QuizUnlockedCtaButton
+            unlocked={quizReady}
+            onClick={handleStartQuiz}
+            theme={theme}
+            label="QUIZ UNLOCKED"
+            lockedLabel="MARK AS READ TO UNLOCK"
+            lockedTitle={quizPagerLockTooltip(missingCardCount)}
+          />
+          {!quizReady && missingCardCount > 0 ? (
+            <p
+              className={
+                isMissionCard
+                  ? "iq-schools-ocean-muted-text text-center text-[11.5px] font-medium leading-snug"
+                  : "text-center text-[11.5px] leading-snug text-ink-2"
+              }
+            >
+              Mark this card as read to unlock the quiz.
+            </p>
+          ) : null}
+        </nav>
       ) : null}
 
       {hasQuiz && screen === "cards" && !quizReady ? (

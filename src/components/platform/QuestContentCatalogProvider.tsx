@@ -74,7 +74,9 @@ export function QuestContentCatalogProvider({ children }: { children: ReactNode 
       setStatus("ready");
       return;
     }
-    void refetch();
+    void refetch().catch(() => {
+      setStatus("ready");
+    });
   }, [enabled, refetch]);
 
   const value = useMemo(

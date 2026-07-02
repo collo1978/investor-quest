@@ -53,6 +53,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { BusinessIslandQuestReading } from "@/components/BusinessIslandQuestReading";
 import {
   getPillarQuestTheme,
+  resolveBusinessQuestTheme,
   usesPillarQuestCardTemplate
 } from "@/components/quest/pillarQuestTheme";
 import { useGame } from "@/components/GameProvider";
@@ -89,7 +90,8 @@ import {
 } from "@/lib/quests/gameActionCopy";
 import {
   resolveMapIslandHref,
-  resolveSchoolsBusinessHubHref
+  resolveSchoolsBusinessHubHref,
+  isSchoolsBusinessQuestPath
 } from "@/lib/schools/schoolsDemoHref";
 import {
   isSchoolsDemoPlaythroughActive,
@@ -333,9 +335,11 @@ export function QuestDetailScreen({
 
   const isMultiCard = (quest?.cards?.length ?? 0) > 0;
   const usePillarQuestCardTemplate = usesPillarQuestCardTemplate(pillarId);
+  const schoolsBusinessQuest =
+    pillarId === "business" && isSchoolsBusinessQuestPath(pathname);
   const pillarQuestTheme =
     usePillarQuestCardTemplate && quest
-      ? getPillarQuestTheme(pillarId)
+      ? resolveBusinessQuestTheme(pillarId, pathname)
       : null;
   const [quizHeaderProgress, setQuizHeaderProgress] = useState<{
     current: number;
@@ -487,7 +491,11 @@ export function QuestDetailScreen({
     <main
       className={[
         "pointer-events-auto relative mx-auto w-full max-w-4xl px-4 pb-28 pt-6 md:px-6 md:pt-8",
-        usePillarQuestCardTemplate ? "bg-[#010104]" : ""
+        schoolsBusinessQuest
+          ? "iq-schools-business-quest min-h-[100dvh]"
+          : usePillarQuestCardTemplate
+            ? "bg-[#010104]"
+            : ""
       ].join(" ")}
     >
       {/* Top bar: back link + quest progress */}
@@ -501,18 +509,26 @@ export function QuestDetailScreen({
           }
           className="group inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.16em] transition hover:brightness-110"
           style={{
-            borderColor: usePillarQuestCardTemplate
-              ? "rgba(255,255,255,0.1)"
-              : pillarQuestTheme?.border ?? GOLD_BORDER_SOFT,
-            background: "rgba(7,7,18,0.55)",
-            color: usePillarQuestCardTemplate
-              ? "rgba(220,220,230,0.88)"
-              : pillarQuestTheme?.hi ?? GOLD_HI,
-            boxShadow: usePillarQuestCardTemplate
-              ? undefined
-              : pillarQuestTheme
-                ? `0 0 18px -6px ${pillarQuestTheme.glow}`
-                : undefined
+            borderColor: schoolsBusinessQuest
+              ? pillarQuestTheme?.borderSoft ?? "rgba(202, 138, 4, 0.48)"
+              : usePillarQuestCardTemplate
+                ? "rgba(255,255,255,0.1)"
+                : pillarQuestTheme?.border ?? GOLD_BORDER_SOFT,
+            background: schoolsBusinessQuest
+              ? "rgba(255,251,235,0.94)"
+              : "rgba(7,7,18,0.55)",
+            color: schoolsBusinessQuest
+              ? pillarQuestTheme?.badgeText ?? "#92400e"
+              : usePillarQuestCardTemplate
+                ? "rgba(220,220,230,0.88)"
+                : pillarQuestTheme?.hi ?? GOLD_HI,
+            boxShadow: schoolsBusinessQuest
+              ? "0 8px 22px rgba(2, 6, 23, 0.16), inset 0 1px 0 rgba(255,255,255,0.72)"
+              : usePillarQuestCardTemplate
+                ? undefined
+                : pillarQuestTheme
+                  ? `0 0 18px -6px ${pillarQuestTheme.glow}`
+                  : undefined
           }}
         >
           <span aria-hidden className="text-[14px] leading-none">
@@ -524,12 +540,25 @@ export function QuestDetailScreen({
         </Link>
 
         <div className="flex items-center gap-3">
-          <span className="text-[10.5px] uppercase tracking-[0.20em] text-ink-2">
-            {showQuizHeaderProgress ? "Question" : "Quest Progress"}
+          <span
+            className="text-[10.5px] uppercase tracking-[0.20em]"
+            style={{
+              color: schoolsBusinessQuest
+                ? "rgba(255,251,235,0.82)"
+                : undefined
+            }}
+          >
+            <span className={schoolsBusinessQuest ? "" : "text-ink-2"}>
+              {showQuizHeaderProgress ? "Question" : "Quest Progress"}
+            </span>
           </span>
           <span
             className="font-[var(--font-grotesk)] text-[14px] font-semibold tabular-nums"
-            style={{ color: pillarQuestTheme?.hi ?? GOLD_HI }}
+            style={{
+              color: schoolsBusinessQuest
+                ? "#fde68a"
+                : pillarQuestTheme?.hi ?? GOLD_HI
+            }}
           >
             {headerProgressCurrent} / {headerProgressTotal}
           </span>
@@ -552,9 +581,11 @@ export function QuestDetailScreen({
           usePillarQuestCardTemplate ? "h-1" : "h-1.5"
         ].join(" ")}
         style={{
-          background: usePillarQuestCardTemplate
-            ? "rgba(255,255,255,0.06)"
-            : pillarQuestTheme?.glowSoft ?? GOLD_WASH
+          background: schoolsBusinessQuest
+            ? "rgba(255,255,255,0.16)"
+            : usePillarQuestCardTemplate
+              ? "rgba(255,255,255,0.06)"
+              : pillarQuestTheme?.glowSoft ?? GOLD_WASH
         }}
       >
         <motion.div
@@ -566,9 +597,11 @@ export function QuestDetailScreen({
             background: pillarQuestTheme
               ? `linear-gradient(90deg, ${pillarQuestTheme.hi} 0%, ${pillarQuestTheme.lo} 100%)`
               : `linear-gradient(90deg, ${GOLD_HI} 0%, ${GOLD_LO} 100%)`,
-            boxShadow: usePillarQuestCardTemplate
-              ? "none"
-              : `0 0 20px ${pillarQuestTheme?.glow ?? GOLD_GLOW}`
+            boxShadow: schoolsBusinessQuest
+              ? "0 0 12px rgba(251, 191, 36, 0.35)"
+              : usePillarQuestCardTemplate
+                ? "none"
+                : `0 0 20px ${pillarQuestTheme?.glow ?? GOLD_GLOW}`
           }}
         />
       </div>
@@ -577,13 +610,15 @@ export function QuestDetailScreen({
       <motion.article
         initial={false}
         animate={{
-          boxShadow: usePillarQuestCardTemplate
-            ? "0 22px 52px -36px rgba(0,0,0,0.92), inset 0 1px 0 rgba(255, 228, 170, 0.14)"
-            : parentRead
-              ? pillarQuestTheme
-                ? `0 24px 80px -36px rgba(0,0,0,0.75), 0 0 0 1px ${pillarQuestTheme.border}, 0 0 48px -28px ${pillarQuestTheme.glowSoft}`
-                : `0 24px 80px -36px rgba(0,0,0,0.75), 0 0 0 1px rgba(245,197,71,0.22), 0 0 48px -28px rgba(245,197,71,0.12)`
-              : `0 20px 70px -40px rgba(0,0,0,0.72), 0 0 0 1px rgba(255,255,255,0.08)`,
+          boxShadow: schoolsBusinessQuest
+            ? "none"
+            : usePillarQuestCardTemplate
+              ? "0 22px 52px -36px rgba(0,0,0,0.92), inset 0 1px 0 rgba(255, 228, 170, 0.14)"
+              : parentRead
+                ? pillarQuestTheme
+                  ? `0 24px 80px -36px rgba(0,0,0,0.75), 0 0 0 1px ${pillarQuestTheme.border}, 0 0 48px -28px ${pillarQuestTheme.glowSoft}`
+                  : `0 24px 80px -36px rgba(0,0,0,0.75), 0 0 0 1px rgba(245,197,71,0.22), 0 0 48px -28px rgba(245,197,71,0.12)`
+                : `0 20px 70px -40px rgba(0,0,0,0.72), 0 0 0 1px rgba(255,255,255,0.08)`,
           scale: celebrate ? [1, 1.015, 1] : 1
         }}
         transition={{
@@ -591,18 +626,30 @@ export function QuestDetailScreen({
           scale: { duration: 0.55, ease: "easeOut" }
         }}
         className={[
-          "relative mt-5 overflow-hidden rounded-2xl border backdrop-blur-xl",
-          usePillarQuestCardTemplate
+          "relative mt-5",
+          schoolsBusinessQuest
+            ? "overflow-visible"
+            : "overflow-hidden rounded-2xl border backdrop-blur-xl",
+          !schoolsBusinessQuest && usePillarQuestCardTemplate
             ? "border-2 bg-[rgba(4,4,10,0.99)]"
-            : "border-white/[0.08] bg-[rgba(10,10,14,0.94)]"
+            : !schoolsBusinessQuest
+              ? "border-white/[0.08] bg-[rgba(10,10,14,0.94)]"
+              : ""
         ].join(" ")}
         style={{
-          borderColor: usePillarQuestCardTemplate
-            ? "rgba(210, 175, 85, 0.55)"
-            : undefined,
-          borderTopColor: usePillarQuestCardTemplate
-            ? "rgba(228, 196, 110, 0.62)"
-            : pillarQuestTheme?.border ?? "rgba(245,197,71,0.28)"
+          borderColor:
+            schoolsBusinessQuest || !usePillarQuestCardTemplate
+              ? undefined
+              : "rgba(210, 175, 85, 0.55)",
+          borderTopColor:
+            schoolsBusinessQuest || !usePillarQuestCardTemplate
+              ? undefined
+              : "rgba(228, 196, 110, 0.62)",
+          ...(schoolsBusinessQuest
+            ? {}
+            : !usePillarQuestCardTemplate
+              ? { borderTopColor: pillarQuestTheme?.border ?? "rgba(245,197,71,0.28)" }
+              : {})
         }}
         aria-label={`${quest.title} — quest detail`}
       >

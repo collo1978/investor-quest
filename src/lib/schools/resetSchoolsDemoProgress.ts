@@ -1,4 +1,4 @@
-import { buildDemoGameState, DEMO_PROFILE_NEW_USER } from "@/lib/demo/demoProfiles";
+import { buildDemoGameState, buildFreshSchoolsBusinessDemoProgress, DEMO_PROFILE_NEW_USER } from "@/lib/demo/demoProfiles";
 import {
   clearDemoSessionFlags,
   setActiveDemoProfileLabel
@@ -9,24 +9,30 @@ import {
   savePersistedSnapshot
 } from "@/engine/progression/persistence";
 import { clearBusinessIslandBriefSeen } from "@/lib/businessIslandBriefSession";
+import { CONTROLLED_DEMO_COMPANY_ID } from "@/lib/demo/controlledDemo";
+import { clearAllHubCardRevealForPillar } from "@/lib/quests/hubCardRevealStorage";
 import { resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
-import { dismissSchoolsMapMissionBrief } from "@/lib/schools/schoolsMapMissionBriefState";
+import { clearSchoolsMapMissionBriefDismiss } from "@/lib/schools/schoolsMapMissionBriefState";
+import {
+  clearSchoolsBusinessIslandHubEntered,
+  clearSchoolsBusinessIslandZoomEnter
+} from "@/lib/schools/schoolsBusinessIslandZoomEnter";
+import { clearSchoolsHubCelebrateReturn, clearSchoolsQuestSummaryExited } from "@/lib/schools/schoolsQuestRewardFlow";
 import {
   ensureProductionSchoolsDemoFromPath,
   markSchoolsDemoLaunched,
+  markSchoolsDemoMapBriefPending,
   setSchoolsDemoStoryStep,
   wasSchoolsDemoLaunchedInSession
 } from "@/lib/schools/schoolsDemoStoryMode";
 
 export const SCHOOLS_DEMO_RESET_EVENT = "iq-schools-demo-reset";
 
-/** Fresh presenter save — Business only, no quest reads, onboarding already done. */
+/** Fresh presenter save — Business card 1 only, no quest reads, onboarding already done. */
 export function buildSchoolsDemoPresenterResetState(): GameState {
   const base = buildDemoGameState(DEMO_PROFILE_NEW_USER);
   const now = Date.now();
   const companyId = base.activeCompanyId;
-  const prog = base.companies[companyId];
-  if (!prog) return base;
 
   return {
     ...base,
@@ -39,11 +45,9 @@ export function buildSchoolsDemoPresenterResetState(): GameState {
     companies: {
       ...base.companies,
       [companyId]: {
-        ...prog,
+        ...buildFreshSchoolsBusinessDemoProgress(),
         activePillarId: "business",
-        activeQuestSlug: null,
-        questMapBriefDismissedAt: now,
-        businessIslandBriefDismissedAt: now
+        activeQuestSlug: null
       }
     },
     lastActivityAt: now
@@ -60,7 +64,7 @@ type ResetRouter = {
 
 /**
  * Reset Schools demo quest progress without replaying the opening tour.
- * Card 1 unlocked, other Business cards locked, map brief stays dismissed.
+ * Business Island returns to 0/7 — card 1 unlocked, map envelope brief replays.
  */
 export function resetSchoolsDemoProgress(
   pathname: string,
@@ -74,16 +78,22 @@ export function resetSchoolsDemoProgress(
 
   clearDemoSessionFlags();
   clearBusinessIslandBriefSeen();
-  dismissSchoolsMapMissionBrief();
+  clearSchoolsMapMissionBriefDismiss();
+  clearSchoolsQuestSummaryExited();
+  clearSchoolsHubCelebrateReturn();
+  clearSchoolsBusinessIslandZoomEnter();
+  clearSchoolsBusinessIslandHubEntered();
+  clearAllHubCardRevealForPillar(CONTROLLED_DEMO_COMPANY_ID, "business");
   setActiveDemoProfileLabel(DEMO_PROFILE_NEW_USER);
-  setSchoolsDemoStoryStep("map");
+  markSchoolsDemoMapBriefPending();
+  setSchoolsDemoStoryStep("map-brief");
 
   const nextState = buildSchoolsDemoPresenterResetState();
+  /** Always persist — replaceGameState skips disk writes during isolated demo story mode. */
+  clearPersistedSnapshots();
+  savePersistedSnapshot(nextState, { mergeIfDiskNewer: false });
   if (actions) {
     actions.replaceGameState(nextState);
-  } else {
-    clearPersistedSnapshots();
-    savePersistedSnapshot(nextState, { mergeIfDiskNewer: false });
   }
 
   if (typeof window !== "undefined") {

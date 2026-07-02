@@ -1,6 +1,7 @@
-import { isSchoolsDemoPath } from "@/lib/schools/schoolsDemoHref";
+import { isSchoolsDemoPath, isSchoolsPreviewPath } from "@/lib/schools/schoolsDemoHref";
 import {
   SCHOOLS_DEMO_STORY_STEPS,
+  isSchoolsDemoMapBriefPending,
   schoolsDemoStepFromPathname,
   type SchoolsDemoStoryStep
 } from "@/lib/schools/schoolsDemoStoryMode";
@@ -20,17 +21,42 @@ function stepIndex(step: SchoolsDemoStoryStep): number {
   return SCHOOLS_DEMO_STORY_STEPS.indexOf(step);
 }
 
+/** Map envelope brief finished — session flag or demo story past `map-brief`. */
+export function isSchoolsMapMissionBriefComplete(
+  activeStoryStep?: SchoolsDemoStoryStep | null,
+  mapMissionBriefDismissed?: boolean
+): boolean {
+  if (isSchoolsDemoMapBriefPending()) return false;
+  if (activeStoryStep && stepIndex(activeStoryStep) < stepIndex("map")) {
+    return false;
+  }
+  if (mapMissionBriefDismissed === true) return true;
+  if (!activeStoryStep) return false;
+  return stepIndex(activeStoryStep) >= stepIndex("map");
+}
+
 function schoolsLearnerPath(pathname: string): string {
   if (isSchoolsDemoPath(pathname)) {
     return pathname.replace("/schools/demo", "/schools");
   }
+  if (isSchoolsPreviewPath(pathname)) {
+    return pathname.replace("/schools/preview", "/schools");
+  }
   return pathname;
+}
+
+/** Map + all preview map variants (`/schools/map-prodigy`, etc.) share nav rules. */
+function normalizeSchoolsNavLearnerPath(pathname: string): string {
+  const learner = schoolsLearnerPath(pathname);
+  if (learner === "/schools/map" || learner.startsWith("/schools/map-")) {
+    return "/schools/map";
+  }
+  return learner;
 }
 
 /** Routes that always expose the in-demo hamburger (map onward). */
 export const SCHOOLS_DEMO_MENU_HUB_PATHS = new Set([
   "/schools/map",
-  "/schools/business",
   "/schools/profile",
   "/schools/xp-ladder",
   "/schools/final-challenge",
@@ -66,20 +92,19 @@ export function shouldShowSchoolsNavMenu(
   activeStoryStep?: SchoolsDemoStoryStep | null,
   options?: { mapMissionBriefDismissed?: boolean }
 ): boolean {
-  if (pathname.startsWith("/schools/preview")) return false;
-  if (activeStoryStep === "map-brief") return false;
+  const learner = normalizeSchoolsNavLearnerPath(pathname);
+  const preview = isSchoolsPreviewPath(pathname);
 
-  const learner = schoolsLearnerPath(pathname);
+  /** Map — preview maps always show menu; live map waits for envelope brief. */
+  if (learner === "/schools/map") {
+    if (preview) return true;
+    return isSchoolsMapMissionBriefComplete(
+      activeStoryStep,
+      options?.mapMissionBriefDismissed
+    );
+  }
 
   if (isNavMenuLearnerHub(learner)) return true;
-
-  if (
-    learner === "/schools/map" &&
-    !isSchoolsDemoPath(pathname) &&
-    options?.mapMissionBriefDismissed === false
-  ) {
-    return false;
-  }
 
   const step = resolveNavMenuStoryStep(pathname, activeStoryStep);
   if (!step) return false;
@@ -90,9 +115,15 @@ export function shouldShowSchoolsNavMenu(
  * Localhost canonical routes use the dev sidebar on desktop — offset the menu into
  * the content column so it is not hidden under the fixed aside.
  */
+/** Presenter demo + fullscreen map — hamburger anchors viewport top-left (no dev sidebar). */
+export function shouldPinSchoolsNavMenuTopLeft(pathname: string): boolean {
+  if (isSchoolsPreviewPath(pathname)) return true;
+  if (isSchoolsDemoPath(pathname)) return true;
+  return normalizeSchoolsNavLearnerPath(pathname) === "/schools/map";
+}
+
 export function shouldOffsetSchoolsNavMenuForDevSidebar(pathname: string): boolean {
-  if (isSchoolsDemoPath(pathname)) return false;
-  if (pathname.startsWith("/schools/preview")) return false;
+  if (shouldPinSchoolsNavMenuTopLeft(pathname)) return false;
   if (!shouldShowSchoolsNavMenu(pathname)) return false;
 
   const learner = schoolsLearnerPath(pathname);

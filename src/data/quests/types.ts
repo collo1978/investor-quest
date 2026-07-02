@@ -101,7 +101,7 @@ export type RedFlagQuestion = QuizQuestionBase & {
 /** "Apple's ___ makes it harder for customers to switch." */
 export type FillBlankQuestion = QuizQuestionBase & {
   kind: "fill-blank";
-  /** Prompt contains a `___` placeholder; one option fills it correctly. */
+  /** Prompt contains one or more `___` / `______` placeholders; one option fills them correctly. */
   options: string[];
   correctIndex: number;
 };

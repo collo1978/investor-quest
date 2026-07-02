@@ -24,43 +24,22 @@ export type SchoolsMissionBriefStep = {
 
 export const SCHOOLS_MISSION_BRIEF_STEPS: readonly SchoolsMissionBriefStep[] = [
   {
-    id: "investors",
+    id: "welcome",
     ctaLabel: "GOT IT",
     lines: [
       {
-        id: "investors-headline",
-        text: "THE WORLD'S BEST INVESTORS SHARE ONE THING IN COMMON.",
+        id: "welcome-headline",
+        text: "WELCOME TO NVIDIA'S 10-K",
         variant: "title"
       },
       {
-        id: "investors-1",
-        text: "They understand the business behind the stock.",
+        id: "welcome-1",
+        text: "This is NVIDIA's Annual Report.",
         variant: "intro"
       },
       {
-        id: "investors-2",
-        text: "You're about to start developing that same skill.",
-        variant: "intro"
-      }
-    ]
-  },
-  {
-    id: "ten-k",
-    ctaLabel: "GOT IT",
-    lines: [
-      {
-        id: "ten-k-1",
-        text: "The 10-K (Annual Report) is the most important document great investors use to understand any company.",
-        variant: "intro"
-      },
-      {
-        id: "ten-k-2",
-        text: "Most people never read it.",
-        variant: "intro"
-      },
-      {
-        id: "ten-k-3",
-        text: "The best investors always do.",
+        id: "welcome-2",
+        text: "It's the most important document great investors use to understand a company before investing.",
         variant: "intro"
       }
     ]
@@ -70,25 +49,45 @@ export const SCHOOLS_MISSION_BRIEF_STEPS: readonly SchoolsMissionBriefStep[] = [
     ctaLabel: "GOT IT",
     lines: [
       {
+        id: "quest-label",
+        text: "YOUR ISLAND QUEST",
+        variant: "label-gold"
+      },
+      {
         id: "quest-1",
-        text: "We've turned NVIDIA's 10-K into a fun interactive island quest.",
+        text: "NVIDIA's 10-K is over 80,000 words long.",
         variant: "intro"
       },
       {
         id: "quest-2",
-        text: "We've removed the jargon, skipped the boring parts, and focused only on what matters.",
+        text: "We've transformed NVIDIA's 10-K into an interactive island adventure.",
         variant: "intro"
       },
       {
         id: "quest-3",
-        text: "Saving you hours.",
+        text: "We've removed the jargon.",
+        variant: "intro"
+      },
+      {
+        id: "quest-4",
+        text: "Skipped the boring parts.",
+        variant: "intro"
+      },
+      {
+        id: "quest-5",
+        text: "And focused only on what matters.",
+        variant: "intro"
+      },
+      {
+        id: "quest-6",
+        text: "Saving you hours of research.",
         variant: "body"
       }
     ]
   },
   {
     id: "mission",
-    ctaLabel: "START BUSINESS ISLAND",
+    ctaLabel: "GOT IT",
     lines: [
       {
         id: "mission-label",
@@ -96,31 +95,99 @@ export const SCHOOLS_MISSION_BRIEF_STEPS: readonly SchoolsMissionBriefStep[] = [
         variant: "label-gold"
       },
       {
-        id: "mission-body",
+        id: "mission-body-1",
         text: "Conquer all 4 islands.",
         variant: "body"
       },
       {
-        id: "objective-label",
-        text: "OBJECTIVE",
-        variant: "label-violet",
-        sectionGap: true
-      },
-      {
-        id: "objective-body",
-        text: "Understand NVIDIA like a professional investor.",
-        variant: "body-hero"
-      },
+        id: "mission-body-2",
+        text: "Unlock the Final Challenge.",
+        variant: "body"
+      }
+    ]
+  },
+  {
+    id: "reward",
+    ctaLabel: "START BUSINESS ISLAND",
+    lines: [
       {
         id: "reward-label",
         text: "REWARD",
-        variant: "label-gold",
-        sectionGap: true
+        variant: "label-gold"
+      },
+      {
+        id: "reward-badge",
+        text: "🏅 10K Rookie Badge",
+        variant: "body-hero"
       },
       {
         id: "reward-body",
-        text: "A rare skill that can stay with you for life.",
+        text: "The first step on your journey to becoming a smarter investor.",
         variant: "body-reward"
+      }
+    ]
+  }
+] as const;
+
+/** Typed envelope brief on the Prodigy map — paragraph-by-paragraph with Continue. */
+export const SCHOOLS_ENVELOPE_MISSION_BRIEF_STEPS: readonly SchoolsMissionBriefStep[] = [
+  {
+    id: "welcome",
+    ctaLabel: "Continue",
+    lines: [
+      {
+        id: "envelope-welcome-1",
+        text: "Welcome to NVIDIA's 10-K (Annual Report).",
+        variant: "title"
+      },
+      {
+        id: "envelope-welcome-2",
+        text: "This is where every great investor starts.",
+        variant: "intro"
+      }
+    ]
+  },
+  {
+    id: "boring",
+    ctaLabel: "Continue",
+    lines: [
+      {
+        id: "envelope-boring",
+        text: "NVIDIA's 10-K is 80,000 words long and, let's be honest, incredibly boring.",
+        variant: "intro"
+      }
+    ]
+  },
+  {
+    id: "adventure",
+    ctaLabel: "Continue",
+    lines: [
+      {
+        id: "envelope-adventure",
+        text: "We've removed the jargon, kept only what matters, and transformed it into an interactive adventure.",
+        variant: "intro"
+      }
+    ]
+  },
+  {
+    id: "discover",
+    ctaLabel: "Continue",
+    lines: [
+      {
+        id: "envelope-discover",
+        text: "You're about to discover how great investors analyse NVIDIA and become a better investor, faster.",
+        variant: "body"
+      }
+    ]
+  },
+  {
+    id: "mission",
+    ctaLabel: "Begin Mission",
+    lines: [
+      {
+        id: "envelope-mission",
+        text: "MISSION: Conquer all 4 islands and unlock the Final Challenge.",
+        variant: "label-gold"
       }
     ]
   }

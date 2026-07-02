@@ -15,11 +15,13 @@ import { useHubRoutePrefetch } from "@/hooks/useHubRoutePrefetch";
 import { usePillarHubQuestData } from "@/hooks/usePillarHubQuestData";
 import { getAnalyticsUserId } from "@/lib/analytics/identity";
 import { BusinessIslandDevReset } from "@/components/business/BusinessIslandDevReset";
+import { SchoolsBusinessHubHydrationScene } from "@/components/business/hub/SchoolsBusinessHubHydrationScene";
 import { buildBusinessHubCards } from "@/lib/business/buildBusinessHubCards";
 import {
   markBusinessIslandBriefSeen,
   wasBusinessIslandBriefSeen
 } from "@/lib/businessIslandBriefSession";
+import { SCHOOLS_DEMO_RESET_EVENT } from "@/lib/schools/resetSchoolsDemoProgress";
 import { companyById, type CompanyId } from "@/data/companies";
 import { SCHOOLS_MISSION_BRIEF_IMG_SRC } from "@/lib/schools/schoolsMapConfig";
 import { BUSINESS_HUB_IMG_SRC } from "@/lib/screenAssetUrls";
@@ -51,10 +53,12 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
   useLayoutEffect(() => {
     setHydrationReady(true);
     actions.setActivePillar("business");
-    preloadImage(BUSINESS_HUB_IMG_SRC);
+    if (!isSchoolsBusinessHub) {
+      preloadImage(BUSINESS_HUB_IMG_SRC);
+    }
     preloadImage(SCHOOLS_MISSION_BRIEF_IMG_SRC);
     preloadQuestDetailChunks();
-  }, [actions]);
+  }, [actions, isSchoolsBusinessHub]);
 
   useEffect(() => {
     void prewarmQuestAnswers(company.ticker, "business", "what-they-do");
@@ -101,6 +105,14 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
     }
   }, [companyProgress.businessIslandBriefDismissedAt]);
 
+  useEffect(() => {
+    const onDemoReset = () => {
+      setBriefDismissedLocal(false);
+    };
+    window.addEventListener(SCHOOLS_DEMO_RESET_EVENT, onDemoReset);
+    return () => window.removeEventListener(SCHOOLS_DEMO_RESET_EVENT, onDemoReset);
+  }, []);
+
   const islandBriefDismissed =
     companyProgress.businessIslandBriefDismissedAt != null ||
     wasBusinessIslandBriefSeen() ||
@@ -145,7 +157,11 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
         ].join(" ")}
       >
         {!hydrated ? (
-          <BusinessQuestRouteLoading />
+          isSchoolsBusinessHub ? (
+            <SchoolsBusinessHubHydrationScene />
+          ) : (
+            <BusinessQuestRouteLoading />
+          )
         ) : (
           <>
             <BusinessQuestMap

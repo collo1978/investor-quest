@@ -35,10 +35,12 @@ import type {
   TrueFalseQuestion
 } from "@/data/quests/types";
 import { isQuizAnswerCorrect } from "@/data/quests/types";
+import type { PillarQuestTheme } from "@/components/quest/pillarQuestTheme";
 import {
   initialOrderPermutation,
   shuffleIndices
 } from "@/lib/quests/quizOrderShuffle";
+import { SchoolsQuizMicroRewardFx } from "@/components/schools/SchoolsQuizMicroRewardFx";
 
 // ---------------------------------------------------------------------------
 // Visual tokens
@@ -51,6 +53,14 @@ const GREEN_HI = "#22C58B";
 const GREEN_BORDER = "rgba(34, 197, 139, 0.55)";
 const RED_HI = "#F47878";
 const RED_BORDER = "rgba(244, 120, 120, 0.55)";
+const MISSION_HEADING = "#92400e";
+const MISSION_BODY = "#0f172a";
+const MISSION_MUTED = "#475569";
+const MISSION_LABEL = "#64748b";
+
+function isMissionQuizSurface(theme?: PillarQuestTheme): boolean {
+  return theme?.cardChrome === "mission";
+}
 
 // ---------------------------------------------------------------------------
 // Props
@@ -70,6 +80,8 @@ export type QuizQuestionViewProps = {
   celebrateCorrect?: boolean;
   /** XP earned on the current correct answer (Schools flow). */
   successXp?: number;
+  /** Schools Business Island — cream/gold quiz card surface. */
+  surfaceTheme?: PillarQuestTheme;
 };
 
 export function QuizQuestionView(props: QuizQuestionViewProps) {
@@ -80,9 +92,13 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
     showFeedback,
     variant = "default",
     celebrateCorrect = false,
-    successXp
+    successXp,
+    surfaceTheme
   } = props;
   const isFocus = variant === "focus";
+  const isMissionSurface = surfaceTheme?.cardChrome === "mission";
+  const bodyText = surfaceTheme?.text ?? MISSION_BODY;
+  const mutedText = surfaceTheme?.textMuted ?? MISSION_MUTED;
   const isReview = mode === "review";
   const showResult =
     isReview || (showFeedback && question.kind === "order");
@@ -98,7 +114,9 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
         ? GREEN_BORDER
         : RED_BORDER
       : isFocus
-        ? "rgba(255,255,255,0.08)"
+        ? isMissionSurface
+          ? "rgba(202, 138, 4, 0.35)"
+          : "rgba(255,255,255,0.08)"
         : GOLD_BORDER_SOFT;
   const feedbackBg = celebrating
     ? "rgba(34,197,139,0.07)"
@@ -107,8 +125,12 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
         ? "rgba(34,197,139,0.035)"
         : "rgba(244,120,120,0.04)"
       : isFocus
-        ? "rgba(255,255,255,0.03)"
-        : "rgba(255,255,255,0.02)";
+        ? isMissionSurface
+          ? "rgba(255,255,255,0.42)"
+          : "rgba(255,255,255,0.03)"
+        : isMissionSurface
+          ? "rgba(255,255,255,0.62)"
+          : "rgba(255,255,255,0.02)";
   const feedbackShadow = celebrating
     ? "0 0 36px -6px rgba(34,197,139,0.44), 0 0 24px -8px rgba(245,197,71,0.28)"
     : showResult
@@ -116,17 +138,29 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
         ? "0 0 28px -8px rgba(34,197,139,0.44)"
         : "0 0 28px -8px rgba(244,120,120,0.45)"
       : isFocus
-        ? "0 24px 64px -32px rgba(0,0,0,0.55)"
-        : "none";
+        ? isMissionSurface
+          ? "0 10px 26px rgba(2, 6, 23, 0.16)"
+          : "0 24px 64px -32px rgba(0,0,0,0.55)"
+        : isMissionSurface
+          ? "0 8px 22px rgba(2, 6, 23, 0.12)"
+          : "none";
+
+  const cardClassName = [
+    "transition-[border-color,box-shadow] duration-300",
+    celebrating ? "overflow-visible" : "",
+    showSuccessXp && isMissionSurface ? "pt-14 sm:pt-16" : "",
+    isFocus
+      ? "relative rounded-2xl border px-5 py-9 sm:px-7 sm:py-11"
+      : isMissionSurface
+        ? "relative rounded-2xl border px-5 py-5 sm:px-6 sm:py-6"
+        : "relative rounded-xl border px-4 py-3"
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div
-      className={[
-        "transition-[border-color,box-shadow] duration-300",
-        isFocus
-          ? "relative rounded-2xl border px-5 py-9 sm:px-7 sm:py-11"
-          : "relative rounded-xl border px-4 py-3"
-      ].join(" ")}
+      className={cardClassName}
       style={{
         borderColor: feedbackBorder,
         background: feedbackBg,
@@ -151,55 +185,57 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
         </motion.span>
       ) : null}
 
-      {showSuccessXp ? (
-        <motion.div
-          initial={{ opacity: 0, y: 6, scale: 0.92 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ type: "spring", stiffness: 380, damping: 24 }}
-          className="mb-8 flex justify-center"
-          aria-live="polite"
-        >
-          <span
-            className="inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-[12px] font-bold tabular-nums uppercase tracking-[0.12em]"
-            aria-label={`Plus ${successXp} experience points`}
+      {showSuccessXp && successXp != null ? (
+        <SchoolsQuizMicroRewardFx
+          xp={successXp}
+          triggerKey={`${question.id}-correct`}
+          variant={isMissionSurface ? "mission" : "default"}
+        />
+      ) : null}
+      {!isFocus && !isMissionSurface ? (
+        <div>
+          <p
+            className="flex flex-wrap items-center gap-x-2 gap-y-1 px-1 text-[10.5px] font-semibold uppercase tracking-[0.22em]"
             style={{
-              borderColor: "rgba(245,197,71,0.55)",
-              background: "rgba(245,197,71,0.14)",
-              color: GOLD_HI,
-              boxShadow: "0 0 20px rgba(245,197,71,0.28)"
+              color: showResult
+                ? answeredCorrect
+                  ? GREEN_HI
+                  : RED_HI
+                : GOLD_HI
             }}
           >
-            +{successXp} XP
-          </span>
-        </motion.div>
-      ) : null}
-      {!isFocus ? (
-        <p
-          className="flex items-center gap-2 px-1 text-[10.5px] font-semibold uppercase tracking-[0.22em]"
-          style={{
-            color: showResult ? (answeredCorrect ? GREEN_HI : RED_HI) : GOLD_HI
-          }}
-        >
-          <span>{`Question ${props.index + 1}`}</span>
-          <span aria-hidden style={{ opacity: 0.6 }}>
-            ·
-          </span>
-          <span>{kindLabel(question.kind)}</span>
-          {showResult ? (
-            <>
-              <span aria-hidden style={{ opacity: 0.6 }}>
-                ·
-              </span>
-              <span>{answeredCorrect ? "Correct" : "Not quite"}</span>
-            </>
-          ) : null}
-        </p>
+            <span>{`Question ${props.index + 1}`}</span>
+            <span aria-hidden style={{ opacity: 0.6 }}>
+              ·
+            </span>
+            <span>{kindLabel(question.kind)}</span>
+            {showResult ? (
+              <>
+                <span aria-hidden style={{ opacity: 0.6 }}>
+                  ·
+                </span>
+                <span>{answeredCorrect ? "Correct" : "Not quite"}</span>
+              </>
+            ) : null}
+          </p>
+        </div>
       ) : null}
 
-      <QuestionPrompt question={question} hero={isFocus} celebrating={showSuccessXp} />
+      <QuestionPrompt
+        question={question}
+        hero={isFocus}
+        celebrating={showSuccessXp}
+        textColor={isMissionSurface ? bodyText : undefined}
+        mutedText={isMissionSurface ? mutedText : undefined}
+        missionSurface={isMissionSurface}
+      />
 
-      <div className={isFocus ? "mt-9" : "mt-3"}>
-        <QuestionInput {...props} premium={isFocus} />
+      <div className={isFocus ? "mt-9" : isMissionSurface ? "mt-0" : "mt-3"}>
+        <QuestionInput
+          {...props}
+          premium={isFocus || isMissionSurface}
+          missionSurface={isMissionSurface}
+        />
       </div>
 
       {(isReview || showFeedback) && question.explain ? (
@@ -209,23 +245,43 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
           transition={{ duration: 0.22, ease: "easeOut" }}
           className={
             isFocus
-              ? "mt-6 border-t border-white/[0.06] pt-5 text-[13px] leading-relaxed text-ink-1/90"
+              ? `mt-6 border-t pt-5 text-[13px] leading-relaxed${
+                  isMissionSurface ? "" : " border-white/[0.06] text-ink-1/90"
+                }`
               : "mt-3 rounded-lg border px-3 py-2 text-[12.5px] leading-relaxed text-ink-0/90"
           }
           style={
             isFocus
-              ? undefined
+              ? isMissionSurface
+                ? {
+                    borderColor: "rgba(202, 138, 4, 0.28)",
+                    color: mutedText
+                  }
+                : undefined
               : {
                   borderColor: answeredCorrect
                     ? "rgba(34,197,139,0.25)"
                     : "rgba(244,120,120,0.25)",
                   background: answeredCorrect
-                    ? "rgba(34,197,139,0.06)"
-                    : "rgba(244,120,120,0.06)"
+                    ? isMissionSurface
+                      ? "rgba(34,197,139,0.12)"
+                      : "rgba(34,197,139,0.06)"
+                    : isMissionSurface
+                      ? "rgba(244,120,120,0.12)"
+                      : "rgba(244,120,120,0.06)",
+                  color: isMissionSurface
+                    ? mutedText
+                    : undefined
                 }
           }
         >
-          {question.explain}
+          <span
+            className="block text-[10px] font-bold uppercase tracking-[0.18em]"
+            style={{ color: isMissionSurface ? MISSION_HEADING : GOLD_HI }}
+          >
+            Why
+          </span>
+          <span className="mt-1 block">{question.explain}</span>
         </motion.p>
       ) : null}
     </div>
@@ -235,7 +291,7 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
 /**
  * Renders the question prompt with optional kind-specific framing.
  * - `scenario` gets a callout card to feel like "an investor brief".
- * - `fill-blank` swaps `___` for a stylised gold pill.
+ * - `fill-blank` swaps each `___` / `______` run for styled blank pills (count matches answer word count).
  * - Everything else uses a plain prompt line.
  */
 function formatQuizPrompt(question: QuizQuestion): string {
@@ -248,44 +304,62 @@ function formatQuizPrompt(question: QuizQuestion): string {
 function QuestionPrompt({
   question,
   hero = false,
-  celebrating = false
+  celebrating = false,
+  textColor,
+  mutedText,
+  missionSurface = false
 }: {
   question: QuizQuestion;
   hero?: boolean;
   celebrating?: boolean;
+  textColor?: string;
+  mutedText?: string;
+  missionSurface?: boolean;
 }) {
   if (hero) {
+    const promptContent =
+      question.kind === "fill-blank"
+        ? renderFillBlankPrompt(question, missionSurface)
+        : formatQuizPrompt(question);
     return (
       <p
         className={[
-          "font-[var(--font-grotesk)] font-semibold leading-[1.35] tracking-[-0.01em] text-ink-0",
+          "font-[var(--font-grotesk)] font-semibold leading-[1.35] tracking-[-0.01em]",
+          textColor ? "" : "text-ink-0",
           "text-[clamp(1.25rem,2.4vw,1.75rem)]",
           celebrating ? "px-2 pt-1" : "px-1 py-1"
         ].join(" ")}
+        style={textColor ? { color: textColor } : undefined}
       >
-        {formatQuizPrompt(question)}
+        {promptContent}
       </p>
     );
   }
   if (question.kind === "scenario") {
     return (
       <div
-        className="mt-2 rounded-2xl border px-4 py-3"
+        className="mt-1 rounded-2xl border px-4 py-3"
         style={{
-          borderColor: GOLD_BORDER,
-          background:
-            "linear-gradient(135deg, rgba(245,197,71,0.12) 0%, rgba(245,197,71,0.04) 100%)",
-          boxShadow: "inset 0 0 0 1px rgba(245,197,71,0.08)"
+          borderColor: missionSurface ? "rgba(202, 138, 4, 0.42)" : GOLD_BORDER,
+          background: missionSurface
+            ? "rgba(255, 255, 255, 0.62)"
+            : "linear-gradient(135deg, rgba(245,197,71,0.12) 0%, rgba(245,197,71,0.04) 100%)",
+          boxShadow: missionSurface
+            ? "inset 0 1px 0 rgba(255,255,255,0.72)"
+            : "inset 0 0 0 1px rgba(245,197,71,0.08)"
         }}
       >
         <p
           className="mb-1 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.22em]"
-          style={{ color: GOLD_HI }}
+          style={{ color: missionSurface ? MISSION_HEADING : GOLD_HI }}
         >
           <SparkleGlyphSmall className="h-3 w-3" />
           Scenario
         </p>
-        <p className="text-[14.5px] leading-relaxed text-ink-0">
+        <p
+          className="text-[15px] font-semibold leading-relaxed"
+          style={{ color: textColor ?? (missionSurface ? MISSION_BODY : undefined) }}
+        >
           {question.prompt}
         </p>
       </div>
@@ -293,38 +367,110 @@ function QuestionPrompt({
   }
   if (question.kind === "fill-blank") {
     return (
-      <p className="mt-1 text-[14.5px] leading-relaxed text-ink-0">
-        {renderFillBlankPrompt(question)}
+      <p
+        className={[
+          "mt-1 text-[15px] font-semibold leading-relaxed",
+          missionSurface ? "" : "text-ink-0"
+        ].join(" ")}
+        style={textColor ? { color: textColor } : undefined}
+      >
+        {renderFillBlankPrompt(question, missionSurface)}
       </p>
     );
   }
   return (
-    <p className="mt-1 text-[14.5px] leading-relaxed text-ink-0">
+    <p
+      className={[
+        "mt-1 text-[15px] font-semibold leading-relaxed",
+        missionSurface ? "" : "text-ink-0"
+      ].join(" ")}
+      style={textColor ? { color: textColor } : undefined}
+    >
       {question.prompt}
     </p>
   );
 }
 
-function renderFillBlankPrompt(q: FillBlankQuestion): React.ReactNode {
-  const parts = q.prompt.split("___");
-  if (parts.length < 2) return q.prompt;
+const FILL_BLANK_PLACEHOLDER = /_{3,}/g;
+
+function countAnswerWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+/** One blank per `___` / `______` run; a single run expands to the correct answer's word count. */
+function getFillBlankRenderPlan(q: FillBlankQuestion): {
+  parts: string[];
+  blankCounts: number[];
+} {
+  const prompt = q.prompt;
+  const matches = [...prompt.matchAll(FILL_BLANK_PLACEHOLDER)];
+  if (matches.length === 0) {
+    return { parts: [prompt], blankCounts: [] };
+  }
+
+  const correctWords = countAnswerWords(q.options[q.correctIndex] ?? "");
+  const parts: string[] = [];
+  const blankCounts: number[] = [];
+  let cursor = 0;
+
+  for (const match of matches) {
+    const index = match.index ?? 0;
+    parts.push(prompt.slice(cursor, index));
+    blankCounts.push(matches.length === 1 ? Math.max(1, correctWords) : 1);
+    cursor = index + match[0].length;
+  }
+  parts.push(prompt.slice(cursor));
+
+  return { parts, blankCounts };
+}
+
+function FillBlankPlaceholder({
+  missionSurface
+}: {
+  missionSurface: boolean;
+}) {
+  if (missionSurface) {
+    return (
+      <span className="iq-schools-quiz-blank" aria-hidden>
+        ____
+      </span>
+    );
+  }
+  return (
+    <span
+      className="mx-1 inline-block min-w-[2.5rem] rounded-md border px-2 text-center align-baseline text-[12.5px] tracking-[0.1em]"
+      style={{
+        borderColor: GOLD_BORDER_SOFT,
+        background: "rgba(245,197,71,0.08)",
+        color: GOLD_HI
+      }}
+      aria-hidden
+    >
+      ____
+    </span>
+  );
+}
+
+function renderFillBlankPrompt(
+  q: FillBlankQuestion,
+  missionSurface = false
+): React.ReactNode {
+  const { parts, blankCounts } = getFillBlankRenderPlan(q);
+  if (blankCounts.length === 0) return q.prompt;
+
   const out: React.ReactNode[] = [];
   parts.forEach((part, i) => {
     out.push(<span key={`p${i}`}>{part}</span>);
-    if (i < parts.length - 1) {
-      out.push(
-        <span
-          key={`b${i}`}
-          className="mx-1 inline-block min-w-[2.5rem] rounded-md border px-2 text-center align-baseline text-[12.5px] tracking-[0.1em]"
-          style={{
-            borderColor: GOLD_BORDER_SOFT,
-            background: "rgba(245,197,71,0.08)",
-            color: GOLD_HI
-          }}
-        >
-          ____
-        </span>
-      );
+    const blankCount = blankCounts[i];
+    if (blankCount != null) {
+      for (let b = 0; b < blankCount; b++) {
+        out.push(
+          <FillBlankPlaceholder
+            key={`b${i}-${b}`}
+            missionSurface={missionSurface}
+          />
+        );
+      }
     }
   });
   return out;
@@ -357,12 +503,39 @@ function kindLabel(kind: QuizQuestion["kind"]): string {
   }
 }
 
+function kindInstruction(kind: QuizQuestion["kind"]): string {
+  switch (kind) {
+    case "multiple-choice":
+      return "Choose the best answer below.";
+    case "scenario":
+      return "Read the scenario, then pick your call.";
+    case "odd-one-out":
+      return "Tap the one that doesn't belong.";
+    case "red-flag":
+      return "Flag the warning sign.";
+    case "fill-blank":
+      return "Tap the word that completes the sentence.";
+    case "true-false":
+      return "Decide if the statement is true or false.";
+    case "match":
+      return "Match each concept on the left.";
+    case "order":
+      return "Put the steps in the right order.";
+    case "bull-bear":
+      return "Pick the stronger side of the argument.";
+    case "risk-meter":
+      return "Slide to where this risk feels.";
+    case "swipe-cards":
+      return "Sort each card as a good sign or warning sign.";
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Dispatch on question kind
 // ---------------------------------------------------------------------------
 
 function QuestionInput(
-  props: QuizQuestionViewProps & { premium?: boolean }
+  props: QuizQuestionViewProps & { premium?: boolean; missionSurface?: boolean }
 ) {
   const { question } = props;
   switch (question.kind) {
@@ -406,10 +579,12 @@ function IndexChoiceInput({
   value,
   onChange,
   mode,
-  premium = false
+  premium = false,
+  missionSurface = false
 }: QuizQuestionViewProps & {
   question: MultipleChoiceQuestion;
   premium?: boolean;
+  missionSurface?: boolean;
 }) {
   const list = question.choices;
   const selected = typeof value === "number" ? value : null;
@@ -421,6 +596,16 @@ function IndexChoiceInput({
         const isCorrectChoice = mode === "review" && idx === correctIndex;
         const isWrongChoice =
           mode === "review" && isSelected && idx !== correctIndex;
+        const missionChoiceClass = missionSurface
+          ? [
+              "iq-schools-quiz-choice",
+              isSelected && mode === "input" ? "iq-schools-quiz-choice--selected" : "",
+              isCorrectChoice ? "iq-schools-quiz-choice--review-correct" : "",
+              isWrongChoice ? "iq-schools-quiz-choice--review-wrong" : ""
+            ]
+              .filter(Boolean)
+              .join(" ")
+          : "";
         return (
           <label
             key={idx}
@@ -429,14 +614,18 @@ function IndexChoiceInput({
               mode === "review" ? "cursor-default" : "cursor-pointer",
               premium
                 ? "min-h-[3.75rem] rounded-2xl px-5 py-4 text-[15px] font-medium"
-                : "rounded-lg px-3 py-2 text-[13.5px]"
+                : missionSurface
+                  ? "min-h-[3.25rem] rounded-xl px-4 py-3 text-[14.5px] font-medium"
+                  : "rounded-lg px-3 py-2 text-[13.5px]",
+              missionChoiceClass
             ].join(" ")}
             style={choiceStyle({
               isSelected,
               isCorrectChoice,
               isWrongChoice,
               mode,
-              premium
+              premium,
+              missionSurface
             })}
           >
             <input
@@ -455,13 +644,16 @@ function IndexChoiceInput({
                 isSelected,
                 isCorrectChoice,
                 isWrongChoice,
-                mode
+                mode,
+                missionSurface
               })}
             >
               {isSelected || isCorrectChoice ? (
                 <span
                   className="block h-1.5 w-1.5 rounded-full"
-                  style={{ background: "#0a0a16" }}
+                  style={{
+                    background: missionSurface ? "#451a03" : "#0a0a16"
+                  }}
                 />
               ) : null}
             </span>
@@ -487,36 +679,57 @@ function FillBlankPillInput({
   question,
   value,
   onChange,
-  mode
-}: QuizQuestionViewProps & { question: FillBlankQuestion }) {
+  mode,
+  missionSurface = false
+}: QuizQuestionViewProps & {
+  question: FillBlankQuestion;
+  missionSurface?: boolean;
+}) {
   const selected = typeof value === "number" ? value : null;
   return (
     <div>
-      <p
-        className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.18em]"
-        style={{ color: "rgba(245,197,71,0.7)" }}
-      >
-        Tap the word that fills the blank
-      </p>
-      <div className="flex flex-wrap gap-1.5">
+      {!missionSurface ? (
+        <p
+          className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.18em]"
+          style={{ color: "rgba(245,197,71,0.7)" }}
+        >
+          Tap the word that fills the blank
+        </p>
+      ) : null}
+      <div className="flex flex-wrap gap-2">
         {question.options.map((label, idx) => {
           const isSelected = selected === idx;
           const isCorrectChoice =
             mode === "review" && idx === question.correctIndex;
           const isWrongChoice =
             mode === "review" && isSelected && idx !== question.correctIndex;
+          const missionChoiceClass = missionSurface
+            ? [
+                "iq-schools-quiz-choice",
+                isSelected && mode === "input" ? "iq-schools-quiz-choice--selected" : "",
+                isCorrectChoice ? "iq-schools-quiz-choice--review-correct" : "",
+                isWrongChoice ? "iq-schools-quiz-choice--review-wrong" : ""
+              ]
+                .filter(Boolean)
+                .join(" ")
+            : "";
           return (
             <button
               key={idx}
               type="button"
               disabled={mode === "review"}
               onClick={() => onChange(idx)}
-              className="rounded-full border px-4 py-1.5 text-[13px] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65"
+              className={[
+                "rounded-full border px-4 py-2 text-[13.5px] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65",
+                missionSurface ? "min-h-[2.5rem] px-5 text-[14px]" : "",
+                missionChoiceClass
+              ].join(" ")}
               style={choiceStyle({
                 isSelected,
                 isCorrectChoice,
                 isWrongChoice,
-                mode
+                mode,
+                missionSurface
               })}
             >
               <span className="inline-flex items-center gap-1.5">
@@ -547,10 +760,12 @@ function TrueFalseInput({
   value,
   onChange,
   mode,
-  premium = false
+  premium = false,
+  missionSurface = false
 }: QuizQuestionViewProps & {
   question: TrueFalseQuestion;
   premium?: boolean;
+  missionSurface?: boolean;
 }) {
   const selected = typeof value === "boolean" ? value : null;
   const options: { label: string; sub: string; bool: boolean }[] = [
@@ -564,6 +779,16 @@ function TrueFalseInput({
         const isCorrectChoice = mode === "review" && opt.bool === question.correct;
         const isWrongChoice =
           mode === "review" && isSelected && opt.bool !== question.correct;
+        const missionChoiceClass = missionSurface
+          ? [
+              "iq-schools-quiz-choice",
+              isSelected && mode === "input" ? "iq-schools-quiz-choice--selected" : "",
+              isCorrectChoice ? "iq-schools-quiz-choice--review-correct" : "",
+              isWrongChoice ? "iq-schools-quiz-choice--review-wrong" : ""
+            ]
+              .filter(Boolean)
+              .join(" ")
+          : "";
         return (
           <motion.button
             key={opt.label}
@@ -575,7 +800,8 @@ function TrueFalseInput({
             transition={{ type: "spring", stiffness: 320, damping: 22 }}
             className={[
               "relative flex flex-col items-center justify-center gap-1.5 border p-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65",
-              premium ? "min-h-[108px] rounded-2xl" : "min-h-[96px] rounded-2xl"
+              premium ? "min-h-[108px] rounded-2xl" : "min-h-[96px] rounded-2xl",
+              missionChoiceClass
             ].join(" ")}
             style={choiceStyle({
               isSelected,
@@ -583,7 +809,8 @@ function TrueFalseInput({
               isWrongChoice,
               mode,
               premium,
-              isFalseOption: opt.bool === false
+              isFalseOption: opt.bool === false,
+              missionSurface
             })}
           >
             <span
@@ -596,25 +823,37 @@ function TrueFalseInput({
                     : isWrongChoice
                     ? RED_BORDER
                     : isSelected
-                    ? "rgba(245,197,71,0.55)"
-                    : opt.bool === false
-                    ? "rgba(245,197,71,0.36)"
-                    : "rgba(245,197,71,0.30)"
+                    ? missionSurface
+                      ? "rgba(180, 83, 9, 0.55)"
+                      : "rgba(245,197,71,0.55)"
+                    : missionSurface
+                      ? "rgba(202, 138, 4, 0.42)"
+                      : opt.bool === false
+                        ? "rgba(245,197,71,0.36)"
+                        : "rgba(245,197,71,0.30)"
                 }`,
                 background: isCorrectChoice
                   ? "rgba(34,197,139,0.18)"
                   : isWrongChoice
                   ? "rgba(244,120,120,0.18)"
                   : isSelected
-                  ? "rgba(245,197,71,0.18)"
-                  : "rgba(255,255,255,0.04)",
+                  ? missionSurface
+                    ? "rgba(251, 191, 36, 0.28)"
+                    : "rgba(245,197,71,0.18)"
+                  : missionSurface
+                    ? "rgba(255,255,255,0.72)"
+                    : "rgba(255,255,255,0.04)",
                 color: isCorrectChoice
                   ? GREEN_HI
                   : isWrongChoice
                   ? RED_HI
                   : isSelected
-                  ? GOLD_HI
-                  : "rgba(245,197,71,0.55)"
+                  ? missionSurface
+                    ? "#451a03"
+                    : GOLD_HI
+                  : missionSurface
+                    ? MISSION_HEADING
+                    : "rgba(245,197,71,0.55)"
               }}
             >
               {opt.bool ? (
@@ -627,21 +866,31 @@ function TrueFalseInput({
               className="text-[20px] font-bold tracking-[0.14em]"
               style={{
                 color: isCorrectChoice
-                  ? GREEN_HI
+                  ? missionSurface
+                    ? "#15803d"
+                    : GREEN_HI
                   : isWrongChoice
-                  ? RED_HI
+                  ? missionSurface
+                    ? "#b45309"
+                    : RED_HI
                   : isSelected
-                  ? "#fff"
-                  : opt.bool === false
-                  ? "rgba(245,197,71,0.92)"
-                  : "rgba(245,197,71,0.85)"
+                  ? missionSurface
+                    ? "#451a03"
+                    : "#fff"
+                  : missionSurface
+                    ? MISSION_BODY
+                    : opt.bool === false
+                      ? "rgba(245,197,71,0.92)"
+                      : "rgba(245,197,71,0.85)"
               }}
             >
               {opt.label}
             </span>
             <span
               className="text-[10.5px] uppercase tracking-[0.18em]"
-              style={{ color: "rgba(220,220,232,0.55)" }}
+              style={{
+                color: missionSurface ? MISSION_LABEL : "rgba(220,220,232,0.55)"
+              }}
             >
               {opt.sub}
             </span>
@@ -660,8 +909,12 @@ function OddOneOutInput({
   question,
   value,
   onChange,
-  mode
-}: QuizQuestionViewProps & { question: OddOneOutQuestion }) {
+  mode,
+  missionSurface = false
+}: QuizQuestionViewProps & {
+  question: OddOneOutQuestion;
+  missionSurface?: boolean;
+}) {
   const selected = typeof value === "number" ? value : null;
   const n = question.choices.length;
   const gridCols =
@@ -674,20 +927,32 @@ function OddOneOutInput({
       : "grid-cols-2";
   return (
     <div>
-      <p
-        className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.18em]"
-        style={{ color: "rgba(245,197,71,0.7)" }}
-      >
-        Tap the one that doesn&apos;t belong
-      </p>
-      <div className={`grid ${gridCols} gap-2`}>
+      {!missionSurface ? (
+        <p
+          className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.18em]"
+          style={{ color: "rgba(245,197,71,0.7)" }}
+        >
+          Tap the one that doesn&apos;t belong
+        </p>
+      ) : null}
+      <div className={`grid ${gridCols} gap-2.5`}>
         {question.choices.map((label, idx) => {
           const isSelected = selected === idx;
           const isCorrectPick = mode === "review" && idx === question.oddIndex;
           const isWrongPick =
             mode === "review" && isSelected && idx !== question.oddIndex;
           const struck =
-            isSelected || isCorrectPick; // visually crossed-out when "picked as odd"
+            isSelected || isCorrectPick;
+          const missionChoiceClass = missionSurface
+            ? [
+                "iq-schools-quiz-choice",
+                isSelected && mode === "input" ? "iq-schools-quiz-choice--selected" : "",
+                isCorrectPick ? "iq-schools-quiz-choice--review-correct" : "",
+                isWrongPick ? "iq-schools-quiz-choice--review-wrong" : ""
+              ]
+                .filter(Boolean)
+                .join(" ")
+            : "";
           return (
             <motion.button
               key={idx}
@@ -697,12 +962,16 @@ function OddOneOutInput({
               whileHover={mode === "review" ? undefined : { y: -2 }}
               whileTap={mode === "review" ? undefined : { scale: 0.97 }}
               transition={{ type: "spring", stiffness: 320, damping: 22 }}
-              className="relative flex min-h-[78px] items-center justify-center rounded-2xl border p-3 text-center text-[13px] leading-snug transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65"
+              className={[
+                "relative flex min-h-[84px] items-center justify-center rounded-2xl border p-3 text-center text-[14px] leading-snug transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65",
+                missionChoiceClass
+              ].join(" ")}
               style={choiceStyle({
                 isSelected,
                 isCorrectChoice: isCorrectPick,
                 isWrongChoice: isWrongPick,
-                mode
+                mode,
+                missionSurface
               })}
             >
               <span
@@ -893,10 +1162,12 @@ function ScenarioInput({
   value,
   onChange,
   mode,
-  premium = false
+  premium = false,
+  missionSurface = false
 }: QuizQuestionViewProps & {
   question: ScenarioQuestion;
   premium?: boolean;
+  missionSurface?: boolean;
 }) {
   const selected = typeof value === "number" ? value : null;
   return (
@@ -907,6 +1178,16 @@ function ScenarioInput({
           mode === "review" && idx === question.correctIndex;
         const isWrongChoice =
           mode === "review" && isSelected && idx !== question.correctIndex;
+        const missionChoiceClass = missionSurface
+          ? [
+              "iq-schools-quiz-choice",
+              isSelected && mode === "input" ? "iq-schools-quiz-choice--selected" : "",
+              isCorrectChoice ? "iq-schools-quiz-choice--review-correct" : "",
+              isWrongChoice ? "iq-schools-quiz-choice--review-wrong" : ""
+            ]
+              .filter(Boolean)
+              .join(" ")
+          : "";
         return (
           <motion.button
             key={idx}
@@ -920,14 +1201,18 @@ function ScenarioInput({
               "group flex items-center gap-4 border text-left leading-snug transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65",
               premium
                 ? "min-h-[3.75rem] rounded-2xl px-5 py-4 text-[15px] font-medium"
-                : "rounded-xl px-3.5 py-3 text-[13.5px]"
+                : missionSurface
+                  ? "min-h-[3.25rem] rounded-xl px-4 py-3 text-[14.5px] font-medium"
+                  : "rounded-xl px-3.5 py-3 text-[13.5px]",
+              missionChoiceClass
             ].join(" ")}
             style={choiceStyle({
               isSelected,
               isCorrectChoice,
               isWrongChoice,
               mode,
-              premium
+              premium,
+              missionSurface
             })}
           >
               <span
@@ -990,8 +1275,12 @@ function MatchInput({
   question,
   value,
   onChange,
-  mode
-}: QuizQuestionViewProps & { question: MatchQuestion }) {
+  mode,
+  missionSurface = false
+}: QuizQuestionViewProps & {
+  question: MatchQuestion;
+  missionSurface?: boolean;
+}) {
   const pairs = question.pairs;
   // Permutation of right indices for *display*: rightOrder[i] = original right idx
   const rightOrder = shuffleIndices(pairs.length, question.id, "right");
@@ -1020,23 +1309,34 @@ function MatchInput({
         return (
           <div
             key={leftIdx}
-            className="rounded-lg border px-3 py-2"
+            className="rounded-lg border px-3 py-2.5"
             style={{
               borderColor:
                 mode === "review"
                   ? userCorrect
                     ? GREEN_BORDER
                     : RED_BORDER
-                  : GOLD_BORDER_SOFT,
+                  : missionSurface
+                    ? "rgba(202, 138, 4, 0.35)"
+                    : GOLD_BORDER_SOFT,
               background:
                 mode === "review"
                   ? userCorrect
-                    ? "rgba(34,197,139,0.06)"
-                    : "rgba(244,120,120,0.05)"
-                  : "rgba(255,255,255,0.015)"
+                    ? missionSurface
+                      ? "rgba(34,197,139,0.12)"
+                      : "rgba(34,197,139,0.06)"
+                    : missionSurface
+                      ? "rgba(244,120,120,0.10)"
+                      : "rgba(244,120,120,0.05)"
+                  : missionSurface
+                    ? "rgba(255,255,255,0.62)"
+                    : "rgba(255,255,255,0.015)"
             }}
           >
-            <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.16em]" style={{ color: GOLD_HI }}>
+            <div
+              className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.16em]"
+              style={{ color: missionSurface ? MISSION_HEADING : GOLD_HI }}
+            >
               <span>{pair.left}</span>
               {mode === "review" ? (
                 userCorrect ? (
@@ -1059,12 +1359,27 @@ function MatchInput({
                     type="button"
                     disabled={mode === "review"}
                     onClick={() => pickFor(leftIdx, origIdx)}
-                    className="rounded-full border px-3 py-1.5 text-[12.5px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65"
+                    className={[
+                      "rounded-full border px-3 py-1.5 text-[12.5px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65",
+                      missionSurface ? "iq-schools-quiz-choice min-h-[2.25rem] px-4 text-[13px]" : "",
+                      missionSurface && isPicked && mode === "input"
+                        ? "iq-schools-quiz-choice--selected"
+                        : "",
+                      missionSurface && isCorrectChoice
+                        ? "iq-schools-quiz-choice--review-correct"
+                        : "",
+                      missionSurface && isWrongPick
+                        ? "iq-schools-quiz-choice--review-wrong"
+                        : ""
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                     style={choiceStyle({
                       isSelected: isPicked,
                       isCorrectChoice,
                       isWrongChoice: isWrongPick,
-                      mode
+                      mode,
+                      missionSurface
                     })}
                   >
                     {pairs[origIdx].right}
@@ -1073,8 +1388,14 @@ function MatchInput({
               })}
             </div>
             {mode === "review" && !userCorrect ? (
-              <p className="mt-1.5 text-[11.5px]" style={{ color: "rgb(180 180 200)" }}>
-                Correct match: <span style={{ color: GREEN_HI }}>{pair.right}</span>
+              <p
+                className="mt-1.5 text-[11.5px]"
+                style={{ color: missionSurface ? MISSION_MUTED : "rgb(180 180 200)" }}
+              >
+                Correct match:{" "}
+                <span style={{ color: missionSurface ? "#15803d" : GREEN_HI }}>
+                  {pair.right}
+                </span>
               </p>
             ) : null}
           </div>
@@ -2021,7 +2342,8 @@ function choiceStyle({
   isWrongChoice,
   mode,
   premium = false,
-  isFalseOption = false
+  isFalseOption = false,
+  missionSurface = false
 }: {
   isSelected: boolean;
   isCorrectChoice: boolean;
@@ -2029,7 +2351,48 @@ function choiceStyle({
   mode: "input" | "review";
   premium?: boolean;
   isFalseOption?: boolean;
+  missionSurface?: boolean;
 }): React.CSSProperties {
+  if (missionSurface) {
+    if (mode === "review") {
+      if (isCorrectChoice) {
+        return {
+          borderColor: GREEN_BORDER,
+          background: "rgba(34,197,139,0.18)",
+          color: "#14532d",
+          cursor: "default",
+          boxShadow: "0 0 16px -4px rgba(34,197,139,0.45)"
+        };
+      }
+      if (isWrongChoice) {
+        return {
+          borderColor: RED_BORDER,
+          background: "rgba(244,120,120,0.16)",
+          color: "#7f1d1d",
+          cursor: "default",
+          boxShadow: "0 0 16px -4px rgba(244,120,120,0.4)"
+        };
+      }
+      return {
+        borderColor: "rgba(202, 138, 4, 0.28)",
+        background: "rgba(255,255,255,0.35)",
+        color: "#64748b",
+        cursor: "default"
+      };
+    }
+    return {
+      borderColor: isSelected
+        ? "rgba(180, 83, 9, 0.62)"
+        : "rgba(202, 138, 4, 0.42)",
+      background: isSelected
+        ? "rgba(251, 191, 36, 0.28)"
+        : "rgba(255, 255, 255, 0.78)",
+      color: isSelected ? "#451a03" : MISSION_BODY,
+      boxShadow: isSelected
+        ? "0 8px 20px -10px rgba(251, 191, 36, 0.42)"
+        : undefined
+    };
+  }
   if (mode === "review") {
     if (isCorrectChoice) {
       return {
@@ -2080,12 +2443,14 @@ function radioDotStyle({
   isSelected,
   isCorrectChoice,
   isWrongChoice,
-  mode
+  mode,
+  missionSurface = false
 }: {
   isSelected: boolean;
   isCorrectChoice: boolean;
   isWrongChoice: boolean;
   mode: "input" | "review";
+  missionSurface?: boolean;
 }): React.CSSProperties {
   if (mode === "review") {
     if (isCorrectChoice) {
@@ -2101,13 +2466,27 @@ function radioDotStyle({
       };
     }
     return {
-      border: `1.5px solid rgba(245,197,71,0.35)`,
-      background: "rgba(0,0,0,0.30)"
+      border: `1.5px solid rgba(202, 138, 4, 0.35)`,
+      background: missionSurface ? "rgba(255,255,255,0.72)" : "rgba(0,0,0,0.30)"
     };
   }
   return {
-    border: `1.5px solid ${isSelected ? GOLD_HI : "rgba(245,197,71,0.55)"}`,
-    background: isSelected ? GOLD_HI : "rgba(0,0,0,0.30)"
+    border: `1.5px solid ${
+      isSelected
+        ? missionSurface
+          ? "rgba(180, 83, 9, 0.62)"
+          : GOLD_HI
+        : missionSurface
+          ? "rgba(202, 138, 4, 0.48)"
+          : "rgba(245,197,71,0.55)"
+    }`,
+    background: isSelected
+      ? missionSurface
+        ? "#fbbf24"
+        : GOLD_HI
+      : missionSurface
+        ? "rgba(255,255,255,0.78)"
+        : "rgba(0,0,0,0.30)"
   };
 }
 

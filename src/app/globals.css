@@ -305,6 +305,3705 @@ h3 {
   overflow: hidden;
 }
 
+/* Schools Business Island — coded Prodigy-style hub (no raster backdrop) */
+.iq-schools-business-hub-scene-shell {
+  background: #0a1a4f;
+  /* Orbit spacing — card height ~152px desktop / ~118px mobile + 48px gap */
+  --iq-schools-hub-card-h: 152px;
+  --iq-schools-hub-card-gap: 48px;
+  --iq-schools-hub-edge: clamp(10px, 1.2vw, 18px);
+  /* Clears hamburger (mobile) + progress tracker (top-right) on row 1 */
+  --iq-schools-hub-row1: calc(
+    env(safe-area-inset-top, 0px) + clamp(96px, 11.5vh, 112px)
+  );
+  --iq-schools-hub-row1-right: calc(var(--iq-schools-hub-row1) + 18px);
+  --iq-schools-hub-row2: calc(var(--iq-schools-hub-row1) + var(--iq-schools-hub-card-h) + var(--iq-schools-hub-card-gap));
+  --iq-schools-hub-row3: calc(var(--iq-schools-hub-row2) + var(--iq-schools-hub-card-h) + var(--iq-schools-hub-card-gap));
+  /* Master principles panel — dedicated left column */
+  --iq-schools-hub-principles-width: clamp(196px, 15.5vw, 272px);
+  --iq-schools-hub-principles-gap: clamp(10px, 1.2vw, 18px);
+  --iq-schools-hub-left-inset: calc(
+    var(--iq-schools-hub-principles-width) + var(--iq-schools-hub-principles-gap) +
+      clamp(8px, 1vw, 14px)
+  );
+}
+
+.iq-schools-business-hub-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-scene__ocean {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 82% 68% at 50% 36%, #2f6bf0 0%, #1e40af 46%, #0a1a4f 100%);
+}
+
+.iq-schools-business-hub-scene__aurora {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 58% 44% at 50% 74%, rgba(56, 189, 248, 0.2), transparent 70%),
+    radial-gradient(circle at 16% 14%, rgba(167, 139, 250, 0.14), transparent 30%),
+    radial-gradient(circle at 84% 18%, rgba(251, 191, 36, 0.1), transparent 26%);
+}
+
+.iq-schools-business-hub-scene__ripple {
+  position: absolute;
+  left: 50%;
+  border: 2px solid rgba(59, 130, 246, 0.24);
+  border-radius: 999px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-scene__ripple--far {
+  top: 24%;
+  width: 92%;
+  height: 42%;
+  opacity: 0.28;
+}
+
+.iq-schools-business-hub-scene__ripple--mid {
+  top: 38%;
+  width: 76%;
+  height: 34%;
+  opacity: 0.34;
+}
+
+.iq-schools-business-hub-scene__ripple--near {
+  top: 52%;
+  width: 60%;
+  height: 28%;
+  opacity: 0.4;
+  border-color: rgba(96, 165, 250, 0.28);
+}
+
+.iq-schools-business-hub-scene__star {
+  position: absolute;
+  border-radius: 999px;
+  background: #e0f2fe;
+  opacity: 0.82;
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-scene__ambient-glow {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: min(94%, 720px);
+  height: min(52%, 420px);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse 62% 54% at 50% 50%,
+    rgba(56, 189, 248, 0.16),
+    rgba(251, 191, 36, 0.07) 44%,
+    transparent 72%
+  );
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-scene__island-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 5%;
+  width: min(78%, 620px);
+  height: min(54%, 460px);
+  transform: translateX(-50%);
+  background: radial-gradient(
+    ellipse 58% 52% at 50% 60%,
+    rgba(56, 189, 248, 0.42),
+    rgba(251, 191, 36, 0.12) 42%,
+    transparent 72%
+  );
+  animation: iq-prodigy-hub-pulse 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-scene-shell .iq-schools-business-hub-scene__island-glow {
+  bottom: clamp(132px, 17vh, 196px);
+}
+
+.iq-schools-business-hub-scene__island {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: min(96%, 720px);
+  height: min(70%, 580px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-scene-shell .iq-schools-business-hub-scene__island {
+  bottom: clamp(132px, 17vh, 196px);
+}
+
+.iq-schools-business-hub-scene__island-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 20px 32px rgba(4, 12, 40, 0.48));
+}
+
+.iq-schools-business-hub-scene__vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(4, 10, 30, 0.28) 0%, transparent 26%, transparent 58%, rgba(4, 8, 22, 0.38) 100%);
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .iq-schools-business-hub-scene__island {
+    width: min(100%, 560px);
+    height: min(58%, 440px);
+    bottom: 0;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-business-hub-scene__island {
+    bottom: clamp(108px, 14vh, 152px);
+  }
+
+  .iq-schools-business-hub-scene__island-glow {
+    width: min(88%, 480px);
+    height: min(50%, 360px);
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-business-hub-scene__island-glow {
+    bottom: clamp(108px, 14vh, 152px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-schools-business-hub-scene__island-glow,
+  .iq-schools-business-hub-scene__star {
+    animation: none !important;
+  }
+}
+
+/* Schools Business Island — mission quest cards (Prodigy map sign language) */
+.iq-schools-hub-mission-card {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  border-radius: 18px;
+  border: 2px solid rgba(251, 191, 36, 0.88);
+  background:
+    radial-gradient(
+      ellipse 120% 80% at 50% -20%,
+      color-mix(in srgb, var(--mission-glow, rgba(251, 191, 36, 0.45)) 38%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(168deg, #fffbeb 0%, #fef3c7 46%, #fde68a 100%);
+  padding: 12px 14px 14px;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    inset 0 -2px 0 rgba(180, 83, 9, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.42),
+    0 10px 26px rgba(2, 6, 23, 0.22);
+  transition:
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms ease,
+    filter 200ms ease;
+  cursor: pointer;
+}
+
+.iq-schools-hub-mission-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  z-index: 2;
+  height: 2px;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(90deg, transparent, rgba(253, 224, 71, 0.95), transparent);
+  opacity: 0.88;
+  pointer-events: none;
+}
+
+.iq-schools-hub-mission-card::after {
+  content: "";
+  position: absolute;
+  inset: 1px 1px auto;
+  height: 42%;
+  border-radius: 17px 17px 22px 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent);
+  pointer-events: none;
+}
+
+.iq-schools-hub-mission-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    inset 0 -2px 0 rgba(180, 83, 9, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 0 24px color-mix(in srgb, var(--mission-glow, rgba(251, 191, 36, 0.45)) 52%, transparent),
+    0 16px 32px rgba(2, 6, 23, 0.28);
+}
+
+.iq-schools-hub-mission-card--primary {
+  border-width: 3px;
+  border-color: rgba(251, 191, 36, 0.98);
+  animation: iq-schools-hub-mission-pulse 2.4s ease-in-out infinite;
+}
+
+.iq-schools-hub-mission-card--active {
+  border-color: rgba(245, 158, 11, 0.92);
+}
+
+.iq-schools-hub-mission-card--completed {
+  border-color: rgba(34, 197, 94, 0.72);
+  background:
+    radial-gradient(
+      ellipse 120% 80% at 50% -20%,
+      rgba(74, 222, 128, 0.18),
+      transparent 58%
+    ),
+    linear-gradient(168deg, #ecfdf5 0%, #fef9c3 52%, #fde68a 100%);
+}
+
+.iq-schools-hub-mission-card--locked {
+  display: block;
+  width: 100%;
+  border: 2px solid rgba(251, 191, 36, 0.82);
+  background: linear-gradient(168deg, rgba(241, 245, 249, 0.96) 0%, rgba(226, 232, 240, 0.92) 100%);
+  padding: 10px 12px 12px;
+  text-align: center;
+  cursor: not-allowed;
+  filter: saturate(0.9);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(100, 116, 139, 0.14),
+    0 0 0 1px rgba(180, 83, 9, 0.22),
+    0 8px 20px rgba(2, 6, 23, 0.18);
+}
+
+.iq-schools-hub-mission-card--locked::before {
+  opacity: 0.62;
+}
+
+.iq-schools-hub-mission-card--awaiting {
+  cursor: pointer;
+  filter: saturate(1.08);
+  border-width: 3px;
+  border-color: rgba(251, 191, 36, 0.98);
+  padding: 14px 16px 16px;
+  background:
+    radial-gradient(
+      ellipse 120% 80% at 50% -20%,
+      rgba(251, 191, 36, 0.42),
+      transparent 58%
+    ),
+    linear-gradient(168deg, #fffbeb 0%, #fef3c7 46%, #fde68a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    inset 0 -2px 0 rgba(180, 83, 9, 0.1),
+    0 0 0 2px rgba(251, 191, 36, 0.55),
+    0 0 28px rgba(251, 191, 36, 0.52),
+    0 0 48px rgba(245, 158, 11, 0.28),
+    0 14px 30px rgba(2, 6, 23, 0.24);
+  animation: iq-schools-hub-mission-awaiting-pulse 2.2s ease-in-out infinite;
+}
+
+.iq-schools-hub-mission-card--awaiting::before {
+  opacity: 1;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(253, 224, 71, 1), transparent);
+}
+
+.iq-schools-hub-mission-card--beacon.iq-schools-hub-mission-card--awaiting {
+  animation: iq-schools-hub-mission-awaiting-pulse 2.2s ease-in-out infinite;
+}
+
+.iq-schools-hub-mission-slot--awaiting {
+  filter: drop-shadow(0 0 18px rgba(251, 191, 36, 0.42));
+}
+
+.iq-schools-hub-mission-card__header {
+  position: absolute;
+  top: 11px;
+  left: 12px;
+  right: 12px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+}
+
+.iq-schools-hub-mission-card__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 2px solid rgba(202, 138, 4, 0.5);
+  background: rgba(255, 255, 255, 0.72);
+  font-size: clamp(15px, 1.05vw, 17px);
+  font-weight: 900;
+  line-height: 1;
+  color: #92400e;
+}
+
+.iq-schools-hub-mission-card__unlock-label {
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.72);
+  background: linear-gradient(180deg, #fef9c3 0%, #fde68a 100%);
+  padding: 3px 9px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #92400e;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 0 12px rgba(251, 191, 36, 0.35);
+}
+
+.iq-schools-hub-mission-card__done-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(34, 197, 94, 0.45);
+  background: rgba(220, 252, 231, 0.88);
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #15803d;
+}
+
+.iq-schools-hub-mission-card__title {
+  position: relative;
+  z-index: 1;
+  margin: 2rem 0 0;
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(0.95rem, 1.05vw, 1.12rem);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  color: #1e3a5f;
+  text-wrap: balance;
+}
+
+.iq-schools-hub-mission-card__desc {
+  position: relative;
+  z-index: 1;
+  margin: 6px 0 0;
+  font-size: clamp(0.72rem, 0.82vw, 0.84rem);
+  font-weight: 600;
+  line-height: 1.35;
+  color: #475569;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-wrap: balance;
+}
+
+.iq-schools-hub-mission-card__progress {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.iq-schools-hub-mission-card__progress-track {
+  flex: 1;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(30, 58, 95, 0.16);
+  background: rgba(30, 58, 95, 0.1);
+}
+
+.iq-schools-hub-mission-card__progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f59e0b, #fde047);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.35);
+  transition: width 500ms ease;
+}
+
+.iq-schools-hub-mission-card--completed .iq-schools-hub-mission-card__progress-fill {
+  background: linear-gradient(90deg, #16a34a, #fde047);
+}
+
+.iq-schools-hub-mission-card__progress-pct {
+  flex-shrink: 0;
+  min-width: 2rem;
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: #92400e;
+}
+
+.iq-schools-hub-mission-card__cta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(180, 83, 9, 0.42);
+  background: linear-gradient(180deg, #fde047 0%, #fbbf24 48%, #d97706 100%);
+  font-size: clamp(0.68rem, 0.78vw, 0.78rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #451a03;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 4px 0 rgba(120, 53, 15, 0.42),
+    0 0 14px rgba(251, 191, 36, 0.28);
+  pointer-events: none;
+}
+
+.iq-schools-hub-mission-card--primary .iq-schools-hub-mission-card__cta {
+  padding: 10px 16px;
+  font-size: clamp(0.72rem, 0.84vw, 0.84rem);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 5px 0 rgba(120, 53, 15, 0.48),
+    0 0 20px rgba(251, 191, 36, 0.42);
+}
+
+.iq-schools-hub-mission-card__lock-wrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 2rem 0 6px;
+  min-height: 5rem;
+}
+
+.iq-schools-hub-mission-card .iq-prodigy-map__lock-badge--island {
+  transform: scale(1.1);
+  transform-origin: center;
+}
+
+.iq-schools-hub-mission-card--locked .iq-prodigy-map__lock-badge--island {
+  transform: scale(1.18);
+}
+
+.iq-schools-hub-mission-card__tap-hint {
+  margin: 0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #92400e;
+}
+
+.iq-schools-hub-mission-card--awaiting .iq-schools-hub-mission-card__lock-wrap {
+  gap: 10px;
+  padding: 2.15rem 0 8px;
+  min-height: 5.35rem;
+}
+
+.iq-schools-hub-mission-card--awaiting .iq-schools-hub-mission-card__tap-hint {
+  font-size: clamp(11px, 1.05vw, 13px);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: #78350f;
+  text-shadow:
+    0 0 10px rgba(251, 191, 36, 0.55),
+    0 0 18px rgba(245, 158, 11, 0.32);
+}
+
+.iq-schools-hub-mission-card--awaiting .iq-prodigy-map__lock-badge--island {
+  transform: scale(1.24);
+  transform-origin: center;
+}
+
+@keyframes iq-schools-hub-mission-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    border-color: rgba(251, 191, 36, 0.94);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.78),
+      inset 0 -2px 0 rgba(180, 83, 9, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.42),
+      0 0 22px rgba(251, 191, 36, 0.48),
+      0 10px 26px rgba(2, 6, 23, 0.22);
+  }
+
+  50% {
+    transform: scale(1.03);
+    border-color: rgba(255, 244, 180, 1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      inset 0 -2px 0 rgba(180, 83, 9, 0.08),
+      0 0 0 2px rgba(251, 191, 36, 0.72),
+      0 0 36px rgba(251, 191, 36, 0.62),
+      0 12px 28px rgba(2, 6, 23, 0.24);
+  }
+}
+
+@keyframes iq-schools-hub-mission-awaiting-pulse {
+  0%,
+  100% {
+    border-color: rgba(251, 191, 36, 0.94);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.82),
+      inset 0 -2px 0 rgba(180, 83, 9, 0.1),
+      0 0 0 2px rgba(251, 191, 36, 0.48),
+      0 0 24px rgba(251, 191, 36, 0.46),
+      0 0 40px rgba(245, 158, 11, 0.22),
+      0 14px 30px rgba(2, 6, 23, 0.24);
+  }
+
+  50% {
+    border-color: rgba(255, 244, 180, 1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      inset 0 -2px 0 rgba(180, 83, 9, 0.08),
+      0 0 0 3px rgba(251, 191, 36, 0.82),
+      0 0 38px rgba(251, 191, 36, 0.72),
+      0 0 56px rgba(245, 158, 11, 0.38),
+      0 16px 34px rgba(2, 6, 23, 0.28);
+  }
+}
+
+@keyframes iq-schools-hub-mission-beacon {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      0 0 0 1px rgba(180, 83, 9, 0.22),
+      0 0 18px rgba(251, 191, 36, 0.35),
+      0 8px 20px rgba(2, 6, 23, 0.18);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.78),
+      0 0 0 2px rgba(251, 191, 36, 0.72),
+      0 0 32px rgba(251, 191, 36, 0.55),
+      0 10px 24px rgba(2, 6, 23, 0.2);
+  }
+}
+
+@media (min-width: 768px) {
+  .iq-schools-business-hub-scene-shell {
+    --iq-schools-hub-row1: calc(
+      env(safe-area-inset-top, 0px) + clamp(92px, 10.5vh, 108px)
+    );
+    --iq-schools-hub-row1-right: calc(var(--iq-schools-hub-row1) + 18px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-schools-hub-mission-card--primary,
+  .iq-schools-hub-mission-card--beacon,
+  .iq-schools-hub-mission-card--awaiting {
+    animation: none !important;
+  }
+
+  .iq-prodigy-map__lock-badge--unlocked.iq-prodigy-map__lock-badge--island {
+    animation: none !important;
+  }
+
+  .iq-schools-hub-progress-card,
+  .iq-schools-hub-progress-card__ring-pulse {
+    animation: none !important;
+  }
+}
+
+/* Schools Business Island — compact game-style progress tracker */
+.iq-schools-hub-progress-card {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 2px solid rgba(251, 191, 36, 0.88);
+  background:
+    radial-gradient(
+      ellipse 120% 90% at 18% -20%,
+      rgba(251, 191, 36, 0.24),
+      transparent 58%
+    ),
+    linear-gradient(168deg, #fffbeb 0%, #fef3c7 52%, #fde68a 100%);
+  padding: 8px 12px 8px 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    inset 0 -2px 0 rgba(180, 83, 9, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.42),
+    0 8px 22px rgba(2, 6, 23, 0.2);
+}
+
+.iq-schools-hub-progress-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  z-index: 2;
+  height: 2px;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(90deg, transparent, rgba(253, 224, 71, 0.95), transparent);
+  opacity: 0.88;
+  pointer-events: none;
+}
+
+.iq-schools-hub-progress-card__ring-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 3.25rem;
+  height: 3.25rem;
+}
+
+@media (min-width: 640px) {
+  .iq-schools-hub-progress-card__ring-wrap {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}
+
+.iq-schools-hub-progress-card__ring-center {
+  position: absolute;
+  inset: 24%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1.5px solid rgba(202, 138, 4, 0.45);
+  background: rgba(255, 255, 255, 0.72);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #92400e;
+}
+
+.iq-schools-hub-progress-card__copy {
+  position: relative;
+  z-index: 1;
+  min-width: 5.75rem;
+  padding-right: 2px;
+}
+
+.iq-schools-hub-progress-card__label {
+  margin: 0;
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #92400e;
+}
+
+@media (min-width: 640px) {
+  .iq-schools-hub-progress-card__label {
+    font-size: 0.68rem;
+  }
+}
+
+.iq-schools-hub-progress-card__count {
+  margin: 2px 0 0;
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  color: #1e3a5f;
+}
+
+@media (min-width: 640px) {
+  .iq-schools-hub-progress-card__count {
+    font-size: 1.02rem;
+  }
+}
+
+.iq-schools-hub-progress-card__ring-pulse {
+  pointer-events: none;
+  position: absolute;
+  inset: -18%;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(251, 191, 36, 0.34) 0%,
+    rgba(251, 191, 36, 0) 72%
+  );
+  animation: iq-schools-hub-progress-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes iq-schools-hub-progress-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 0.82;
+    transform: scale(1.04);
+  }
+}
+
+/* Schools Business Island — quest + quiz flow (matches hub ocean + mission cards) */
+.iq-schools-business-quest {
+  min-height: 100dvh;
+  background:
+    radial-gradient(ellipse 58% 44% at 50% 74%, rgba(56, 189, 248, 0.16), transparent 70%),
+    radial-gradient(ellipse 82% 68% at 50% 36%, #2f6bf0 0%, #1e40af 46%, #0a1a4f 100%);
+}
+
+.iq-schools-mission-cta {
+  border-radius: 999px;
+  border: 2px solid rgba(180, 83, 9, 0.42);
+  background: linear-gradient(180deg, #fde047 0%, #fbbf24 48%, #d97706 100%);
+  color: #451a03;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 4px 0 rgba(120, 53, 15, 0.42),
+    0 0 14px rgba(251, 191, 36, 0.28);
+}
+
+.iq-schools-mission-cta:hover:not(:disabled) {
+  filter: brightness(1.03);
+}
+
+/* Mission nav — Previous / Next / locked actions (readable disabled state) */
+.iq-schools-mission-nav-btn {
+  border-radius: 999px;
+  border: 2px solid rgba(251, 191, 36, 0.88);
+  background: rgba(255, 251, 235, 0.78);
+  color: #92400e;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.iq-schools-mission-nav-btn:hover:not(:disabled) {
+  background: rgba(254, 243, 199, 0.94);
+}
+
+.iq-schools-mission-nav-btn:disabled {
+  cursor: not-allowed;
+  border-color: rgba(251, 191, 36, 0.48);
+  background: rgba(255, 255, 255, 0.5);
+  color: #64748b;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  opacity: 1;
+  filter: none;
+}
+
+.iq-schools-mission-nav-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.2rem;
+  border-radius: 999px;
+  border: 2px solid rgba(251, 191, 36, 0.38);
+  background: rgba(255, 251, 235, 0.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 6px 18px rgba(2, 6, 23, 0.12);
+}
+
+.iq-schools-mission-nav-group__count {
+  min-width: 3.25rem;
+  padding: 0 0.35rem;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+/* Ocean backdrop — nav pill + footer text readable at a glance */
+.iq-schools-business-quest .iq-schools-mission-nav-group {
+  background: rgba(15, 23, 42, 0.24);
+  border-color: rgba(241, 245, 249, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 8px 22px rgba(2, 6, 23, 0.22);
+  backdrop-filter: blur(8px);
+}
+
+.iq-schools-business-quest .iq-schools-mission-nav-group__count {
+  color: rgba(248, 250, 252, 0.96);
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-shadow: 0 1px 3px rgba(2, 6, 23, 0.48);
+}
+
+.iq-schools-business-quest .iq-schools-ocean-muted-text {
+  color: rgba(241, 245, 249, 0.94);
+  text-shadow: 0 1px 3px rgba(2, 6, 23, 0.42);
+}
+
+.iq-schools-business-quest .iq-schools-quest-source-footer {
+  color: rgba(241, 245, 249, 0.9);
+  text-shadow: 0 1px 3px rgba(2, 6, 23, 0.38);
+}
+
+.iq-schools-mission-nav-btn--ready:not(:disabled) {
+  animation: iq-schools-nav-ready-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes iq-schools-nav-ready-pulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.72),
+      0 0 0 rgba(251, 191, 36, 0);
+  }
+
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.82),
+      0 0 16px rgba(251, 191, 36, 0.42);
+  }
+}
+
+.iq-schools-mission-read-hint {
+  margin-top: 0.65rem;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.iq-schools-business-quest .iq-schools-mission-read-hint {
+  display: inline-block;
+  margin-top: 0.75rem;
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.52);
+  background: rgba(255, 251, 235, 0.96);
+  color: #0f172a;
+  font-weight: 700;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 6px 18px rgba(2, 6, 23, 0.16);
+}
+
+.iq-schools-mission-cta:disabled {
+  cursor: not-allowed;
+  border-color: rgba(251, 191, 36, 0.48);
+  background: rgba(255, 255, 255, 0.5);
+  color: #64748b;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  opacity: 1;
+  filter: none;
+}
+
+.iq-schools-quest-quiz-panel {
+  color: #1e3a5f;
+}
+
+.iq-schools-quest-quiz-panel .text-ink-2 {
+  color: #475569;
+}
+
+/* Schools quiz — interactive answer choices on cream */
+.iq-schools-quiz-choice {
+  border-width: 2px;
+  border-style: solid;
+  border-color: rgba(202, 138, 4, 0.42);
+  background: rgba(255, 255, 255, 0.78);
+  color: #0f172a;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.iq-schools-quiz-choice:hover:not(:disabled) {
+  border-color: rgba(180, 83, 9, 0.58);
+  background: rgba(254, 243, 199, 0.92);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.1);
+}
+
+.iq-schools-quiz-choice--selected {
+  border-color: rgba(180, 83, 9, 0.62) !important;
+  background: rgba(251, 191, 36, 0.28) !important;
+  color: #451a03 !important;
+  box-shadow: 0 8px 20px -10px rgba(251, 191, 36, 0.42) !important;
+}
+
+.iq-schools-quiz-choice--review-correct {
+  border-color: rgba(34, 197, 139, 0.55) !important;
+  background: rgba(34, 197, 139, 0.18) !important;
+  color: #14532d !important;
+}
+
+.iq-schools-quiz-choice--review-wrong {
+  border-color: rgba(244, 120, 120, 0.55) !important;
+  background: rgba(244, 120, 120, 0.16) !important;
+  color: #7f1d1d !important;
+}
+
+.iq-schools-quiz-blank {
+  display: inline-block;
+  min-width: 3.25rem;
+  margin-inline: 0.2rem;
+  padding: 0.15rem 0.65rem;
+  border-radius: 0.45rem;
+  border: 2px dashed rgba(180, 83, 9, 0.52);
+  background: rgba(254, 243, 199, 0.72);
+  color: #92400e;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-align: center;
+  vertical-align: baseline;
+}
+
+.iq-schools-quiz-progress {
+  margin-bottom: 1.25rem;
+}
+
+.iq-schools-quiz-progress__track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(202, 138, 4, 0.28);
+  overflow: hidden;
+}
+
+.iq-schools-quiz-progress__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #fbbf24, #d97706);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.45);
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.iq-schools-quiz-micro-xp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 5.5rem;
+  padding: 0.55rem 1.35rem 0.65rem;
+  border-radius: 999px;
+  border: 2px solid rgba(245, 197, 71, 0.72);
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(254, 243, 199, 0.96) 42%,
+    rgba(253, 224, 71, 0.42) 100%
+  );
+  box-shadow:
+    0 0 32px rgba(245, 197, 71, 0.48),
+    0 10px 28px rgba(2, 6, 23, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.iq-schools-quiz-micro-xp__ring {
+  border: 2px solid rgba(34, 197, 139, 0.55);
+  box-shadow: 0 0 24px rgba(34, 197, 139, 0.35);
+}
+
+.iq-schools-quiz-micro-xp__value {
+  font-family: var(--font-grotesk);
+  font-size: clamp(1.85rem, 5.4vw, 2.35rem);
+  font-weight: 800;
+  line-height: 1;
+  color: #92400e;
+  text-shadow:
+    0 0 22px rgba(245, 197, 71, 0.55),
+    0 2px 0 rgba(255, 255, 255, 0.65);
+}
+
+.iq-schools-quiz-micro-xp__label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #b45309;
+}
+
+/* Master Investing Principles — Business Island mastery panel */
+.iq-schools-business-hub-layout {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-layout__inner {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 2.4vh, 1.35rem);
+  width: min(100%, 680px);
+  min-height: min-content;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + clamp(72px, 9.5vh, 88px))
+    clamp(0.65rem, 2.8vw, 1.15rem)
+    calc(env(safe-area-inset-bottom, 0px) + 0.85rem);
+}
+
+/* Three-zone hub — left ladder | center HQ | right quests */
+.iq-schools-business-hub-layout--zones {
+  display: grid;
+  grid-template-columns:
+    minmax(var(--iq-schools-hub-principles-width), clamp(196px, 17vw, 264px))
+    minmax(220px, 1fr)
+    minmax(148px, clamp(148px, 16vw, 216px));
+  align-items: stretch;
+  gap: clamp(8px, 1.1vw, 14px);
+  padding:
+    calc(env(safe-area-inset-top, 0px) + clamp(88px, 10.5vh, 104px))
+    clamp(8px, 1.1vw, 14px)
+    calc(env(safe-area-inset-bottom, 0px) + clamp(12px, 2vh, 20px));
+  overflow: hidden;
+}
+
+.iq-schools-business-hub-zone--ladder {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  padding-left: clamp(2px, 0.5vw, 6px);
+}
+
+.iq-schools-business-hub-zone--ladder .iq-master-principles-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.iq-schools-business-hub-zone--ladder .iq-master-principles-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.iq-schools-business-hub-zone--center {
+  pointer-events: none;
+  min-width: 0;
+}
+
+.iq-schools-business-hub-zone--quests {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  padding-right: clamp(2px, 0.5vw, 6px);
+}
+
+.iq-schools-business-hub-quest-rail {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.48rem, 1.2vh, 0.62rem);
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding-block: 0.12rem;
+  scrollbar-width: thin;
+}
+
+.iq-schools-business-hub-quest-rail__item {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.iq-schools-business-hub-quest-rail .iq-schools-hub-mission-card {
+  width: 100% !important;
+  max-width: 100%;
+  padding: 10px 11px 11px;
+}
+
+.iq-schools-business-hub-quest-rail .iq-schools-hub-mission-card__title {
+  font-size: clamp(0.68rem, 1.6vw, 0.78rem);
+}
+
+.iq-schools-business-hub-quest-rail
+  .iq-schools-hub-mission-card--primary {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 0 0 2px rgba(251, 191, 36, 0.45),
+    0 0 24px rgba(251, 191, 36, 0.34),
+    0 12px 28px rgba(2, 6, 23, 0.2);
+}
+
+.iq-schools-business-hub-scene-shell--zones {
+  --iq-schools-hub-principles-width: clamp(196px, 17vw, 264px);
+}
+
+.iq-schools-business-hub-scene-shell--zones .iq-schools-business-hub-scene__island {
+  left: 50%;
+  bottom: clamp(6%, 8vh, 12%);
+  width: min(56%, 520px);
+  height: min(78%, 620px);
+  transform: translateX(-50%);
+}
+
+.iq-schools-business-hub-scene-shell--zones .iq-schools-business-hub-scene__island-glow {
+  left: 50%;
+  bottom: clamp(6%, 8vh, 12%);
+  width: min(60%, 560px);
+  height: min(62%, 500px);
+  transform: translateX(-50%);
+}
+
+.iq-schools-business-hub-scene-shell--zones .iq-schools-business-hub-scene__ambient-glow {
+  left: 50%;
+  top: 54%;
+  width: min(40%, 400px);
+  height: min(48%, 380px);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse 62% 54% at 50% 50%,
+    rgba(56, 189, 248, 0.22),
+    rgba(251, 191, 36, 0.1) 44%,
+    transparent 72%
+  );
+}
+
+.iq-schools-business-hub-scene-shell--zones .iq-schools-business-hub-scene__ripple--mid {
+  top: 42%;
+  width: min(36%, 340px);
+}
+
+.iq-schools-business-hub-scene-shell--zones .iq-schools-business-hub-scene__ripple--near {
+  top: 50%;
+  width: min(28%, 280px);
+}
+
+/* Island Command — orbit hub (Concept A) */
+.iq-schools-business-hub-command {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-command__orbit {
+  pointer-events: none;
+}
+
+.iq-principles-seal-arc {
+  position: absolute;
+  z-index: 18;
+  left: clamp(6px, 1.4vw, 14px);
+  bottom: clamp(8px, 1.8vh, 16px);
+  width: min(44%, 440px);
+  min-width: 220px;
+  padding: 0.42rem 0.48rem 0.35rem;
+  border-radius: 16px;
+  border: 1px solid rgba(251, 191, 36, 0.38);
+  background: linear-gradient(
+    168deg,
+    rgba(8, 16, 48, 0.82) 0%,
+    rgba(12, 24, 64, 0.78) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 10px 28px rgba(2, 6, 23, 0.35),
+    0 0 24px rgba(251, 191, 36, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.iq-principles-seal-arc__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.38rem;
+  padding-inline: 0.12rem;
+}
+
+.iq-principles-seal-arc__title {
+  margin: 0;
+  font-size: clamp(0.58rem, 1.4vw, 0.68rem);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 248, 225, 0.88);
+}
+
+.iq-principles-seal-arc__count {
+  margin: 0;
+  padding: 0.14rem 0.42rem;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: clamp(0.62rem, 1.5vw, 0.72rem);
+  font-weight: 800;
+  color: #fcd34d;
+}
+
+.iq-principles-seal-arc__path-glow {
+  display: block;
+  width: 100%;
+  height: 28px;
+  margin-bottom: 0.15rem;
+  opacity: 0.9;
+}
+
+.iq-principles-seal-arc__seals {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  height: clamp(52px, 7vh, 64px);
+}
+
+.iq-principles-seal-arc__seal {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.18rem;
+  transform: translateX(-50%);
+  min-width: 2.4rem;
+}
+
+.iq-principles-seal-arc__seal-face {
+  display: grid;
+  place-items: center;
+  width: clamp(1.55rem, 2.8vw, 1.85rem);
+  height: clamp(1.55rem, 2.8vw, 1.85rem);
+  border-radius: 999px;
+  border: 2px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.iq-principles-seal-arc__seal--mastered .iq-principles-seal-arc__seal-face {
+  border-color: rgba(217, 119, 6, 0.75);
+  background: linear-gradient(168deg, #fffbeb 0%, #fde68a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 0 12px rgba(251, 191, 36, 0.35);
+}
+
+.iq-principles-seal-arc__seal--spotlight .iq-principles-seal-arc__seal-face {
+  border-color: rgba(245, 197, 71, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 0 0 2px rgba(251, 191, 36, 0.28),
+    0 0 16px rgba(251, 191, 36, 0.45);
+}
+
+.iq-principles-seal-arc__seal--celebrate {
+  animation: iq-investor-toolkit-chip-pop 0.85s ease-out 1;
+}
+
+.iq-principles-seal-arc__ring {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  border: 2px solid rgba(148, 163, 184, 0.55);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.iq-principles-seal-arc__tick {
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #d97706;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.55);
+}
+
+.iq-principles-seal-arc__label {
+  font-size: clamp(0.48rem, 1.1vw, 0.58rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(226, 232, 240, 0.82);
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(2, 6, 23, 0.65);
+}
+
+.iq-principles-seal-arc__seal--mastered .iq-principles-seal-arc__label {
+  color: rgba(254, 243, 199, 0.95);
+}
+
+.iq-schools-business-hub-scene-shell--command,
+.iq-schools-business-hub-scene-shell--journey,
+.iq-schools-business-hub-scene-shell--island-focus {
+  overflow: hidden;
+}
+
+.iq-schools-business-hub-scene-shell--command .iq-schools-business-hub-scene__island,
+.iq-schools-business-hub-scene-shell--journey .iq-schools-business-hub-scene__island {
+  left: 50%;
+  bottom: clamp(2%, 3.5vh, 6%);
+  width: min(78%, 920px);
+  height: min(74%, 78vh);
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+/* Island focus — full island visible (~88% frame), HQ + environment stay in view */
+.iq-schools-business-hub-scene-shell--island-focus {
+  --iq-island-hub-width: min(88%, 920px);
+  --iq-island-hub-height: min(86%, 80vh);
+  --iq-island-hub-bottom: clamp(4%, 6vh, 9%);
+}
+
+.iq-schools-business-hub-scene-shell--island-focus .iq-schools-business-hub-scene__island {
+  left: 50%;
+  bottom: var(--iq-island-hub-bottom);
+  width: var(--iq-island-hub-width);
+  height: var(--iq-island-hub-height);
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+.iq-schools-business-hub-scene-shell--command .iq-schools-business-hub-scene__island-glow,
+.iq-schools-business-hub-scene-shell--journey .iq-schools-business-hub-scene__island-glow {
+  left: 50%;
+  bottom: clamp(2%, 3.5vh, 6%);
+  width: min(82%, 960px);
+  height: min(62%, 68vh);
+  transform: translateX(-50%);
+}
+
+.iq-schools-business-hub-scene-shell--island-focus .iq-schools-business-hub-scene__island-glow {
+  left: 50%;
+  bottom: var(--iq-island-hub-bottom);
+  width: min(92%, calc(var(--iq-island-hub-width) + 40px));
+  height: min(70%, calc(var(--iq-island-hub-height) * 0.88));
+  transform: translateX(-50%);
+}
+
+.iq-schools-business-hub-scene-settle {
+  transform-origin: 50% 72%;
+}
+
+.iq-schools-business-hub-scene-shell--command .iq-schools-business-hub-scene__ambient-glow,
+.iq-schools-business-hub-scene-shell--journey .iq-schools-business-hub-scene__ambient-glow {
+  left: 50%;
+  top: 52%;
+  width: min(52%, 520px);
+  height: min(50%, 480px);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse 62% 54% at 50% 50%,
+    rgba(56, 189, 248, 0.24),
+    rgba(251, 191, 36, 0.12) 44%,
+    transparent 72%
+  );
+}
+
+.iq-schools-business-hub-scene-shell--island-focus .iq-schools-business-hub-scene__ambient-glow {
+  left: 50%;
+  top: 48%;
+  width: min(68%, 680px);
+  height: min(58%, 540px);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse 62% 54% at 50% 50%,
+    rgba(56, 189, 248, 0.28),
+    rgba(251, 191, 36, 0.14) 44%,
+    transparent 72%
+  );
+}
+
+.iq-schools-business-hub-scene-shell--command .iq-schools-business-hub-scene__ripple--far,
+.iq-schools-business-hub-scene-shell--journey .iq-schools-business-hub-scene__ripple--far {
+  top: 28%;
+  width: min(88%, 900px);
+  height: 46%;
+}
+
+.iq-schools-business-hub-scene-shell--island-focus .iq-schools-business-hub-scene__ripple--far {
+  top: 22%;
+  left: 50%;
+  width: min(94%, 980px);
+  height: 52%;
+  transform: translateX(-50%);
+}
+
+.iq-schools-business-hub-scene-shell--command .iq-schools-business-hub-scene__ripple--mid,
+.iq-schools-business-hub-scene-shell--journey .iq-schools-business-hub-scene__ripple--mid {
+  top: 40%;
+  width: min(72%, 760px);
+  height: 38%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.iq-schools-business-hub-scene-shell--island-focus .iq-schools-business-hub-scene__ripple--mid {
+  top: 34%;
+  left: 50%;
+  width: min(82%, 860px);
+  height: 42%;
+  transform: translateX(-50%);
+}
+
+.iq-schools-business-hub-scene-shell--command .iq-schools-business-hub-scene__ripple--near,
+.iq-schools-business-hub-scene-shell--journey .iq-schools-business-hub-scene__ripple--near {
+  top: 50%;
+  width: min(58%, 620px);
+  height: 32%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.iq-schools-business-hub-scene-shell--island-focus .iq-schools-business-hub-scene__ripple--near {
+  top: 44%;
+  left: 50%;
+  width: min(68%, 720px);
+  height: 36%;
+  transform: translateX(-50%);
+}
+
+/* Hub entry gate — preview island before learner taps ENTER */
+.iq-schools-business-hub-scene-shell--hub-preview {
+  --iq-island-hub-width: min(58%, 560px);
+  --iq-island-hub-height: min(52%, 420px);
+  --iq-island-hub-bottom: clamp(14%, 18vh, 24%);
+}
+
+.iq-schools-business-hub-scene-shell--hub-preview .iq-schools-business-hub-scene__island,
+.iq-schools-business-hub-scene-shell--hub-preview .iq-schools-business-hub-scene__island-glow,
+.iq-schools-business-hub-scene-shell--hub-revealed .iq-schools-business-hub-scene__island,
+.iq-schools-business-hub-scene-shell--hub-revealed .iq-schools-business-hub-scene__island-glow {
+  transition:
+    width 0.88s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.88s cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 0.88s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.88s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.iq-schools-business-hub-scene-shell--hub-revealed {
+  --iq-island-hub-width: min(88%, 920px);
+  --iq-island-hub-height: min(86%, 80vh);
+  --iq-island-hub-bottom: clamp(4%, 6vh, 9%);
+}
+
+.iq-schools-business-hub-island__entry {
+  position: absolute;
+  left: clamp(12px, 2vw, 24px);
+  top: calc(env(safe-area-inset-top, 0px) + clamp(52px, 8vh, 72px));
+  z-index: 30;
+  width: clamp(168px, 28vw, 220px);
+  pointer-events: auto;
+}
+
+.iq-schools-business-hub-island__entry-sign {
+  width: 100%;
+  text-align: left;
+}
+
+.iq-schools-business-hub-island__entry-sign .iq-prodigy-map__sign-title {
+  font-size: clamp(0.92rem, 1.8vw, 1.08rem);
+  letter-spacing: 0.08em;
+}
+
+.iq-schools-business-hub-island__entry-sign .iq-prodigy-map__sign-sub {
+  font-size: clamp(0.72rem, 1.35vw, 0.82rem);
+  margin-top: 0.28rem;
+}
+
+.iq-schools-business-hub-island__entry-sign .iq-prodigy-map__sign-row {
+  justify-content: flex-start;
+  margin-top: 0.72rem;
+}
+
+.iq-schools-business-hub-island__entry-enter {
+  cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--zone-accent, #fbbf24) 58%, transparent);
+  padding: 7px 18px;
+  font-size: clamp(11px, 1.15vw, 13px);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition:
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 160ms ease,
+    filter 160ms ease;
+}
+
+.iq-schools-business-hub-island__entry-enter:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.03);
+  filter: brightness(1.08);
+}
+
+.iq-schools-business-hub-island__entry-enter:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.iq-schools-business-hub-island__entry-enter:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+@media (min-width: 768px) {
+  .business-hub-scene-scroll--schools-command,
+  .business-hub-scene-scroll--schools-journey,
+  .business-hub-scene-scroll--schools-island-focus {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .iq-schools-business-hub-scene-shell--command .business-hub-scene-stage,
+  .iq-schools-business-hub-scene-shell--journey .business-hub-scene-stage,
+  .iq-schools-business-hub-scene-shell--island-focus .business-hub-scene-stage {
+    overflow: hidden;
+  }
+
+  .iq-schools-business-hub-scene-shell--command .iq-schools-hub-mission-slot {
+    width: clamp(152px, 10.5vw, 200px) !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-7 {
+    width: clamp(168px, 11.5vw, 220px) !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-1 {
+    top: clamp(108px, 22vh, 168px) !important;
+    left: clamp(6px, 1.2vw, 14px) !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-2 {
+    top: clamp(108px, 22vh, 168px) !important;
+    right: clamp(6px, 1.2vw, 14px) !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-3 {
+    top: clamp(168px, 34vh, 248px) !important;
+    right: clamp(6px, 1.2vw, 14px) !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-4 {
+    top: clamp(228px, 46vh, 328px) !important;
+    right: clamp(10px, 1.8vw, 20px) !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-5 {
+    top: clamp(168px, 34vh, 248px) !important;
+    left: clamp(6px, 1.2vw, 14px) !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-6 {
+    top: clamp(228px, 46vh, 328px) !important;
+    left: clamp(10px, 1.8vw, 20px) !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-7 {
+    top: auto !important;
+    bottom: clamp(72px, 10vh, 96px) !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    z-index: 24 !important;
+  }
+}
+
+/* Island game level — UI anchored on the island playfield */
+.iq-schools-business-hub-island {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-island__location {
+  position: absolute;
+  left: 50%;
+  top: calc(env(safe-area-inset-top, 0px) + clamp(10px, 1.6vh, 14px));
+  transform: translateX(-50%);
+  z-index: 26;
+  text-align: center;
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-island__location-title {
+  margin: 0;
+  font-size: clamp(0.72rem, 1.55vw, 0.88rem);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fde68a;
+  text-shadow: 0 0 14px rgba(251, 191, 36, 0.42);
+}
+
+.iq-schools-business-hub-island__location-sub {
+  margin: 0.18rem 0 0;
+  font-size: clamp(0.58rem, 1.15vw, 0.68rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: rgba(224, 242, 254, 0.78);
+}
+
+.iq-schools-business-hub-island__progress {
+  position: absolute;
+  right: clamp(8px, 1.2vw, 16px);
+  top: calc(env(safe-area-inset-top, 0px) + clamp(8px, 1.2vh, 12px));
+  z-index: 28;
+}
+
+.iq-schools-business-hub-island__playfield {
+  position: absolute;
+  left: 50%;
+  bottom: var(--iq-island-hub-bottom, clamp(4%, 6vh, 9%));
+  width: var(--iq-island-hub-width, min(88%, 920px));
+  height: var(--iq-island-hub-height, min(86%, 80vh));
+  transform: translateX(-50%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-island__path-glow {
+  position: absolute;
+  left: 4%;
+  bottom: 18%;
+  width: 52%;
+  height: 42%;
+  background:
+    radial-gradient(ellipse 55% 42% at 18% 78%, rgba(251, 191, 36, 0.24), transparent 68%),
+    radial-gradient(ellipse 40% 28% at 42% 62%, rgba(251, 191, 36, 0.12), transparent 72%);
+  opacity: 0.85;
+  z-index: 1;
+}
+
+.iq-schools-business-hub-island__slot-label {
+  margin: 0 0 0.36rem;
+  padding-inline: 0.12rem;
+  font-size: clamp(0.52rem, 1.05vw, 0.62rem);
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(252, 211, 77, 0.82);
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
+}
+
+.iq-schools-business-hub-island__slot-label--quest {
+  color: rgba(253, 230, 138, 0.95);
+}
+
+.iq-schools-business-hub-island__principles-slot {
+  position: absolute;
+  left: 0;
+  bottom: 20%;
+  width: clamp(168px, 24%, 228px);
+  z-index: 18;
+}
+
+.iq-schools-business-hub-island__principles {
+  width: 100%;
+  max-height: min(42vh, 360px);
+}
+
+.iq-schools-business-hub-island__principles .iq-master-principles-panel {
+  max-height: min(38vh, 320px);
+}
+
+.iq-schools-business-hub-island__quest-slot {
+  position: absolute;
+  left: 57%;
+  top: 14%;
+  width: clamp(158px, 26%, 220px);
+  z-index: 22;
+}
+
+.iq-schools-business-hub-island__quest-beam {
+  position: absolute;
+  right: calc(100% + 2px);
+  top: 46%;
+  width: clamp(16px, 7%, 42px);
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(251, 191, 36, 0.12),
+    rgba(251, 191, 36, 0.62)
+  );
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.32);
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-island__quest-pin {
+  display: block;
+  position: absolute;
+  right: calc(100% + clamp(16px, 7%, 42px) - 1px);
+  top: 46%;
+  width: 2px;
+  height: clamp(12px, 2.4vh, 18px);
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(251, 191, 36, 0.85), rgba(251, 191, 36, 0.08));
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.45);
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-island__quest-card {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .iq-schools-business-hub-island__location {
+    left: clamp(12px, 1.4vw, 20px);
+    transform: none;
+    text-align: left;
+  }
+}
+
+@media (max-width: 767px) {
+  .iq-schools-business-hub-island__playfield {
+    width: min(96%, 560px);
+    height: min(64%, 520px);
+    bottom: clamp(80px, 11vh, 108px);
+  }
+
+  .iq-schools-business-hub-island__principles-slot {
+    left: 2%;
+    bottom: 14%;
+    width: min(168px, 42vw);
+  }
+
+  .iq-schools-business-hub-island__principles {
+    transform: scale(0.88);
+    transform-origin: bottom left;
+  }
+
+  .iq-schools-business-hub-island__quest-slot {
+    left: 50%;
+    top: auto;
+    bottom: 2%;
+    width: min(92%, 280px);
+    transform: translateX(-50%);
+  }
+
+  .iq-schools-business-hub-island__quest-beam,
+  .iq-schools-business-hub-island__quest-pin {
+    display: none;
+  }
+
+  .iq-schools-business-hub-island__progress {
+    right: clamp(6px, 2vw, 10px);
+    top: calc(env(safe-area-inset-top, 0px) + clamp(52px, 7vh, 64px));
+  }
+
+  .iq-schools-business-hub-island__location {
+    top: calc(env(safe-area-inset-top, 0px) + clamp(52px, 7vh, 64px));
+  }
+}
+
+/* Legacy island hub selectors — kept for preview routes */
+.iq-schools-business-hub-island__quest-tether {
+  display: none;
+}
+
+.iq-schools-business-hub-island__objective-hint {
+  display: none;
+}
+
+.iq-schools-business-hub-island__quest--marker {
+  position: absolute;
+  left: clamp(54%, 58vw, 62%);
+  top: clamp(28%, 32vh, 36%);
+  right: auto;
+  transform: translate(-8%, -18%);
+  width: clamp(158px, 17vw, 210px);
+  z-index: 22;
+}
+
+.iq-schools-business-hub-island__quest--dock {
+  display: none;
+}
+
+.iq-schools-business-hub-island__quest-card .iq-schools-hub-journey-card--current .iq-schools-hub-mission-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 0 0 2px rgba(251, 191, 36, 0.58),
+    0 0 36px rgba(251, 191, 36, 0.42),
+    0 18px 40px rgba(2, 6, 23, 0.28);
+}
+
+.iq-master-principles-panel--island {
+  border-radius: 18px;
+  border-color: rgba(251, 191, 36, 0.42);
+  background: linear-gradient(
+    168deg,
+    rgba(8, 20, 56, 0.94) 0%,
+    rgba(10, 26, 68, 0.9) 100%
+  );
+  backdrop-filter: blur(10px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 14px 36px rgba(2, 6, 23, 0.42),
+    0 0 28px rgba(56, 189, 248, 0.12);
+}
+
+.iq-master-principles-panel--island::before,
+.iq-master-principles-panel--island::after {
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.iq-master-principles-panel--island .iq-master-principles-panel__header-band {
+  padding: 0.62rem 0.68rem 0.52rem;
+  background: linear-gradient(
+    180deg,
+    rgba(251, 191, 36, 0.24) 0%,
+    rgba(251, 191, 36, 0.06) 100%
+  );
+  box-shadow: inset 0 -8px 16px rgba(0, 0, 0, 0.18);
+}
+
+.iq-master-principles-panel--island .iq-master-principles-panel__medal {
+  font-size: 1rem;
+  margin-bottom: 0.22rem;
+}
+
+.iq-master-principles-panel--island .iq-master-principles-panel__title {
+  font-size: clamp(0.62rem, 1.45vw, 0.72rem);
+  letter-spacing: 0.12em;
+  color: rgba(254, 243, 199, 0.96);
+  text-shadow: 0 0 14px rgba(251, 191, 36, 0.22);
+}
+
+.iq-master-principles-panel--island .iq-master-principles-panel__subtitle {
+  font-size: 0.56rem;
+  color: rgba(251, 191, 36, 0.62);
+}
+
+.iq-master-principles-panel--island .iq-master-principles-panel__body {
+  padding: 0.42rem 0.48rem 0.38rem;
+  background: transparent;
+  box-shadow: none;
+}
+
+.iq-master-principles-panel--island .iq-master-principles-panel__list {
+  gap: 0.2rem;
+  max-height: min(28vh, 240px);
+}
+
+.iq-master-principles-panel--island .iq-master-principles-panel__item {
+  padding: 0.14rem 0.18rem;
+  gap: 0.42rem;
+}
+
+.iq-master-principles-panel--island .iq-master-principles-panel__label {
+  font-size: clamp(0.58rem, 1.3vw, 0.66rem);
+  line-height: 1.25;
+}
+
+.iq-master-principles-panel--island
+  .iq-master-principles-panel__item--pending
+  .iq-master-principles-panel__label {
+  color: rgba(148, 163, 184, 0.78);
+}
+
+.iq-master-principles-panel--island
+  .iq-master-principles-panel__item--mastered
+  .iq-master-principles-panel__label {
+  color: rgba(254, 243, 199, 0.92);
+}
+
+.iq-master-principles-panel--island .iq-master-principles-panel__footer {
+  padding: 0.38rem 0.48rem 0.42rem;
+  background: rgba(4, 10, 30, 0.35);
+}
+
+.iq-master-principles-panel--island .iq-master-principles-panel__progress {
+  font-size: clamp(0.58rem, 1.3vw, 0.66rem);
+  color: rgba(254, 243, 199, 0.88);
+}
+
+.iq-master-principles-panel--island .iq-master-principles-panel__progress-count {
+  color: #fcd34d;
+}
+
+/* Map-camera kiosk — ~38% smaller academy sign on the island shore */
+.iq-master-principles-panel--island-kiosk {
+  font-size: 0.62rem;
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__medal {
+  display: none;
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__header-band {
+  padding: 0.38rem 0.42rem 0.32rem;
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__title {
+  font-size: 0.54rem;
+  letter-spacing: 0.1em;
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__subtitle {
+  font-size: 0.46rem;
+  margin-top: 0.08rem;
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__body {
+  padding: 0.28rem 0.32rem 0.24rem;
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__list {
+  gap: 0.12rem;
+  max-height: min(22vh, 168px);
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__item {
+  padding: 0.08rem 0.1rem;
+  gap: 0.28rem;
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__label {
+  font-size: 0.48rem;
+  line-height: 1.2;
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__circle,
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__tick-wrap {
+  width: 0.72rem;
+  height: 0.72rem;
+  min-width: 0.72rem;
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__tick {
+  font-size: 0.48rem;
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__footer {
+  padding: 0.24rem 0.32rem 0.28rem;
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__progress {
+  font-size: 0.46rem;
+}
+
+.iq-master-principles-panel--island-kiosk .iq-master-principles-panel__progress-star {
+  font-size: 0.52rem;
+}
+
+/* Full ladder sheet — premium cream progression panel */
+.iq-master-principles-panel--ladder {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  color: #0f172a;
+}
+
+.iq-master-principles-panel--ladder::before,
+.iq-master-principles-panel--ladder::after {
+  display: none;
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__header-band {
+  padding: 0.85rem 1.15rem 0.72rem;
+  background: linear-gradient(
+    180deg,
+    #fcd34d 0%,
+    #fde68a 42%,
+    #fef3c7 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -8px 16px rgba(180, 83, 9, 0.08);
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__medal {
+  font-size: 1.45rem;
+  margin-bottom: 0.38rem;
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__title {
+  font-size: clamp(1rem, 2.4vw, 1.22rem);
+  letter-spacing: 0.08em;
+  color: #78350f;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__subtitle {
+  font-size: clamp(0.72rem, 1.6vw, 0.82rem);
+  margin-top: 0.2rem;
+  color: rgba(120, 53, 15, 0.78);
+  font-weight: 700;
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__body {
+  padding: 0.9rem 1.1rem 0.8rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  background: linear-gradient(
+    168deg,
+    rgba(255, 251, 235, 0.99) 0%,
+    rgba(254, 249, 232, 0.98) 100%
+  );
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__list {
+  gap: 0.62rem;
+  max-height: none;
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__item {
+  padding: 0.62rem 0.72rem;
+  gap: 0.72rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(251, 191, 36, 0.32);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 1px 2px rgba(120, 53, 15, 0.06);
+}
+
+.iq-master-principles-panel--ladder
+  .iq-master-principles-panel__item--mastered {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 251, 235, 1) 0%,
+    rgba(254, 243, 199, 0.92) 100%
+  );
+  border-color: rgba(217, 119, 6, 0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 0 14px rgba(251, 191, 36, 0.16);
+}
+
+.iq-master-principles-panel--ladder
+  .iq-master-principles-panel__item--current {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(254, 243, 199, 0.72) 100%
+  );
+  border-color: rgba(245, 158, 11, 0.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 0 0 1px rgba(251, 191, 36, 0.22),
+    0 0 18px rgba(251, 191, 36, 0.2);
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__label {
+  font-size: clamp(0.92rem, 2vw, 1.05rem);
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.iq-master-principles-panel--ladder
+  .iq-master-principles-panel__item--mastered
+  .iq-master-principles-panel__label {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.iq-master-principles-panel--ladder
+  .iq-master-principles-panel__item--current
+  .iq-master-principles-panel__label {
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.iq-master-principles-panel--ladder
+  .iq-master-principles-panel__item--pending:not(.iq-master-principles-panel__item--current)
+  .iq-master-principles-panel__label {
+  color: #475569;
+  font-weight: 600;
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__circle,
+.iq-master-principles-panel--ladder .iq-master-principles-panel__tick-wrap {
+  width: 1.65rem;
+  height: 1.65rem;
+  min-width: 1.65rem;
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__circle {
+  border-width: 2.5px;
+  border-color: rgba(217, 119, 6, 0.42);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+}
+
+.iq-master-principles-panel--ladder
+  .iq-master-principles-panel__item--current
+  .iq-master-principles-panel__circle {
+  border-color: rgba(245, 158, 11, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.85),
+    0 0 8px rgba(251, 191, 36, 0.28);
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__tick-wrap {
+  background: linear-gradient(145deg, #fcd34d 0%, #f59e0b 100%);
+  border: 2px solid rgba(254, 243, 199, 0.95);
+  box-shadow:
+    0 0 16px rgba(251, 191, 36, 0.62),
+    0 0 6px rgba(245, 158, 11, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__tick {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #451a03;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.45));
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__footer {
+  padding: 0.85rem 1.1rem max(1.05rem, env(safe-area-inset-bottom, 0px));
+  flex-shrink: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(254, 243, 199, 0.95) 0%,
+    rgba(253, 230, 138, 0.88) 100%
+  );
+  border-top: 1px solid rgba(202, 138, 4, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__progress {
+  font-size: clamp(0.84rem, 1.85vw, 0.94rem);
+  color: #78350f;
+  font-weight: 800;
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__progress-count {
+  color: #92400e;
+}
+
+.iq-master-principles-panel--ladder .iq-master-principles-panel__footer-hint {
+  font-size: clamp(0.68rem, 1.4vw, 0.76rem);
+  margin-top: 0.38rem;
+  color: rgba(120, 53, 15, 0.72);
+  font-weight: 600;
+}
+
+.iq-schools-hub-journey-card {
+  width: 100%;
+  min-width: 0;
+}
+
+.iq-schools-hub-journey-card .iq-schools-hub-mission-card {
+  width: 100% !important;
+}
+
+.iq-schools-hub-journey-card--current .iq-schools-hub-mission-card {
+  padding: 13px 14px 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 0 0 2px rgba(251, 191, 36, 0.52),
+    0 0 32px rgba(251, 191, 36, 0.38),
+    0 16px 36px rgba(2, 6, 23, 0.22);
+}
+
+.iq-schools-hub-journey-card--current .iq-schools-hub-mission-card__title {
+  font-size: clamp(0.82rem, 1.9vw, 0.94rem);
+}
+
+.iq-schools-hub-journey-card--previous .iq-schools-hub-mission-card {
+  padding: 8px 10px 9px;
+  opacity: 0.9;
+}
+
+.iq-schools-hub-journey-card--previous .iq-schools-hub-mission-card__desc,
+.iq-schools-hub-journey-card--previous .iq-schools-hub-mission-card__progress,
+.iq-schools-hub-journey-card--previous .iq-schools-hub-mission-card__cta {
+  display: none;
+}
+
+.iq-schools-hub-journey-card--previous .iq-schools-hub-mission-card__title {
+  font-size: clamp(0.68rem, 1.6vw, 0.76rem);
+  margin-bottom: 0;
+}
+
+.iq-schools-hub-journey-card--next .iq-schools-hub-mission-card {
+  padding: 10px 11px 11px;
+  opacity: 0.94;
+}
+
+.iq-schools-hub-journey-card--next .iq-schools-hub-mission-card__desc {
+  display: none;
+}
+
+.iq-master-principles-panel--journey {
+  max-height: 100%;
+}
+
+.iq-master-principles-panel--journey .iq-master-principles-panel__title {
+  font-size: clamp(0.82rem, 2vw, 0.98rem);
+  letter-spacing: 0.04em;
+}
+
+.iq-master-principles-panel--journey .iq-master-principles-panel__list {
+  gap: 0.28rem;
+}
+
+.iq-schools-business-hub-quest-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.55rem, 1.6vw, 0.75rem);
+  width: 100%;
+}
+
+.iq-schools-business-hub-quest-grid__finale {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: min(100%, 360px);
+  margin-inline: auto;
+}
+
+.iq-schools-business-hub-quest-grid .iq-schools-hub-mission-card {
+  width: 100% !important;
+}
+
+/* Direction B — vertical quest trail + compact principle strip */
+.iq-schools-business-hub-layout--trail .iq-schools-business-hub-layout__inner {
+  width: min(100%, 420px);
+  gap: clamp(0.85rem, 2.2vh, 1.15rem);
+  padding-top: calc(env(safe-area-inset-top, 0px) + clamp(68px, 9vh, 84px));
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(4.5rem, 12vh, 5.5rem));
+}
+
+.iq-investor-toolkit-strip {
+  width: 100%;
+  flex-shrink: 0;
+  border-radius: 18px;
+  border: 1.5px solid rgba(251, 191, 36, 0.55);
+  background: linear-gradient(
+    168deg,
+    rgba(255, 251, 235, 0.97) 0%,
+    rgba(254, 243, 199, 0.94) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 14px 36px rgba(2, 6, 23, 0.28),
+    0 0 28px rgba(251, 191, 36, 0.12);
+  padding: clamp(0.62rem, 1.8vw, 0.78rem) clamp(0.68rem, 2vw, 0.85rem)
+    clamp(0.58rem, 1.6vw, 0.72rem);
+}
+
+.iq-investor-toolkit-strip__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 0.52rem;
+}
+
+.iq-investor-toolkit-strip__title {
+  margin: 0;
+  font-size: clamp(0.68rem, 2vw, 0.78rem);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #92400e;
+  line-height: 1.2;
+}
+
+.iq-investor-toolkit-strip__count {
+  margin: 0;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.12rem;
+  padding: 0.22rem 0.52rem;
+  border-radius: 999px;
+  border: 1px solid rgba(202, 138, 4, 0.42);
+  background: rgba(255, 255, 255, 0.72);
+  font-size: clamp(0.72rem, 2vw, 0.82rem);
+  font-weight: 800;
+  color: #b45309;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.iq-investor-toolkit-strip__count-value {
+  color: #92400e;
+}
+
+.iq-investor-toolkit-strip__count-sep {
+  opacity: 0.55;
+  font-weight: 700;
+}
+
+.iq-investor-toolkit-strip__scroll-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  margin-inline: -0.15rem;
+  padding-inline: 0.15rem;
+  scrollbar-width: none;
+}
+
+.iq-investor-toolkit-strip__scroll-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+.iq-investor-toolkit-strip__chips {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0.42rem;
+  margin: 0;
+  padding: 0.08rem 0 0.12rem;
+  list-style: none;
+  min-width: min-content;
+}
+
+.iq-investor-toolkit-strip__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  flex-shrink: 0;
+  padding: 0.34rem 0.52rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(148, 163, 184, 0.45);
+  background: rgba(255, 255, 255, 0.78);
+  color: #64748b;
+  font-size: clamp(0.64rem, 1.85vw, 0.74rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.iq-investor-toolkit-strip__chip--mastered {
+  border-color: rgba(217, 119, 6, 0.62);
+  background: linear-gradient(168deg, #fffbeb 0%, #fde68a 100%);
+  color: #92400e;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 0 14px rgba(251, 191, 36, 0.22);
+}
+
+.iq-investor-toolkit-strip__chip--spotlight {
+  border-color: rgba(245, 197, 71, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 0 0 2px rgba(251, 191, 36, 0.28),
+    0 0 18px rgba(251, 191, 36, 0.35);
+}
+
+.iq-investor-toolkit-strip__chip--celebrate {
+  animation: iq-investor-toolkit-chip-pop 0.85s ease-out 1;
+}
+
+@keyframes iq-investor-toolkit-chip-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.08);
+  }
+}
+
+.iq-investor-toolkit-strip__chip-icon {
+  display: grid;
+  place-items: center;
+  width: 0.95rem;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  color: inherit;
+}
+
+.iq-investor-toolkit-strip__chip--mastered .iq-investor-toolkit-strip__chip-icon {
+  color: #d97706;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.55);
+}
+
+.iq-investor-toolkit-strip__chip-label {
+  line-height: 1.1;
+}
+
+.iq-schools-business-hub-quest-trail {
+  --iq-schools-hub-trail-gap: clamp(0.62rem, 1.7vh, 0.82rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--iq-schools-hub-trail-gap);
+  width: 100%;
+}
+
+.iq-schools-business-hub-quest-trail__step {
+  position: relative;
+  width: 100%;
+  max-width: min(100%, 380px);
+}
+
+.iq-schools-business-hub-quest-trail__step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 2px;
+  height: var(--iq-schools-hub-trail-gap);
+  transform: translateX(-50%);
+  background: linear-gradient(
+    180deg,
+    rgba(251, 191, 36, 0.72),
+    rgba(56, 189, 248, 0.35)
+  );
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.iq-schools-business-hub-quest-trail .iq-schools-hub-mission-card {
+  width: 100% !important;
+}
+
+.iq-schools-business-hub-quest-trail
+  .iq-schools-hub-mission-card--primary {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 0 0 2px rgba(251, 191, 36, 0.45),
+    0 0 28px rgba(251, 191, 36, 0.38),
+    0 16px 36px rgba(2, 6, 23, 0.22);
+}
+
+/* Direction C — principles spine + branching quest path */
+.iq-schools-business-hub-layout--spine .iq-schools-business-hub-layout__inner {
+  width: min(100%, 760px);
+  gap: 0;
+  padding-top: calc(env(safe-area-inset-top, 0px) + clamp(64px, 8.5vh, 80px));
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(4.5rem, 12vh, 5.5rem));
+}
+
+.iq-schools-business-hub-spine-path {
+  width: 100%;
+}
+
+.iq-schools-business-hub-spine-path__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: clamp(0.65rem, 1.8vh, 0.85rem);
+  padding-inline: clamp(0.15rem, 1vw, 0.35rem);
+}
+
+.iq-schools-business-hub-spine-path__title {
+  margin: 0;
+  font-size: clamp(0.68rem, 2vw, 0.8rem);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 248, 225, 0.94);
+  text-shadow: 0 0 18px rgba(251, 191, 36, 0.28);
+  line-height: 1.2;
+}
+
+.iq-schools-business-hub-spine-path__count {
+  margin: 0;
+  flex-shrink: 0;
+  padding: 0.24rem 0.58rem;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.48);
+  background: rgba(8, 7, 18, 0.72);
+  font-size: clamp(0.72rem, 2vw, 0.82rem);
+  font-weight: 800;
+  color: #fcd34d;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 16px rgba(251, 191, 36, 0.18);
+}
+
+.iq-schools-business-hub-spine-path__track {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.55rem, 1.5vh, 0.75rem);
+}
+
+.iq-schools-business-hub-spine-path__track::before {
+  content: "";
+  position: absolute;
+  top: 0.75rem;
+  bottom: clamp(4.5rem, 10vh, 5.5rem);
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    rgba(251, 191, 36, 0.15),
+    rgba(251, 191, 36, 0.72) 18%,
+    rgba(56, 189, 248, 0.55) 82%,
+    rgba(56, 189, 248, 0.2)
+  );
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.28);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.iq-schools-business-hub-spine-path__row {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(148px, 34%) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(0.35rem, 1.2vw, 0.65rem);
+}
+
+.iq-schools-business-hub-spine-path__branch {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.iq-schools-business-hub-spine-path__branch--left {
+  justify-content: flex-end;
+  padding-right: clamp(0.15rem, 0.8vw, 0.35rem);
+}
+
+.iq-schools-business-hub-spine-path__branch--right {
+  justify-content: flex-start;
+  padding-left: clamp(0.15rem, 0.8vw, 0.35rem);
+}
+
+.iq-schools-business-hub-spine-path__row--branch-left
+  .iq-schools-business-hub-spine-path__branch--left:not(:empty)::before,
+.iq-schools-business-hub-spine-path__row--branch-right
+  .iq-schools-business-hub-spine-path__branch--right:not(:empty)::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: clamp(0.45rem, 1.8vw, 0.85rem);
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(251, 191, 36, 0.82),
+    rgba(56, 189, 248, 0.45)
+  );
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-spine-path__row--branch-left
+  .iq-schools-business-hub-spine-path__branch--left:not(:empty)::before {
+  right: -0.05rem;
+}
+
+.iq-schools-business-hub-spine-path__row--branch-right
+  .iq-schools-business-hub-spine-path__branch--right:not(:empty)::before {
+  left: -0.05rem;
+}
+
+.iq-schools-business-hub-spine-path__branch .iq-schools-hub-mission-card {
+  width: 100% !important;
+  max-width: min(100%, 220px);
+}
+
+.iq-schools-business-hub-spine-path__branch
+  .iq-schools-hub-mission-card--primary {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 0 0 2px rgba(251, 191, 36, 0.45),
+    0 0 28px rgba(251, 191, 36, 0.38),
+    0 16px 36px rgba(2, 6, 23, 0.22);
+}
+
+.iq-principles-spine-node {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  min-width: 0;
+  padding: 0.42rem 0.52rem;
+  border-radius: 14px;
+  border: 1.5px solid rgba(148, 163, 184, 0.42);
+  background: rgba(255, 251, 235, 0.94);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 10px 24px rgba(2, 6, 23, 0.22);
+}
+
+.iq-principles-spine-node--mastered {
+  border-color: rgba(217, 119, 6, 0.62);
+  background: linear-gradient(168deg, #fffbeb 0%, #fde68a 100%);
+}
+
+.iq-principles-spine-node--spotlight {
+  border-color: rgba(245, 197, 71, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 0 0 2px rgba(251, 191, 36, 0.28),
+    0 0 18px rgba(251, 191, 36, 0.35);
+}
+
+.iq-principles-spine-node--celebrate {
+  animation: iq-investor-toolkit-chip-pop 0.85s ease-out 1;
+}
+
+.iq-principles-spine-node__marker {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.iq-principles-spine-node__circle {
+  width: 0.72rem;
+  height: 0.72rem;
+  border-radius: 999px;
+  border: 2px solid rgba(148, 163, 184, 0.55);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.iq-principles-spine-node__tick {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #d97706;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.55);
+}
+
+.iq-principles-spine-node__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.iq-principles-spine-node__step {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #b45309;
+  opacity: 0.82;
+}
+
+.iq-principles-spine-node__label {
+  font-size: clamp(0.64rem, 1.85vw, 0.76rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: #0f172a;
+}
+
+.iq-principles-spine-node--pending .iq-principles-spine-node__label {
+  color: #64748b;
+}
+
+.iq-schools-business-hub-spine-path__row--finale-quest {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.15rem;
+}
+
+.iq-schools-business-hub-spine-path__finale-quest {
+  width: 100%;
+  max-width: min(100%, 260px);
+}
+
+.iq-schools-business-hub-spine-path__finale-quest .iq-schools-hub-mission-card {
+  width: 100% !important;
+}
+
+.iq-master-principles-panel-slot {
+  position: absolute;
+  top: var(--iq-schools-hub-row1, calc(env(safe-area-inset-top, 0px) + 96px));
+  left: clamp(8px, 1vw, 14px);
+  bottom: clamp(88px, 12vh, 132px);
+  width: var(--iq-schools-hub-principles-width, clamp(196px, 15.5vw, 272px));
+  max-width: min(272px, 38vw);
+  display: flex;
+  align-items: stretch;
+}
+
+.iq-master-principles-panel-slot--schools {
+  position: relative;
+  top: auto;
+  left: auto;
+  bottom: auto;
+  width: 100%;
+  max-width: min(100%, 440px);
+  margin-inline: auto;
+  flex-shrink: 0;
+}
+
+.iq-master-principles-panel-slot > .iq-master-principles-panel {
+  pointer-events: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.iq-master-principles-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 2px solid rgba(251, 191, 36, 0.62);
+  padding: 0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -16px 28px rgba(146, 64, 14, 0.07),
+    0 20px 48px rgba(2, 6, 23, 0.32),
+    0 0 40px rgba(251, 191, 36, 0.14);
+}
+
+.iq-master-principles-panel--schools::before,
+.iq-master-principles-panel--schools::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(217, 119, 6, 0.55);
+  pointer-events: none;
+}
+
+.iq-master-principles-panel--schools::before {
+  top: 10px;
+  left: 10px;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 4px 0 0 0;
+}
+
+.iq-master-principles-panel--schools::after {
+  top: 10px;
+  right: 10px;
+  border-left: none;
+  border-bottom: none;
+  border-radius: 0 4px 0 0;
+}
+
+.iq-master-principles-panel--schools {
+  background: #fffbeb;
+  color: #0f172a;
+}
+
+.iq-master-principles-panel--schools.iq-master-principles-panel--island {
+  background: linear-gradient(
+    168deg,
+    rgba(8, 20, 56, 0.94) 0%,
+    rgba(10, 26, 68, 0.9) 100%
+  );
+  color: rgba(254, 243, 199, 0.92);
+}
+
+.iq-master-principles-panel--dark {
+  background: rgba(8, 7, 18, 0.94);
+  color: rgba(255, 248, 225, 0.96);
+  border-color: rgba(245, 197, 71, 0.48);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -16px 28px rgba(0, 0, 0, 0.28),
+    0 18px 44px rgba(0, 0, 0, 0.45),
+    0 0 32px rgba(245, 197, 71, 0.1);
+}
+
+.iq-master-principles-panel__header-band {
+  position: relative;
+  z-index: 1;
+  padding: 1rem 1rem 0.78rem;
+  text-align: center;
+  background: linear-gradient(
+    180deg,
+    #fcd34d 0%,
+    #fde68a 38%,
+    #fef3c7 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -10px 20px rgba(180, 83, 9, 0.1);
+}
+
+.iq-master-principles-panel__medal {
+  display: block;
+  font-size: 1.35rem;
+  line-height: 1;
+  margin-bottom: 0.35rem;
+  filter: drop-shadow(0 2px 6px rgba(180, 83, 9, 0.35));
+}
+
+.iq-master-principles-panel__subtitle {
+  margin: 0.28rem 0 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(120, 53, 15, 0.72);
+}
+
+.iq-master-principles-panel--dark .iq-master-principles-panel__header-band {
+  background: linear-gradient(
+    180deg,
+    rgba(42, 32, 12, 0.98) 0%,
+    rgba(28, 22, 10, 0.96) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.22);
+}
+
+.iq-master-principles-panel--dark .iq-master-principles-panel__subtitle {
+  color: rgba(251, 191, 36, 0.58);
+}
+
+.iq-master-principles-panel__title {
+  margin: 0;
+  font-family: var(--font-grotesk);
+  font-size: clamp(0.95rem, 2.5vw, 1.08rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #78350f;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.iq-master-principles-panel--dark .iq-master-principles-panel__title {
+  color: rgba(255, 236, 179, 0.98);
+  text-shadow: 0 0 18px rgba(245, 197, 71, 0.18);
+}
+
+.iq-master-principles-panel__title-divider {
+  height: 2px;
+  margin-top: 0.55rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(245, 197, 71, 0.35) 8%,
+    rgba(217, 119, 6, 0.82) 50%,
+    rgba(245, 197, 71, 0.35) 92%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
+}
+
+.iq-master-principles-panel--dark .iq-master-principles-panel__title-divider {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(245, 197, 71, 0.28) 12%,
+    rgba(252, 211, 77, 0.72) 50%,
+    rgba(245, 197, 71, 0.28) 88%,
+    transparent
+  );
+}
+
+.iq-master-principles-panel__body {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0.62rem 0.72rem 0.55rem;
+  background: linear-gradient(
+    168deg,
+    rgba(255, 251, 235, 0.98) 0%,
+    rgba(254, 249, 232, 0.96) 100%
+  );
+  box-shadow: inset 0 10px 18px rgba(180, 83, 9, 0.04);
+}
+
+.iq-master-principles-panel--dark .iq-master-principles-panel__body {
+  background: linear-gradient(
+    168deg,
+    rgba(12, 10, 22, 0.92) 0%,
+    rgba(8, 7, 18, 0.88) 100%
+  );
+  box-shadow: inset 0 10px 18px rgba(0, 0, 0, 0.18);
+}
+
+.iq-master-principles-panel__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.iq-master-principles-panel__item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.22rem 0.28rem;
+  border-radius: 12px;
+  transition:
+    background 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.iq-master-principles-panel__item--pending .iq-master-principles-panel__label {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.iq-master-principles-panel--dark
+  .iq-master-principles-panel__item--pending
+  .iq-master-principles-panel__label {
+  color: rgba(148, 163, 184, 0.72);
+}
+
+.iq-master-principles-panel__item--mastered .iq-master-principles-panel__label {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.iq-master-principles-panel--dark
+  .iq-master-principles-panel__item--mastered
+  .iq-master-principles-panel__label {
+  color: rgba(255, 248, 225, 0.96);
+}
+
+.iq-master-principles-panel__item--spotlight {
+  padding: 0.38rem 0.55rem;
+  background: linear-gradient(
+    135deg,
+    rgba(254, 243, 199, 0.98) 0%,
+    rgba(253, 224, 71, 0.38) 100%
+  );
+  border: 1px solid rgba(251, 191, 36, 0.48);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 0 16px rgba(251, 191, 36, 0.18);
+}
+
+.iq-master-principles-panel--dark .iq-master-principles-panel__item--spotlight {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 197, 71, 0.16) 0%,
+    rgba(245, 197, 71, 0.06) 100%
+  );
+  border-color: rgba(245, 197, 71, 0.38);
+}
+
+.iq-master-principles-panel__item--celebrate {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 0 22px rgba(251, 191, 36, 0.32);
+}
+
+.iq-master-principles-panel__circle {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  border: 2px solid rgba(148, 163, 184, 0.55);
+  background: rgba(241, 245, 249, 0.65);
+  box-shadow: inset 0 1px 2px rgba(148, 163, 184, 0.12);
+}
+
+.iq-master-principles-panel--dark .iq-master-principles-panel__circle {
+  border-color: rgba(100, 116, 139, 0.5);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.iq-master-principles-panel__tick-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  display: grid;
+  place-items: center;
+}
+
+.iq-master-principles-panel__tick {
+  position: relative;
+  z-index: 1;
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #f5c547;
+  text-shadow:
+    0 0 14px rgba(245, 197, 71, 0.72),
+    0 1px 0 rgba(180, 83, 9, 0.35);
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.55));
+}
+
+.iq-master-principles-panel--dark .iq-master-principles-panel__tick {
+  color: #fcd34d;
+  text-shadow:
+    0 0 16px rgba(252, 211, 77, 0.65),
+    0 0 8px rgba(245, 197, 71, 0.45);
+}
+
+.iq-master-principles-panel__tick--celebrate {
+  animation: iq-master-principles-tick-pulse 1.8s ease-in-out 1;
+}
+
+@keyframes iq-master-principles-tick-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.55));
+    transform: scale(1);
+  }
+  45% {
+    filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.95));
+    transform: scale(1.12);
+  }
+}
+
+.iq-master-principles-panel__tick-glow {
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(245, 197, 71, 0.55), transparent 70%);
+}
+
+.iq-master-principles-panel__label {
+  font-size: clamp(0.72rem, 1.9vw, 0.82rem);
+  line-height: 1.25;
+}
+
+.iq-master-principles-panel__footer {
+  position: relative;
+  z-index: 1;
+  padding: 0.68rem 0.82rem 0.78rem;
+  text-align: center;
+  background: linear-gradient(
+    180deg,
+    rgba(254, 243, 199, 0.72) 0%,
+    rgba(253, 230, 138, 0.55) 100%
+  );
+  border-top: 1px solid rgba(202, 138, 4, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.iq-master-principles-panel--dark .iq-master-principles-panel__footer {
+  background: linear-gradient(
+    180deg,
+    rgba(24, 18, 8, 0.92) 0%,
+    rgba(12, 10, 22, 0.96) 100%
+  );
+  border-top-color: rgba(245, 197, 71, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.iq-master-principles-panel__progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: clamp(0.7rem, 1.85vw, 0.78rem);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  color: #78350f;
+}
+
+.iq-master-principles-panel--dark .iq-master-principles-panel__progress {
+  color: rgba(252, 211, 77, 0.92);
+}
+
+.iq-master-principles-panel__progress-star {
+  font-size: 0.92em;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.45));
+}
+
+.iq-master-principles-panel__progress-count {
+  font-family: var(--font-grotesk);
+  font-weight: 800;
+  color: #92400e;
+}
+
+.iq-master-principles-panel--dark .iq-master-principles-panel__progress-count {
+  color: rgba(255, 236, 179, 0.98);
+}
+
+.iq-master-principles-panel__footer-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  color: rgba(120, 53, 15, 0.68);
+}
+
+.iq-master-principles-panel--dark .iq-master-principles-panel__footer-hint {
+  color: rgba(226, 232, 240, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-master-principles-panel__tick--celebrate {
+    animation: none;
+  }
+}
+
+.iq-schools-quiz-lock-cta--ready:not(:disabled) {
+  animation: iq-schools-nav-ready-pulse 2.2s ease-in-out infinite;
+}
+
+/* Schools quest complete — readable navy/grey on cream */
+.iq-schools-quest-complete {
+  color: #0f172a;
+}
+
+.iq-schools-quest-complete .text-ink-0,
+.iq-schools-quest-complete .text-ink-1,
+.iq-schools-quest-complete .text-ink-2 {
+  color: #475569;
+}
+
+.iq-schools-quest-complete__achievement {
+  color: #0f172a;
+}
+
+.iq-schools-quest-complete__principle-hero {
+  color: #0f172a;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.55);
+}
+
+.iq-schools-quest-complete__principle-body strong {
+  color: #92400e;
+  font-weight: 700;
+}
+
+.iq-schools-quest-complete__insight {
+  color: #0f172a;
+}
+
+.iq-schools-quest-complete__insight-blank {
+  min-height: 1.1em;
+  border-bottom: 1.5px dashed rgba(202, 138, 4, 0.45);
+}
+
+.iq-schools-business-quest .iq-mission-answer-content {
+  color: #475569;
+}
+
+.iq-schools-business-quest .iq-mission-answer-content .text-ink-0,
+.iq-schools-business-quest .iq-mission-answer-content .text-ink-1,
+.iq-schools-business-quest .iq-mission-answer-content .text-ink-2 {
+  color: #475569;
+}
+
+@media (min-width: 768px) {
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot {
+    width: clamp(210px, 13.5vw, 300px) !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-7 {
+    width: clamp(228px, 14.5vw, 320px) !important;
+  }
+
+  /*
+   * Schools desktop orbit — left: 1,5,6 | right: 2,3,4 | bottom: 7
+   * Left column inset clears the Master Principles panel.
+   */
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-1 {
+    top: var(--iq-schools-hub-row1) !important;
+    left: var(--iq-schools-hub-left-inset) !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-2 {
+    top: var(--iq-schools-hub-row1-right) !important;
+    right: var(--iq-schools-hub-edge) !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-3 {
+    top: var(--iq-schools-hub-row2) !important;
+    right: var(--iq-schools-hub-edge) !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-4 {
+    top: var(--iq-schools-hub-row3) !important;
+    right: var(--iq-schools-hub-edge) !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-5 {
+    top: var(--iq-schools-hub-row2) !important;
+    left: var(--iq-schools-hub-left-inset) !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-6 {
+    top: var(--iq-schools-hub-row3) !important;
+    left: var(--iq-schools-hub-left-inset) !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-7 {
+    top: auto !important;
+    bottom: clamp(10px, 1.8vh, 20px) !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    z-index: 24 !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-master-principles-panel-slot:not(.iq-master-principles-panel-slot--schools) {
+    top: var(--iq-schools-hub-row1);
+    bottom: clamp(96px, 13vh, 140px);
+  }
+}
+
+/* Schools grid hub — panel sits in document flow (not orbit left slot). */
+.iq-schools-business-hub-scene-shell .iq-master-principles-panel-slot--schools {
+  position: relative;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100%;
+  max-width: min(100%, 440px);
+  margin-inline: auto;
+}
+
+@media (max-width: 767px) {
+  .iq-schools-business-hub-scene-shell {
+    --iq-schools-hub-card-h: 118px;
+    --iq-schools-hub-card-gap: 40px;
+    --iq-schools-hub-edge: clamp(6px, 2vw, 12px);
+    --iq-schools-hub-principles-width: clamp(148px, 39vw, 172px);
+    --iq-schools-hub-principles-gap: clamp(8px, 2vw, 12px);
+    --iq-schools-hub-left-inset: calc(
+      var(--iq-schools-hub-principles-width) + var(--iq-schools-hub-principles-gap) +
+        clamp(4px, 1.5vw, 8px)
+    );
+    --iq-schools-hub-row1: calc(
+      env(safe-area-inset-top, 0px) + clamp(88px, 12vh, 104px)
+    );
+    --iq-schools-hub-row1-right: calc(var(--iq-schools-hub-row1) + 16px);
+  }
+
+  .iq-master-principles-panel-slot:not(.iq-master-principles-panel-slot--schools) {
+    width: var(--iq-schools-hub-principles-width);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(72px, 10vh, 96px));
+  }
+
+  .iq-schools-business-hub-journey {
+    display: none;
+  }
+
+  .iq-schools-business-hub-scene-shell--island-focus .iq-schools-business-hub-scene__island {
+    left: 50%;
+    width: min(94%, 560px);
+    height: min(62%, 520px);
+    bottom: clamp(88px, 12vh, 120px);
+  }
+
+  .iq-schools-business-hub-scene-shell--hub-preview .iq-schools-business-hub-scene__island {
+    width: min(72%, 420px);
+    height: min(48%, 360px);
+    bottom: clamp(18%, 22vh, 28%);
+  }
+
+  .iq-schools-business-hub-scene-shell--hub-preview .iq-schools-business-hub-scene__island-glow {
+    width: min(76%, 440px);
+    height: min(44%, 340px);
+    bottom: clamp(18%, 22vh, 28%);
+  }
+
+  .iq-schools-business-hub-scene-shell--hub-revealed .iq-schools-business-hub-scene__island {
+    width: min(94%, 560px);
+    height: min(62%, 520px);
+    bottom: clamp(88px, 12vh, 120px);
+  }
+
+  .iq-schools-business-hub-scene-shell--hub-revealed .iq-schools-business-hub-scene__island-glow {
+    width: min(98%, 580px);
+    height: min(54%, 460px);
+    bottom: clamp(88px, 12vh, 120px);
+  }
+
+  .iq-schools-business-hub-island__entry {
+    top: calc(env(safe-area-inset-top, 0px) + clamp(56px, 8vh, 68px));
+    width: min(200px, 52vw);
+  }
+
+  .iq-schools-business-hub-scene-shell--island-focus .iq-schools-business-hub-scene__island-glow {
+    left: 50%;
+    width: min(98%, 580px);
+    height: min(54%, 460px);
+    bottom: clamp(88px, 12vh, 120px);
+  }
+
+  .iq-schools-business-hub-island__principles-wrap {
+    left: clamp(6px, 2vw, 10px);
+    bottom: clamp(8px, 1.8vh, 14px);
+    transform: scale(0.68);
+    transform-origin: bottom left;
+  }
+
+  .iq-schools-business-hub-island__principles {
+    width: min(188px, 46vw);
+  }
+
+  .iq-schools-business-hub-island__quest--marker {
+    left: 50%;
+    top: auto;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(88px, 12vh, 108px));
+    transform: translateX(-50%);
+    width: min(92%, 300px);
+  }
+
+  .iq-schools-business-hub-island__quest {
+    right: clamp(8px, 2vw, 12px);
+    top: auto;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(10px, 2vh, 16px));
+    transform: none;
+    width: min(92%, 300px);
+  }
+
+  .iq-schools-business-hub-island__quest-tether {
+    display: none;
+  }
+
+  .iq-schools-business-hub-island__path-glow {
+    left: 4%;
+    bottom: 14%;
+    width: 72%;
+    height: 32%;
+  }
+
+  .iq-schools-business-hub-layout--zones {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(34vh, 1fr) auto;
+    grid-template-areas:
+      "ladder"
+      "center"
+      "quests";
+    gap: clamp(0.55rem, 1.6vh, 0.75rem);
+    padding-top: calc(env(safe-area-inset-top, 0px) + clamp(72px, 9.5vh, 88px));
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(10px, 2vh, 16px));
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .iq-schools-business-hub-zone--ladder {
+    grid-area: ladder;
+    max-height: min(42vh, 360px);
+    padding-left: 0;
+  }
+
+  .iq-schools-business-hub-zone--center {
+    grid-area: center;
+    min-height: clamp(200px, 34vh, 280px);
+  }
+
+  .iq-schools-business-hub-zone--quests {
+    grid-area: quests;
+    padding-right: 0;
+    max-height: none;
+  }
+
+  .iq-schools-business-hub-quest-rail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.48rem;
+    overflow: visible;
+    padding-bottom: 0.35rem;
+  }
+
+  .iq-schools-business-hub-scene-shell--zones .iq-schools-business-hub-scene__island {
+    width: min(88%, 520px);
+    height: min(62%, 420px);
+    bottom: clamp(108px, 14vh, 152px);
+  }
+
+  .iq-schools-business-hub-scene-shell--zones .iq-schools-business-hub-scene__island-glow {
+    width: min(92%, 540px);
+    height: min(54%, 380px);
+    bottom: clamp(108px, 14vh, 152px);
+  }
+
+  .iq-schools-business-hub-scene-shell--command .iq-schools-business-hub-scene__island,
+  .iq-schools-business-hub-scene-shell--journey .iq-schools-business-hub-scene__island {
+    width: min(94%, 560px);
+    height: min(58%, 440px);
+    bottom: clamp(108px, 14vh, 152px);
+  }
+
+  .iq-schools-business-hub-scene-shell--command .iq-schools-business-hub-scene__island-glow,
+  .iq-schools-business-hub-scene-shell--journey .iq-schools-business-hub-scene__island-glow {
+    width: min(96%, 580px);
+    height: min(50%, 380px);
+    bottom: clamp(108px, 14vh, 152px);
+  }
+
+  .iq-principles-seal-arc {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(6px, 1.5vh, 10px));
+    width: min(94%, 420px);
+    min-width: 0;
+  }
+
+  .iq-schools-business-hub-scene-shell--command .iq-schools-hub-mission-slot {
+    width: clamp(8.75rem, 36vw, 11.5rem) !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-1 {
+    top: var(--iq-schools-hub-row1) !important;
+    left: var(--iq-schools-hub-edge) !important;
+    right: auto !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-2 {
+    top: var(--iq-schools-hub-row1-right) !important;
+    right: var(--iq-schools-hub-edge) !important;
+    left: auto !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-5 {
+    top: var(--iq-schools-hub-row2) !important;
+    left: var(--iq-schools-hub-edge) !important;
+    right: auto !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-6 {
+    top: var(--iq-schools-hub-row3) !important;
+    left: var(--iq-schools-hub-edge) !important;
+    right: auto !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-3 {
+    top: var(--iq-schools-hub-row2) !important;
+    right: var(--iq-schools-hub-edge) !important;
+    left: auto !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-4 {
+    top: var(--iq-schools-hub-row3) !important;
+    right: var(--iq-schools-hub-edge) !important;
+    left: auto !important;
+  }
+
+  .iq-schools-business-hub-scene-shell--command
+    .iq-schools-hub-mission-slot.business-hub-orbit-slot-7 {
+    bottom: clamp(88px, 12vh, 112px) !important;
+  }
+
+  .iq-schools-business-hub-quest-grid {
+    grid-template-columns: 1fr;
+    max-width: min(100%, 360px);
+    margin-inline: auto;
+  }
+
+  .iq-schools-business-hub-quest-grid__finale {
+    max-width: 100%;
+  }
+
+  .iq-master-principles-panel-slot--schools {
+    width: 100%;
+    max-width: min(100%, 440px);
+    bottom: auto;
+  }
+
+  .iq-schools-business-hub-layout__inner {
+    padding-top: calc(env(safe-area-inset-top, 0px) + clamp(68px, 9vh, 84px));
+  }
+
+  .iq-master-principles-panel__header-band {
+    padding: 0.72rem 0.78rem 0.62rem;
+  }
+
+  .iq-master-principles-panel__body {
+    padding: 0.5rem 0.58rem 0.45rem;
+  }
+
+  .iq-master-principles-panel__list {
+    gap: 0.28rem;
+  }
+
+  .iq-master-principles-panel__header-band {
+    padding: 0.72rem 0.78rem 0.62rem;
+  }
+
+  .iq-master-principles-panel__body {
+    padding: 0.5rem 0.58rem 0.45rem;
+  }
+
+  .iq-master-principles-panel__list {
+    gap: 0.28rem;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot {
+    width: clamp(8.75rem, 36vw, 11.5rem) !important;
+    max-width: 42vw;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-7 {
+    width: clamp(9.25rem, 38vw, 12rem) !important;
+    max-width: 44vw;
+  }
+
+  /* Portrait — same left/right columns as desktop, not stacked on one side */
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-1 {
+    top: var(--iq-schools-hub-row1) !important;
+    left: var(--iq-schools-hub-left-inset) !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-2 {
+    top: var(--iq-schools-hub-row1-right) !important;
+    right: var(--iq-schools-hub-edge) !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-3 {
+    top: var(--iq-schools-hub-row2) !important;
+    right: var(--iq-schools-hub-edge) !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-4 {
+    top: var(--iq-schools-hub-row3) !important;
+    right: var(--iq-schools-hub-edge) !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-5 {
+    top: var(--iq-schools-hub-row2) !important;
+    left: var(--iq-schools-hub-left-inset) !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-6 {
+    top: var(--iq-schools-hub-row3) !important;
+    left: var(--iq-schools-hub-left-inset) !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
+  .iq-schools-business-hub-scene-shell .iq-schools-hub-mission-slot.business-hub-orbit-slot-7 {
+    top: auto !important;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(8px, 1.5vh, 14px)) !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    z-index: 24 !important;
+  }
+
+  .iq-schools-hub-mission-card {
+    padding: 10px 11px 12px;
+    border-radius: 16px;
+  }
+
+  .iq-schools-hub-mission-card__title {
+    font-size: 0.82rem;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .iq-schools-hub-mission-card__desc {
+    font-size: 0.68rem;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .iq-schools-hub-mission-card__cta {
+    padding: 7px 10px;
+    font-size: 0.62rem;
+  }
+
+  .iq-schools-hub-mission-card--primary .iq-schools-hub-mission-card__cta {
+    padding: 8px 12px;
+    font-size: 0.66rem;
+  }
+}
+
 @media (min-width: 768px) {
   .business-hub-page-stage,
   .iq-schools-business-hub-stage {
@@ -385,6 +4084,24 @@ h3 {
   .business-hub-orbit-slot-2 {
     right: 24% !important;
     left: auto !important;
+  }
+
+  .business-hub-scene-shell:not(.iq-schools-business-hub-scene-shell) {
+    --iq-hub-principles-width: clamp(196px, 15.5vw, 272px);
+    --iq-hub-left-inset: calc(var(--iq-hub-principles-width) + clamp(18px, 2vw, 28px));
+  }
+
+  .business-hub-scene-shell:not(.iq-schools-business-hub-scene-shell)
+    .business-hub-orbit-slot-1,
+  .business-hub-scene-shell:not(.iq-schools-business-hub-scene-shell)
+    .business-hub-orbit-slot-5,
+  .business-hub-scene-shell:not(.iq-schools-business-hub-scene-shell)
+    .business-hub-orbit-slot-6 {
+    left: var(--iq-hub-left-inset) !important;
+  }
+
+  .iq-master-principles-panel-slot--dark {
+    width: var(--iq-hub-principles-width);
   }
 
   .business-hub-cards-layer {
@@ -2190,6 +5907,32 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   }
 }
 
+.iq-schools-nav-menu-shell--map {
+  left: 0;
+  z-index: 250;
+}
+
+.iq-schools-nav-menu-shell--revealed {
+  animation: iq-schools-nav-menu-reveal 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes iq-schools-nav-menu-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-schools-nav-menu-shell--revealed {
+    animation: none;
+  }
+}
+
 .iq-schools-pick-company-select {
   background-image:
     linear-gradient(45deg, transparent 50%, rgba(245, 197, 71, 0.75) 50%),
@@ -2539,6 +6282,34 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   z-index: 25;
 }
 
+/* Post–mission-brief tap target — pulsing ring over Business Island landmass */
+.iq-schools-map-island-prompt {
+  box-shadow:
+    inset 0 0 0 2px rgba(245, 158, 11, 0.72),
+    0 0 22px rgba(245, 158, 11, 0.42);
+  animation: schools-map-island-prompt-pulse 2.4s ease-in-out infinite;
+}
+
+.iq-schools-map-island-prompt-hit {
+  cursor: pointer;
+}
+
+@keyframes schools-map-island-prompt-pulse {
+  0%,
+  100% {
+    opacity: 0.82;
+    box-shadow:
+      inset 0 0 0 2px rgba(245, 158, 11, 0.68),
+      0 0 18px rgba(245, 158, 11, 0.38);
+  }
+  50% {
+    opacity: 1;
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 237, 160, 0.92),
+      0 0 32px rgba(245, 158, 11, 0.58);
+  }
+}
+
 .iq-schools-map-box-landed {
   animation: schools-map-box-landed-pulse 2.8s ease-in-out infinite;
   z-index: 25;
@@ -2615,14 +6386,20 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   100% {
     transform: scale(1);
     box-shadow:
-      inset 0 0 0 2px rgba(251, 191, 36, 0.85),
-      0 0 16px rgba(245, 158, 11, 0.45);
+      inset 0 0 0 2px rgba(251, 191, 36, 0.88),
+      0 0 0 1px rgba(245, 158, 11, 0.55),
+      0 0 22px rgba(245, 158, 11, 0.52),
+      0 0 44px rgba(245, 158, 11, 0.28);
   }
   50% {
-    transform: scale(1.035);
+    transform: scale(1.04);
     box-shadow:
-      inset 0 0 0 2px rgba(255, 237, 160, 0.95),
-      0 0 24px rgba(245, 158, 11, 0.55);
+      inset 0 0 0 2px rgba(255, 244, 180, 0.98),
+      0 0 0 3px rgba(251, 191, 36, 0.72),
+      0 0 0 6px rgba(245, 158, 11, 0.28),
+      0 0 36px rgba(251, 191, 36, 0.82),
+      0 0 68px rgba(245, 158, 11, 0.48),
+      0 0 96px rgba(245, 158, 11, 0.22);
   }
 }
 
@@ -2648,20 +6425,58 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   100% {
     transform: scale(1);
     box-shadow:
-      inset 0 0 0 2px rgba(245, 158, 11, 0.75),
-      0 0 14px rgba(245, 158, 11, 0.4);
+      inset 0 0 0 2px rgba(251, 191, 36, 0.82),
+      0 0 0 1px rgba(245, 158, 11, 0.5),
+      0 0 20px rgba(245, 158, 11, 0.48),
+      0 0 40px rgba(245, 158, 11, 0.24);
   }
   50% {
-    transform: scale(1.03);
+    transform: scale(1.038);
     box-shadow:
-      inset 0 0 0 2px rgba(251, 191, 36, 0.9),
-      0 0 20px rgba(245, 158, 11, 0.5);
+      inset 0 0 0 2px rgba(255, 244, 180, 0.96),
+      0 0 0 3px rgba(251, 191, 36, 0.68),
+      0 0 0 5px rgba(245, 158, 11, 0.26),
+      0 0 32px rgba(251, 191, 36, 0.78),
+      0 0 60px rgba(245, 158, 11, 0.44);
+  }
+}
+
+.iq-schools-map-box-highlight .iq-schools-map-pillar-card,
+.iq-schools-map-box-landed .iq-schools-map-pillar-card {
+  animation: schools-map-business-card-border-pulse 2.5s ease-in-out infinite;
+  border-width: 2px;
+  border-color: rgba(251, 191, 36, 0.92);
+}
+
+@keyframes schools-map-business-card-border-pulse {
+  0%,
+  100% {
+    border-color: rgba(251, 191, 36, 0.88);
+    box-shadow:
+      0 0 0 1px rgba(245, 158, 11, 0.45),
+      0 0 20px rgba(245, 158, 11, 0.42),
+      0 0 40px rgba(245, 158, 11, 0.2),
+      0 8px 28px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    border-color: rgba(255, 244, 180, 0.98);
+    box-shadow:
+      0 0 0 2px rgba(251, 191, 36, 0.75),
+      0 0 0 4px rgba(245, 158, 11, 0.32),
+      0 0 34px rgba(251, 191, 36, 0.72),
+      0 0 64px rgba(245, 158, 11, 0.42),
+      0 10px 32px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .iq-schools-map-box-highlight,
-  .iq-schools-map-box-landed {
+  .iq-schools-map-box-landed,
+  .iq-schools-map-box-highlight .iq-schools-map-pillar-card,
+  .iq-schools-map-box-landed .iq-schools-map-pillar-card,
+  .iq-schools-map-island-prompt {
     animation: none;
     transform: scale(1.02);
     box-shadow:
@@ -7430,11 +11245,9 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   height: 100dvh;
   overflow: hidden;
   overscroll-behavior: none;
-  /* Deep ocean that fills the area around the map so off-aspect screens read
-     as open water rather than empty letterbox bars. */
+  /* Match `#prod-water` edge tone so letterbox bars never read as side panels. */
   background:
-    radial-gradient(ellipse at 50% 24%, rgba(47, 107, 240, 0.5) 0%, transparent 48%),
-    radial-gradient(ellipse at 50% 48%, #173a86 0%, #0c235f 55%, #06123a 100%);
+    radial-gradient(ellipse at 50% 46%, #2f6bf0 0%, #1e40af 50%, #0a1a4f 100%);
   color: #f8fafc;
 }
 
@@ -7445,22 +11258,1265 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
 }
 
-/* Show the whole map (no cropping), scaled as large as possible while keeping
-   the 1672:941 aspect ratio. A little vertical headroom is reserved (96dvh)
-   and the map is nudged down so the tall landmarks (flag, radar) clear the top
-   edge. Any leftover space around it is filled by the deep-ocean background on
-   .iq-prodigy-map, so there are no dead letterbox bars and nothing is cut off. */
+/* Full canvas — SVG renders the extended ocean (no CSS side panels). */
 .iq-prodigy-map__canvas {
   position: relative;
   margin: 0;
-  aspect-ratio: 1672 / 941;
-  width: min(100vw, calc(96dvh * 1672 / 941));
+  aspect-ratio: var(--prodigy-canvas-w, 2272) / var(--prodigy-canvas-h, 941);
+  width: min(
+    100vw,
+    calc(96dvh * var(--prodigy-canvas-w, 2272) / var(--prodigy-canvas-h, 941))
+  );
   max-width: 100vw;
   max-height: 96dvh;
-  transform: translateY(0.75dvh);
+  margin-top: 0.75dvh;
+  overflow: visible;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.iq-prodigy-map--zooming-business .iq-prodigy-map__stage {
+  overflow: hidden;
+}
+
+.iq-prodigy-map--zooming-business .iq-prodigy-map__art {
+  filter: saturate(0.72) brightness(0.82);
+  transition: filter 520ms ease, opacity 520ms ease;
+}
+
+.iq-prodigy-map--zooming-business .iq-prodigy-map__zone:not(.iq-prodigy-map__zone--business):not(.iq-prodigy-map__zone--hub) {
+  opacity: 0;
+  transition: opacity 420ms ease;
+  pointer-events: none;
+}
+
+.iq-prodigy-map--zooming-business .iq-prodigy-map__zone--hub {
+  opacity: 0;
+  transition: opacity 380ms ease;
+  pointer-events: none;
+}
+
+/* Island room — only Business Island art remains visible on the same canvas. */
+.iq-prodigy-map--zooming-business .iq-prodigy-map__island:not(.iq-prodigy-map__island--business),
+.iq-prodigy-map--island-hub .iq-prodigy-map__island:not(.iq-prodigy-map__island--business),
+.iq-prodigy-map--zooming-business .iq-prodigy-landmark:not(.iq-prodigy-landmark--business),
+.iq-prodigy-map--island-hub .iq-prodigy-landmark:not(.iq-prodigy-landmark--business),
+.iq-prodigy-map--zooming-business .iq-prodigy-map__hub-platform,
+.iq-prodigy-map--island-hub .iq-prodigy-map__hub-platform {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.iq-prodigy-map--zooming-business .iq-prodigy-map__zone--business {
+  z-index: 12;
+}
+
+.iq-prodigy-map__zoom-crossfade {
+  position: absolute;
+  inset: 0;
+  z-index: 28;
+  background: radial-gradient(
+    ellipse 78% 68% at var(--prodigy-zoom-origin-x, 50%) var(--prodigy-zoom-origin-y, 50%),
+    rgba(10, 26, 79, 0) 0%,
+    rgba(10, 26, 79, 0.18) 52%,
+    rgba(10, 26, 79, 0.72) 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+.iq-prodigy-map--zooming-business .iq-prodigy-map__zoom-crossfade {
+  animation: iq-prodigy-business-zoom-crossfade 820ms ease-out forwards;
+}
+
+/* Hub hold — camera settled; soften vignette, no solid handoff */
+.iq-prodigy-map--island-hub .iq-prodigy-map__zoom-crossfade {
+  opacity: 0;
+  animation: none;
+  transition: opacity 480ms ease;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-map__art {
+  filter: saturate(1.06) brightness(1.02);
+  transition: filter 520ms ease;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-map__stage::before {
+  opacity: 0.03;
+  animation: none;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-map__zoom-crossfade {
+  opacity: 0;
+}
+
+/* Camera-hub UI — game HUD layer (viewport-fixed, independent of island scale) */
+.iq-schools-map-camera-hub-ui {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-island--map-camera {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+/* Progress ring — fixed top-right */
+.iq-schools-island-hud__progress {
+  position: absolute;
+  right: max(10px, env(safe-area-inset-right, 0px));
+  top: max(10px, env(safe-area-inset-top, 0px));
+  z-index: 46;
+  transform: none;
+  opacity: 1;
+}
+
+/* Academy board — top-left HUD beside the menu (fixed to match nav shell) */
+.iq-schools-island-hud__academy {
+  position: fixed;
+  left: calc(env(safe-area-inset-left, 0px) + 66px);
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  transform: none;
+  width: clamp(148px, 24vw, 210px);
+  max-width: calc(100vw - 66px - 72px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+  z-index: 240;
+}
+
+.iq-schools-island-hud__academy .iq-schools-island-prop--notice-board {
+  transform: none;
+  transform-origin: top left;
+}
+
+.iq-schools-island-hud__academy .iq-schools-island-prop--notice-board:hover {
+  transform: translateY(-1px);
+}
+
+.iq-schools-island-hud__academy .iq-schools-island-prop__post,
+.iq-schools-island-hud__academy .iq-schools-island-prop__ground-shadow {
+  display: none;
+}
+
+/* Mission board — near HQ on the enlarged island (legacy floating card) */
+.iq-schools-island-hud__mission {
+  position: absolute;
+  left: 56%;
+  top: 38%;
+  transform: translateY(-34%);
+  width: clamp(140px, 17.5vw, 186px);
+  z-index: 45;
+}
+
+/* Quest markers — world pins on the zoomed island */
+.iq-schools-island-hud__quest-markers {
+  position: absolute;
+  inset: 0;
+  z-index: 44;
+  overflow: visible;
+}
+
+.iq-business-island-quest-markers {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.iq-business-island-quest-marker-anchor {
+  position: absolute;
+  z-index: 1;
+  transform: translate(-50%, -100%);
+  transform-origin: bottom center;
+  overflow: visible;
+}
+
+.iq-business-island-quest-marker-anchor:has(.iq-business-island-quest-marker--active) {
+  z-index: 8;
+}
+
+.iq-business-island-quest-marker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 4rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  overflow: visible;
+}
+
+.iq-business-island-quest-marker--active {
+  filter: drop-shadow(0 0 18px rgba(251, 191, 36, 0.55));
+}
+
+.iq-business-island-quest-marker:disabled {
+  cursor: default;
+}
+
+.iq-business-island-quest-marker__head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  overflow: visible;
+}
+
+.iq-business-island-quest-marker__shadow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 2.4rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.42);
+  filter: blur(3px);
+  transform: translateX(-50%) scaleY(0.55);
+}
+
+.iq-business-island-quest-marker__post {
+  position: absolute;
+  bottom: 0.15rem;
+  left: 50%;
+  width: 0.45rem;
+  height: 1.3rem;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #27272a, #09090b);
+  transform: translateX(-50%);
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.45);
+}
+
+.iq-business-island-quest-marker__cap {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: 2px solid rgba(251, 191, 36, 0.55);
+  background: linear-gradient(145deg, #3f3f46 0%, #18181b 55%, #09090b 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 0 rgba(0, 0, 0, 0.55),
+    0 6px 14px rgba(0, 0, 0, 0.38);
+  overflow: hidden;
+}
+
+.iq-business-island-quest-marker__beacon {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffbeb 0%, #fde047 45%, #f59e0b 100%);
+  box-shadow:
+    0 0 14px rgba(251, 191, 36, 0.98),
+    0 0 8px rgba(255, 255, 255, 0.85);
+}
+
+.iq-business-island-quest-marker__tick {
+  font-size: 1.15rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #fbbf24;
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.75));
+}
+
+.iq-business-island-quest-marker__lock-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  background: linear-gradient(
+    160deg,
+    rgba(24, 24, 27, 0.35) 0%,
+    rgba(9, 9, 11, 0.55) 100%
+  );
+}
+
+.iq-business-island-quest-marker__pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.62) 0%, transparent 72%);
+  animation: iq-business-island-quest-marker-pulse 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.iq-business-island-quest-marker__pulse--outer {
+  width: 5.8rem;
+  height: 5.8rem;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.32) 0%, transparent 70%);
+  animation: iq-business-island-quest-marker-pulse-outer 2.2s ease-in-out infinite;
+}
+
+@keyframes iq-business-island-quest-marker-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(0.86);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.14);
+  }
+}
+
+@keyframes iq-business-island-quest-marker-pulse-outer {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  50% {
+    opacity: 0.82;
+    transform: translate(-50%, -50%) scale(1.22);
+  }
+}
+
+.iq-business-island-quest-marker--active .iq-business-island-quest-marker__cap {
+  border-width: 3px;
+  border-color: rgba(251, 191, 36, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0 0 3px rgba(251, 191, 36, 0.45),
+    0 0 0 7px rgba(251, 191, 36, 0.2),
+    0 5px 0 rgba(0, 0, 0, 0.55),
+    0 0 36px rgba(251, 191, 36, 0.82),
+    0 0 72px rgba(251, 191, 36, 0.38);
+  animation:
+    iq-business-island-quest-marker-active-float 2.8s ease-in-out infinite,
+    iq-business-island-quest-marker-cap-glow 2.2s ease-in-out infinite;
+}
+
+@keyframes iq-business-island-quest-marker-cap-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.22);
+  }
+}
+
+@keyframes iq-business-island-quest-marker-active-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.iq-business-island-quest-marker--active .iq-business-island-quest-marker__beacon {
+  animation: iq-business-island-quest-marker-beacon 1.8s ease-in-out infinite;
+}
+
+@keyframes iq-business-island-quest-marker-beacon {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 14px rgba(251, 191, 36, 0.98),
+      0 0 8px rgba(255, 255, 255, 0.95);
+  }
+  50% {
+    transform: scale(1.18);
+    box-shadow:
+      0 0 24px rgba(251, 191, 36, 1),
+      0 0 12px rgba(255, 255, 255, 1);
+  }
+}
+
+.iq-business-island-quest-marker--active .iq-business-island-quest-marker__pulse {
+  width: 4.8rem;
+  height: 4.8rem;
+}
+
+.iq-business-island-quest-marker--active .iq-business-island-quest-marker__pulse--outer {
+  width: 7.2rem;
+  height: 7.2rem;
+}
+
+.iq-business-island-quest-marker--locked {
+  opacity: 0.92;
+}
+
+.iq-business-island-quest-marker--completed .iq-business-island-quest-marker__cap {
+  border-color: rgba(251, 191, 36, 0.85);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 4px 0 rgba(0, 0, 0, 0.5),
+    0 0 18px rgba(251, 191, 36, 0.42);
+}
+
+.iq-business-island-quest-marker__lock {
+  position: relative;
+  width: 1.25rem;
+  height: 1.42rem;
+  pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.55));
+}
+
+.iq-business-island-quest-marker__lock-shackle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0.72rem;
+  height: 0.58rem;
+  border: 2.5px solid #fbbf24;
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+  transform: translateX(-50%);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.55);
+}
+
+.iq-business-island-quest-marker__lock-body {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0.92rem;
+  height: 0.72rem;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #fde047 0%, #f59e0b 100%);
+  border: 1.5px solid #d97706;
+  transform: translateX(-50%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 0 10px rgba(251, 191, 36, 0.55);
+}
+
+.iq-business-island-quest-marker__lock-keyhole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.2rem;
+  height: 0.24rem;
+  border-radius: 999px;
+  background: #18181b;
+  transform: translate(-50%, -20%);
+  box-shadow: 0 0.16rem 0 0 #18181b;
+}
+
+.iq-business-island-quest-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 62;
+  border: 0;
+  background: rgba(2, 6, 23, 0.58);
+  backdrop-filter: blur(5px);
+  cursor: pointer;
+}
+
+.iq-business-island-quest-modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 64;
+  width: min(380px, 92vw);
+  transform: translate(-50%, -50%);
+}
+
+.iq-business-island-quest-modal__close {
+  position: absolute;
+  top: -0.55rem;
+  right: -0.55rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  background: rgba(255, 255, 255, 0.95);
+  color: #78350f;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+}
+
+.iq-business-island-quest-modal__card {
+  display: block;
+  width: 100%;
+  padding: 1rem 1.05rem 1.05rem;
+  border-radius: 18px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.iq-business-island-quest-modal__card .iq-schools-hub-mission-card__header {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  margin-bottom: 0.55rem;
+}
+
+.iq-business-island-quest-modal__card .iq-schools-hub-mission-card__title {
+  margin-top: 0;
+}
+
+.iq-business-island-quest-modal__enter {
+  pointer-events: auto !important;
+  display: flex;
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-business-island-quest-marker__pulse,
+  .iq-business-island-quest-marker__pulse--outer {
+    animation: none;
+    opacity: 0.65;
+  }
+
+  .iq-business-island-quest-marker--active .iq-business-island-quest-marker__cap,
+  .iq-business-island-quest-marker--active .iq-business-island-quest-marker__beacon {
+    animation: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .iq-schools-island-hud__academy {
+    left: calc(env(safe-area-inset-left, 0px) + 66px);
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    bottom: auto;
+    transform: none;
+    width: min(168px, calc(100vw - 66px - 72px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  }
+
+  .iq-schools-island-hud__mission {
+    left: auto;
+    right: clamp(10px, 3vw, 18px);
+    top: auto;
+    bottom: max(76px, calc(env(safe-area-inset-bottom, 0px) + 68px));
+    transform: none;
+    width: min(142px, 40vw);
+  }
+}
+
+/* Physical props — notice board + mission terminal on the island */
+.iq-schools-map-camera-hub-ui--hq-zoom {
+  opacity: 0;
+  transition: opacity 280ms ease;
+}
+
+.iq-schools-business-hub-island--map-camera .iq-schools-business-hub-island__quest-beam,
+.iq-schools-business-hub-island--map-camera .iq-schools-business-hub-island__quest-pin,
+.iq-schools-business-hub-island--map-camera .iq-schools-business-hub-island__path-glow {
+  display: none;
+}
+
+.iq-schools-island-prop--notice-board {
+  position: relative;
+  padding: 0.38rem 0.42rem 0.48rem;
+  border-radius: 10px;
+  background:
+    linear-gradient(168deg, rgba(120, 72, 24, 0.98) 0%, rgba(62, 38, 10, 0.99) 100%);
+  border: 2.5px solid #92400e;
+  box-shadow:
+    0 8px 0 rgba(69, 26, 3, 0.72),
+    0 16px 28px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 236, 179, 0.28);
+  transform: perspective(720px) rotateY(5deg) rotateX(6deg);
+  transform-origin: bottom left;
+}
+
+.iq-schools-island-prop--notice-board .iq-schools-island-prop__ground-shadow {
+  position: absolute;
+  left: 8%;
+  right: 6%;
+  bottom: -6px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.38);
+  filter: blur(4px);
+  transform: scaleY(0.55);
+}
+
+.iq-schools-island-prop--notice-board .iq-schools-island-prop__post {
+  position: absolute;
+  left: -8px;
+  bottom: 8%;
+  width: 10px;
+  height: 72%;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #78350f, #451a03);
+  box-shadow: inset -2px 0 0 rgba(0, 0, 0, 0.28);
+}
+
+.iq-schools-island-prop--notice-board .iq-schools-island-prop__sign-cap {
+  display: block;
+  margin: 0 0 0.28rem;
+  padding-bottom: 0.22rem;
+  border-bottom: 1px solid rgba(253, 230, 138, 0.22);
+  font-size: 0.48rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(253, 230, 138, 0.9);
+}
+
+.iq-schools-island-prop--notice-board .iq-master-principles-panel--island {
+  border: 0;
+  border-radius: 6px;
+  background: rgba(254, 243, 199, 0.08);
+  backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgba(253, 230, 138, 0.12);
+}
+
+/* Large academy notice board — summary sign on the island shore */
+.iq-schools-island-academy-sign {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.72rem 0.78rem 0.82rem;
+  border-radius: 14px;
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    filter 220ms ease;
+}
+
+.iq-schools-island-academy-sign:hover {
+  filter: brightness(1.06);
+  transform: perspective(720px) rotateY(5deg) rotateX(6deg) translateY(-2px);
+  box-shadow:
+    0 10px 0 rgba(69, 26, 3, 0.72),
+    0 20px 34px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 236, 179, 0.32);
+}
+
+.iq-schools-island-academy-sign:focus-visible {
+  outline: 2px solid rgba(251, 191, 36, 0.85);
+  outline-offset: 3px;
+}
+
+.iq-schools-island-academy-sign .iq-schools-island-prop__sign-cap {
+  font-size: clamp(0.58rem, 1.4vw, 0.68rem);
+  letter-spacing: 0.22em;
+  margin-bottom: 0.42rem;
+  padding-bottom: 0.32rem;
+}
+
+.iq-schools-island-academy-sign .iq-schools-island-prop__post {
+  width: 14px;
+  left: -10px;
+}
+
+.iq-schools-island-academy-sign__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.42rem;
+  margin-bottom: 0.55rem;
+}
+
+.iq-schools-island-academy-sign__seal {
+  flex-shrink: 0;
+  font-size: clamp(1rem, 2.2vw, 1.18rem);
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+
+.iq-schools-island-academy-sign__title {
+  font-size: clamp(0.68rem, 1.65vw, 0.82rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  color: rgba(254, 243, 199, 0.96);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.iq-schools-island-academy-sign__spotlight {
+  display: flex;
+  align-items: center;
+  gap: 0.48rem;
+  margin: 0 0 0.42rem;
+  padding: 0.38rem 0.48rem;
+  border-radius: 8px;
+  background: rgba(254, 243, 199, 0.12);
+  border: 1px solid rgba(253, 230, 138, 0.22);
+}
+
+.iq-schools-island-academy-sign__tick {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #451a03;
+  background: linear-gradient(145deg, #fcd34d 0%, #f59e0b 100%);
+  box-shadow:
+    0 0 10px rgba(251, 191, 36, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.iq-schools-island-academy-sign__next-dot {
+  flex-shrink: 0;
+  width: 0.72rem;
+  height: 0.72rem;
+  border-radius: 50%;
+  border: 2px solid rgba(253, 230, 138, 0.55);
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.iq-schools-island-academy-sign__spotlight-label {
+  font-size: clamp(0.72rem, 1.7vw, 0.86rem);
+  font-weight: 700;
+  line-height: 1.25;
+  color: rgba(254, 243, 199, 0.94);
+}
+
+.iq-schools-island-academy-sign__remaining {
+  margin: 0 0 0.48rem;
+  font-size: clamp(0.62rem, 1.45vw, 0.74rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(253, 230, 138, 0.78);
+}
+
+.iq-schools-island-academy-sign__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: clamp(0.58rem, 1.35vw, 0.68rem);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(251, 191, 36, 0.95);
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.28);
+}
+
+/* Principles ladder slide-out */
+.iq-schools-principles-ladder-sheet__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 58;
+  border: 0;
+  background: rgba(2, 6, 23, 0.62);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+}
+
+.iq-schools-principles-ladder-sheet {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: max(64px, calc(env(safe-area-inset-bottom, 0px) + 56px));
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 92vw);
+  max-width: 100%;
+  border-radius: 0 16px 16px 0;
+  background: linear-gradient(
+    168deg,
+    rgba(255, 251, 235, 0.99) 0%,
+    rgba(254, 249, 232, 0.98) 55%,
+    rgba(253, 244, 215, 0.99) 100%
+  );
+  border-right: 1px solid rgba(217, 119, 6, 0.35);
+  box-shadow:
+    24px 0 48px rgba(15, 23, 42, 0.28),
+    0 0 32px rgba(251, 191, 36, 0.14);
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .iq-schools-principles-ladder-sheet {
+    bottom: max(88px, calc(env(safe-area-inset-bottom, 0px) + 80px));
+  }
+}
+
+.iq-schools-principles-ladder-sheet__chrome {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: max(12px, env(safe-area-inset-top, 0px)) 1rem 0.35rem;
+  border-bottom: 1px solid rgba(217, 119, 6, 0.22);
+  background: linear-gradient(
+    180deg,
+    rgba(254, 243, 199, 0.92) 0%,
+    rgba(255, 251, 235, 0.85) 100%
+  );
+}
+
+.iq-schools-principles-ladder-sheet__close {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  background: rgba(255, 255, 255, 0.88);
+  color: #78350f;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.iq-schools-principles-ladder-sheet__close:hover {
+  background: rgba(254, 243, 199, 0.95);
+  border-color: rgba(245, 158, 11, 0.55);
+}
+
+.iq-schools-principles-ladder-sheet .iq-master-principles-panel {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+.iq-schools-island-prop--mission-terminal {
+  position: relative;
+  padding: 1.15rem 0.42rem 0.5rem;
+  border-radius: 12px 12px 10px 10px;
+  background:
+    linear-gradient(168deg, rgba(22, 32, 52, 0.96) 0%, rgba(12, 18, 34, 0.98) 100%);
+  border: 2px solid rgba(148, 163, 184, 0.5);
+  box-shadow:
+    0 10px 0 rgba(8, 12, 24, 0.75),
+    0 18px 32px rgba(0, 0, 0, 0.48),
+    inset 0 0 0 1px rgba(186, 230, 253, 0.14);
+  transform: perspective(720px) rotateY(-6deg) rotateX(5deg);
+  transform-origin: bottom center;
+}
+
+.iq-schools-island-prop--mission-terminal .iq-schools-island-prop__kiosk-base {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -8px;
+  height: 10px;
+  border-radius: 2px 2px 4px 4px;
+  background: linear-gradient(180deg, #64748b, #334155);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  transform: perspective(200px) rotateX(28deg);
+  transform-origin: top center;
+}
+
+.iq-schools-island-prop--mission-terminal .iq-schools-island-prop__terminal-antenna {
+  position: absolute;
+  top: -10px;
+  right: 14%;
+  width: 2px;
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #94a3b8, #475569);
+}
+
+.iq-schools-island-prop--mission-terminal .iq-schools-island-prop__terminal-antenna::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.75);
+  animation: iq-prodigy-beacon-pulse 2s ease-in-out infinite;
+}
+
+.iq-schools-island-prop--mission-terminal .iq-schools-island-prop__terminal-header {
+  position: absolute;
+  top: 0.32rem;
+  left: 0.5rem;
+  right: 0.5rem;
+  padding: 0.12rem 0.28rem;
+  border-radius: 4px;
+  font-size: 0.46rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(186, 230, 253, 0.92);
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.iq-schools-island-prop--mission-terminal .iq-schools-hub-mission-card {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0.35rem 0.2rem 0.2rem !important;
+}
+
+.iq-schools-island-prop--mission-terminal .iq-schools-hub-mission-card__title {
+  font-size: clamp(0.74rem, 1.65vw, 0.86rem) !important;
+  line-height: 1.2;
+}
+
+.iq-schools-island-prop--mission-terminal .iq-schools-hub-mission-card__desc {
+  font-size: 0.56rem;
+  line-height: 1.25;
+}
+
+.iq-schools-island-prop--mission-terminal .iq-schools-hub-mission-card__cta {
+  font-size: 0.58rem;
+  padding: 0.32rem 0.55rem;
+}
+
+.iq-schools-island-prop--mission-terminal .iq-schools-hub-journey-card--current .iq-schools-hub-mission-card {
+  box-shadow: none !important;
+  border: 1px solid rgba(148, 163, 184, 0.28) !important;
+}
+
+/* Island life — ambient motion when hub is active */
+.iq-prodigy-map--island-hub .iq-prodigy-prop--tree,
+.iq-prodigy-map--island-hub .iq-prodigy-prop--pine,
+.iq-prodigy-map--island-hub .iq-prodigy-landmark__tree {
+  animation: iq-prodigy-tree-sway 4.8s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-prop--tree:nth-child(2n),
+.iq-prodigy-map--island-hub .iq-prodigy-prop--pine:nth-child(2n),
+.iq-prodigy-map--island-hub .iq-prodigy-landmark__tree:nth-child(2n) {
+  animation-duration: 5.6s;
+  animation-delay: -1.2s;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-landmark__lamp .iq-prodigy-landmark__sparkle {
+  animation: iq-prodigy-ambient-sparkle 2.6s ease-in-out infinite;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-landmark--business .iq-prodigy-landmark__entrance-glow {
+  animation: iq-prodigy-entrance-idle-glow 3.2s ease-in-out infinite;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-landmark__bush {
+  animation: iq-prodigy-tree-sway 5.2s ease-in-out infinite;
+  animation-delay: -0.8s;
+  transform-origin: center bottom;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-prop-fountain__jet,
+.iq-prodigy-map--island-hub .iq-prodigy-prop--fountain path:nth-child(3),
+.iq-prodigy-map--island-hub .iq-prodigy-landmark--business .iq-prodigy-prop-fountain__jet {
+  animation: iq-prodigy-fountain-jet 2.4s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-prop-flag {
+  transform-origin: 150px -12px;
+  animation: iq-prodigy-flag-wave 3.2s ease-in-out infinite;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-landmark__window {
+  animation: iq-prodigy-window-glow 3.6s ease-in-out infinite;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-landmark__beacon {
+  animation: iq-prodigy-beacon-pulse 2s ease-in-out infinite;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-island-ambient__cloud--a {
+  animation: iq-prodigy-cloud-drift-a 28s linear infinite;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-island-ambient__cloud--b {
+  animation: iq-prodigy-cloud-drift-b 34s linear infinite;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-island-ambient__spark--a,
+.iq-prodigy-map--island-hub .iq-prodigy-island-ambient__spark--b {
+  animation: iq-prodigy-ambient-sparkle 2.8s ease-in-out infinite;
+}
+
+.iq-prodigy-map--island-hub .iq-prodigy-island-progress-fx__mastery-glow {
+  animation: iq-prodigy-mastery-glow 4s ease-in-out infinite;
+}
+
+.iq-prodigy-map--hq-zoom .iq-prodigy-map__art {
+  filter: saturate(1.1) brightness(1.05);
+}
+
+/* Enter Quest — HQ entrance glow + door beat before navigation */
+.iq-prodigy-map--hq-enter .iq-prodigy-landmark--business .iq-prodigy-landmark__entrance-glow {
+  animation: iq-prodigy-entrance-enter-glow 780ms ease-out forwards;
+}
+
+.iq-prodigy-map--hq-enter .iq-prodigy-landmark--business .iq-prodigy-landmark__entrance-door {
+  animation: iq-prodigy-entrance-door-open 780ms ease-out forwards;
+}
+
+.iq-prodigy-map--hq-enter .iq-prodigy-landmark--business .iq-prodigy-landmark__window {
+  animation: iq-prodigy-window-glow 1.2s ease-in-out infinite;
+}
+
+@keyframes iq-prodigy-entrance-idle-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.62;
+  }
+}
+
+@keyframes iq-prodigy-entrance-enter-glow {
+  0% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  45% {
+    opacity: 0.95;
+    transform: scale(1.18);
+  }
+  100% {
+    opacity: 0.88;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes iq-prodigy-entrance-door-open {
+  0% {
+    fill: #0f172a;
+  }
+  50% {
+    fill: #1e3a5f;
+  }
+  100% {
+    fill: #0c1929;
+  }
+}
+
+/* Business Island progress — island evolves as quests complete */
+.iq-prodigy-map__island--business.iq-prodigy-map__island--tier-1 path[fill="url(#prod-grass)"] {
+  filter: saturate(1.04);
+}
+
+.iq-prodigy-map__island--business.iq-prodigy-map__island--tier-2 ellipse[fill="#86efac"] {
+  opacity: 0.52;
+}
+
+.iq-prodigy-map__island--business.iq-prodigy-map__island--tier-3 ellipse[fill="#fde68a"] {
+  opacity: 0.28;
+}
+
+.iq-prodigy-map__island--business.iq-prodigy-map__island--tier-4 path[stroke="#d6c39a"] {
+  stroke-width: 20;
+}
+
+.iq-prodigy-map__island--business.iq-prodigy-map__island--tier-5 ellipse[fill="#fde68a"] {
+  opacity: 0.38;
+}
+
+.iq-prodigy-map__island--business.iq-prodigy-map__island--tier-6 {
+  filter: saturate(1.08) brightness(1.02);
+}
+
+.iq-prodigy-map--island-tier-7 .iq-prodigy-map__island--business,
+.iq-prodigy-map__island--business.iq-prodigy-map__island--tier-7 {
+  filter: saturate(1.12) brightness(1.04);
+}
+
+.iq-prodigy-map--island-tier-7 .iq-prodigy-landmark--business .iq-prodigy-landmark__window {
+  animation: iq-prodigy-window-glow 2.4s ease-in-out infinite;
+}
+
+.iq-prodigy-map--island-tier-7 .iq-prodigy-island-progress-fx__mastery-glow {
+  opacity: 0.75;
+}
+
+@keyframes iq-prodigy-tree-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(1.6deg);
+  }
+}
+
+@keyframes iq-prodigy-fountain-jet {
+  0%,
+  100% {
+    transform: scaleY(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scaleY(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes iq-prodigy-flag-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(7deg);
+  }
+}
+
+@keyframes iq-prodigy-window-glow {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes iq-prodigy-beacon-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes iq-prodigy-cloud-drift-a {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(36px);
+  }
+}
+
+@keyframes iq-prodigy-cloud-drift-b {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-28px);
+  }
+}
+
+@keyframes iq-prodigy-ambient-sparkle {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+@keyframes iq-prodigy-mastery-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes iq-prodigy-business-zoom-crossfade {
+  0% {
+    opacity: 0;
+  }
+  55% {
+    opacity: 0.28;
+  }
+  100% {
+    opacity: 0.42;
+  }
+}
+
+.iq-prodigy-map--zooming-business .iq-prodigy-map__stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 72% 64% at var(--prodigy-zoom-origin-x, 50%) var(--prodigy-zoom-origin-y, 50%),
+    transparent 42%,
+    rgba(10, 26, 79, 0.22) 100%
+  );
+  opacity: 0;
+  animation: iq-prodigy-business-zoom-vignette 880ms ease-out forwards;
+}
+
+@keyframes iq-prodigy-business-zoom-vignette {
+  to {
+    opacity: 1;
+  }
+}
+.iq-prodigy-map--zooming-business .iq-prodigy-map__progress-hud,
+.iq-prodigy-map--zooming-business .iq-prodigy-map__company-logo,
+.iq-prodigy-map--zooming-business .iq-prodigy-map__mission-envelope-hud,
+.iq-prodigy-map--island-hub .iq-prodigy-map__progress-hud,
+.iq-prodigy-map--island-hub .iq-prodigy-map__company-logo,
+.iq-prodigy-map--island-hub .iq-prodigy-map__mission-envelope-hud {
+  opacity: 0;
+  transition: opacity 320ms ease;
+  pointer-events: none;
+}
+
+.iq-prodigy-map--zooming-business .iq-prodigy-map__zone--business .iq-prodigy-map__sign {
+  opacity: 0;
+  transition: opacity 280ms ease;
+}
+
+.iq-prodigy-map--zooming-business .iq-prodigy-map__zone--business,
+.iq-prodigy-map--island-hub .iq-prodigy-map__zone {
+  pointer-events: none;
+}
+
+.iq-schools-business-hub-scene-shell--zoom-arrival .iq-schools-business-hub-island__path-glow {
+  animation: iq-schools-island-path-glow-in 0.85s ease-out 0.42s 1 backwards;
+}
+
+.iq-schools-business-hub-scene-shell--zoom-arrival .iq-schools-business-hub-scene__island {
+  animation: iq-schools-hub-island-settle-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes iq-schools-hub-island-settle-in {
+  from {
+    filter: brightness(0.92);
+  }
+  to {
+    filter: brightness(1);
+  }
+}
+
+@keyframes iq-schools-island-path-glow-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.85;
+  }
 }
 
 .iq-prodigy-map__art {
@@ -7512,7 +12568,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 
 .iq-prodigy-map__mission-envelope-hud {
   position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 58px);
+  top: calc(env(safe-area-inset-top, 0px) + 72px);
   left: calc(env(safe-area-inset-left, 0px) + 18px);
   z-index: 22;
   transform: none;
@@ -7534,65 +12590,77 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   left: auto;
   z-index: 20;
   transform: none;
-  width: min(300px, calc(100vw - 32px));
-  border: 2px solid rgba(253, 224, 71, 0.62);
+  width: min(320px, calc(100vw - 32px));
+  border: 2px solid rgba(251, 191, 36, 0.72);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 12% 0%, rgba(253, 224, 71, 0.22), transparent 46%),
-    linear-gradient(180deg, rgba(15, 23, 42, 0.86), rgba(30, 27, 75, 0.76));
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  padding: 10px 12px 11px;
+    radial-gradient(circle at 14% 0%, rgba(253, 224, 71, 0.28), transparent 48%),
+    linear-gradient(180deg, rgba(12, 18, 36, 0.92), rgba(24, 20, 58, 0.84));
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  backdrop-filter: blur(12px) saturate(1.15);
+  padding: 12px 14px 13px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 0 24px rgba(251, 191, 36, 0.18),
-    0 14px 34px rgba(2, 6, 23, 0.42);
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 0 1px rgba(251, 191, 36, 0.22),
+    0 0 28px rgba(251, 191, 36, 0.22),
+    0 14px 34px rgba(2, 6, 23, 0.48);
   pointer-events: none;
 }
 
 .iq-prodigy-map__progress-label {
   display: block;
-  margin-bottom: 7px;
-  color: #fef9c3;
-  font-size: 10px;
+  margin-bottom: 8px;
+  color: #fef08a;
+  font-size: 11px;
   font-weight: 950;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   line-height: 1;
   text-transform: uppercase;
-  text-shadow: 0 0 12px rgba(251, 191, 36, 0.35);
+  text-shadow: 0 0 14px rgba(251, 191, 36, 0.42);
 }
 
 .iq-prodigy-map__progress-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .iq-prodigy-map__progress-track {
   position: relative;
   flex: 1;
-  height: 13px;
+  height: 18px;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(251, 191, 36, 0.48);
   border-radius: 999px;
   background:
-    linear-gradient(180deg, rgba(2, 6, 23, 0.72), rgba(15, 23, 42, 0.62));
+    linear-gradient(180deg, rgba(2, 6, 23, 0.92) 0%, rgba(15, 23, 42, 0.78) 100%);
   box-shadow:
-    inset 0 2px 5px rgba(0, 0, 0, 0.42),
-    0 1px 0 rgba(255, 255, 255, 0.12);
+    inset 0 3px 7px rgba(0, 0, 0, 0.48),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.iq-prodigy-map__progress-track::after {
+  content: "";
+  position: absolute;
+  inset: 2px 3px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 55%);
+  pointer-events: none;
 }
 
 .iq-prodigy-map__progress-fill {
   position: absolute;
-  inset: 0 auto 0 0;
-  min-width: 8px;
+  inset: 1px auto 1px 1px;
+  min-width: 10px;
   border-radius: inherit;
   background:
-    linear-gradient(90deg, #f59e0b 0%, #fde047 52%, #fffbeb 100%);
+    linear-gradient(90deg, #b45309 0%, #f59e0b 22%, #fbbf24 52%, #fde047 78%, #fffbeb 100%);
   box-shadow:
-    0 0 14px rgba(253, 224, 71, 0.7),
-    inset 0 1px 0 rgba(255, 255, 255, 0.65);
-  transition: width 420ms ease;
+    0 0 18px rgba(253, 224, 71, 0.72),
+    inset 0 2px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -2px 5px rgba(180, 83, 9, 0.38);
+  transition: width 480ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .iq-prodigy-map__progress-fill::after {
@@ -7600,19 +12668,27 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.55) 45%, transparent 72%);
+    linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.62) 45%, transparent 72%);
   transform: translateX(-100%);
   animation: iq-prodigy-progress-shine 2.4s ease-in-out infinite;
 }
 
 .iq-prodigy-map__progress-value {
-  min-width: 42px;
-  color: #fff7ad;
-  font-size: 13px;
+  flex-shrink: 0;
+  min-width: 48px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.58);
+  background: rgba(251, 191, 36, 0.16);
+  color: #fffbeb;
+  font-size: 14px;
   font-weight: 950;
   line-height: 1;
-  text-align: right;
-  text-shadow: 0 0 12px rgba(253, 224, 71, 0.42);
+  text-align: center;
+  text-shadow: 0 0 12px rgba(253, 224, 71, 0.48);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0 14px rgba(251, 191, 36, 0.22);
 }
 
 .iq-prodigy-map__hub-plateau {
@@ -7664,6 +12740,59 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   animation: iq-prodigy-hub-pulse 3s ease-in-out infinite;
 }
 
+/* Centre trophy — premium prize beacon */
+.iq-prodigy-landmark--hub {
+  animation: iq-prodigy-trophy-presence 3s ease-in-out infinite;
+}
+
+.iq-prodigy-landmark--hub .iq-prodigy-landmark__hub-glow {
+  animation: iq-prodigy-trophy-glow-pulse 2.6s ease-in-out infinite;
+}
+
+.iq-prodigy-landmark__trophy-halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  pointer-events: none;
+}
+
+.iq-prodigy-landmark__trophy-halo--outer {
+  animation: iq-prodigy-trophy-halo-ring 3.2s ease-in-out infinite;
+}
+
+.iq-prodigy-landmark__trophy-halo--mid {
+  animation: iq-prodigy-trophy-halo-ring 3.2s ease-in-out infinite reverse;
+  animation-delay: 0.45s;
+}
+
+.iq-prodigy-landmark__trophy-shine {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: iq-prodigy-trophy-shine-sweep 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.iq-prodigy-landmark__trophy-crown {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: iq-prodigy-trophy-crown-float 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.iq-prodigy-landmark__hub-core {
+  animation: iq-prodigy-hub-core-pulse 3.4s ease-in-out infinite;
+}
+
+.iq-prodigy-landmark__hub-gold-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: iq-prodigy-hub-gold-ring 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.iq-prodigy-landmark--hub .iq-prodigy-landmark__sparkle {
+  animation: iq-prodigy-trophy-sparkle 2s ease-in-out infinite;
+}
+
 .iq-prodigy-map__zone {
   position: absolute;
   z-index: 2;
@@ -7713,9 +12842,110 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   transform: translate(0, -50%);
 }
 
+/* Island callouts — attached at outer grass edge via inline `left` from config. */
+.iq-prodigy-map__zone--sign-left,
+.iq-prodigy-map__zone--sign-right {
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  --prodigy-callout-gap: clamp(20px, 1.6vw, 28px);
+}
+
+.iq-prodigy-map__zone--sign-left.iq-prodigy-map__zone--business,
+.iq-prodigy-map__zone--sign-left.iq-prodigy-map__zone--financials {
+  /* Mirror sign-right: stem + one gap between card and island edge */
+  transform: translate(calc(-100% + var(--prodigy-callout-gap)), -50%);
+  z-index: 4;
+}
+
+.iq-prodigy-map__zone--sign-right.iq-prodigy-map__zone--forces,
+.iq-prodigy-map__zone--sign-right.iq-prodigy-map__zone--management {
+  transform: translate(var(--prodigy-callout-gap), -50%);
+  z-index: 4;
+}
+
+.iq-prodigy-map__zone--sign-left .iq-prodigy-map__zone-motion,
+.iq-prodigy-map__zone--sign-right .iq-prodigy-map__zone-motion {
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  width: max-content;
+}
+
+.iq-prodigy-map__zone--sign-left .iq-prodigy-map__zone-motion {
+  flex-direction: row-reverse;
+}
+
+.iq-prodigy-map__zone--sign-right.iq-prodigy-map__zone--forces .iq-prodigy-map__zone-motion,
+.iq-prodigy-map__zone--sign-right.iq-prodigy-map__zone--management .iq-prodigy-map__zone-motion {
+  flex-direction: row;
+  transform-origin: right center;
+  align-items: center;
+}
+
+.iq-prodigy-map__zone--sign-left.iq-prodigy-map__zone--business .iq-prodigy-map__zone-motion,
+.iq-prodigy-map__zone--sign-left.iq-prodigy-map__zone--financials .iq-prodigy-map__zone-motion {
+  transform-origin: left center;
+  align-items: center;
+}
+
+.iq-prodigy-map__zone--sign-left .iq-prodigy-map__sign-stem,
+.iq-prodigy-map__zone--sign-right .iq-prodigy-map__sign-stem {
+  display: block;
+  flex-shrink: 0;
+  width: var(--prodigy-callout-gap);
+  height: 3px;
+  margin: 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--zone-edge, #7c3aed) 55%, transparent),
+    color-mix(in srgb, var(--zone-edge, #7c3aed) 92%, #fff)
+  );
+  box-shadow: 0 0 10px color-mix(in srgb, var(--zone-glow, #a78bfa) 48%, transparent);
+  pointer-events: none;
+  align-self: center;
+}
+
+.iq-prodigy-map__zone--sign-right .iq-prodigy-map__sign-stem {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--zone-edge, #7c3aed) 92%, #fff),
+    color-mix(in srgb, var(--zone-edge, #7c3aed) 55%, transparent)
+  );
+}
+
+.iq-prodigy-map__zone--sign-left .iq-prodigy-map__hit-area,
+.iq-prodigy-map__zone--sign-right .iq-prodigy-map__hit-area {
+  display: none;
+}
+
+.iq-prodigy-map__zone--sign-left .iq-prodigy-map__sign,
+.iq-prodigy-map__zone--sign-right .iq-prodigy-map__sign {
+  width: min(172px, 24vw);
+  min-width: min(140px, 32vw);
+  max-width: 100%;
+}
+
+.iq-prodigy-map__zone--sign-left .iq-prodigy-map__hit,
+.iq-prodigy-map__zone--sign-right .iq-prodigy-map__hit {
+  width: auto;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.iq-prodigy-map__zone--sign-left .iq-prodigy-map__hit,
+.iq-prodigy-map__zone--sign-right .iq-prodigy-map__hit,
+.iq-prodigy-map__zone--sign-left.iq-prodigy-map__zone--business .iq-prodigy-map__hit,
+.iq-prodigy-map__zone--sign-left.iq-prodigy-map__zone--financials .iq-prodigy-map__hit,
+.iq-prodigy-map__zone--sign-right.iq-prodigy-map__zone--forces .iq-prodigy-map__hit,
+.iq-prodigy-map__zone--sign-right.iq-prodigy-map__zone--management .iq-prodigy-map__hit {
+  align-items: center;
+}
+
 .iq-prodigy-map__zone--locked {
-  filter: grayscale(0.46) saturate(0.68) brightness(0.78);
-  opacity: 0.78;
+  filter: grayscale(0.32) saturate(0.84) brightness(0.9);
+  opacity: 0.92;
 }
 
 .iq-prodigy-map__zone-motion {
@@ -7808,20 +13038,25 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   transform: translate(-50%, -50%);
   place-items: center;
   pointer-events: none;
-  filter: drop-shadow(0 10px 16px rgba(15, 23, 42, 0.42));
+  filter:
+    drop-shadow(0 8px 14px rgba(120, 53, 15, 0.45))
+    drop-shadow(0 0 16px rgba(251, 191, 36, 0.48));
+  animation: iq-prodigy-lock-shine 2.8s ease-in-out infinite;
 }
 
 .iq-prodigy-map__lock-shackle {
   width: 31px;
   height: 25px;
   margin-bottom: -10px;
-  border: 5px solid #f8fafc;
+  border: 5px solid #fde047;
   border-bottom: 0;
   border-radius: 999px 999px 0 0;
   background: transparent;
   box-shadow:
-    inset 0 0 0 1px rgba(15, 23, 42, 0.16),
-    0 0 16px rgba(248, 250, 252, 0.38);
+    inset 0 2px 0 rgba(255, 251, 235, 0.82),
+    inset 0 -1px 0 rgba(180, 83, 9, 0.38),
+    0 0 12px rgba(251, 191, 36, 0.55),
+    0 0 22px rgba(245, 158, 11, 0.32);
 }
 
 .iq-prodigy-map__lock-body {
@@ -7830,16 +13065,35 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   width: 46px;
   height: 38px;
   place-items: center;
-  border: 3px solid #f8fafc;
+  overflow: hidden;
+  border: 3px solid #fef08a;
   border-radius: 13px;
   background:
-    linear-gradient(180deg, #f8fafc 0%, #cbd5e1 48%, #94a3b8 100%);
-  color: #334155;
+    linear-gradient(
+      180deg,
+      #fffbeb 0%,
+      #fde047 16%,
+      #fbbf24 48%,
+      #d97706 76%,
+      #b45309 100%
+    );
+  color: #451a03;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -5px 10px rgba(51, 65, 85, 0.18),
-    0 5px 0 rgba(51, 65, 85, 0.42),
-    0 0 26px rgba(226, 232, 240, 0.42);
+    inset 0 2px 0 rgba(255, 255, 255, 0.88),
+    inset 0 -6px 12px rgba(146, 64, 14, 0.38),
+    0 5px 0 rgba(120, 53, 15, 0.58),
+    0 0 18px rgba(251, 191, 36, 0.52),
+    0 0 32px rgba(245, 158, 11, 0.28);
+}
+
+.iq-prodigy-map__lock-body::after {
+  content: "";
+  position: absolute;
+  inset: 2px 5px auto;
+  height: 44%;
+  border-radius: 10px 10px 14px 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.62), transparent);
+  pointer-events: none;
 }
 
 .iq-prodigy-map__lock-badge--hub {
@@ -7853,7 +13107,6 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   opacity: 1;
   transform: scale(0.9);
   transform-origin: center;
-  filter: drop-shadow(0 8px 14px rgba(15, 23, 42, 0.46));
 }
 
 .iq-prodigy-map__lock-badge--island {
@@ -7867,16 +13120,60 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   opacity: 1;
   transform: scale(0.78);
   transform-origin: center top;
-  filter: drop-shadow(0 8px 14px rgba(15, 23, 42, 0.42));
+}
+
+.iq-prodigy-map__lock-badge--unlocked .iq-prodigy-map__lock-shackle {
+  transform: translateX(7px) rotate(16deg);
+  transform-origin: 18% 100%;
+  border-color: #fde047;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 251, 235, 0.88),
+    0 0 14px rgba(251, 191, 36, 0.62),
+    0 0 24px rgba(245, 158, 11, 0.38);
+}
+
+.iq-prodigy-map__lock-badge--unlocked .iq-prodigy-map__lock-body {
+  border-color: #fef08a;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -6px 12px rgba(146, 64, 14, 0.32),
+    0 5px 0 rgba(120, 53, 15, 0.52),
+    0 0 22px rgba(251, 191, 36, 0.62),
+    0 0 36px rgba(245, 158, 11, 0.34);
+}
+
+.iq-prodigy-map__lock-badge--unlocked.iq-prodigy-map__lock-badge--island {
+  animation: iq-prodigy-lock-unlock-pulse 2.2s ease-in-out infinite;
+  filter:
+    drop-shadow(0 8px 14px rgba(120, 53, 15, 0.42))
+    drop-shadow(0 0 20px rgba(251, 191, 36, 0.58));
+}
+
+@keyframes iq-prodigy-lock-unlock-pulse {
+  0%,
+  100% {
+    filter:
+      drop-shadow(0 8px 14px rgba(120, 53, 15, 0.42))
+      drop-shadow(0 0 18px rgba(251, 191, 36, 0.52));
+  }
+
+  50% {
+    filter:
+      drop-shadow(0 10px 16px rgba(120, 53, 15, 0.48))
+      drop-shadow(0 0 28px rgba(251, 191, 36, 0.78));
+  }
 }
 
 .iq-prodigy-map__lock-keyhole {
   position: relative;
+  z-index: 1;
   width: 10px;
   height: 16px;
   border-radius: 999px 999px 4px 4px;
-  background: #334155;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  background: #451a03;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 4px rgba(69, 26, 3, 0.45);
 }
 
 .iq-prodigy-map__lock-keyhole::before {
@@ -7888,68 +13185,198 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   height: 13px;
   transform: translateX(-50%);
   border-radius: 999px;
-  background: #334155;
+  background: #451a03;
 }
 
 .iq-prodigy-map__zone--available .iq-prodigy-map__sign,
 .iq-prodigy-map__zone--active .iq-prodigy-map__sign {
-  background:
-    radial-gradient(circle at 50% -18%, rgba(255, 255, 255, 0.95), transparent 42%),
-    linear-gradient(180deg, rgba(255, 251, 235, 1) 0%, rgba(254, 240, 138, 0.98) 100%);
+  border-color: color-mix(in srgb, var(--zone-accent, #a78bfa) 72%, rgba(255, 255, 255, 0.38));
   box-shadow:
-    0 4px 0 var(--zone-edge, #ca8a04),
-    0 0 0 3px rgba(255, 255, 255, 0.28),
-    0 0 26px var(--zone-glow, rgba(251, 191, 36, 0.56)),
-    0 18px 38px rgba(8, 16, 46, 0.44);
-  animation: iq-prodigy-unlocked-sign-glow 2.8s ease-in-out infinite;
-  filter: saturate(1.16) brightness(1.08);
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 0 1px color-mix(in srgb, var(--zone-accent, #a78bfa) 38%, transparent),
+    0 0 22px color-mix(in srgb, var(--zone-glow, #a78bfa) 46%, transparent),
+    0 0 44px color-mix(in srgb, var(--zone-glow, #a78bfa) 24%, transparent),
+    0 16px 36px rgba(2, 6, 23, 0.58);
+  animation: iq-prodigy-sign-glow 3.2s ease-in-out infinite;
+}
+
+/* Business Island — unlocked: thicker gold border + pulse (locked cards stay static 2px) */
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--available,
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--active,
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--done {
+  z-index: 8;
+}
+
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--available .iq-prodigy-map__sign,
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--active .iq-prodigy-map__sign,
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--done .iq-prodigy-map__sign {
+  border-width: 3px;
+  border-color: rgba(251, 191, 36, 0.96);
+  animation: iq-prodigy-business-sign-pulse 2.4s ease-in-out infinite;
+}
+
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--available .iq-prodigy-map__sign::before,
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--active .iq-prodigy-map__sign::before,
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--done .iq-prodigy-map__sign::before {
+  left: 4%;
+  right: 4%;
+  height: 3px;
+  opacity: 1;
+  background: linear-gradient(90deg, transparent, rgba(253, 224, 71, 0.95), transparent);
+  animation: iq-prodigy-business-guide-rim 2.4s ease-in-out infinite;
+}
+
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--available .iq-prodigy-map__sign-title,
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--active .iq-prodigy-map__sign-title {
+  color: #fffbeb;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.45);
+}
+
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--available .iq-prodigy-map__sign-sub,
+.iq-prodigy-map__zone--business.iq-prodigy-map__zone--active .iq-prodigy-map__sign-sub {
+  color: rgba(254, 243, 199, 0.94);
+}
+
+.iq-prodigy-map__zone--sign-left.iq-prodigy-map__zone--business.iq-prodigy-map__zone--available .iq-prodigy-map__sign-stem,
+.iq-prodigy-map__zone--sign-left.iq-prodigy-map__zone--business.iq-prodigy-map__zone--active .iq-prodigy-map__sign-stem {
+  height: 4px;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.55);
+  animation: iq-prodigy-business-stem-pulse 2.4s ease-in-out infinite;
+}
+
+/* Business callout — slightly larger hero card + Enter chip */
+.iq-prodigy-map__zone--sign-left.iq-prodigy-map__zone--business .iq-prodigy-map__sign {
+  width: min(196px, 27vw);
+  min-width: min(158px, 34vw);
+  padding: 13px 15px 14px;
+}
+
+.iq-prodigy-map__zone--business .iq-prodigy-map__sign-title {
+  font-size: clamp(13px, 1.28vw, 17px);
+}
+
+.iq-prodigy-map__zone--business .iq-prodigy-map__sign-sub {
+  font-size: clamp(11px, 1.05vw, 14px);
+  margin-top: 5px;
+}
+
+.iq-prodigy-map__zone--business .iq-prodigy-map__sign-row {
+  margin-top: 8px;
+  gap: 8px;
+}
+
+.iq-prodigy-map__zone--business .iq-prodigy-map__chip--go {
+  padding: 5px 14px;
+  font-size: clamp(11px, 1.02vw, 13px);
+  letter-spacing: 0.08em;
 }
 
 .iq-prodigy-map__zone--locked .iq-prodigy-map__sign {
   background:
-    linear-gradient(180deg, rgba(241, 245, 249, 0.94) 0%, rgba(203, 213, 225, 0.92) 100%);
-  border-color: #94a3b8;
+    linear-gradient(168deg, rgba(30, 41, 59, 0.84) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border: 2px solid rgba(251, 191, 36, 0.82);
   box-shadow:
-    0 4px 0 #64748b,
-    0 12px 24px rgba(15, 23, 42, 0.34);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(180, 83, 9, 0.34),
+    0 10px 24px rgba(2, 6, 23, 0.48);
+  animation: none;
+  filter: none;
 }
 
 .iq-prodigy-map__zone--locked .iq-prodigy-map__sign-title,
 .iq-prodigy-map__zone--locked .iq-prodigy-map__sign-sub {
-  color: #475569;
+  color: rgba(203, 213, 225, 0.86);
 }
 
-.iq-prodigy-map__zone--business.iq-prodigy-map__zone--available .iq-prodigy-map__sign::before,
-.iq-prodigy-map__zone--business.iq-prodigy-map__zone--active .iq-prodigy-map__sign::before {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  z-index: 1;
-  border-radius: 17px;
-  border: 4px solid transparent;
-  background:
-    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.96), #fde047, transparent)
-    border-box;
-  background-size: 260% 100%;
-  background-position: 140% 0;
-  filter:
-    drop-shadow(0 0 7px rgba(253, 224, 71, 0.75))
-    drop-shadow(0 0 15px rgba(251, 191, 36, 0.38));
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  animation: iq-prodigy-business-border-shine 1.8s ease-in-out infinite;
-  pointer-events: none;
+.iq-prodigy-map__zone--locked .iq-prodigy-map__sign-sub {
+  color: rgba(148, 163, 184, 0.72);
 }
 
-.iq-prodigy-map__zone--business.iq-prodigy-map__zone--available .iq-prodigy-map__sign::after,
-.iq-prodigy-map__zone--business.iq-prodigy-map__zone--active .iq-prodigy-map__sign::after {
-  z-index: 1;
+.iq-prodigy-map__zone--locked .iq-prodigy-map__sign::before {
+  opacity: 0.58;
+  background: linear-gradient(90deg, transparent, rgba(253, 224, 71, 0.9), transparent);
+  animation: none;
+}
+
+.iq-prodigy-map__zone--locked .iq-prodigy-map__sign-stem {
+  background: linear-gradient(180deg, #fde047 0%, #d97706 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.iq-prodigy-map__zone--sign-left.iq-prodigy-map__zone--locked .iq-prodigy-map__sign-stem,
+.iq-prodigy-map__zone--sign-right.iq-prodigy-map__zone--locked .iq-prodigy-map__sign-stem {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, #fbbf24 58%, transparent),
+    color-mix(in srgb, #fbbf24 94%, #fff)
+  );
+  box-shadow: none;
+}
+
+.iq-prodigy-map__zone--sign-right.iq-prodigy-map__zone--locked .iq-prodigy-map__sign-stem {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, #fbbf24 94%, #fff),
+    color-mix(in srgb, #fbbf24 58%, transparent)
+  );
+}
+
+.iq-prodigy-map__zone--available .iq-prodigy-map__sign::before,
+.iq-prodigy-map__zone--active .iq-prodigy-map__sign::before {
+  opacity: 1;
+  animation: iq-prodigy-sign-rim 2.8s ease-in-out infinite;
+}
+
+@keyframes iq-prodigy-sign-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+
+  50% {
+    filter: brightness(1.07);
+  }
+}
+
+@keyframes iq-prodigy-sign-rim {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-prodigy-map__zone--available .iq-prodigy-map__sign,
+  .iq-prodigy-map__zone--active .iq-prodigy-map__sign,
+  .iq-prodigy-map__zone--available .iq-prodigy-map__sign::before,
+  .iq-prodigy-map__zone--active .iq-prodigy-map__sign::before,
+  .iq-prodigy-map__zone--business.iq-prodigy-map__zone--available .iq-prodigy-map__sign,
+  .iq-prodigy-map__zone--business.iq-prodigy-map__zone--active .iq-prodigy-map__sign,
+  .iq-prodigy-map__zone--business.iq-prodigy-map__zone--done .iq-prodigy-map__sign,
+  .iq-prodigy-map__zone--business.iq-prodigy-map__zone--available .iq-prodigy-map__sign::before,
+  .iq-prodigy-map__zone--business.iq-prodigy-map__zone--active .iq-prodigy-map__sign::before,
+  .iq-prodigy-map__zone--sign-left.iq-prodigy-map__zone--business.iq-prodigy-map__zone--available .iq-prodigy-map__sign-stem,
+  .iq-prodigy-map__zone--sign-left.iq-prodigy-map__zone--business.iq-prodigy-map__zone--active .iq-prodigy-map__sign-stem,
+  .iq-prodigy-map__zone--guide-pulse.iq-prodigy-map__zone--business .iq-prodigy-map__sign,
+  .iq-prodigy-map__zone--guide-pulse.iq-prodigy-map__zone--business .iq-prodigy-map__sign-stem,
+  .iq-schools-map-box-highlight .iq-schools-map-pillar-card,
+  .iq-schools-map-box-landed .iq-schools-map-pillar-card,
+  .iq-prodigy-landmark--hub,
+  .iq-prodigy-landmark--hub .iq-prodigy-landmark__hub-glow,
+  .iq-prodigy-landmark__trophy-halo,
+  .iq-prodigy-landmark__trophy-shine,
+  .iq-prodigy-landmark__trophy-crown,
+  .iq-prodigy-landmark__hub-core,
+  .iq-prodigy-landmark__hub-gold-ring,
+  .iq-prodigy-landmark--hub .iq-prodigy-landmark__sparkle,
+  .iq-prodigy-map__lock-badge {
+    animation: none !important;
+  }
 }
 
 .iq-prodigy-map__zone--hover .iq-prodigy-map__hit-area {
@@ -7975,54 +13402,93 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-prodigy-map__sign {
   position: relative;
   isolation: isolate;
-  overflow: visible;
+  overflow: hidden;
   margin-top: 0;
   width: 100%;
   max-width: 100%;
-  border-radius: 14px;
-  border: 3px solid var(--zone-edge, #7c3aed);
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--zone-edge, #a78bfa) 52%, rgba(255, 255, 255, 0.16));
   background:
-    linear-gradient(180deg, rgba(255, 251, 235, 0.97) 0%, rgba(254, 243, 199, 0.95) 100%);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  padding: 9px 11px 10px;
+    radial-gradient(
+      ellipse 120% 80% at 50% -20%,
+      color-mix(in srgb, var(--zone-glow, #a78bfa) 24%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(ellipse 90% 60% at 50% 110%, rgba(0, 0, 0, 0.38), transparent 55%),
+    linear-gradient(168deg, rgba(15, 23, 42, 0.9) 0%, rgba(8, 14, 36, 0.94) 52%, rgba(4, 10, 28, 0.96) 100%);
+  -webkit-backdrop-filter: blur(14px) saturate(1.28);
+  backdrop-filter: blur(14px) saturate(1.28);
+  padding: 11px 13px 12px;
   text-align: center;
   box-shadow:
-    0 4px 0 var(--zone-edge, #7c3aed),
-    0 12px 26px rgba(8, 16, 46, 0.4);
-  transition: transform 160ms ease, box-shadow 160ms ease;
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.24),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 0 18px color-mix(in srgb, var(--zone-glow, #a78bfa) 26%, transparent),
+    0 14px 32px rgba(2, 6, 23, 0.55);
+  transition:
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms ease,
+    border-color 200ms ease;
   flex-shrink: 0;
 }
 
-/* No island halo behind the card — keeps hover feedback on the card only. */
+/* Accent hairline + holographic top edge */
 .iq-prodigy-map__sign::before {
-  content: none;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  z-index: 2;
+  height: 2px;
+  border-radius: 0 0 4px 4px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--zone-accent, #a78bfa) 88%, #fff),
+    transparent
+  );
+  opacity: 0.78;
+  pointer-events: none;
 }
 
-/* Inner top highlight for a polished, embossed surface */
+/* Inner glass sheen */
 .iq-prodigy-map__sign::after {
   content: "";
   position: absolute;
-  inset: 3px 3px auto;
-  height: 40%;
-  border-radius: 11px 11px 16px 16px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent);
+  inset: 1px 1px auto;
+  height: 42%;
+  border-radius: 15px 15px 20px 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), transparent);
   pointer-events: none;
 }
 
 .iq-prodigy-map__zone--hover .iq-prodigy-map__sign {
-  transform: translateY(-2px);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(255, 252, 245, 0.98) 100%);
+  transform: translateY(-3px) scale(1.02);
+  border-color: color-mix(in srgb, var(--zone-accent, #a78bfa) 82%, #fff);
   box-shadow:
-    0 6px 0 rgba(15, 23, 42, 0.16),
-    0 14px 28px rgba(8, 16, 46, 0.44);
-  filter: brightness(1.04);
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0 0 1px color-mix(in srgb, var(--zone-accent, #a78bfa) 48%, transparent),
+    0 0 30px color-mix(in srgb, var(--zone-glow, #a78bfa) 58%, transparent),
+    0 20px 40px rgba(2, 6, 23, 0.62);
 }
 
 .iq-prodigy-map--mission-envelope-open .iq-prodigy-map__canvas {
   transition: transform 420ms ease, filter 420ms ease;
   transform: translate3d(1.2%, 0.8%, 0) scale(1.015);
   filter: saturate(1.08) brightness(0.9);
+}
+
+.iq-prodigy-map--mission-envelope-ready .iq-prodigy-map__canvas {
+  transition: transform 420ms ease, filter 420ms ease;
+  transform: none;
+  filter: saturate(1.06) brightness(1);
+}
+
+.iq-prodigy-map--mission-envelope-ready .iq-prodigy-map__stage::after {
+  opacity: 0;
+  transition: opacity 360ms ease;
 }
 
 .iq-prodigy-map--mission-envelope-pending .iq-prodigy-map__canvas {
@@ -8045,31 +13511,169 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   z-index: 9;
 }
 
+.iq-prodigy-map__zone--guide-pulse.iq-prodigy-map__zone--business .iq-prodigy-map__sign {
+  border-width: 4px;
+  border-color: rgba(255, 244, 180, 0.98);
+  animation: iq-prodigy-business-guide-glow 2.2s ease-in-out infinite;
+}
+
+.iq-prodigy-map__zone--guide-pulse.iq-prodigy-map__zone--business .iq-prodigy-map__sign::before {
+  left: 4%;
+  right: 4%;
+  height: 3px;
+  opacity: 1;
+  animation: iq-prodigy-business-guide-rim 2.2s ease-in-out infinite;
+}
+
+.iq-prodigy-map__zone--guide-pulse.iq-prodigy-map__zone--business .iq-prodigy-map__sign-title {
+  color: #fffbeb;
+  text-shadow:
+    0 0 12px rgba(251, 191, 36, 0.55),
+    0 1px 14px rgba(245, 158, 11, 0.42);
+}
+
+.iq-prodigy-map__zone--guide-pulse.iq-prodigy-map__zone--business .iq-prodigy-map__sign-sub {
+  color: rgba(254, 243, 199, 0.96);
+}
+
+.iq-prodigy-map__zone--guide-pulse.iq-prodigy-map__zone--business .iq-prodigy-map__sign-stem {
+  height: 4px;
+  animation: iq-prodigy-business-stem-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes iq-prodigy-business-guide-glow {
+  0%,
+  100% {
+    transform: scale(1);
+    border-color: rgba(251, 191, 36, 0.96);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+      0 0 0 2px rgba(245, 158, 11, 0.72),
+      0 0 0 5px rgba(245, 158, 11, 0.28),
+      0 0 28px rgba(251, 191, 36, 0.72),
+      0 0 56px rgba(245, 158, 11, 0.48),
+      0 0 84px rgba(245, 158, 11, 0.22),
+      0 16px 36px rgba(2, 6, 23, 0.58);
+  }
+
+  50% {
+    transform: scale(1.05);
+    border-color: rgba(255, 244, 180, 1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.36),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.14),
+      0 0 0 3px rgba(255, 237, 160, 1),
+      0 0 0 6px rgba(251, 191, 36, 0.82),
+      0 0 0 10px rgba(245, 158, 11, 0.36),
+      0 0 48px rgba(251, 191, 36, 0.98),
+      0 0 80px rgba(245, 158, 11, 0.68),
+      0 0 120px rgba(245, 158, 11, 0.34),
+      0 16px 36px rgba(2, 6, 23, 0.58);
+  }
+}
+
+@keyframes iq-prodigy-business-sign-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    border-color: rgba(251, 191, 36, 0.92);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(245, 158, 11, 0.58),
+      0 0 0 4px rgba(245, 158, 11, 0.2),
+      0 0 22px rgba(251, 191, 36, 0.58),
+      0 0 44px rgba(245, 158, 11, 0.32),
+      0 16px 36px rgba(2, 6, 23, 0.58);
+  }
+
+  50% {
+    transform: scale(1.035);
+    border-color: rgba(255, 244, 180, 0.98);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.16),
+      0 0 0 2px rgba(255, 237, 160, 0.92),
+      0 0 0 5px rgba(251, 191, 36, 0.62),
+      0 0 36px rgba(251, 191, 36, 0.78),
+      0 0 64px rgba(245, 158, 11, 0.48),
+      0 16px 36px rgba(2, 6, 23, 0.58);
+  }
+}
+
+@keyframes iq-prodigy-business-guide-rim {
+  0%,
+  100% {
+    opacity: 0.78;
+    filter: brightness(1);
+  }
+
+  50% {
+    opacity: 1;
+    filter: brightness(1.35);
+  }
+}
+
+@keyframes iq-prodigy-business-stem-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.48);
+    filter: brightness(1);
+  }
+
+  50% {
+    box-shadow:
+      0 0 16px rgba(251, 191, 36, 0.85),
+      0 0 28px rgba(245, 158, 11, 0.52);
+    filter: brightness(1.25);
+  }
+}
+
+.iq-prodigy-map__zone--guide-pulse .iq-prodigy-map__hit-area {
+  animation: none;
+  opacity: 0;
+  box-shadow: none;
+}
+
+.iq-prodigy-map__zone--guide-pulse {
+  z-index: 12;
+  cursor: pointer;
+}
+
+.iq-prodigy-map__zone--guide-pulse .iq-prodigy-map__hit {
+  cursor: pointer;
+}
+
 .iq-prodigy-map__sign--hub {
-  background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%);
-  border-color: #c4b5fd;
+  background:
+    radial-gradient(ellipse 100% 70% at 50% -10%, rgba(167, 139, 250, 0.28), transparent 55%),
+    linear-gradient(168deg, rgba(15, 23, 42, 0.9) 0%, rgba(8, 14, 36, 0.94) 100%);
+  border-color: color-mix(in srgb, #a78bfa 55%, rgba(255, 255, 255, 0.18));
 }
 
 .iq-prodigy-map__sign-title {
   position: relative;
   z-index: 1;
   display: block;
-  font-size: clamp(12px, 1.12vw, 15px);
+  font-size: clamp(12px, 1.15vw, 15.5px);
   font-weight: 900;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   line-height: 1.2;
-  color: #4c1d95;
+  color: #f8fafc;
+  text-shadow: 0 1px 14px color-mix(in srgb, var(--zone-glow, #a78bfa) 32%, transparent);
 }
 
 .iq-prodigy-map__sign-sub {
   position: relative;
   z-index: 1;
   display: block;
-  margin-top: 3px;
-  font-size: clamp(10.5px, 0.95vw, 13px);
-  font-weight: 700;
-  line-height: 1.3;
-  color: rgba(76, 29, 149, 0.75);
+  margin-top: 4px;
+  font-size: clamp(10.5px, 0.96vw, 13px);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--zone-accent, #c4b5fd) 28%, #e2e8f0);
 }
 
 .iq-prodigy-map__sign-row {
@@ -8085,40 +13689,48 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 
 .iq-prodigy-map__sign-count {
   border-radius: 999px;
-  background: #e9d5ff;
+  border: 1px solid color-mix(in srgb, var(--zone-accent, #a78bfa) 45%, transparent);
+  background: color-mix(in srgb, var(--zone-accent, #a78bfa) 14%, rgba(15, 23, 42, 0.72));
   padding: 2px 8px;
   font-size: 10px;
   font-weight: 800;
-  color: #6d28d9;
+  color: color-mix(in srgb, var(--zone-accent, #c4b5fd) 55%, #f8fafc);
 }
 
 .iq-prodigy-map__chip {
   border-radius: 999px;
-  padding: 2px 8px;
+  padding: 3px 9px;
   font-size: 9px;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  border: 1px solid transparent;
 }
 
 .iq-prodigy-map__chip--done {
-  background: #dcfce7;
-  color: #15803d;
+  background: color-mix(in srgb, #22c55e 16%, rgba(15, 23, 42, 0.72));
+  border-color: color-mix(in srgb, #22c55e 45%, transparent);
+  color: #86efac;
 }
 
 .iq-prodigy-map__chip--lock {
-  background: #f1f5f9;
-  color: #64748b;
+  background: rgba(15, 23, 42, 0.62);
+  border-color: rgba(100, 116, 139, 0.4);
+  color: #94a3b8;
 }
 
 .iq-prodigy-map__chip--active {
-  background: #e9d5ff;
-  color: #6d28d9;
+  background: color-mix(in srgb, var(--zone-accent, #a78bfa) 18%, rgba(15, 23, 42, 0.72));
+  border-color: color-mix(in srgb, var(--zone-accent, #a78bfa) 52%, transparent);
+  color: color-mix(in srgb, var(--zone-accent, #c4b5fd) 60%, #f8fafc);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--zone-glow, #a78bfa) 28%, transparent);
 }
 
 .iq-prodigy-map__chip--go {
-  background: color-mix(in srgb, var(--zone-accent, #a78bfa) 22%, #fff 78%);
-  color: #5b21b6;
+  background: color-mix(in srgb, var(--zone-accent, #a78bfa) 20%, rgba(15, 23, 42, 0.68));
+  border-color: color-mix(in srgb, var(--zone-accent, #a78bfa) 58%, transparent);
+  color: color-mix(in srgb, var(--zone-accent, #c4b5fd) 65%, #fff);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--zone-glow, #a78bfa) 32%, transparent);
 }
 
 .iq-prodigy-map__title {
@@ -8294,6 +13906,125 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   }
   50% {
     opacity: 1;
+  }
+}
+
+@keyframes iq-prodigy-trophy-presence {
+  0%,
+  100% {
+    filter:
+      drop-shadow(0 0 14px rgba(251, 191, 36, 0.58))
+      drop-shadow(0 0 28px rgba(245, 158, 11, 0.34));
+  }
+
+  50% {
+    filter:
+      drop-shadow(0 0 22px rgba(255, 244, 180, 0.95))
+      drop-shadow(0 0 48px rgba(251, 191, 36, 0.68))
+      drop-shadow(0 0 72px rgba(245, 158, 11, 0.32));
+  }
+}
+
+@keyframes iq-prodigy-trophy-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.82;
+    transform: scale(0.98);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes iq-prodigy-trophy-halo-ring {
+  0%,
+  100% {
+    opacity: 0.38;
+    transform: scale(0.96);
+  }
+
+  50% {
+    opacity: 0.72;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes iq-prodigy-trophy-shine-sweep {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: translateX(-6%) skewX(-6deg);
+  }
+
+  50% {
+    opacity: 0.72;
+    transform: translateX(6%) skewX(-6deg);
+  }
+}
+
+@keyframes iq-prodigy-trophy-crown-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes iq-prodigy-hub-core-pulse {
+  0%,
+  100% {
+    opacity: 0.88;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes iq-prodigy-hub-gold-ring {
+  0%,
+  100% {
+    opacity: 0.48;
+    stroke-width: 3;
+  }
+
+  50% {
+    opacity: 0.82;
+    stroke-width: 4.5;
+  }
+}
+
+@keyframes iq-prodigy-trophy-sparkle {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.88);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+}
+
+@keyframes iq-prodigy-lock-shine {
+  0%,
+  100% {
+    filter:
+      drop-shadow(0 8px 14px rgba(120, 53, 15, 0.42))
+      drop-shadow(0 0 14px rgba(251, 191, 36, 0.42));
+  }
+
+  50% {
+    filter:
+      drop-shadow(0 8px 14px rgba(120, 53, 15, 0.42))
+      drop-shadow(0 0 22px rgba(255, 244, 180, 0.78))
+      drop-shadow(0 0 34px rgba(251, 191, 36, 0.58));
   }
 }
 
@@ -10483,9 +16214,11 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-roblox-map__zone--financials.iq-roblox-map__zone--active .iq-roblox-map__sign,
 .iq-roblox-map__zone--financials.iq-roblox-map__zone--hover:not(.iq-roblox-map__zone--locked) .iq-roblox-map__sign {
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--zone-accent, #22c55e) 55%, transparent),
-    0 0 22px color-mix(in srgb, var(--zone-glow, #34d399) 38%, transparent),
-    0 8px 28px rgba(0, 0, 0, 0.35);
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 0 1px color-mix(in srgb, var(--zone-accent, #22c55e) 42%, transparent),
+    0 0 26px color-mix(in srgb, var(--zone-glow, #34d399) 52%, transparent),
+    0 0 48px color-mix(in srgb, var(--zone-glow, #34d399) 26%, transparent),
+    0 16px 36px rgba(2, 6, 23, 0.58);
 }
 
 .iq-cartoon-map__zone--financials.iq-cartoon-map__zone--active .iq-cartoon-map__sign-fill,

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { PILLAR_META, type PillarId } from "@/data/pillars";
@@ -30,15 +30,6 @@ function schoolsPillarHref(id: PillarId, pathname: string): string {
   const route = PILLAR_META.find((p) => p.id === id)?.route ?? `/${id}`;
   const schoolsRoute = route.startsWith("/schools") ? route : `/schools${route}`;
   return resolveSchoolsLearnerHref(schoolsRoute, pathname);
-}
-
-function boxHoverGlow(accent: string, active: boolean): string {
-  if (!active) return "none";
-  return [
-    `inset 0 0 0 1px color-mix(in srgb, ${accent} 68%, transparent)`,
-    `0 0 18px color-mix(in srgb, ${accent} 52%, transparent)`,
-    `0 0 34px color-mix(in srgb, ${accent} 30%, transparent)`
-  ].join(", ");
 }
 
 function SchoolsMapLockGlyph({ className = "" }: { className?: string }) {
@@ -109,12 +100,32 @@ function SchoolsMapLockedIslandVeil({ spot }: { spot: SchoolsMapIslandHotspot })
   );
 }
 
+function SchoolsMapIslandPromptRing({ spot }: { spot: SchoolsMapIslandHotspot }) {
+  return (
+    <div
+      aria-hidden
+      className="iq-schools-map-island-prompt pointer-events-none absolute z-[17]"
+      style={{
+        left: `${spot.cx - spot.w / 2}%`,
+        top: `${spot.cy - spot.h / 2}%`,
+        width: `${spot.w}%`,
+        height: `${spot.h}%`,
+        borderRadius: "50%"
+      }}
+    />
+  );
+}
+
 function IslandHotspot({
   spot,
-  href
+  href,
+  promptActive,
+  onPromptClick
 }: {
   spot: SchoolsMapIslandHotspot;
   href?: string;
+  promptActive?: boolean;
+  onPromptClick?: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const box = SCHOOLS_MAP_DESCRIPTION_BOXES.find((b) => b.id === spot.id);
@@ -135,6 +146,7 @@ function IslandHotspot({
 
   const hitClass = [
     "absolute z-[18] m-0 border-0 bg-transparent p-0",
+    promptActive ? "iq-schools-map-island-prompt-hit cursor-pointer" : "",
     "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-400/70"
   ].join(" ");
 
@@ -147,13 +159,27 @@ function IslandHotspot({
     onBlur: () => setHovered(false)
   };
 
+  if (promptActive && onPromptClick) {
+    return (
+      <>
+        <SchoolsMapIslandPromptRing spot={spot} />
+        <button
+          type="button"
+          aria-label={`${box.title} — tap to unlock your first quest`}
+          {...hitProps}
+          onClick={onPromptClick}
+        />
+      </>
+    );
+  }
+
   if (unlocked && href) {
     return (
       <Link
         href={href}
         prefetch
         scroll
-        aria-label={`Enter ${box.title}`}
+        aria-label={`${box.title} — ${box.description}`}
         {...hitProps}
       />
     );
@@ -162,7 +188,7 @@ function IslandHotspot({
   return (
     <button
       type="button"
-      aria-label={`${box.title} (locked)`}
+      aria-label={`${box.title} — ${box.description} (locked)`}
       aria-disabled
       {...hitProps}
       onClick={(e) => e.preventDefault()}
@@ -170,19 +196,53 @@ function IslandHotspot({
   );
 }
 
+function SchoolsMapPillarCardContent({
+  box,
+  active
+}: {
+  box: SchoolsMapDescriptionBox;
+  active: boolean;
+}) {
+  return (
+    <div
+      className={[
+        "iq-schools-map-pillar-card pointer-events-none relative flex h-full w-full flex-col justify-center gap-0.5 px-2.5 py-2 sm:gap-1 sm:px-3.5 sm:py-2.5",
+        active ? "iq-schools-map-pillar-card--active" : "",
+        !box.unlocked ? "iq-schools-map-pillar-card--locked" : ""
+      ].join(" ")}
+      style={
+        {
+          ["--schools-map-accent" as string]: box.accent
+        } as CSSProperties
+      }
+    >
+      <span className="iq-schools-map-pillar-card__title">{box.title}</span>
+      <span className="iq-schools-map-pillar-card__description">{box.description}</span>
+      {!box.unlocked ? (
+        <span className="iq-schools-map-pillar-card__lock" aria-hidden>
+          <SchoolsMapLockGlyph className="!px-1.5 !py-1" />
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 function DescriptionBoxHit({
   box,
   href,
   highlight,
-  landed
+  landed,
+  promptActive,
+  onPromptClick
 }: {
   box: SchoolsMapDescriptionBox;
   href?: string;
   highlight?: boolean;
   landed?: boolean;
+  promptActive?: boolean;
+  onPromptClick?: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const accent = box.accent;
   const active = box.unlocked && (hovered || Boolean(highlight) || Boolean(landed));
 
   const positionStyle = {
@@ -190,25 +250,26 @@ function DescriptionBoxHit({
     top: `${box.top}%`,
     width: `${box.width}%`,
     height: `${box.height}%`,
-    transform: highlight || landed ? undefined : box.unlocked && hovered ? "scale(1.03)" : "scale(1)",
+    transform: highlight || landed ? undefined : box.unlocked && hovered ? "scale(1.02)" : "scale(1)",
     transition: highlight || landed
       ? undefined
       : "transform 200ms ease-out, box-shadow 200ms ease-out",
-    boxShadow: highlight || landed ? undefined : boxHoverGlow(accent, active),
     cursor: box.unlocked ? "pointer" : "not-allowed"
   } as const;
 
   const hitClass = [
-    "absolute z-20 m-0 rounded-[12px] border-0 bg-transparent p-0",
+    "iq-schools-map-pillar-card-hit absolute z-20 m-0 rounded-xl border-0 bg-transparent p-0",
     "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-amber-400/70",
     !box.unlocked ? "iq-schools-map-box-locked" : "",
-    landed
-      ? "iq-schools-map-box-landed"
-      : highlight
-        ? "iq-schools-map-box-highlight"
-        : box.unlocked && hovered
-          ? "iq-schools-map-box-glow"
-          : ""
+    promptActive
+      ? "iq-schools-map-box-highlight cursor-pointer"
+      : landed
+        ? "iq-schools-map-box-landed"
+        : highlight
+          ? "iq-schools-map-box-highlight"
+          : box.unlocked && hovered
+            ? "iq-schools-map-box-glow"
+            : ""
   ].join(" ");
 
   const hitProps = {
@@ -220,26 +281,45 @@ function DescriptionBoxHit({
     onBlur: () => setHovered(false)
   };
 
+  const card = <SchoolsMapPillarCardContent box={box} active={active} />;
+
+  if (promptActive && onPromptClick) {
+    return (
+      <button
+        type="button"
+        aria-label={`${box.title} — tap to unlock your first quest`}
+        {...hitProps}
+        onClick={onPromptClick}
+      >
+        {card}
+      </button>
+    );
+  }
+
   if (box.unlocked && href) {
     return (
       <Link
         href={href}
         prefetch
         scroll
-        aria-label={`Enter ${box.title}`}
+        aria-label={`${box.title} — ${box.description}`}
         {...hitProps}
-      />
+      >
+        {card}
+      </Link>
     );
   }
 
   return (
     <button
       type="button"
-      aria-label={`${box.title} (locked)`}
+      aria-label={`${box.title} — ${box.description} (locked)`}
       aria-disabled
       {...hitProps}
       onClick={(e) => e.preventDefault()}
-    />
+    >
+      {card}
+    </button>
   );
 }
 
@@ -267,6 +347,9 @@ function BusinessIslandGuideLabel({ visible }: { visible: boolean }) {
 }
 
 type Props = {
+  /** Pulse Business Island + card until the learner taps to unlock. */
+  businessIslandPromptActive?: boolean;
+  onBusinessIslandClick?: () => void;
   /** Run center → Business Island unlock pulse. */
   unlockAnimationActive?: boolean;
   onUnlockAnimationComplete?: () => void;
@@ -279,9 +362,11 @@ type Props = {
 };
 
 /**
- * Schools-only quest map — `latest-map-schools.png` with interactive corner panels.
+ * Schools-only quest map — `new-map.png` with interactive pillar cards.
  */
 export function SchoolsQuestMapScreen({
+  businessIslandPromptActive = false,
+  onBusinessIslandClick,
   unlockAnimationActive = false,
   onUnlockAnimationComplete,
   highlightIslandId = null,
@@ -290,6 +375,8 @@ export function SchoolsQuestMapScreen({
 }: Props) {
   const pathname = usePathname();
   const businessLanded = highlightIslandId === "business";
+  const businessPrompt =
+    businessIslandPromptActive && Boolean(onBusinessIslandClick);
 
   const handleUnlockComplete = useCallback(() => {
     onUnlockAnimationComplete?.();
@@ -345,6 +432,12 @@ export function SchoolsQuestMapScreen({
                   ? schoolsPillarHref(spot.id, pathname)
                   : undefined
               }
+              promptActive={businessPrompt && spot.id === "business"}
+              onPromptClick={
+                businessPrompt && spot.id === "business"
+                  ? onBusinessIslandClick
+                  : undefined
+              }
             />
           ))}
           {SCHOOLS_MAP_DESCRIPTION_BOXES.map((box) => (
@@ -356,6 +449,12 @@ export function SchoolsQuestMapScreen({
               }
               highlight={highlightIslandId === box.id}
               landed={businessLanded && box.id === "business"}
+              promptActive={businessPrompt && box.id === "business"}
+              onPromptClick={
+                businessPrompt && box.id === "business"
+                  ? onBusinessIslandClick
+                  : undefined
+              }
             />
           ))}
         </div>

@@ -1,13 +1,16 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import { usePathname } from "next/navigation";
 
 import { resolveBusinessMapCardWidth } from "@/app/business/businessQuestMapPositions";
 import { hubMapCardThemeFromPillar } from "@/components/quest/hub/hubMapCardTheme";
 import { SharedHubQuestMapCard } from "@/components/quest/hub/SharedHubQuestMapCard";
+import { SchoolsBusinessMissionCard } from "@/components/schools/SchoolsBusinessMissionCard";
 import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
 import type { HubMapQuestCardData } from "@/lib/quests/hubMapQuestCardTypes";
 import type { Company } from "@/data/companies";
+import { isSchoolsDemoPath } from "@/lib/schools/schoolsDemoHref";
 
 type Props = {
   card: BusinessHubQuestCard;
@@ -17,6 +20,11 @@ type Props = {
   userId?: string;
   staggerIndex?: number;
   hubProgressPct?: number;
+  /** Schools hub grid — cards sit in a CSS grid, not orbit slots. */
+  cardLayout?: "orbit" | "grid";
+  /** Journey hub — sizes the card for current / next / previous focus. */
+  journeyRole?: "current" | "next" | "previous";
+  onBeforeQuestNavigate?: (href: string) => void;
 };
 
 function toHubCard(card: BusinessHubQuestCard): HubMapQuestCardData {
@@ -41,6 +49,25 @@ function toHubCard(card: BusinessHubQuestCard): HubMapQuestCardData {
 }
 
 export function BusinessQuestMapCard(props: Props) {
+  const pathname = usePathname();
+  const schoolsBusinessIsland =
+    isSchoolsDemoPath(pathname) || pathname.startsWith("/schools/business");
+
+  if (schoolsBusinessIsland) {
+    return (
+      <SchoolsBusinessMissionCard
+        card={props.card}
+        company={props.company}
+        partnerId={props.partnerId}
+        userId={props.userId}
+        staggerIndex={props.staggerIndex}
+        cardLayout={props.cardLayout ?? "orbit"}
+        journeyRole={props.journeyRole}
+        onBeforeQuestNavigate={props.onBeforeQuestNavigate}
+      />
+    );
+  }
+
   return (
     <SharedHubQuestMapCard
       card={toHubCard(props.card)}

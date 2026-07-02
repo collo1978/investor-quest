@@ -1,8 +1,8 @@
-/** 10-K badge center on `latest-map-schools.png` (viewBox %). */
-export const SCHOOLS_MAP_PORTAL_CENTER = { x: 50.5, y: 52 } as const;
+/** 10-K badge center on `new-map.png` (viewBox %). */
+export const SCHOOLS_MAP_PORTAL_CENTER = { x: 50, y: 49.1 } as const;
 
-/** NVIDIA skyscraper center on Business Kingdom island (viewBox %). */
-export const SCHOOLS_MAP_BUSINESS_BUILDING = { x: 28.5, y: 21.5 } as const;
+/** NVIDIA skyscraper center on Business island (viewBox %). */
+export const SCHOOLS_MAP_BUSINESS_BUILDING = { x: 24.1, y: 20 } as const;
 
 /** Bridge pulse + unlock FX land on the building mass (alias). */
 export const SCHOOLS_MAP_BUSINESS_TARGET = SCHOOLS_MAP_BUSINESS_BUILDING;

@@ -132,12 +132,14 @@ export function AppShell({
     learnerPath === "/schools/screen5-onboarding" ||
     learnerPath === "/schools/pick-interests" ||
     learnerPath === "/schools/company-reveal";
+  const isSchoolsMapScreen = learnerPath === "/schools/map";
   const isSchoolsImmersiveScreen =
     isSchoolsOpeningScreen ||
     isSchoolsAvatarScreen ||
     isSchoolsOnboardingFunnelScreen ||
     isSchoolsPosterScreen ||
-    isSchoolsPickCompanyScreen;
+    isSchoolsPickCompanyScreen ||
+    isSchoolsMapScreen;
   const showAppChrome =
     !isOnboarding && !isEntryFunnel && !isSchoolsImmersiveScreen;
   const hideMobileChrome = learnerPath.startsWith("/business");

@@ -109,6 +109,37 @@ export function clearHubCardTitleRevealed(
   try {
     sessionStorage.removeItem(revealKey(companyId, pillarId, slug));
     sessionStorage.removeItem(revealEpochKey(companyId, pillarId, slug));
+    sessionStorage.removeItem(toastKey(companyId, pillarId, slug));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Demo reset — wipe tap-to-reveal + unlock toast state for every hub slot. */
+export function clearAllHubCardRevealForPillar(
+  companyId: CompanyId,
+  pillarId: PillarId
+): void {
+  if (typeof sessionStorage === "undefined") return;
+  const slugPrefix = `${companyId}:${pillarId}:`;
+  const keyPrefixes = [
+    `${REVEAL_PREFIX}:${slugPrefix}`,
+    `${REVEAL_EPOCH_PREFIX}:${slugPrefix}`,
+    `${TOAST_PREFIX}:${slugPrefix}`
+  ];
+  try {
+    sessionStorage.removeItem(revealSetKey(companyId, pillarId));
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (!key) continue;
+      if (keyPrefixes.some((prefix) => key.startsWith(prefix))) {
+        keysToRemove.push(key);
+      }
+    }
+    for (const key of keysToRemove) {
+      sessionStorage.removeItem(key);
+    }
   } catch {
     /* ignore */
   }

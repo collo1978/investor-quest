@@ -130,6 +130,8 @@ export function QuizUnlockedCtaButton({
     }
   }, [unlocked]);
 
+  const isMission = theme.cardChrome === "mission";
+
   return (
     <motion.button
       type="button"
@@ -140,15 +142,24 @@ export function QuizUnlockedCtaButton({
       className={[
         "relative overflow-hidden rounded-full border px-6 py-2.5 sm:px-7 sm:py-3",
         "text-[11px] sm:text-[12px] font-extrabold uppercase tracking-[0.22em]",
-        "transition disabled:cursor-not-allowed disabled:opacity-60"
+        "transition disabled:cursor-not-allowed",
+        isMission
+          ? unlocked
+            ? "iq-schools-mission-cta tracking-[0.08em]"
+            : "iq-schools-mission-nav-btn tracking-[0.12em] disabled:opacity-100"
+          : "disabled:opacity-60"
       ].join(" ")}
-      style={{
-        borderColor: unlocked ? theme.border : "rgba(255,255,255,0.14)",
-        color: unlocked ? theme.hi : "rgba(226,232,240,0.70)",
-        background: unlocked
-          ? `linear-gradient(135deg, rgba(0,0,0,0.20), ${theme.glowSoft})`
-          : "transparent"
-      }}
+      style={
+        isMission
+          ? undefined
+          : {
+              borderColor: unlocked ? theme.border : "rgba(255,255,255,0.14)",
+              color: unlocked ? theme.hi : "rgba(226,232,240,0.70)",
+              background: unlocked
+                ? `linear-gradient(135deg, rgba(0,0,0,0.20), ${theme.glowSoft})`
+                : "transparent"
+            }
+      }
       initial={false}
       whileHover={unlocked ? { y: -2, scale: 1.02 } : undefined}
       whileTap={unlocked ? { scale: 0.985 } : undefined}

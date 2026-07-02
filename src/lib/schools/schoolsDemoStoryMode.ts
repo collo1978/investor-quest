@@ -7,6 +7,36 @@ export const SCHOOLS_DEMO_STORY_SESSION_KEY = "iq-schools-demo-story-active";
 /** Set only by {@link markSchoolsDemoLaunched} — sidebar “Schools Live Demo” entry. */
 export const SCHOOLS_DEMO_STORY_LAUNCHED_KEY = "iq-schools-demo-story-launched";
 
+/** Set by reset — `/schools/map` must replay envelope brief after refresh. */
+export const SCHOOLS_DEMO_MAP_BRIEF_PENDING_KEY = "iq-schools-demo-map-brief-pending";
+
+export function markSchoolsDemoMapBriefPending(): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.setItem(SCHOOLS_DEMO_MAP_BRIEF_PENDING_KEY, "1");
+  } catch {
+    /* ignore */
+  }
+}
+
+export function clearSchoolsDemoMapBriefPending(): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.removeItem(SCHOOLS_DEMO_MAP_BRIEF_PENDING_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function isSchoolsDemoMapBriefPending(): boolean {
+  if (typeof sessionStorage === "undefined") return false;
+  try {
+    return sessionStorage.getItem(SCHOOLS_DEMO_MAP_BRIEF_PENDING_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export const SCHOOLS_DEMO_STORY_STEPS = [
   "mission-brief-invitation",
   "onboarding",
@@ -144,9 +174,28 @@ export function deactivateSchoolsDemoStory(): void {
 }
 
 export function setSchoolsDemoStoryStep(step: SchoolsDemoStoryStep): void {
-  if (!snapshot.active) return;
-  snapshot = { ...snapshot, step };
+  if (!snapshot.active) {
+    if (!wasSchoolsDemoLaunchedInSession()) return;
+    snapshot = {
+      active: true,
+      step,
+      productionRoutes: pathnameLooksLikeProductionDemo()
+    };
+  } else {
+    snapshot = { ...snapshot, step };
+  }
+  writeSessionFlag(true);
+  if (step === "map-brief") {
+    markSchoolsDemoMapBriefPending();
+  } else if (stepIndex(step) > stepIndex("map-brief")) {
+    clearSchoolsDemoMapBriefPending();
+  }
   emit();
+}
+
+function pathnameLooksLikeProductionDemo(): boolean {
+  if (typeof window === "undefined") return snapshot.productionRoutes;
+  return window.location.pathname.startsWith("/schools/demo");
 }
 
 export function advanceSchoolsDemoStoryStep(next: SchoolsDemoStoryStep): void {
@@ -203,7 +252,6 @@ export const SCHOOLS_DEMO_STORY_PREFETCH_ROUTES = [
   "/schools/pick-interests",
   "/schools/company-reveal",
   "/schools/map",
-  "/schools/business",
   "/schools/business/what-they-do",
   "/schools/profile",
   "/schools/xp-ladder",
@@ -225,7 +273,9 @@ export function ensureProductionSchoolsDemoFromPath(pathname: string): void {
   const inferred = schoolsDemoStepFromPathname(pathname) ?? "mission-brief-invitation";
   let step = inferred;
 
-  if (snapshot.active) {
+  if (isSchoolsDemoMapBriefPending() && inferred === "map") {
+    step = "map-brief";
+  } else if (snapshot.active) {
     const currentIdx = stepIndex(snapshot.step);
     const inferredIdx = stepIndex(inferred);
 

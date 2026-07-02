@@ -1,1 +1,1 @@
-export { default } from "@/app/schools/mission-brief-invitation/page";
+export { default } from "@/app/schools/logo-intro/page";

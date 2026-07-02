@@ -24,9 +24,9 @@ export function isSchoolsPreviewPath(pathname: string): boolean {
 /** Strip `/schools/demo` prefix; yields canonical `/schools/...` paths. */
 export function stripSchoolsDemoPrefix(pathname: string): string {
   if (!isSchoolsDemoPath(pathname)) return pathname;
-  if (pathname === SCHOOLS_DEMO_ROUTE_PREFIX) return "/schools/opening";
+  if (pathname === SCHOOLS_DEMO_ROUTE_PREFIX) return "/schools/logo-intro";
   const rest = pathname.slice(SCHOOLS_DEMO_ROUTE_PREFIX.length);
-  return `/schools${rest.length ? rest : "/opening"}`;
+  return `/schools${rest.length ? rest : "/logo-intro"}`;
 }
 
 /**

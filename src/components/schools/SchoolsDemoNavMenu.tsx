@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useId, useState, type MouseEvent } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useState, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 
 import { useOptionalGame } from "@/components/GameProvider";
@@ -11,8 +11,10 @@ import { isMobilePreviewEmbed } from "@/lib/bank/mobilePreviewEmbed";
 import { navigateSchoolsDemoMenuHref } from "@/lib/schools/navigateSchoolsDemoStep";
 import { readSchoolsMapMissionBriefDismissed } from "@/lib/schools/schoolsMapMissionBriefState";
 import {
+  isSchoolsMapMissionBriefComplete,
   SCHOOLS_DEV_SIDEBAR_WIDTH_PX,
   shouldOffsetSchoolsNavMenuForDevSidebar,
+  shouldPinSchoolsNavMenuTopLeft,
   shouldShowSchoolsNavMenu,
   SCHOOLS_DEMO_MENU_ITEMS
 } from "@/lib/schools/schoolsDemoMenu";
@@ -35,21 +37,24 @@ export function SchoolsDemoNavMenu() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [resetBusy, setResetBusy] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [mapBriefDismissed, setMapBriefDismissed] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return readSchoolsMapMissionBriefDismissed();
-  });
+  const [mapBriefDismissed, setMapBriefDismissed] = useState(false);
 
   const storyStep =
     isSchoolsDemoStoryModeActive() && isSchoolsDemoPath(pathname) ? step : null;
 
+  const mapBriefComplete = isSchoolsMapMissionBriefComplete(
+    storyStep,
+    mapBriefDismissed
+  );
+
   const visible =
     !isMobilePreviewEmbed() &&
     shouldShowSchoolsNavMenu(pathname, storyStep, {
-      mapMissionBriefDismissed: mapBriefDismissed
+      mapMissionBriefDismissed: mapBriefComplete
     });
 
   const offsetForDevSidebar = shouldOffsetSchoolsNavMenuForDevSidebar(pathname);
+  const pinTopLeft = shouldPinSchoolsNavMenuTopLeft(pathname);
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
@@ -66,7 +71,7 @@ export function SchoolsDemoNavMenu() {
   const onResetDemo = useCallback(() => {
     if (resetBusy) return;
     const ok = window.confirm(
-      "Reset Schools demo progress? Business card 1 unlocks again and quest completions are cleared. You'll return to the quest map."
+      "Reset Schools demo progress? Business Island returns to 0/7 (quest 1 unlocked). The map envelope mission brief will replay."
     );
     if (!ok) return;
 
@@ -82,6 +87,10 @@ export function SchoolsDemoNavMenu() {
       setResetBusy(false);
     }
   }, [closeMenu, game, pathname, resetBusy, router]);
+
+  useLayoutEffect(() => {
+    setMapBriefDismissed(readSchoolsMapMissionBriefDismissed());
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -126,8 +135,10 @@ export function SchoolsDemoNavMenu() {
   return createPortal(
     <div
       className={[
-        "iq-schools-nav-menu-shell pointer-events-none fixed left-0 top-0 z-[110]",
-        offsetForDevSidebar ? "iq-schools-nav-menu-shell--dev-sidebar" : ""
+        "iq-schools-nav-menu-shell pointer-events-none fixed left-0 top-0 z-[250]",
+        offsetForDevSidebar ? "iq-schools-nav-menu-shell--dev-sidebar" : "",
+        pinTopLeft ? "iq-schools-nav-menu-shell--map" : "",
+        mapBriefComplete ? "iq-schools-nav-menu-shell--revealed" : ""
       ].join(" ")}
       style={shellStyle}
     >

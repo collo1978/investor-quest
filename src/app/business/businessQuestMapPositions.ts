@@ -29,10 +29,10 @@ export const BUSINESS_SCENE_STYLE_PORTRAIT: CSSProperties = {
 
 /** Quest card slots — staggered path 1→7; left/right pairs with clear vertical gaps (desktop). */
 export const BUSINESS_MAP_CARD_POSITIONS: Record<number, CSSProperties> = {
-  /** Top left — WHAT NVIDIA DOES */
+  /** Top left — WHAT NVIDIA DOES (inset for principles panel) */
   1: {
     top: "4%",
-    left: "4%"
+    left: "max(22%, calc(clamp(196px, 15.5vw, 272px) + 28px))"
   },
   /** Top right — WHAT'S NVIDIA'S PRODUCT SEGMENTS? (inset left of progress HUD) */
   2: {
@@ -52,12 +52,12 @@ export const BUSINESS_MAP_CARD_POSITIONS: Record<number, CSSProperties> = {
   /** Middle left — WHO MAKES NVIDIA'S CHIPS? */
   5: {
     top: "26%",
-    left: "4%"
+    left: "max(22%, calc(clamp(196px, 15.5vw, 272px) + 28px))"
   },
   /** Lower left — HOW TOUGH IS THIS INDUSTRY? */
   6: {
     top: "48%",
-    left: "4%"
+    left: "max(22%, calc(clamp(196px, 15.5vw, 272px) + 28px))"
   },
   /** Bottom center — WHO IS NVIDIA COMPETING AGAINST? */
   7: {
