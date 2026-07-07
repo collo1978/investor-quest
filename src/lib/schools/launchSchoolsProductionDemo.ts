@@ -18,6 +18,11 @@ import {
 } from "@/lib/schools/schoolsDemoStoryMode";
 import { SCHOOLS_DEMO_ROUTE_PREFIX } from "@/lib/schools/schoolsDemoHref";
 import { clearSchoolsMapMissionBriefDismiss } from "@/lib/schools/schoolsMapMissionBriefState";
+import {
+  clearSchoolsBusinessIslandHubEntered,
+  clearSchoolsBusinessIslandZoomEnter,
+  clearSchoolsBusinessIslandZoomInProgress
+} from "@/lib/schools/schoolsBusinessIslandZoomEnter";
 
 type LaunchActions = {
   replaceGameState: (state: ReturnType<typeof buildDemoGameState>) => void;
@@ -48,6 +53,9 @@ export function launchSchoolsProductionDemo(
   clearPersistedSnapshots();
   clearDemoSessionFlags();
   clearSchoolsMapMissionBriefDismiss();
+  clearSchoolsBusinessIslandHubEntered();
+  clearSchoolsBusinessIslandZoomEnter();
+  clearSchoolsBusinessIslandZoomInProgress();
   rotateOnboardingGuestId();
   setActiveDemoProfileLabel(DEMO_PROFILE_NEW_USER);
 

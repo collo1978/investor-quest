@@ -59,21 +59,21 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     slug: "why-buying",
     type: "revenue",
     pillarId: "business",
-    title: "WHY THE WORLD IS BUYING {Company.name}",
-    objective: "See where the money comes from and who pays the biggest bills.",
+    title: "WHAT {Company.name} SELLS & WHY IT WINS",
+    objective: "Understand what the company sells, why customers choose it and how it keeps improving.",
     description:
-      "Who spends the most, which products print money, and why the AI chip rush is happening — Item 1 and segment disclosures.",
-    investorQuestion: "Who spends the most money with {Company.name}?",
+      "Three quick cards: value proposition, product portfolio and innovation — grounded in Item 1 Business.",
+    investorQuestion: "What problem does {Company.name} solve for customers?",
     plainEnglishAnswer: null,
     whyItMatters:
-      "When a few big customers pay most of the bills, one pause in orders can hurt fast.",
+      "If you cannot explain why customers choose this company, you cannot judge whether demand will last.",
     secSection: {
       form: "10-K",
-      section: "Revenue Segments",
-      hint: "Products, services, markets, and major customers."
+      section: "Item 1 Business",
+      hint: "Products, services, and competitive advantages."
     },
     aiTask:
-      "Explain {Company.name}'s demand drivers: top customers, biggest product lines, and why buyers are rushing in now.",
+      "Explain {Company.name}'s value proposition, product portfolio and innovation in plain English.",
     artifactType: "map",
     rewardXp: 120,
     unlockRequirements: {
@@ -87,31 +87,29 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     displayOrder: 2,
     hubIcon: "why-buying",
     hubCardCount: 3,
-    tags: ["revenue", "customers", "demand"],
+    tags: ["products", "value", "innovation"],
     quizConfig: BUSINESS_QUEST_QUIZZES["why-buying"],
     cards: [
       {
         id: "card-1",
-        investorQuestion: "Who spends the most money with {Company.name}?",
+        investorQuestion: "What problem does {Company.name} solve?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "A handful of giants can move the whole company up or down."
+          "Investors look for businesses that solve real customer problems."
       },
       {
         id: "card-2",
-        investorQuestion:
-          "What products make {Company.name} the most money?",
+        investorQuestion: "What products does {Company.name} sell?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "If one product carries the company, a bad cycle hits hard."
+          "A broad range of products can reduce risk and create growth opportunities."
       },
       {
         id: "card-3",
-        investorQuestion:
-          "Why are companies rushing to buy AI chips?",
+        investorQuestion: "Why is innovation so important to {Company.name}?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "Demand waves explain both the hype and the risk of a slowdown."
+          "Companies that keep innovating are more likely to stay competitive over the long term."
       }
     ]
   },

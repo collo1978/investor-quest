@@ -19,7 +19,8 @@ const PROGRESS_PERSIST_ACTIONS: ReadonlySet<GameAction["type"]> = new Set([
   "toggle-quest-checklist",
   "reset",
   "dismiss-quest-map-brief",
-  "dismiss-business-island-brief"
+  "dismiss-business-island-brief",
+  "award-badges-if-new"
 ]);
 
 export function isProgressPersistAction(type: GameAction["type"]): boolean {

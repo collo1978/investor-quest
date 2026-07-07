@@ -364,7 +364,10 @@ function migratePendingConvictionQueue(raw: unknown): PendingConvictionItem[] {
       pillarToUnlock
     });
   }
-  return out;
+  return out.filter(
+    (item) =>
+      !(item.completedPillarId === "business" && item.pillarToUnlock === null)
+  );
 }
 
 function migrateOnboarding(raw: unknown): OnboardingState {

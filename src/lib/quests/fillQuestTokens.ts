@@ -75,6 +75,18 @@ function fillQuestion(q: QuizQuestion, company: Company): QuizQuestion {
 
   switch (q.kind) {
     case "multiple-choice":
+      return {
+        ...q,
+        prompt,
+        explain,
+        choices: q.choices.map((c) => fillQuestTokens(c, company)),
+        trueFalseStatement: q.trueFalseStatement
+          ? fillQuestTokens(q.trueFalseStatement, company)
+          : q.trueFalseStatement,
+        rankingSteps: q.rankingSteps
+          ? q.rankingSteps.map((s) => fillQuestTokens(s, company))
+          : q.rankingSteps
+      };
     case "scenario":
     case "odd-one-out":
     case "red-flag":

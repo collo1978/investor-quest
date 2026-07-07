@@ -125,8 +125,7 @@ export function AppShell({
     learnerPath === "/schools/mission-brief-cards" ||
     learnerPath === "/schools/mission-brief-invitation" ||
     learnerPath === "/schools/logo-reveal";
-  const isSchoolsPosterScreen =
-    learnerPath === "/schools/profile" || learnerPath === "/schools/armor-guide";
+  const isSchoolsPosterScreen = learnerPath === "/schools/armor-guide";
   const isSchoolsPickCompanyScreen = learnerPath === "/schools/pick-company";
   const isSchoolsOnboardingFunnelScreen =
     learnerPath === "/schools/screen5-onboarding" ||

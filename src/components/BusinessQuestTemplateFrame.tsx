@@ -117,10 +117,16 @@ function circleBadgeShellStyle(
   };
 }
 
+export type PillarQuestTemplateHeaderMode = "quest" | "principle-evidence";
+
 export type PillarQuestTemplateFrameProps = {
   pillarId: PillarId;
   /** Override pillar default — schools Business Island uses mission chrome. */
   theme?: PillarQuestTheme;
+  /** Quest cards vs investor-principle evidence cards (same Q/A shell). */
+  headerMode?: PillarQuestTemplateHeaderMode;
+  /** Shown as “⭐ {label}” when headerMode is principle-evidence. */
+  principleLabel?: string;
   questionText: string;
   answerSlot: ReactNode;
   companyName: string;
@@ -353,6 +359,8 @@ function InvestigationCardHighlight({
 export function PillarQuestTemplateFrame({
   pillarId,
   theme: themeProp,
+  headerMode = "quest",
+  principleLabel,
   questionText,
   answerSlot,
   companyName,
@@ -367,6 +375,7 @@ export function PillarQuestTemplateFrame({
   const isNeon = theme.cardChrome === "neon";
   const isJewel = theme.cardChrome === "jewel";
   const isMission = theme.cardChrome === "mission";
+  const isPrincipleEvidenceHeader = headerMode === "principle-evidence";
   const pct = Math.min(100, (cardIndex / Math.max(1, cardTotal)) * 100);
   const displayPct =
     isMission && readProgressCount != null
@@ -548,68 +557,110 @@ export function PillarQuestTemplateFrame({
                 answerDominant ? "min-h-[2rem]" : "min-h-[2.25rem] sm:min-h-[2.5rem]"
               ].join(" ")}
             >
-              <p
-                className={[
-                  "shrink-0 font-medium uppercase",
-                  isMission
-                    ? "text-[9.5px] tracking-[0.22em]"
-                    : isJewel
-                      ? "text-[9.5px] tracking-[0.22em] text-ink-2"
-                      : "text-[10px] font-bold tracking-[0.28em]"
-                ].join(" ")}
-                style={{ color: isMission ? labelTextColor : isJewel ? undefined : theme.hi }}
-              >
-                Card {cardIndex} of {cardTotal}
-              </p>
-              <div className="flex shrink-0 items-center justify-end gap-2">
-                {trailSlot}
-                <HeaderCompanyName name={companyName} theme={theme} />
-              </div>
+              {isPrincipleEvidenceHeader ? (
+                <>
+                  <p
+                    className={[
+                      "min-w-0 truncate font-medium uppercase",
+                      isMission
+                        ? "text-[9.5px] tracking-[0.22em]"
+                        : isJewel
+                          ? "text-[9.5px] tracking-[0.22em] text-ink-2"
+                          : "text-[10px] font-bold tracking-[0.28em]"
+                    ].join(" ")}
+                    style={{ color: isMission ? labelTextColor : isJewel ? undefined : theme.hi }}
+                  >
+                    <span aria-hidden>⭐ </span>
+                    {principleLabel ?? "Investor Principle"}
+                  </p>
+                  <p
+                    className={[
+                      "shrink-0 font-medium uppercase tabular-nums",
+                      isMission
+                        ? "text-[9.5px] tracking-[0.22em]"
+                        : isJewel
+                          ? "text-[9.5px] tracking-[0.22em] text-ink-2"
+                          : "text-[10px] font-bold tracking-[0.28em]"
+                    ].join(" ")}
+                    style={{
+                      color: isMission
+                        ? theme.textMuted ?? "#475569"
+                        : isJewel
+                          ? undefined
+                          : "rgba(210,210,220,0.72)"
+                    }}
+                  >
+                    Evidence {cardIndex} of {cardTotal}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p
+                    className={[
+                      "shrink-0 font-medium uppercase",
+                      isMission
+                        ? "text-[9.5px] tracking-[0.22em]"
+                        : isJewel
+                          ? "text-[9.5px] tracking-[0.22em] text-ink-2"
+                          : "text-[10px] font-bold tracking-[0.28em]"
+                    ].join(" ")}
+                    style={{ color: isMission ? labelTextColor : isJewel ? undefined : theme.hi }}
+                  >
+                    Card {cardIndex} of {cardTotal}
+                  </p>
+                  <div className="flex shrink-0 items-center justify-end gap-2">
+                    {trailSlot}
+                    <HeaderCompanyName name={companyName} theme={theme} />
+                  </div>
+                </>
+              )}
             </motion.div>
-            <motion.div
-              className={[
-                "relative overflow-hidden rounded-full",
-                isMission
-                  ? answerDominant
-                    ? "mt-2 h-[3px]"
-                    : "mt-2.5 h-[3px]"
-                  : isJewel
+            {!isPrincipleEvidenceHeader ? (
+              <motion.div
+                className={[
+                  "relative overflow-hidden rounded-full",
+                  isMission
                     ? answerDominant
                       ? "mt-2 h-[3px]"
                       : "mt-2.5 h-[3px]"
-                    : answerDominant
-                      ? "mt-2 h-1.5 ring-2 ring-offset-0"
-                      : "mt-3 h-1.5 ring-2 ring-offset-0"
-              ].join(" ")}
-              style={
-                isMission
-                  ? { background: "rgba(202, 138, 4, 0.22)" }
-                  : isJewel
-                    ? undefined
-                    : { boxShadow: `0 0 0 2px ${theme.borderSoft}` }
-              }
-              role="presentation"
-            >
-              <motion.div
-                initial={false}
-                animate={{ width: `${displayPct}%` }}
-                transition={{
-                  duration: isMission ? 0.72 : 0.85,
-                  ease: [0.22, 1, 0.36, 1]
-                }}
-                className="h-full rounded-full"
-                style={{
-                  background: isMission || isJewel
-                    ? `linear-gradient(90deg, ${theme.hi}88, ${theme.hi})`
-                    : progressBarGradient(theme),
-                  boxShadow: isMission
-                    ? `0 0 10px ${theme.glowSoft}`
                     : isJewel
-                      ? "none"
-                      : `0 0 18px ${theme.glow}, 0 0 8px rgba(255,255,255,0.25)`
-                }}
-              />
-            </motion.div>
+                      ? answerDominant
+                        ? "mt-2 h-[3px]"
+                        : "mt-2.5 h-[3px]"
+                      : answerDominant
+                        ? "mt-2 h-1.5 ring-2 ring-offset-0"
+                        : "mt-3 h-1.5 ring-2 ring-offset-0"
+                ].join(" ")}
+                style={
+                  isMission
+                    ? { background: "rgba(202, 138, 4, 0.22)" }
+                    : isJewel
+                      ? undefined
+                      : { boxShadow: `0 0 0 2px ${theme.borderSoft}` }
+                }
+                role="presentation"
+              >
+                <motion.div
+                  initial={false}
+                  animate={{ width: `${displayPct}%` }}
+                  transition={{
+                    duration: isMission ? 0.72 : 0.85,
+                    ease: [0.22, 1, 0.36, 1]
+                  }}
+                  className="h-full rounded-full"
+                  style={{
+                    background: isMission || isJewel
+                      ? `linear-gradient(90deg, ${theme.hi}88, ${theme.hi})`
+                      : progressBarGradient(theme),
+                    boxShadow: isMission
+                      ? `0 0 10px ${theme.glowSoft}`
+                      : isJewel
+                        ? "none"
+                        : `0 0 18px ${theme.glow}, 0 0 8px rgba(255,255,255,0.25)`
+                  }}
+                />
+              </motion.div>
+            ) : null}
           </header>
 
           <motion.section

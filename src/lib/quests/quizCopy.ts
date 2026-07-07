@@ -10,6 +10,12 @@
 
 import type { QuizQuestion } from "@/data/quests/types";
 import { assertQuizFormatVariety } from "@/lib/quests/quizFormatVariety";
+import {
+  assertObjectiveTrueFalsePrompt,
+  assertStandaloneQuizPrompt,
+  QUIZ_STANDALONE_RULE_TEXT,
+  TRUE_FALSE_RULE_TEXT
+} from "@/lib/quests/quizTrueFalseEligibility";
 
 /** Target mix per quest (3–4 questions typical). */
 export const QUIZ_QUESTION_MIX = {
@@ -55,6 +61,11 @@ Tone
 Wrong answers
 - Realistic mistakes investors make (price action, hype, single metrics without context).
 
+${TRUE_FALSE_RULE_TEXT}
+
+Stand-alone questions (all kinds — required)
+${QUIZ_STANDALONE_RULE_TEXT}
+
 Format variety (required)
 - Never use the same question kind twice in a row within one quiz.
 - Standard 3-question checkpoints: three different kinds (e.g. MC → T/F → fill-blank).
@@ -88,6 +99,10 @@ export function assertQuizQuestionsCopy(
   const prefix = catalogLabel ? `${catalogLabel}/` : "";
   for (const q of questions) {
     assertQuizCopyAllowed(q.prompt, `${prefix}${q.id}`);
+    assertStandaloneQuizPrompt(q.prompt, `${prefix}${q.id}`);
+    if (q.kind === "true-false") {
+      assertObjectiveTrueFalsePrompt(q.prompt, `${prefix}${q.id}`);
+    }
     if ("choices" in q && q.choices) {
       for (const c of q.choices) assertQuizCopyAllowed(c, q.id);
     }

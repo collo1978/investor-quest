@@ -4,24 +4,26 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { MasterInvestingPrinciplesPanel } from "@/components/business/hub/MasterInvestingPrinciplesPanel";
+import { BusinessChecklistPanel } from "@/components/business/hub/BusinessChecklistPanel";
+import { SchoolsDemoHubResetButton } from "@/components/schools/SchoolsDemoHubResetButton";
+import type { CompanyId } from "@/data/companies";
 import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  cards: readonly BusinessHubQuestCard[];
-  celebrateQuestSlug?: string | null;
+  companyId: CompanyId;
+  cards?: readonly BusinessHubQuestCard[];
 };
 
 /**
- * Full-size mastery ladder — opens when the learner taps the island academy sign.
+ * Full-size Business Checklist — opens from the island academy sign.
  */
 export function MasterInvestingPrinciplesLadderSheet({
   open,
   onClose,
-  cards,
-  celebrateQuestSlug = null
+  companyId,
+  cards
 }: Props) {
   const reduceMotion = useReducedMotion();
   const [mounted, setMounted] = useState(false);
@@ -48,7 +50,7 @@ export function MasterInvestingPrinciplesLadderSheet({
           <motion.button
             type="button"
             className="iq-schools-principles-ladder-sheet__backdrop pointer-events-auto"
-            aria-label="Close principles ladder"
+            aria-label="Close Investor Checklist"
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -59,7 +61,7 @@ export function MasterInvestingPrinciplesLadderSheet({
             className="iq-schools-principles-ladder-sheet pointer-events-auto"
             role="dialog"
             aria-modal="true"
-            aria-label="Investment quality check ladder"
+            aria-label="Investor Checklist, Business section"
             initial={reduceMotion ? false : { x: "-105%", opacity: 0.92 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: "-105%", opacity: 0.88 }}
@@ -70,16 +72,17 @@ export function MasterInvestingPrinciplesLadderSheet({
                 type="button"
                 className="iq-schools-principles-ladder-sheet__close"
                 onClick={onClose}
-                aria-label="Close ladder"
+                aria-label="Close checklist"
               >
                 ×
               </button>
+              <SchoolsDemoHubResetButton className="iq-schools-principles-ladder-sheet__reset" />
             </div>
-            <MasterInvestingPrinciplesPanel
-              cards={cards}
+            <BusinessChecklistPanel
+              companyId={companyId}
               variant="schools"
               presentation="ladder"
-              celebrateQuestSlug={celebrateQuestSlug}
+              cards={cards}
             />
           </motion.div>
         </>

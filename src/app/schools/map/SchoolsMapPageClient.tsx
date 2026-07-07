@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { MissionEnvelopeBriefSequence } from "@/components/schools/MissionEnvelopeBriefSequence";
 import { SchoolsMapBusinessIslandHubUiOverlay } from "@/components/schools/SchoolsMapBusinessIslandHubUiOverlay";
@@ -29,7 +29,7 @@ import {
   markSchoolsBusinessIslandZoomInProgress
 } from "@/lib/schools/schoolsBusinessIslandZoomEnter";
 import { resolveBusinessIslandProgressTier } from "@/lib/schools/schoolsProdigyMapConfig";
-import { SCHOOLS_BUSINESS_HQ_ENTER_HOLD_MS } from "@/lib/schools/schoolsBusinessIslandZoomEnter";
+import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
 import { SCHOOLS_UNLOCK_LAND_MS } from "@/lib/schools/schoolsMapUnlockAnimation";
 
 const CANONICAL_SCHOOLS_MAP_PATH = "/schools/map";
@@ -37,11 +37,12 @@ const CANONICAL_SCHOOLS_MAP_PATH = "/schools/map";
 /** Brief beat after the cinematic Business Island flash before entering the hub. */
 const BUSINESS_HUB_NAV_DELAY_MS = SCHOOLS_UNLOCK_LAND_MS + 180;
 
-type GuidePhase = "idle" | "awaiting-click" | "animating" | "zooming" | "hub" | "hq-zooming" | "landed";
+type GuidePhase = "idle" | "awaiting-click" | "animating" | "zooming" | "hub" | "landed";
 
 /** Schools-only map page — Prodigy overworld with envelope mission brief. */
 export default function SchoolsMapPageClient() {
   const pathname = usePathname();
+  const router = useRouter();
   const isCanonicalSchoolsMap = pathname === CANONICAL_SCHOOLS_MAP_PATH;
   const schoolsDemoFullscreen = isSchoolsDemoPath(pathname);
   /** Prodigy overworld for Schools demo + live map; cinematic map is preview-only. */
@@ -58,7 +59,6 @@ export default function SchoolsMapPageClient() {
   const [showBusinessGuideLabel, setShowBusinessGuideLabel] = useState(false);
   const [mapSessionKey, setMapSessionKey] = useState(0);
   const navigateAfterUnlockRef = useRef<number | null>(null);
-  const pendingQuestHrefRef = useRef<string | null>(null);
   const [businessProgressTier, setBusinessProgressTier] = useState(0);
   const schoolsDemo = useSchoolsDemoStory();
 
@@ -74,9 +74,7 @@ export default function SchoolsMapPageClient() {
   const missionBriefGateActive = showMapEnvelopeBrief;
 
   const mapInteractionLocked =
-    (!useProdigyMap && guidePhase === "animating") ||
-    guidePhase === "zooming" ||
-    guidePhase === "hq-zooming";
+    (!useProdigyMap && guidePhase === "animating") || guidePhase === "zooming";
 
   const exitBusinessIslandHub = useCallback(() => {
     clearSchoolsBusinessIslandHubEntered();
@@ -136,22 +134,14 @@ export default function SchoolsMapPageClient() {
     beginBusinessIslandZoom();
   }, [beginBusinessIslandZoom, guidePhase]);
 
-  const handleQuestEnterRequest = useCallback((href: string) => {
-    pendingQuestHrefRef.current = href;
-    setGuidePhase("hq-zooming");
-  }, []);
-
-  const finishHqZoom = useCallback(() => {
-    window.setTimeout(() => {
-      const href = pendingQuestHrefRef.current;
-      pendingQuestHrefRef.current = null;
-      if (href) {
-        window.location.assign(href);
-      } else {
-        setGuidePhase("hub");
-      }
-    }, SCHOOLS_BUSINESS_HQ_ENTER_HOLD_MS);
-  }, []);
+  const handleQuestEnterRequest = useCallback(
+    (href: string) => {
+      preloadQuestDetailChunks();
+      router.prefetch(href);
+      router.push(href);
+    },
+    [router]
+  );
 
   const handleHubProgressTier = useCallback(
     (completedCards: number, totalCards: number) => {
@@ -161,7 +151,7 @@ export default function SchoolsMapPageClient() {
   );
 
   const handleBusinessIslandEnter = useCallback(() => {
-    if (guidePhase === "hub" || guidePhase === "zooming" || guidePhase === "hq-zooming" || guidePhase === "animating") {
+    if (guidePhase === "hub" || guidePhase === "zooming") {
       return;
     }
     if (missionBriefGateActive && guidePhase === "idle") return;
@@ -185,9 +175,13 @@ export default function SchoolsMapPageClient() {
     const dismissed = readSchoolsMapMissionBriefDismissed();
     setSchoolsBriefDismissed(dismissed);
     setBriefStateReady(true);
+    if (!dismissed) {
+      setGuidePhase("idle");
+      return;
+    }
     if (hasSchoolsBusinessIslandHubEntered()) {
       setGuidePhase("hub");
-    } else if (dismissed) {
+    } else {
       setGuidePhase("landed");
     }
   }, []);
@@ -204,7 +198,9 @@ export default function SchoolsMapPageClient() {
   useEffect(() => {
     if (!missionBriefGateActive) {
       setEnvelopeBriefOpen(false);
+      return;
     }
+    setEnvelopeBriefOpen(true);
   }, [missionBriefGateActive]);
 
   useEffect(() => {
@@ -220,8 +216,7 @@ export default function SchoolsMapPageClient() {
         prev === "animating" ||
         prev === "awaiting-click" ||
         prev === "zooming" ||
-        prev === "hub" ||
-        prev === "hq-zooming"
+        prev === "hub"
           ? prev
           : "landed"
       );
@@ -284,19 +279,19 @@ export default function SchoolsMapPageClient() {
               businessIslandPromptActive={guidePhase === "awaiting-click"}
               onBusinessIslandClick={handleBusinessIslandClick}
               businessIslandZoomActive={guidePhase === "zooming"}
-              businessIslandHubActive={guidePhase === "hub" || guidePhase === "hq-zooming"}
-              businessHqZoomActive={guidePhase === "hq-zooming"}
+              businessIslandHubActive={guidePhase === "hub"}
+              businessHqZoomActive={false}
               businessIslandProgressTier={businessProgressTier}
               onBusinessIslandZoomComplete={finishBusinessIslandZoom}
-              onBusinessHqZoomComplete={finishHqZoom}
+              onBusinessHqZoomComplete={undefined}
               onBusinessIslandEnter={handleBusinessIslandEnter}
             />
-            {guidePhase === "hub" || guidePhase === "hq-zooming" ? (
+            {guidePhase === "hub" ? (
               <SchoolsMapBusinessIslandHubUiOverlay
                 onBackToMap={exitBusinessIslandHub}
                 onQuestEnterRequest={handleQuestEnterRequest}
                 onProgressTierChange={handleHubProgressTier}
-                uiVisible={guidePhase === "hub"}
+                uiVisible
               />
             ) : null}
           </>

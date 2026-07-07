@@ -31,10 +31,10 @@ export const BUSINESS_QUEST_QUIZZES: Record<BusinessQuestSlug, QuizConfig> = {
         kind: "true-false",
         id: "wtd-q2",
         prompt:
-          "You should understand what {Company.name} sells before you worry about the stock price.",
+          "{Company.name} builds accelerated computing chips and software.",
         correct: true,
         explain:
-          "Price is noise until you know the business in everyday language."
+          "NVIDIA's core is GPUs and accelerated computing platforms, not household cloud apps like Gmail or Dropbox."
       },
       {
         kind: "fill-blank",
@@ -89,10 +89,10 @@ export const BUSINESS_QUEST_QUIZZES: Record<BusinessQuestSlug, QuizConfig> = {
         kind: "true-false",
         id: "wb-q3",
         prompt:
-          "Knowing where the money comes from helps you judge why customers spend here.",
+          "{Company.name} primarily earns revenue from chips, software, and computing platforms.",
         correct: true,
         explain:
-          "Demand and who pays are the business model in plain sight."
+          "Revenue comes from products and platforms customers pay for, not from running a generic ad network."
       }
     ]
   },
@@ -118,10 +118,10 @@ export const BUSINESS_QUEST_QUIZZES: Record<BusinessQuestSlug, QuizConfig> = {
         kind: "true-false",
         id: "el-q2",
         prompt:
-          "If you can name where you meet a company's tech, you understand it better than memorizing jargon.",
+          "{Company.name}'s GPUs are widely used in AI data centres.",
         correct: true,
         explain:
-          "Touchpoints make the business stick in your head."
+          "Those parallel-processing workloads are where NVIDIA's technology shows up in the real world."
       },
       {
         kind: "scenario",

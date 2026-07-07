@@ -1,6 +1,6 @@
 /** Shared PWA identity for `/schools/demo` (iOS Add to Home Screen + Android install). */
 /** Bump when shipping Schools demo fixes so installed PWAs pick up new SW + assets. */
-export const SCHOOLS_DEMO_SW_VERSION = "3";
+export const SCHOOLS_DEMO_SW_VERSION = "4";
 
 export const SCHOOLS_DEMO_PWA = {
   appName: "Investor Quest",

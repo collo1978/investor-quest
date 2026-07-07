@@ -73,6 +73,25 @@ export type MultipleChoiceQuestion = QuizQuestionBase & {
   kind: "multiple-choice";
   choices: string[];
   correctIndex: number;
+  /**
+   * When true, dynamic quiz generation may transform this into an order question.
+   * When false, ranking is blocked even if the prompt sounds orderable.
+   */
+  supportsRanking?: boolean;
+  /**
+   * Explicit T/F statement when transforming from multiple-choice.
+   * Must be an objective fact about the company — not learner self-assessment.
+   */
+  trueFalseStatement?: string;
+  /** Answer when `trueFalseStatement` is set. Defaults to true. */
+  trueFalseCorrect?: boolean;
+  /** When false, dynamic generation will not transform this MC into true/false. */
+  supportsTrueFalse?: boolean;
+  /**
+   * Explicit ordered steps for ranking/timeline questions.
+   * When set (length ≥ 3), dynamic generation may use these instead of MC choices.
+   */
+  rankingSteps?: string[];
 };
 
 /** Scenario framing ("If X happens, what's most likely?"). Same input as MC. */
@@ -556,9 +575,16 @@ export type GenerateQuizOptions = {
  *  3. For each chosen format, ask an LLM to author a beginner-friendly
  *     question grounded in the card content (investor question, plain-English
  *     answer, why-it-matters).
- *  4. Validate the AI output against the discriminated union shape, retry
+ *  4. Only emit `order` when ranking eligibility passes — never turn
+ *     one-correct MC distractors into ranking exercises.
+ *  5. Only emit `true-false` as one objective company-fact statement with a
+ *     clear subject and verb — never learner self-assessment, lesson narration,
+ *     or multiple combined concepts.
+ *  6. Every question must stand on its own — reject copy that only makes sense
+ *     after reading the lesson cards; regenerate until it is a direct factual claim.
+ *  7. Validate the AI output against the discriminated union shape, retry
  *     once on shape failure, then drop the question if still invalid.
- *  5. Return a `QuizConfig`.
+ *  8. Return a `QuizConfig`.
  *
  * Until that pipeline ships, this stub keeps the call-site stable.
  */

@@ -68,11 +68,19 @@ import {
   CONTROLLED_DEMO_MODE
 } from "@/lib/demo/controlledDemo";
 import { isIsolatedDemoStoryModeActive } from "@/lib/demo/isolatedDemoStoryMode";
+import { isSchoolsDemoStoryModeActive } from "@/lib/schools/schoolsDemoStoryMode";
 import { getMaxProgressRevision } from "@/lib/gameState/stateActivity";
 import {
   buildSchoolsDemoPresenterResetState,
   SCHOOLS_DEMO_RESET_EVENT
 } from "@/lib/schools/resetSchoolsDemoProgress";
+
+/** Bank demo stays in-memory; Schools demo persists quest chain unlocks. */
+function skipProgressStoreSync(): boolean {
+  return (
+    isIsolatedDemoStoryModeActive() && !isSchoolsDemoStoryModeActive()
+  );
+}
 
 type Toast = {
   id: string;
@@ -139,6 +147,10 @@ type GameActions = {
   enqueuePillarConviction: (
     pillarId: PillarId,
     opts?: { pillarToUnlock?: PillarId | null }
+  ) => void;
+  dropPendingConviction: (
+    completedPillarId: PillarId,
+    pillarToUnlock?: PillarId | null
   ) => void;
   completeTenKRookieChallenge: (scoreFraction: number) => void;
   dismissQuestMapBrief: () => void;
@@ -340,7 +352,7 @@ export function GameProvider({
     let cancelled = false;
 
     const reconcileFromStore = async () => {
-      if (isIsolatedDemoStoryModeActive()) return;
+      if (skipProgressStoreSync()) return;
       const loaded = await store.load();
       if (cancelled) return;
       setState((prev) => {
@@ -348,7 +360,7 @@ export function GameProvider({
           logQuestProgress("hydrate.empty", summarizeReadProgress(prev));
           return prev;
         }
-        if (isIsolatedDemoStoryModeActive() || Date.now() < bootstrapLockUntilRef.current) {
+        if (skipProgressStoreSync() || Date.now() < bootstrapLockUntilRef.current) {
           return prev;
         }
         const merged = mergeLoadedGameState(prev, loaded);
@@ -378,7 +390,7 @@ export function GameProvider({
       : window.setTimeout(() => void reconcileFromStore(), 50);
 
     const unsub = store.subscribe?.((next) => {
-      if (isIsolatedDemoStoryModeActive() || Date.now() < bootstrapLockUntilRef.current) {
+      if (skipProgressStoreSync() || Date.now() < bootstrapLockUntilRef.current) {
         return;
       }
       logQuestProgress("hydrate.subscribe", summarizeReadProgress(next));
@@ -419,7 +431,7 @@ export function GameProvider({
   }, []);
 
   useEffect(() => {
-    if (isIsolatedDemoStoryModeActive()) return;
+    if (skipProgressStoreSync()) return;
     if (!persistReadyRef.current || corruptSaveBlocked) return;
     void store.save(state).then(() => {
       logQuestProgress("persist.saved", summarizeReadProgress(state));
@@ -559,7 +571,7 @@ export function GameProvider({
           lastActivityAt: Date.now()
         };
         bootstrapLockUntilRef.current = Date.now() + 4000;
-        if (!isIsolatedDemoStoryModeActive()) {
+        if (!skipProgressStoreSync()) {
           clearPersistedSnapshots();
           savePersistedSnapshot(stamped, { mergeIfDiskNewer: false });
         }
@@ -579,6 +591,12 @@ export function GameProvider({
           type: "enqueue-pillar-conviction",
           pillarId,
           pillarToUnlock: opts?.pillarToUnlock
+        }),
+      dropPendingConviction: (completedPillarId, pillarToUnlock) =>
+        dispatch({
+          type: "drop-pending-conviction",
+          completedPillarId,
+          pillarToUnlock
         }),
       completeTenKRookieChallenge: (scoreFraction) =>
         dispatch({

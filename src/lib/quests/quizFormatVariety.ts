@@ -148,12 +148,15 @@ export function pickVariedQuizFormats(
   opts: {
     category?: (typeof QUIZ_FORMAT_REGISTRY)[number]["category"];
     exclude?: ReadonlyArray<QuizQuestion["kind"]>;
+    /** Restrict random picks to this subset (e.g. MVP dynamic pool). */
+    include?: ReadonlyArray<QuizQuestion["kind"]>;
     previousKind?: QuizQuestion["kind"];
     /** Deterministic shuffle seed for tests/build scripts only — not SSR. */
     seed?: number;
   } = {}
 ): QuizQuestion["kind"][] {
   let pool = QUIZ_FORMAT_REGISTRY.filter((f) => {
+    if (opts.include && !opts.include.includes(f.kind)) return false;
     if (opts.category && f.category !== opts.category) return false;
     if (opts.exclude?.includes(f.kind)) return false;
     return true;
@@ -176,6 +179,7 @@ export function pickVariedQuizFormats(
     if (nextIdx === -1) {
       // Exhausted non-adjacent options — reshuffle full pool minus last.
       pool = QUIZ_FORMAT_REGISTRY.filter((f) => {
+        if (opts.include && !opts.include.includes(f.kind)) return false;
         if (opts.category && f.category !== opts.category) return false;
         if (opts.exclude?.includes(f.kind)) return false;
         return f.kind !== last;

@@ -57,6 +57,7 @@ function normalizeSchoolsNavLearnerPath(pathname: string): string {
 /** Routes that always expose the in-demo hamburger (map onward). */
 export const SCHOOLS_DEMO_MENU_HUB_PATHS = new Set([
   "/schools/map",
+  "/schools/business",
   "/schools/profile",
   "/schools/xp-ladder",
   "/schools/final-challenge",

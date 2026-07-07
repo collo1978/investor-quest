@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { BusinessHubSceneImage } from "@/components/business/BusinessHubSceneImage";
@@ -31,6 +31,8 @@ import {
   SCHOOLS_BUSINESS_ISLAND_UI_SETTLE_MS
 } from "@/lib/schools/schoolsBusinessIslandZoomEnter";
 import { SCHOOLS_DEMO_RESET_EVENT } from "@/lib/schools/resetSchoolsDemoProgress";
+import { SchoolsDemoHubResetButton } from "@/components/schools/SchoolsDemoHubResetButton";
+import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
 
 type HubEntryPhase = "preview" | "entering" | "revealed";
 
@@ -58,6 +60,7 @@ export function BusinessQuestMapDesktop({
   missionBriefOpen = false
 }: Props) {
   const pathname = usePathname();
+  const router = useRouter();
   const schoolsBusinessIsland =
     isSchoolsDemoPath(pathname) || pathname.startsWith("/schools/business");
   const schoolsMapHref = resolveSchoolsLearnerHref("/schools/map", pathname);
@@ -135,6 +138,15 @@ export function BusinessQuestMapDesktop({
     revealHubIslandLevel(true);
   }, [entryPhase, revealHubIslandLevel]);
 
+  const handleMarkerQuestNavigate = useCallback(
+    (href: string) => {
+      preloadQuestDetailChunks();
+      router.prefetch(href);
+      router.push(href);
+    },
+    [router]
+  );
+
   useEffect(() => {
     if (entryPhase !== "entering") return;
     const fallback = window.setTimeout(() => {
@@ -150,9 +162,9 @@ export function BusinessQuestMapDesktop({
   useEffect(() => {
     if (!schoolsBusinessIsland) return;
     if (consumeSchoolsHubCelebrateReturn()) {
-      setHubCelebrateFrom(0);
+      setHubCelebrateFrom(completedCards > 0 ? completedCards - 1 : 0);
     }
-  }, [schoolsBusinessIsland]);
+  }, [schoolsBusinessIsland, pathname, completedCards]);
 
   useEffect(() => {
     if (!schoolsBusinessIsland) return;
@@ -323,6 +335,12 @@ export function BusinessQuestMapDesktop({
                     cameraSettled={islandCameraSettled}
                     entryGateActive={hubEntryGateActive}
                     entryPhase={entryPhase}
+                    mapCameraHub={
+                      schoolsBusinessIsland &&
+                      entryPhase === "revealed" &&
+                      !hubEntryGateActive
+                    }
+                    onBeforeQuestNavigate={handleMarkerQuestNavigate}
                     onEnterHub={handleEnterBusinessHub}
                   />
                 ) : (
@@ -334,9 +352,8 @@ export function BusinessQuestMapDesktop({
                     ].join(" ")}
                   >
                     <MasterInvestingPrinciplesPanel
-                      cards={cards}
+                      companyId={company.id}
                       variant="dark"
-                      celebrateQuestSlug={celebrateQuestSlug}
                     />
                   </div>
                   <div className="pointer-events-auto absolute inset-0">
@@ -367,7 +384,7 @@ export function BusinessQuestMapDesktop({
             <>
             {schoolsBusinessIsland ? (
               <motion.div
-                className="pointer-events-none absolute bottom-3 left-2 z-30 sm:bottom-4 sm:left-4"
+                className="pointer-events-none absolute bottom-3 left-2 z-30 flex flex-col items-start gap-2 sm:bottom-4 sm:left-4"
                 style={{ paddingBottom: "max(0px, env(safe-area-inset-bottom))" }}
                 initial={false}
                 animate={{
@@ -387,6 +404,7 @@ export function BusinessQuestMapDesktop({
                   </span>
                   Back to map
                 </Link>
+                <SchoolsDemoHubResetButton />
               </motion.div>
             ) : null}
 

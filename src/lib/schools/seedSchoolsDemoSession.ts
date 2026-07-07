@@ -7,7 +7,7 @@ import {
   clearPersistedSnapshots,
   savePersistedSnapshot
 } from "@/engine/progression/persistence";
-import { clearSchoolsMapMissionBriefDismiss } from "@/lib/schools/schoolsMapMissionBriefState";
+import { prepareSchoolsMapMissionBriefEntry } from "@/lib/schools/schoolsMapMissionBriefState";
 
 export const SCHOOLS_DEMO_GAME_SEEDED_KEY = "iq-schools-demo-game-seeded";
 
@@ -18,7 +18,7 @@ export function seedSchoolsDemoGameStateOncePerSession(): void {
     if (sessionStorage.getItem(SCHOOLS_DEMO_GAME_SEEDED_KEY) === "1") return;
     clearDemoSessionFlags();
     clearPersistedSnapshots();
-    clearSchoolsMapMissionBriefDismiss();
+    prepareSchoolsMapMissionBriefEntry();
     setActiveDemoProfileLabel(DEMO_PROFILE_NEW_USER);
     savePersistedSnapshot(buildDemoGameState(DEMO_PROFILE_NEW_USER), {
       mergeIfDiskNewer: false

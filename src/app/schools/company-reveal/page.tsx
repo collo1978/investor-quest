@@ -7,6 +7,7 @@ import { BankBrokerCompanyRevealScreen } from "@/components/bank/BankBrokerCompa
 import { useGame } from "@/components/GameProvider";
 import { isSchoolsDemoPath, resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
 import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
+import { prepareSchoolsMapMissionBriefEntry } from "@/lib/schools/schoolsMapMissionBriefState";
 import { hrefForSchoolsOnboardingStep } from "@/lib/schools/schoolsOnboardingFlow";
 import { SCHOOLS_PICK_INTERESTS_REQUIRED_COUNT } from "@/lib/schools/schoolsPickInterestsConfig";
 import { markFunnelTransition } from "@/lib/startup/funnelTransition";
@@ -25,6 +26,7 @@ export default function SchoolsCompanyRevealPage() {
 
   const onLetsGo = useCallback(() => {
     actions.completeOnboarding();
+    prepareSchoolsMapMissionBriefEntry();
 
     if (isSchoolsDemoPath(pathname)) {
       navigateSchoolsDemoStep("map-brief", pathname, router);

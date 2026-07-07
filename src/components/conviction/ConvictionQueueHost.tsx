@@ -7,29 +7,30 @@ import { useGame } from "@/components/GameProvider";
 import { ConvictionFeedbackModal } from "@/components/conviction/ConvictionFeedbackModal";
 import { companyById } from "@/data/companies";
 import { pillarById } from "@/data/pillars";
+import type { PendingConvictionItem } from "@/engine";
 import { CONTROLLED_DEMO_MODE } from "@/lib/demo/controlledDemo";
 import { NVDA_CONVICTION } from "@/lib/demo/nvidiaDemoVoice";
 import {
-  isSchoolsBusinessQuestDetailPath,
   isSchoolsLearnerPath,
   resolveSchoolsLearnerHref
 } from "@/lib/schools/schoolsDemoHref";
 import { isSchoolsDemoPlaythroughActive } from "@/lib/schools/schoolsDemoPlaythrough";
 import { warmSchoolsProfileApproachAssets } from "@/lib/schools/prefetchSchoolsProfileLinks";
-import {
-  SCHOOLS_CONVICTION_BODY,
-  SCHOOLS_CONVICTION_CAUTIOUS_DESCRIPTION,
-  SCHOOLS_CONVICTION_CAUTIOUS_LABEL,
-  SCHOOLS_CONVICTION_CONFIDENT_LABEL,
-  schoolsConvictionConfidentDescription,
-  schoolsConvictionHeading,
-  schoolsConvictionKicker,
-  clearSchoolsQuestSummaryExited
-} from "@/lib/schools/schoolsQuestRewardFlow";
-import { SCHOOLS_DEMO_BUSINESS_TILE } from "@/lib/schools/schoolsDemoPlaythrough";
 import { XP_ISLAND_COMPLETION } from "@/engine/progression/xpEconomy";
 import { appendConvictionRecord } from "@/lib/conviction";
 import { filingForPillar } from "@/lib/conviction/filingForPillar";
+
+/** Removed Schools quest-1 check-in — drain stale queue items from older saves. */
+function isDeprecatedSchoolsQuest1CheckIn(
+  item: PendingConvictionItem | undefined,
+  pathname: string
+): boolean {
+  if (!item) return false;
+  if (item.completedPillarId !== "business" || item.pillarToUnlock != null) {
+    return false;
+  }
+  return isSchoolsLearnerPath(pathname) || isSchoolsDemoPlaythroughActive();
+}
 
 export function ConvictionQueueHost() {
   const { state, actions } = useGame();
@@ -40,13 +41,15 @@ export function ConvictionQueueHost() {
   const pendingRouteRef = useRef<string | null>(null);
   const prevLen = useRef(state.pendingConvictionQueue.length);
 
+  useEffect(() => {
+    if (!isDeprecatedSchoolsQuest1CheckIn(head, pathname)) return;
+    actions.dropPendingConviction("business", null);
+  }, [head, pathname, actions]);
+
   const resolvePostConvictionRoute = useCallback((): string => {
     if (!head) return "/map";
     if (isSchoolsLearnerPath(pathname) || isSchoolsDemoPlaythroughActive()) {
       if (head.completedPillarId === "business") {
-        if (head.pillarToUnlock == null) {
-          return resolveSchoolsLearnerHref("/schools/business", pathname);
-        }
         if (isSchoolsDemoPlaythroughActive()) {
           return resolveSchoolsLearnerHref("/schools/profile", pathname);
         }
@@ -77,26 +80,11 @@ export function ConvictionQueueHost() {
       if (next.includes("/profile")) {
         warmSchoolsProfileApproachAssets();
       }
-      const schoolsImmediate =
-        isSchoolsLearnerPath(pathname) &&
-        head.completedPillarId === "business" &&
-        head.pillarToUnlock == null;
-
-      if (schoolsImmediate) {
-        pendingRouteRef.current = null;
-        clearSchoolsQuestSummaryExited(SCHOOLS_DEMO_BUSINESS_TILE);
-        if (pathname !== next) {
-          router.replace(next);
-        }
-        actions.submitConvictionAndAdvance();
-        return;
-      }
 
       actions.submitConvictionAndAdvance();
-
       pendingRouteRef.current = next;
     },
-    [head, pathname, resolvePostConvictionRoute, router, state.activeCompanyId, actions]
+    [head, resolvePostConvictionRoute, state.activeCompanyId, actions]
   );
 
   useEffect(() => {
@@ -106,23 +94,8 @@ export function ConvictionQueueHost() {
     warmSchoolsProfileApproachAssets();
   }, [head, open, pathname]);
 
-  const schoolsQuest1CheckIn =
-    open &&
-    head != null &&
-    isSchoolsLearnerPath(pathname) &&
-    head.completedPillarId === "business" &&
-    head.pillarToUnlock == null;
-
-  /** Wait until hub navigation finishes — never overlay check-in on the quest summary. */
-  const deferSchoolsQuest1Modal =
-    schoolsQuest1CheckIn && isSchoolsBusinessQuestDetailPath(pathname);
-
-  const showModal = open && head && !deferSchoolsQuest1Modal;
-
-  useEffect(() => {
-    if (!showModal || !schoolsQuest1CheckIn) return;
-    clearSchoolsQuestSummaryExited(SCHOOLS_DEMO_BUSINESS_TILE);
-  }, [showModal, schoolsQuest1CheckIn]);
+  const deprecatedSchoolsCheckIn = isDeprecatedSchoolsQuest1CheckIn(head, pathname);
+  const showModal = open && head && !deprecatedSchoolsCheckIn;
 
   useEffect(() => {
     const len = state.pendingConvictionQueue.length;
@@ -150,53 +123,19 @@ export function ConvictionQueueHost() {
               : undefined
           }
           kicker={
-            isSchoolsLearnerPath(pathname)
-              ? schoolsConvictionKicker(pillarById(head.completedPillarId).title)
-              : CONTROLLED_DEMO_MODE
-                ? NVDA_CONVICTION.kicker(pillarById(head.completedPillarId).title)
-                : undefined
-          }
-          heading={
-            isSchoolsLearnerPath(pathname)
-              ? schoolsConvictionHeading(companyById(state.activeCompanyId).name)
-              : CONTROLLED_DEMO_MODE
-                ? NVDA_CONVICTION.heading
-                : undefined
-          }
-          body={
-            isSchoolsLearnerPath(pathname)
-              ? SCHOOLS_CONVICTION_BODY
-              : CONTROLLED_DEMO_MODE
-                ? NVDA_CONVICTION.body(
-                    XP_ISLAND_COMPLETION,
-                    head.pillarToUnlock != null
-                  )
-                : undefined
-          }
-          confidentLabel={
-            isSchoolsLearnerPath(pathname)
-              ? SCHOOLS_CONVICTION_CONFIDENT_LABEL
+            CONTROLLED_DEMO_MODE
+              ? NVDA_CONVICTION.kicker(pillarById(head.completedPillarId).title)
               : undefined
           }
-          confidentDescription={
-            isSchoolsLearnerPath(pathname)
-              ? schoolsConvictionConfidentDescription(
-                  companyById(state.activeCompanyId).name
+          heading={CONTROLLED_DEMO_MODE ? NVDA_CONVICTION.heading : undefined}
+          body={
+            CONTROLLED_DEMO_MODE
+              ? NVDA_CONVICTION.body(
+                  XP_ISLAND_COMPLETION,
+                  head.pillarToUnlock != null
                 )
               : undefined
           }
-          cautiousLabel={
-            isSchoolsLearnerPath(pathname)
-              ? SCHOOLS_CONVICTION_CAUTIOUS_LABEL
-              : undefined
-          }
-          cautiousDescription={
-            isSchoolsLearnerPath(pathname)
-              ? SCHOOLS_CONVICTION_CAUTIOUS_DESCRIPTION
-              : undefined
-          }
-          confidentGlyph={isSchoolsLearnerPath(pathname) ? "🟢" : undefined}
-          cautiousGlyph={isSchoolsLearnerPath(pathname) ? "🔵" : undefined}
           nextUnlockLabel={
             CONTROLLED_DEMO_MODE ? NVDA_CONVICTION.nextUnlock : undefined
           }

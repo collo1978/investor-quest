@@ -50,6 +50,7 @@ import {
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+import { formatBusinessQuestRevealTitle } from "@/lib/business/businessQuestDiscovery";
 import { BusinessIslandQuestReading } from "@/components/BusinessIslandQuestReading";
 import {
   getPillarQuestTheme,
@@ -687,7 +688,8 @@ export function QuestDetailScreen({
         {/* Hero banner — hidden for BUSINESS CSS quest card (title/crest on card + outer context). */}
         {usePillarQuestCardTemplate ? (
           <h1 className="sr-only">
-            {quest.title}. {quest.objective}
+            {formatBusinessQuestRevealTitle(questNumber, quest.title)}.{" "}
+            {quest.objective}
           </h1>
         ) : (
           <motion.header
@@ -749,6 +751,7 @@ export function QuestDetailScreen({
         {usePillarQuestCardTemplate ? (
           <BusinessIslandQuestReading
             quest={quest}
+            questOrderNumber={questNumber}
             company={company}
             pillarId={pillarId}
             slug={slug}

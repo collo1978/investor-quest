@@ -5,7 +5,10 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { useGame } from "@/components/GameProvider";
 import { SchoolsPickCompanyScreen } from "@/components/schools/SchoolsPickCompanyScreen";
-import { resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
+import { isSchoolsDemoPath, resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
+import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
+import { prepareSchoolsMapMissionBriefEntry } from "@/lib/schools/schoolsMapMissionBriefState";
+import { markFunnelTransition } from "@/lib/startup/funnelTransition";
 import {
   resolveSchoolsPickCompanyGameId,
   type SchoolsPickCompanySelection
@@ -24,6 +27,14 @@ export default function SchoolsPickCompanyPage() {
   const onStartQuest = useCallback(
     (selection: SchoolsPickCompanySelection) => {
       actions.setActiveCompany(resolveSchoolsPickCompanyGameId(selection.companyName));
+      prepareSchoolsMapMissionBriefEntry();
+
+      if (isSchoolsDemoPath(pathname)) {
+        navigateSchoolsDemoStep("map-brief", pathname, router);
+        return;
+      }
+
+      markFunnelTransition("map");
       router.replace(resolveSchoolsLearnerHref("/schools/map", pathname));
     },
     [actions, pathname, router]

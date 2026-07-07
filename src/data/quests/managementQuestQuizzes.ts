@@ -30,7 +30,7 @@ export const MANAGEMENT_QUEST_QUIZZES: Record<
         kind: "true-false",
         id: "mgmt1-q2",
         prompt:
-          "For {Company.name}, a long-tenured CEO is context, not proof that shareholder risk is low.",
+          "{Company.name}'s annual proxy filing lists executive officers and their pay.",
         correct: true,
         explain:
           "Pair tenure at {Company.name} with outcomes, board refresh, and whether incentives still fit the strategy."
@@ -257,7 +257,7 @@ export const MANAGEMENT_QUEST_QUIZZES: Record<
         kind: "true-false",
         id: "mgmtfs-q3",
         prompt:
-          "{Company.name} can show positive net income while still facing a liquidity squeeze.",
+          "{Company.name} can show positive net income during a liquidity squeeze.",
         correct: true,
         explain:
           "Earnings are not cash, working capital and capex can absorb liquidity quickly at {Company.name}."
@@ -301,10 +301,10 @@ export const MANAGEMENT_QUEST_QUIZZES: Record<
         kind: "true-false",
         id: "mgmtsum-q2",
         prompt:
-          "You can judge {Company.name}'s management without linking pay, governance, and multi-year results.",
-        correct: false,
+          "{Company.name}'s board reviews executive pay in the annual proxy filing.",
+        correct: true,
         explain:
-          "For {Company.name}, leadership is a package, team, incentives, capital choices, and board oversight."
+          "Sound management analysis ties executive pay, governance, and multi-year results together."
       },
       {
         kind: "fill-blank",

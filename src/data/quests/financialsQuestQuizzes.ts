@@ -30,7 +30,7 @@ export const FINANCIALS_QUEST_QUIZZES: Record<
         kind: "true-false",
         id: "fin-growth-q2",
         prompt:
-          "For {Company.name}, heavy reliance on one product or region can hide risk until that slice slows.",
+          "{Company.name} depends heavily on data-centre AI chip demand.",
         correct: true,
         explain:
           "Concentration at {Company.name} is fine until the engine that drives most sales hiccups."
@@ -69,7 +69,7 @@ export const FINANCIALS_QUEST_QUIZZES: Record<
         kind: "true-false",
         id: "fin-profit-q2",
         prompt:
-          "At {Company.name}, earnings per share can rise even when net income is flat if the share count shrinks.",
+          "{Company.name}'s earnings per share can rise when its share count falls.",
         correct: true,
         explain:
           "Always ask whether EPS growth at {Company.name} is operating strength or financial engineering."
@@ -123,7 +123,7 @@ export const FINANCIALS_QUEST_QUIZZES: Record<
         kind: "true-false",
         id: "fin-expense-q3",
         prompt:
-          "Operating expenses at {Company.name} can grow with revenue and still be healthy if margins hold.",
+          "{Company.name} invests heavily in research and development each year.",
         correct: true,
         explain:
           "Scale businesses grow opex with volume, the test for {Company.name} is margin and return on spend."
@@ -202,7 +202,7 @@ export const FINANCIALS_QUEST_QUIZZES: Record<
         kind: "true-false",
         id: "fin-strength-q2",
         prompt:
-          "{Company.name} can report profit while still facing a near-term liquidity squeeze.",
+          "{Company.name} can face a near-term liquidity squeeze.",
         correct: true,
         explain:
           "Profit is not cash, working capital and capex can drain liquidity at {Company.name} even with positive net income."

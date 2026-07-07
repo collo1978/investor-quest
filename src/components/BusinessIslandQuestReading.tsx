@@ -53,13 +53,11 @@ import { islandQuizSectionTitle } from "@/lib/quests/islandQuizStyle";
 import {
   isSchoolsBusinessQuestPath,
   isSchoolsDemoPath,
-  isSchoolsLearnerPath,
   resolveSchoolsLearnerHref
 } from "@/lib/schools/schoolsDemoHref";
 import { navigateSchoolsDemoMenuHref } from "@/lib/schools/navigateSchoolsDemoStep";
 import {
   isSchoolsDemoPlaythroughActive,
-  SCHOOLS_DEMO_BUSINESS_TILE
 } from "@/lib/schools/schoolsDemoPlaythrough";
 import {
   markSchoolsHubCelebrateReturn,
@@ -70,6 +68,61 @@ import {
   SCHOOLS_CARD_COMPLETE_XP,
   SCHOOLS_MICRO_XP_PER_CORRECT
 } from "@/lib/schools/schoolsQuestRewardFlow";
+import { BusinessInvestorPrincipleEvidenceFlow } from "@/components/business/investorFramework/BusinessInvestorPrincipleEvidenceFlow";
+import { BusinessChecklistSectionQuizFlow } from "@/components/business/investorFramework/BusinessChecklistSectionQuizFlow";
+import { InvestorEvidenceMarkAsReadButton } from "@/components/business/investorFramework/InvestorEvidenceMarkAsReadButton";
+import { InvestorEvidenceReadCard } from "@/components/business/investorFramework/InvestorEvidenceReadCard";
+import { InvestorQualityRatingScreen } from "@/components/business/investorQuality/InvestorQualityRatingScreen";
+import { BusinessQuestChecklistLayout, useEvidenceFly } from "@/components/business/investorQuality/BusinessQuestChecklistLayout";
+import { EvidenceFlyProvider } from "@/components/business/investorQuality/InvestorQualityEvidenceFlyover";
+import {
+  resolveCardChecklistItems,
+  resolvePendingQuestRatingItems,
+  resolveQuestEndRatingItems,
+  resolveQuestEvidenceFromReadSlugs,
+  type InvestorQualityChecklistItemId,
+  type InvestorQualityRatingValue
+} from "@/lib/business/investorQualityChecklist";
+import {
+  addChecklistEvidence,
+  saveChecklistRatings,
+  syncChecklistEvidenceFromReadSlugs
+} from "@/lib/business/investorQualityChecklistStorage";
+import {
+  appendQuestSessionEvidence,
+  markQuestRatingSubmitted,
+  readQuestChecklistSession,
+  writeQuestChecklistSession
+} from "@/lib/business/investorQualityQuestSession";
+import { useInvestorQualityChecklist } from "@/hooks/useInvestorQualityChecklist";
+import { useBusinessChecklistProgress } from "@/hooks/useBusinessChecklistProgress";
+import { isPrincipleEvidenceComplete } from "@/lib/business/businessInvestorEvidenceHelpers";
+import {
+  BUSINESS_SECTION_QUIZ_GLOW_EVENT,
+  BUSINESS_SECTION_QUIZ_START_EVENT,
+  isSectionPrinciplesEvidenceComplete
+} from "@/lib/business/businessChecklistSectionQuizHelpers";
+import { consumePendingChecklistSectionQuiz } from "@/lib/business/businessChecklistSectionQuizNavigation";
+import { resolveInvestorEvidenceCards } from "@/lib/business/businessInvestorEvidenceCards";
+import {
+  canStartPrincipleEvidenceFlow,
+  principleHasEvidenceCards,
+  questSlugHasSectionEvidence,
+  resolvePrincipleEvidenceTrigger,
+  resolvePrincipleForQuestEvidenceTrigger,
+  resolveSectionEvidencePrinciples
+} from "@/lib/business/businessInvestorEvidenceFlowHelpers";
+import {
+  formatChecklistSectionHeading,
+  resolveInvestorPrinciple,
+  resolveSectionForQuest,
+  type BusinessChecklistSectionId,
+  type InvestorPrincipleId,
+  type InvestorRollupRating
+} from "@/lib/business/businessInvestorFramework";
+import { BUSINESS_INVESTOR_FRAMEWORK_CHANGED_EVENT } from "@/lib/business/businessInvestorFrameworkStorage";
+import { SCHOOLS_DEMO_RESET_EVENT } from "@/lib/schools/resetSchoolsDemoProgress";
+import { hasSchoolsBusinessIslandHubEntered } from "@/lib/schools/schoolsBusinessIslandZoomEnter";
 
 type AnswerBlock =
   | { kind: "prose"; text: string }
@@ -493,7 +546,7 @@ function MarkAsReadCheckbox({
   );
 }
 
-function QuestReadingHeader({
+function ChecklistSectionHeader({
   title,
   theme
 }: {
@@ -502,21 +555,23 @@ function QuestReadingHeader({
 }) {
   const isMission = theme.cardChrome === "mission";
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
+    <div
       className="mx-auto mb-5 max-w-2xl text-center sm:mb-6"
+      data-checklist-section-title
     >
-      <p
-        className="font-[var(--font-grotesk)] text-[11px] font-semibold uppercase tracking-[0.2em] sm:text-[12px]"
-        style={{
-          color: isMission ? "#fde68a" : theme.hi
-        }}
+      <h1
+        className="iq-business-checklist-section-title font-[var(--font-grotesk)] text-[clamp(1.12rem,2.6vw,1.45rem)] font-bold leading-snug tracking-[0.01em] sm:text-[1.5rem]"
+        style={
+          isMission
+            ? undefined
+            : {
+                color: theme.hi
+              }
+        }
       >
         {title}
-      </p>
-    </motion.div>
+      </h1>
+    </div>
   );
 }
 
@@ -682,6 +737,8 @@ function BusinessCardPager({
 
 export type BusinessIslandQuestReadingProps = {
   quest: QuestDefinition;
+  /** Hub slot order — used for “Quest N: Title” reveal inside the quest. */
+  questOrderNumber: number;
   company: Company;
   pillarId: PillarId;
   slug: string;
@@ -710,6 +767,16 @@ export type BusinessIslandQuestReadingProps = {
 export function BusinessIslandQuestReading(
   props: BusinessIslandQuestReadingProps
 ) {
+  return (
+    <EvidenceFlyProvider>
+      <BusinessIslandQuestReadingInner {...props} />
+    </EvidenceFlyProvider>
+  );
+}
+
+function BusinessIslandQuestReadingInner(
+  props: BusinessIslandQuestReadingProps
+) {
   const {
     quest,
     company,
@@ -733,7 +800,7 @@ export function BusinessIslandQuestReading(
   const questProgressDebug = useQuestProgressDebug();
   const pathname = usePathname();
   const router = useRouter();
-  const { actions, state, raw } = useGame();
+  const { actions, raw } = useGame();
   const schoolsRewardFlow = isSchoolsBusinessQuestPath(pathname);
   const questCompleted =
     raw.companies[raw.activeCompanyId]?.pillars[pillarId]?.completedQuestSlugs.includes(
@@ -748,11 +815,34 @@ export function BusinessIslandQuestReading(
     questProgressDebug ||
     (schoolsRewardFlow && isSchoolsDemoPlaythroughActive());
   const [cardIndex, setCardIndex] = useState(0);
-  const [screen, setScreen] = useState<"cards" | "quiz">("cards");
+  const [screen, setScreen] = useState<
+    "cards" | "quality-check" | "quiz" | "section-quiz"
+  >("cards");
+  const [evidenceFrameworkTick, setEvidenceFrameworkTick] = useState(0);
+  /** Active principle evidence gate — set on mark-read or auto-chained unlock. */
+  const [activeEvidencePrincipleId, setActiveEvidencePrincipleId] =
+    useState<InvestorPrincipleId | null>(null);
+  /** Keep evidence flow mounted through principle-complete / unlock panels. */
+  const [evidenceFlowSessionActive, setEvidenceFlowSessionActive] = useState(false);
+  const [highlightPrincipleId, setHighlightPrincipleId] = useState<string | null>(
+    null
+  );
+  const [highlightSectionQuizId, setHighlightSectionQuizId] = useState<
+    BusinessChecklistSectionId | null
+  >(null);
   const [quizSessionKey, setQuizSessionKey] = useState(0);
   const [answerRevealed, setAnswerRevealed] = useState(false);
   const [continueHint, setContinueHint] = useState(false);
+  const [pulseChecklistItems, setPulseChecklistItems] = useState<
+    InvestorQualityChecklistItemId[]
+  >([]);
+  const [sessionEvidenceItems, setSessionEvidenceItems] = useState<
+    InvestorQualityChecklistItemId[]
+  >([]);
+  const [questRatingSubmitted, setQuestRatingSubmitted] = useState(false);
   const prevQuestCompletedRef = useRef(questCompleted);
+  const markReadAnchorRef = useRef<HTMLDivElement>(null);
+  const evidenceFly = useEvidenceFly();
   /** Q → SHOW ME → A reveal for every Business quest card (same flow as Quest 1). */
   const useAnswerReveal = pillarId === "business";
   const quiz = useMemo(
@@ -770,34 +860,355 @@ export function BusinessIslandQuestReading(
       }),
     [slug, cards, readQuestSlugs, quest.quizConfig]
   );
+  const checklistQuestProgressPct = useMemo(() => {
+    if (questCompleted) return 100;
+    if (readProgress.cardsRequired <= 0) return 0;
+    return Math.round(
+      (readProgress.cardsRead / readProgress.cardsRequired) * 100
+    );
+  }, [questCompleted, readProgress.cardsRead, readProgress.cardsRequired]);
   const missingCardCount = readProgress.missingCardIds.length;
   const quizReady = readProgress.quizUnlocked;
   const isMissionCard = theme.cardChrome === "mission";
   const cardsReadCount = cardReadFlags.filter(Boolean).length;
+  const companyId = raw.activeCompanyId;
+  const checklistEnabled = pillarId === "business";
+  const checklistSectionDef = useMemo(() => resolveSectionForQuest(slug), [slug]);
+  const usesChecklistSectionQuiz = checklistEnabled && checklistSectionDef != null;
+  const showLegacyQuestQuiz = hasQuiz && !usesChecklistSectionQuiz;
+  const { snapshot: checklistSnapshot, refresh: refreshChecklistSnapshot } =
+    useInvestorQualityChecklist(companyId);
+  const { refresh: refreshFrameworkChecklist } = useBusinessChecklistProgress({
+    companyId,
+    currentQuestSlug: slug,
+    currentQuestProgressPct: checklistQuestProgressPct
+  });
+
+  const highlightSectionQuizRow = useCallback((sectionId: BusinessChecklistSectionId) => {
+    setHighlightSectionQuizId(sectionId);
+    window.dispatchEvent(
+      new CustomEvent(BUSINESS_SECTION_QUIZ_GLOW_EVENT, {
+        detail: { sectionId }
+      })
+    );
+    window.setTimeout(() => setHighlightSectionQuizId(null), 3200);
+  }, []);
+
+  const startSectionQuizFlow = useCallback(
+    (sectionId: BusinessChecklistSectionId) => {
+      setScreen("section-quiz");
+      highlightSectionQuizRow(sectionId);
+    },
+    [highlightSectionQuizRow]
+  );
+
+  const questEvidenceItems = useMemo(() => {
+    if (!checklistEnabled) return [] as InvestorQualityChecklistItemId[];
+    if (sessionEvidenceItems.length > 0) return sessionEvidenceItems;
+    return resolveQuestEvidenceFromReadSlugs(slug, readQuestSlugs);
+  }, [checklistEnabled, sessionEvidenceItems, slug, readQuestSlugs]);
+
+  const pendingRatingItems = useMemo(() => {
+    if (!checklistEnabled || questRatingSubmitted) return [];
+    let pending = resolvePendingQuestRatingItems(slug, questEvidenceItems);
+    if (pending.length === 0 && schoolsRewardFlow) {
+      const endItems = resolveQuestEndRatingItems(slug);
+      const hasQuestReads = readQuestSlugs.some(
+        (markSlug) => markSlug === slug || markSlug.startsWith(`${slug}#`)
+      );
+      if (endItems.length > 0 && hasQuestReads) {
+        pending = endItems.filter((id) => questEvidenceItems.includes(id));
+        if (pending.length === 0) pending = [...endItems];
+      }
+    }
+    return pending;
+  }, [
+    checklistEnabled,
+    questRatingSubmitted,
+    slug,
+    questEvidenceItems,
+    schoolsRewardFlow,
+    readQuestSlugs
+  ]);
+
+  const sectionEvidencePrinciples = useMemo(
+    () =>
+      checklistSectionDef
+        ? resolveSectionEvidencePrinciples(checklistSectionDef.id)
+        : [],
+    [checklistSectionDef]
+  );
+
+  const questHasSectionEvidence = useMemo(
+    () => questSlugHasSectionEvidence(company.id, slug),
+    [company.id, slug]
+  );
+
+  const resolvedActiveEvidencePrinciple = useMemo((): InvestorPrincipleId | null => {
+    void evidenceFrameworkTick;
+    if (!checklistEnabled || !questHasSectionEvidence) return null;
+    for (const principleId of sectionEvidencePrinciples) {
+      if (!canStartPrincipleEvidenceFlow(company.id, principleId)) continue;
+      const trigger = resolvePrincipleEvidenceTrigger(principleId);
+      if (!trigger) continue;
+      const cardIdx = cards.findIndex((card) => card.id === trigger.cardId);
+      if (cardIdx >= 0 && cardReadFlags[cardIdx] === true) {
+        return principleId;
+      }
+    }
+    return null;
+  }, [
+    checklistEnabled,
+    questHasSectionEvidence,
+    sectionEvidencePrinciples,
+    company.id,
+    cards,
+    cardReadFlags,
+    evidenceFrameworkTick
+  ]);
+
+  const effectiveEvidencePrincipleId =
+    activeEvidencePrincipleId ?? resolvedActiveEvidencePrinciple;
+
+  const evidenceGateActive = useMemo(() => {
+    void evidenceFrameworkTick;
+    if (!checklistEnabled || !questHasSectionEvidence) return false;
+    if (!effectiveEvidencePrincipleId) return false;
+    const principleComplete = isPrincipleEvidenceComplete(
+      company.id,
+      effectiveEvidencePrincipleId
+    );
+    if (!principleComplete) return true;
+    return (
+      evidenceFlowSessionActive &&
+      activeEvidencePrincipleId === effectiveEvidencePrincipleId
+    );
+  }, [
+    checklistEnabled,
+    questHasSectionEvidence,
+    company.id,
+    effectiveEvidencePrincipleId,
+    activeEvidencePrincipleId,
+    evidenceFlowSessionActive,
+    evidenceFrameworkTick
+  ]);
+
+  const skipReadForActivePrincipleFirstCard = useMemo(() => {
+    if (!effectiveEvidencePrincipleId) return false;
+    const trigger = resolvePrincipleEvidenceTrigger(effectiveEvidencePrincipleId);
+    if (!trigger || trigger.questSlug !== slug) return false;
+    const cardIdx = cards.findIndex((card) => card.id === trigger.cardId);
+    return cardIdx >= 0 && cardReadFlags[cardIdx] === true;
+  }, [effectiveEvidencePrincipleId, slug, cards, cardReadFlags]);
+
+  useEffect(() => {
+    const bumpFramework = () => setEvidenceFrameworkTick((tick) => tick + 1);
+    window.addEventListener(BUSINESS_INVESTOR_FRAMEWORK_CHANGED_EVENT, bumpFramework);
+    window.addEventListener("storage", bumpFramework);
+    return () => {
+      window.removeEventListener(
+        BUSINESS_INVESTOR_FRAMEWORK_CHANGED_EVENT,
+        bumpFramework
+      );
+      window.removeEventListener("storage", bumpFramework);
+    };
+  }, []);
+
+  useEffect(() => {
+    const onStartSectionQuiz = (event: Event) => {
+      const detail = (
+        event as CustomEvent<{ sectionId?: BusinessChecklistSectionId; questSlug?: string }>
+      ).detail;
+      if (detail?.questSlug !== slug || !detail.sectionId) return;
+      startSectionQuizFlow(detail.sectionId);
+    };
+    window.addEventListener(BUSINESS_SECTION_QUIZ_START_EVENT, onStartSectionQuiz);
+    return () =>
+      window.removeEventListener(BUSINESS_SECTION_QUIZ_START_EVENT, onStartSectionQuiz);
+  }, [slug, startSectionQuizFlow]);
+
+  useEffect(() => {
+    if (!usesChecklistSectionQuiz || !checklistSectionDef) return;
+    const pendingSectionId = consumePendingChecklistSectionQuiz();
+    if (pendingSectionId && pendingSectionId === checklistSectionDef.id) {
+      startSectionQuizFlow(pendingSectionId);
+    }
+  }, [usesChecklistSectionQuiz, checklistSectionDef, startSectionQuizFlow]);
+
+  const handleEvidenceFlowSaved = useCallback(() => {
+    refreshFrameworkChecklist();
+    setEvidenceFrameworkTick((tick) => tick + 1);
+  }, [refreshFrameworkChecklist]);
+
+  const handleEvidenceFlowComplete = useCallback(
+    ({
+      unlockedPrincipleId
+    }: {
+      overallRating: InvestorRollupRating;
+      unlockedPrincipleId: InvestorPrincipleId | null;
+    }) => {
+      handleEvidenceFlowSaved();
+      if (unlockedPrincipleId) {
+        setHighlightPrincipleId(unlockedPrincipleId);
+        setActiveEvidencePrincipleId(unlockedPrincipleId);
+        setEvidenceFlowSessionActive(true);
+        window.setTimeout(() => setHighlightPrincipleId(null), 3200);
+      } else {
+        setActiveEvidencePrincipleId(null);
+        setEvidenceFlowSessionActive(false);
+        if (
+          checklistSectionDef &&
+          isSectionPrinciplesEvidenceComplete(company.id, checklistSectionDef.id)
+        ) {
+          highlightSectionQuizRow(checklistSectionDef.id);
+        }
+      }
+      setEvidenceFrameworkTick((tick) => tick + 1);
+    },
+    [handleEvidenceFlowSaved, checklistSectionDef, company.id, highlightSectionQuizRow]
+  );
 
   const handleMarkRead = useCallback(
     (markSlug: string) => {
+      const wasRead = readQuestSlugs.includes(markSlug);
+      const cardId = markSlug.includes("#")
+        ? markSlug.split("#")[1]!
+        : cards[cardIndex]?.id ?? "card-1";
       onMarkRead(markSlug);
-      if (schoolsRewardFlow && isMissionCard) {
+
+      if (checklistEnabled && !wasRead) {
+        const items = resolveCardChecklistItems(slug, cardId);
+        if (items.length > 0) {
+          const { addedItems } = addChecklistEvidence(companyId, slug, cardId, items);
+          if (addedItems.length > 0) {
+            const merged = appendQuestSessionEvidence(companyId, slug, addedItems);
+            setSessionEvidenceItems(merged);
+            refreshChecklistSnapshot();
+
+            const celebrateEvidence = () => {
+              setPulseChecklistItems(addedItems);
+              window.setTimeout(() => {
+                setPulseChecklistItems((current) =>
+                  current.length > 0 ? [] : current
+                );
+              }, 2600);
+            };
+
+            const fromEl = markReadAnchorRef.current;
+            if (evidenceFly && fromEl) {
+              evidenceFly.triggerFly(fromEl, addedItems, celebrateEvidence);
+            } else {
+              celebrateEvidence();
+            }
+          }
+        }
+
+        const triggeredPrinciple = resolvePrincipleForQuestEvidenceTrigger(
+          slug,
+          cardId
+        );
+        if (
+          triggeredPrinciple &&
+          canStartPrincipleEvidenceFlow(company.id, triggeredPrinciple)
+        ) {
+          setActiveEvidencePrincipleId(triggeredPrinciple);
+          setEvidenceFlowSessionActive(true);
+          setEvidenceFrameworkTick((tick) => tick + 1);
+        }
+      }
+
+      const triggeredPrinciple = resolvePrincipleForQuestEvidenceTrigger(slug, cardId);
+      const launchesEvidenceGate =
+        checklistEnabled &&
+        questHasSectionEvidence &&
+        !wasRead &&
+        triggeredPrinciple != null &&
+        canStartPrincipleEvidenceFlow(company.id, triggeredPrinciple);
+
+      if (schoolsRewardFlow && isMissionCard && !launchesEvidenceGate) {
         setContinueHint(true);
         window.setTimeout(() => setContinueHint(false), 3200);
       }
     },
-    [onMarkRead, schoolsRewardFlow, isMissionCard]
+    [
+      onMarkRead,
+      schoolsRewardFlow,
+      isMissionCard,
+      checklistEnabled,
+      readQuestSlugs,
+      slug,
+      companyId,
+      cards,
+      cardIndex,
+      refreshChecklistSnapshot,
+      evidenceFly,
+      company.id,
+      questHasSectionEvidence
+    ]
   );
 
-  useEffect(() => {
-    setContinueHint(false);
-  }, [cardIndex, slug]);
-
+  /** Quest slug change — reset card flow only (not on hydration-driven companyId ticks). */
   useEffect(() => {
     setCardIndex(0);
     setScreen("cards");
     setAnswerRevealed(false);
+    setPulseChecklistItems([]);
+    setActiveEvidencePrincipleId(null);
+    setEvidenceFlowSessionActive(false);
+    setHighlightSectionQuizId(null);
     if (schoolsRewardFlow) {
       clearSchoolsQuestSummaryExited(slug);
     }
   }, [slug, schoolsRewardFlow]);
+
+  /** Session + checklist evidence — sync without clobbering evidence rating screen. */
+  useEffect(() => {
+    if (!checklistEnabled) {
+      setSessionEvidenceItems([]);
+      setQuestRatingSubmitted(false);
+      return;
+    }
+    const session = readQuestChecklistSession(companyId, slug);
+    const rebuilt = resolveQuestEvidenceFromReadSlugs(slug, readQuestSlugs);
+    const evidenceItems =
+      session.evidenceItems.length > 0 ? session.evidenceItems : rebuilt;
+    if (session.evidenceItems.length === 0 && rebuilt.length > 0) {
+      writeQuestChecklistSession(companyId, slug, {
+        evidenceItems: rebuilt,
+        ratingSubmitted: session.ratingSubmitted
+      });
+    }
+    setSessionEvidenceItems(evidenceItems);
+    setQuestRatingSubmitted(session.ratingSubmitted);
+  }, [slug, checklistEnabled, companyId, readQuestSlugs]);
+
+  /** Keep checklist evidence aligned with engine read slugs (fixes stale bars after reset). */
+  useEffect(() => {
+    if (!checklistEnabled) return;
+    syncChecklistEvidenceFromReadSlugs(companyId, readQuestSlugs);
+    refreshChecklistSnapshot();
+  }, [checklistEnabled, companyId, readQuestSlugs, refreshChecklistSnapshot]);
+
+  useEffect(() => {
+    const onDemoReset = () => {
+      setPulseChecklistItems([]);
+      setSessionEvidenceItems([]);
+      setQuestRatingSubmitted(false);
+      setHighlightPrincipleId(null);
+      setActiveEvidencePrincipleId(null);
+      setEvidenceFlowSessionActive(false);
+      setHighlightSectionQuizId(null);
+      setEvidenceFrameworkTick((tick) => tick + 1);
+      refreshChecklistSnapshot();
+      refreshFrameworkChecklist();
+    };
+    window.addEventListener(SCHOOLS_DEMO_RESET_EVENT, onDemoReset);
+    return () => window.removeEventListener(SCHOOLS_DEMO_RESET_EVENT, onDemoReset);
+  }, [refreshChecklistSnapshot, refreshFrameworkChecklist]);
+
+  useEffect(() => {
+    setContinueHint(false);
+  }, [cardIndex, slug]);
 
   useEffect(() => {
     const wasComplete = prevQuestCompletedRef.current;
@@ -827,14 +1238,33 @@ export function BusinessIslandQuestReading(
   const fastQuizHandoff = useControlledDemoFastQuizHandoff();
 
   const handleStartQuiz = useCallback(() => {
+    if (!showLegacyQuestQuiz) return;
     setQuizSessionKey((key) => key + 1);
     setScreen("quiz");
-  }, []);
+  }, [showLegacyQuestQuiz]);
+
+  const handleSectionQuizPassed = useCallback(() => {
+    refreshFrameworkChecklist();
+    refreshChecklistSnapshot();
+    setEvidenceFrameworkTick((tick) => tick + 1);
+  }, [refreshFrameworkChecklist, refreshChecklistSnapshot]);
+
+  const handleQualityCheckSubmit = useCallback(
+    (ratings: Partial<
+      Record<InvestorQualityChecklistItemId, InvestorQualityRatingValue>
+    >) => {
+      saveChecklistRatings(companyId, slug, ratings);
+      markQuestRatingSubmitted(companyId, slug);
+      setQuestRatingSubmitted(true);
+      refreshChecklistSnapshot();
+    },
+    [companyId, slug, refreshChecklistSnapshot]
+  );
 
   // Removed mastery interstitial — keep momentum (cards → quiz).
 
   useEffect(() => {
-    if (screen !== "quiz") {
+    if (screen !== "quiz" && screen !== "quality-check") {
       onQuizScreenChange?.(false);
     }
   }, [screen, onQuizScreenChange]);
@@ -851,35 +1281,83 @@ export function BusinessIslandQuestReading(
     markSchoolsHubCelebrateReturn();
     markSchoolsQuestSummaryExited(slug);
 
+    const hubPath = hasSchoolsBusinessIslandHubEntered()
+      ? "/schools/map"
+      : "/schools/business";
+
     if (isSchoolsDemoPath(pathname)) {
-      navigateSchoolsDemoMenuHref("/schools/business", pathname, router);
+      navigateSchoolsDemoMenuHref(hubPath, pathname, router);
     } else {
-      router.push(resolveSchoolsLearnerHref("/schools/business", pathname));
+      router.push(resolveSchoolsLearnerHref(hubPath, pathname));
     }
+  }, [pathname, router, slug]);
 
-    const needsQuest1CheckIn =
-      isSchoolsLearnerPath(pathname) && slug === SCHOOLS_DEMO_BUSINESS_TILE;
+  const handleSectionQuizFinished = useCallback(() => {
+    if (schoolsRewardFlow) {
+      handleSchoolsBackToIsland();
+      return;
+    }
+    setScreen("cards");
+  }, [schoolsRewardFlow, handleSchoolsBackToIsland]);
 
-    if (needsQuest1CheckIn) {
-      const prog = raw.companies[raw.activeCompanyId];
-      const convictionDone =
-        prog != null &&
-        typeof prog.pillarConvictionSubmittedAt.business === "number";
-      const convictionPending = state.pendingConvictionQueue.some(
-        (item) => item.completedPillarId === "business"
-      );
-      if (!convictionDone && !convictionPending) {
-        actions.enqueuePillarConviction("business", { pillarToUnlock: null });
+  /** After quiz pass — quality check (if needed), then return to hub. */
+  const handleSchoolsQuizPassed = useCallback(
+    (_result: { correct: number; total: number }) => {
+      if (
+        checklistEnabled &&
+        pendingRatingItems.length > 0 &&
+        !questRatingSubmitted
+      ) {
+        setScreen("quality-check");
+        return;
       }
-    }
+      if (!questCompleted) {
+        actions.completeQuest(pillarId, slug);
+      }
+      handleSchoolsBackToIsland();
+    },
+    [
+      checklistEnabled,
+      pendingRatingItems.length,
+      questRatingSubmitted,
+      handleSchoolsBackToIsland,
+      questCompleted,
+      actions,
+      pillarId,
+      slug
+    ]
+  );
+
+  const handleQualityCheckComplete = useCallback(
+    (ratings: Partial<
+      Record<InvestorQualityChecklistItemId, InvestorQualityRatingValue>
+    >) => {
+      handleQualityCheckSubmit(ratings);
+      if (!questCompleted) {
+        actions.completeQuest(pillarId, slug);
+      }
+      handleSchoolsBackToIsland();
+    },
+    [
+      handleQualityCheckSubmit,
+      handleSchoolsBackToIsland,
+      questCompleted,
+      actions,
+      pillarId,
+      slug
+    ]
+  );
+
+  /** Quality check with nothing to rate — return to hub. */
+  useEffect(() => {
+    if (screen !== "quality-check" || !checklistEnabled) return;
+    if (pendingRatingItems.length > 0) return;
+    handleSchoolsBackToIsland();
   }, [
-    actions,
-    pathname,
-    raw.activeCompanyId,
-    raw.companies,
-    router,
-    slug,
-    state.pendingConvictionQueue
+    screen,
+    checklistEnabled,
+    pendingRatingItems.length,
+    handleSchoolsBackToIsland
   ]);
 
   const cardView = useMemo(() => {
@@ -945,6 +1423,36 @@ export function BusinessIslandQuestReading(
     [pillarId, slug, cardView.cardId, cardView.question]
   );
 
+  /** Quest card N = Company Overview evidence card 1 — same read template as evidence flow. */
+  const questCardEvidencePrinciple =
+    cardView.cardId != null
+      ? resolvePrincipleForQuestEvidenceTrigger(slug, cardView.cardId)
+      : null;
+
+  const questCardEvidenceCards = useMemo(() => {
+    if (!checklistEnabled || !questHasSectionEvidence || !questCardEvidencePrinciple) {
+      return [];
+    }
+    return resolveInvestorEvidenceCards(company.id, questCardEvidencePrinciple);
+  }, [checklistEnabled, questHasSectionEvidence, company.id, questCardEvidencePrinciple]);
+
+  const questUsesInvestorEvidenceReadCard =
+    questCardEvidenceCards.length > 0 &&
+    questCardEvidencePrinciple != null &&
+    canStartPrincipleEvidenceFlow(company.id, questCardEvidencePrinciple) &&
+    !evidenceGateActive;
+
+  const questCardEvidencePrincipleLabel =
+    questCardEvidencePrinciple != null
+      ? resolveInvestorPrinciple(questCardEvidencePrinciple).label
+      : "";
+
+  const checklistSectionHeading = useMemo(() => {
+    if (!checklistEnabled) return null;
+    const section = resolveSectionForQuest(slug);
+    return section ? formatChecklistSectionHeading(section) : null;
+  }, [checklistEnabled, slug]);
+
   const shellClass =
     "relative px-5 pb-2 pt-5 sm:px-6 md:px-9 md:pt-7";
 
@@ -958,7 +1466,67 @@ export function BusinessIslandQuestReading(
 
   const sourceLine = <QuestSourceFooter source={source} theme={theme} />;
 
-  if (screen === "quiz" && hasQuiz) {
+  if (screen === "quality-check" && checklistEnabled && pendingRatingItems.length > 0) {
+    return (
+      <BusinessQuestChecklistLayout
+        enabled={checklistEnabled}
+        snapshot={checklistSnapshot}
+        ratingFocusMode
+        companyId={company.id}
+        questSlug={slug}
+        questProgressPct={checklistQuestProgressPct}
+      >
+        <motion.div className="relative px-3 pb-2 pt-2 sm:px-4 md:px-5 md:pt-3">
+          <InvestorQualityRatingScreen
+            companyName={company.name}
+            itemIds={pendingRatingItems}
+            evidenceCountByItem={checklistSnapshot.evidenceCount}
+            onSubmit={handleQualityCheckComplete}
+            submitLabel="Continue"
+          />
+          {sourceLine}
+        </motion.div>
+      </BusinessQuestChecklistLayout>
+    );
+  }
+
+  if (
+    screen === "section-quiz" &&
+    usesChecklistSectionQuiz &&
+    checklistSectionDef
+  ) {
+    return (
+      <BusinessQuestChecklistLayout
+        enabled={checklistEnabled}
+        snapshot={checklistSnapshot}
+        companyId={company.id}
+        questSlug={slug}
+        questProgressPct={checklistQuestProgressPct}
+        highlightPrincipleId={highlightPrincipleId}
+        highlightSectionQuizId={highlightSectionQuizId}
+      >
+        <motion.div className={shellClass}>
+          {checklistSectionHeading ? (
+            <ChecklistSectionHeader title={checklistSectionHeading} theme={theme} />
+          ) : null}
+          <div className="mx-auto w-full max-w-2xl px-1">
+            <BusinessChecklistSectionQuizFlow
+              company={company}
+              sectionId={checklistSectionDef.id}
+              pillarId={pillarId}
+              questSlug={slug}
+              theme={theme}
+              onPassed={handleSectionQuizPassed}
+              onFinished={handleSectionQuizFinished}
+            />
+          </div>
+          {sourceLine}
+        </motion.div>
+      </BusinessQuestChecklistLayout>
+    );
+  }
+
+  if (screen === "quiz" && showLegacyQuestQuiz) {
     return (
       <motion.div className="relative px-3 pb-2 pt-2 sm:px-4 md:px-5 md:pt-3">
         <AnimatePresence mode="wait" initial={false}>
@@ -997,8 +1565,8 @@ export function BusinessIslandQuestReading(
               onPlayingProgress={
                 onQuizScreenChange ? handleQuizPlayingProgress : undefined
               }
-              onBackToIsland={
-                schoolsRewardFlow ? handleSchoolsBackToIsland : undefined
+              onSchoolsQuizPassed={
+                schoolsRewardFlow ? handleSchoolsQuizPassed : undefined
               }
             />
           </motion.div>
@@ -1010,9 +1578,39 @@ export function BusinessIslandQuestReading(
   }
 
   return (
-    <motion.div className={shellClass}>
-      <QuestReadingHeader title={quest.title} theme={theme} />
-
+    <BusinessQuestChecklistLayout
+      enabled={checklistEnabled}
+      snapshot={checklistSnapshot}
+      companyId={company.id}
+      questSlug={slug}
+      questProgressPct={checklistQuestProgressPct}
+      highlightPrincipleId={highlightPrincipleId}
+      highlightSectionQuizId={highlightSectionQuizId}
+    >
+      <motion.div className={shellClass}>
+      {checklistSectionHeading ? (
+        <ChecklistSectionHeader title={checklistSectionHeading} theme={theme} />
+      ) : null}
+      {evidenceGateActive && effectiveEvidencePrincipleId ? (
+        <div
+          className={[
+            "mx-auto w-full max-w-2xl px-1",
+            schoolsRewardFlow ? "iq-schools-evidence-gate pt-1" : "pt-0"
+          ].join(" ")}
+        >
+          <BusinessInvestorPrincipleEvidenceFlow
+            key={effectiveEvidencePrincipleId}
+            companyId={company.id}
+            principleId={effectiveEvidencePrincipleId}
+            pillarId={pillarId}
+            theme={theme}
+            skipReadForFirstCard={skipReadForActivePrincipleFirstCard}
+            onEvidenceSaved={handleEvidenceFlowSaved}
+            onComplete={handleEvidenceFlowComplete}
+          />
+        </div>
+      ) : (
+        <>
       {questPipeline ? (
         <PillarQuestPipelineBanner
           pillarId={pillarId}
@@ -1037,6 +1635,32 @@ export function BusinessIslandQuestReading(
           transition={{ duration: 0.28, ease: "easeOut" }}
           className="mx-auto w-full max-w-2xl"
         >
+          {questUsesInvestorEvidenceReadCard ? (
+            <InvestorEvidenceReadCard
+              principleLabel={questCardEvidencePrincipleLabel}
+              evidenceIndex={0}
+              evidenceTotal={questCardEvidenceCards.length}
+              card={questCardEvidenceCards[0]!}
+              pillarId={pillarId}
+              theme={theme}
+              footerSlot={
+                <MarkAsReadGlowWrap isRead={cardView.isRead} theme={theme}>
+                  <div ref={markReadAnchorRef} className="inline-flex">
+                    <InvestorEvidenceMarkAsReadButton
+                      theme={theme}
+                      onClick={() => {
+                        if (allowReadToggle && cardView.isRead) {
+                          onMarkUnread(cardView.markReadSlug);
+                        } else {
+                          handleMarkRead(cardView.markReadSlug);
+                        }
+                      }}
+                    />
+                  </div>
+                </MarkAsReadGlowWrap>
+              }
+            />
+          ) : (
           <PillarQuestTemplateFrame
             pillarId={pillarId}
             theme={theme}
@@ -1069,22 +1693,25 @@ export function BusinessIslandQuestReading(
             footerSlot={
               !useAnswerReveal || answerRevealed ? (
                 <MarkAsReadGlowWrap isRead={cardView.isRead} theme={theme}>
-                  <MarkAsReadCheckbox
-                    isRead={cardView.isRead}
-                    theme={theme}
-                    allowToggle={allowReadToggle}
-                    onClick={() => {
-                      if (allowReadToggle && cardView.isRead) {
-                        onMarkUnread(cardView.markReadSlug);
-                      } else {
-                        handleMarkRead(cardView.markReadSlug);
-                      }
-                    }}
-                  />
+                  <div ref={markReadAnchorRef} className="inline-flex">
+                    <MarkAsReadCheckbox
+                      isRead={cardView.isRead}
+                      theme={theme}
+                      allowToggle={allowReadToggle}
+                      onClick={() => {
+                        if (allowReadToggle && cardView.isRead) {
+                          onMarkUnread(cardView.markReadSlug);
+                        } else {
+                          handleMarkRead(cardView.markReadSlug);
+                        }
+                      }}
+                    />
+                  </div>
                 </MarkAsReadGlowWrap>
               ) : null
             }
           />
+          )}
         </motion.div>
       </AnimatePresence>
 
@@ -1094,7 +1721,7 @@ export function BusinessIslandQuestReading(
             index={cardIndex}
             total={cardView.cardTotal}
             theme={theme}
-            hasQuiz={hasQuiz}
+            hasQuiz={showLegacyQuestQuiz}
             quizReady={quizReady}
             missingCardCount={missingCardCount}
             onStartQuiz={handleStartQuiz}
@@ -1127,7 +1754,7 @@ export function BusinessIslandQuestReading(
             ) : null}
           </AnimatePresence>
         </>
-      ) : hasQuiz ? (
+      ) : showLegacyQuestQuiz ? (
         <nav
           className="mx-auto mt-5 flex max-w-2xl flex-col items-center gap-2"
           aria-label="Quest card navigation"
@@ -1154,7 +1781,7 @@ export function BusinessIslandQuestReading(
         </nav>
       ) : null}
 
-      {hasQuiz && screen === "cards" && !quizReady ? (
+      {showLegacyQuestQuiz && screen === "cards" && !quizReady ? (
         <QuestQuizUnlockStatus
           parentSlug={slug}
           cards={cards}
@@ -1166,7 +1793,11 @@ export function BusinessIslandQuestReading(
 
       {/* Removed duplicate Continue/Start CTA — pager button becomes the single quiz handoff. */}
 
+        </>
+      )}
+
       {sourceLine}
-    </motion.div>
+      </motion.div>
+    </BusinessQuestChecklistLayout>
   );
 }

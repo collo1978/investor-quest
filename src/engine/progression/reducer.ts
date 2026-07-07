@@ -103,9 +103,16 @@ export type GameAction =
       /** Omit to auto-unlock next pillar; pass `null` to skip island unlock (Schools tile demo). */
       pillarToUnlock?: PillarId | null;
     }
+  | {
+      type: "drop-pending-conviction";
+      completedPillarId: PillarId;
+      /** When set, only drops queue items with this unlock target (`null` = mid-quest check-in). */
+      pillarToUnlock?: PillarId | null;
+    }
   | { type: "complete-ten-k-rookie-challenge"; scoreFraction: number }
   | { type: "dismiss-quest-map-brief" }
-  | { type: "dismiss-business-island-brief" };
+  | { type: "dismiss-business-island-brief" }
+  | { type: "award-badges-if-new"; badgeIds: BadgeId[] };
 
 // -----------------------------------------------------------------------------
 // RewardEvent — emitted side-effects for the UI layer
@@ -678,8 +685,28 @@ export function reduce(state: GameState, action: GameAction): ReduceResult {
       };
     }
 
+    case "drop-pending-conviction": {
+      const prog0 = getProg(state);
+      const nextQueue = prog0.pendingConvictionQueue.filter((item) => {
+        if (item.completedPillarId !== action.completedPillarId) return true;
+        if (action.pillarToUnlock === undefined) return false;
+        return item.pillarToUnlock !== action.pillarToUnlock;
+      });
+      if (nextQueue.length === prog0.pendingConvictionQueue.length) {
+        return { state, events };
+      }
+      return {
+        state: putProg(state, { ...prog0, pendingConvictionQueue: nextQueue }),
+        events
+      };
+    }
+
     case "enqueue-pillar-conviction": {
       const prog0 = getProg(state);
+      /** Deprecated Schools quest-1 check-in — replaced by Investor Quality Check. */
+      if (action.pillarId === "business" && action.pillarToUnlock === null) {
+        return { state, events };
+      }
       if (typeof prog0.pillarConvictionSubmittedAt[action.pillarId] === "number") {
         return { state, events };
       }
@@ -933,6 +960,21 @@ export function reduce(state: GameState, action: GameAction): ReduceResult {
           ...prog,
           businessIslandBriefDismissedAt: Date.now()
         }),
+        events
+      };
+    }
+
+    case "award-badges-if-new": {
+      const prog0 = getProg(state);
+      const fresh = action.badgeIds.filter((id) => !prog0.badges[id]);
+      if (fresh.length === 0) return { state, events };
+      const nextBadges = {
+        ...prog0.badges,
+        ...Object.fromEntries(fresh.map((id) => [id, { awardedAt: Date.now() }]))
+      } as CompanyProgress["badges"];
+      for (const id of fresh) events.push({ kind: "badge", badgeId: id });
+      return {
+        state: putProg(state, { ...prog0, badges: nextBadges }),
         events
       };
     }

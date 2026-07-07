@@ -12,10 +12,10 @@ export const FORCES_CATEGORY_QUEST_QUIZZES: Record<ForcesCategoryId, QuizConfig>
         kind: "true-false",
         id: "f-pi-q1",
         prompt:
-          "Strengths inside {Company.name} — like supply, tech, or cash — can still help the stock.",
+          "{Company.name} relies on specialist contract manufacturers to produce its chips.",
         correct: true,
         explain:
-          "Internal strengths are real forces — they can speed launches, keep customers, and support results."
+          "Internal strengths include technology design and cash — manufacturing partners handle production."
       },
       {
         kind: "multiple-choice",
@@ -56,10 +56,10 @@ export const FORCES_CATEGORY_QUEST_QUIZZES: Record<ForcesCategoryId, QuizConfig>
         kind: "true-false",
         id: "f-po-q1",
         prompt:
-          "Tailwinds outside {Company.name}'s control — like hot demand or a good economy — can lift sales.",
+          "Strong demand for AI chips can lift {Company.name}'s sales.",
         correct: true,
         explain:
-          "Outside boosts still matter — more AI spending or confident customers can mean more chip orders."
+          "Outside demand boosts still matter — more AI spending can mean more chip orders."
       },
       {
         kind: "multiple-choice",
@@ -94,7 +94,7 @@ export const FORCES_CATEGORY_QUEST_QUIZZES: Record<ForcesCategoryId, QuizConfig>
         kind: "true-false",
         id: "f-ni-q1",
         prompt:
-          "Inside risks — delays, hacks, or cash getting tight — can hurt {Company.name} fast.",
+          "Product launch delays can hurt {Company.name}'s results quickly.",
         correct: true,
         explain:
           "Self-inflicted or internal problems can hit trust and sales before rivals even move."
@@ -136,7 +136,7 @@ export const FORCES_CATEGORY_QUEST_QUIZZES: Record<ForcesCategoryId, QuizConfig>
         kind: "true-false",
         id: "f-no-q1",
         prompt:
-          "Headwinds outside {Company.name}'s control — rivals, rules, or a rough economy — can squeeze results.",
+          "New export restrictions can limit {Company.name}'s sales in key markets.",
         correct: true,
         explain:
           "Outside threats can cut orders, block markets, or push prices down even when the team executes well."

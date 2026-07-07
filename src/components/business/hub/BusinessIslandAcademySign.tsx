@@ -1,94 +1,54 @@
 "use client";
 
-import { useMemo } from "react";
-
+import { BusinessChecklistJourneyProgress } from "@/components/business/hub/BusinessChecklistJourneyProgress";
+import { BusinessChecklistInfoHint } from "@/components/business/hub/BusinessChecklistInfoHint";
+import type { CompanyId } from "@/data/companies";
+import { useBusinessChecklistProgress } from "@/hooks/useBusinessChecklistProgress";
+import { INVESTOR_CHECKLIST_HEADER_INTRO } from "@/lib/business/businessInvestorFramework";
 import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
-import {
-  MASTER_INVESTING_PRINCIPLES,
-  countMasteredPrinciples,
-  resolveLatestMasteredPrinciple,
-  resolveNextPrincipleToMaster
-} from "@/lib/business/masterInvestingPrinciples";
 
 type Props = {
-  cards: readonly BusinessHubQuestCard[];
+  companyId: CompanyId;
   onOpenLadder: () => void;
+  cards?: readonly BusinessHubQuestCard[];
 };
 
 /**
- * Large island notice board — summary only; full ladder opens on interaction.
+ * Compact island HUD chip — clean entry point into the Investor Checklist.
  */
-export function BusinessIslandAcademySign({ cards, onOpenLadder }: Props) {
-  const total = MASTER_INVESTING_PRINCIPLES.length;
-  const masteredCount = useMemo(() => countMasteredPrinciples(cards), [cards]);
-  const remaining = total - masteredCount;
-  const allMastered = masteredCount >= total;
-
-  const spotlight = useMemo(() => {
-    if (allMastered) {
-      return {
-        label: "All principles mastered",
-        mastered: true as const
-      };
-    }
-    const latest = resolveLatestMasteredPrinciple(cards);
-    if (latest) {
-      return { label: latest.label, mastered: true as const };
-    }
-    const next = resolveNextPrincipleToMaster(cards);
-    if (next) {
-      return { label: next.label, mastered: false as const };
-    }
-    return null;
-  }, [allMastered, cards]);
-
-  const remainingLabel =
-    remaining === 0
-      ? "Ladder complete"
-      : remaining === 1
-        ? "1 Principle Remaining"
-        : `${remaining} Principles Remaining`;
+export function BusinessIslandAcademySign({ companyId, onOpenLadder, cards }: Props) {
+  const { snapshot } = useBusinessChecklistProgress({ companyId, cards });
+  const progressLabel = `${snapshot.journey.pct}% Complete`;
 
   return (
-    <button
-      type="button"
-      className="iq-schools-island-academy-sign iq-schools-island-prop iq-schools-island-prop--notice-board pointer-events-auto"
-      onClick={onOpenLadder}
-      aria-label={`Investment quality check. ${masteredCount} of ${total} mastered. ${remainingLabel}. View full ladder.`}
-    >
+    <div className="iq-schools-island-academy-sign iq-schools-island-prop iq-schools-island-prop--notice-board pointer-events-auto">
       <span className="iq-schools-island-prop__ground-shadow" aria-hidden />
       <span className="iq-schools-island-prop__post" aria-hidden />
 
-      <span className="iq-schools-island-academy-sign__header">
-        <span className="iq-schools-island-academy-sign__seal" aria-hidden>
-          🏅
-        </span>
-        <span className="iq-schools-island-academy-sign__title">
-          Investment Quality Check
-        </span>
-      </span>
-
-      {spotlight ? (
-        <p className="iq-schools-island-academy-sign__spotlight">
-          {spotlight.mastered ? (
-            <span className="iq-schools-island-academy-sign__tick" aria-hidden>
-              ✓
-            </span>
-          ) : (
-            <span className="iq-schools-island-academy-sign__next-dot" aria-hidden />
-          )}
-          <span className="iq-schools-island-academy-sign__spotlight-label">
-            {spotlight.label}
+      <div className="iq-schools-island-academy-sign__open">
+        <button
+          type="button"
+          className="iq-schools-island-academy-sign__open-trigger"
+          onClick={onOpenLadder}
+          aria-label={`Investor Checklist. ${progressLabel}. View full checklist.`}
+        >
+          <span className="iq-schools-island-academy-sign__title">Investor Checklist</span>
+          <BusinessChecklistJourneyProgress
+            snapshot={snapshot}
+            variant="compact"
+            className="iq-schools-island-academy-sign__journey"
+          />
+          <span className="iq-schools-island-academy-sign__cta">
+            View Checklist
+            <span aria-hidden> →</span>
           </span>
-        </p>
-      ) : null}
-
-      <p className="iq-schools-island-academy-sign__remaining">{remainingLabel}</p>
-
-      <span className="iq-schools-island-academy-sign__cta">
-        View Full Ladder
-        <span aria-hidden> →</span>
-      </span>
-    </button>
+        </button>
+        <BusinessChecklistInfoHint
+          label="About the Investor Checklist"
+          content={INVESTOR_CHECKLIST_HEADER_INTRO}
+          className="iq-schools-island-academy-sign__header-hint"
+        />
+      </div>
+    </div>
   );
 }

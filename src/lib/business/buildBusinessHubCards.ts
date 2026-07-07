@@ -193,6 +193,8 @@ export function buildBusinessHubCards(
 
       read: readSlugs.has(quest.slug),
 
+      rewardXp: quest.rewardXp ?? 0,
+
       unlockSource:
 
         locked && priorSlug

@@ -1,7 +1,7 @@
 ﻿"use client";
 
 /**
- * QuestQuizPanel â€” runner-style mini-game quiz.
+ * QuestQuizPanel - runner-style mini-game quiz.
  *
  * Game flow (Duolingo-like, not exam-like):
  *
@@ -15,7 +15,7 @@
  *
  * Question order is **shuffled per attempt** so the player never knows
  * what style is coming next. Shuffle happens in click handlers only
- * (after hydration), never on first paint â€” hydration-safe.
+ * (after hydration), never on first paint - hydration-safe.
  *
  * On pass we dispatch `actions.completeQuest(pillarId, slug, { quizPerfect })`
  * exactly once (the reducer is idempotent for slugs already in
@@ -31,10 +31,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { SchoolsQuestQuizCompletionFlow } from "@/components/schools/SchoolsQuestQuizCompletionFlow";
+import { SchoolsQuizPassResultsCelebration } from "@/components/schools/SchoolsQuizPassResultsCelebration";
 
 import { useGame } from "@/components/GameProvider";
 import { usePillarQuestViews } from "@/components/gameHooks";
 import type { PillarQuestTheme } from "@/components/quest/pillarQuestTheme";
+import { QuizCorrectAnswerCelebration } from "@/components/quest/QuizCorrectAnswerCelebration";
 import { QuizQuestionView } from "@/components/QuizQuestionView";
 import type { PillarId } from "@/data/pillars";
 import { nextPillarId, pillarById } from "@/data/pillars";
@@ -67,6 +69,7 @@ import {
   islandQuizUnlockedHeadline
 } from "@/lib/quests/islandQuizStyle";
 import { LOCK_IN_ANSWER_LABEL } from "@/lib/quests/gameActionCopy";
+import { fireQuizCorrectConfetti } from "@/lib/quests/fireQuizCorrectConfetti";
 import { resolveSchoolsDemoMapHref } from "@/lib/schools/schoolsDemoHref";
 import {
   SCHOOLS_CARD_COMPLETE_XP,
@@ -91,7 +94,7 @@ export type QuestQuizPanelProps = {
    * "Revenue Quiz"). Defaults to "Quiz".
    */
   title?: string;
-  /** XP awarded for passing â€” surfaced in the summary card. */
+  /** XP awarded for passing - surfaced in the summary card. */
   rewardXp?: number;
   /** Total cards-read progress for the "lock" copy on small quizzes. */
   cardsRead?: number;
@@ -131,8 +134,15 @@ export type QuestQuizPanelProps = {
   /** Company display name — used on principle-unlock completion screens. */
   companyName?: string;
   microXpPerCorrect?: number;
+  /** Per-question confetti + XP pop when an answer is correct (section quizzes, Schools). */
+  rewardMicroOnCorrect?: boolean;
   cardCompleteXp?: number;
   onBackToIsland?: () => void;
+  /**
+   * Schools flow — parent owns pass celebration + quality-check gate.
+   * When set, a passing score delegates to the parent instead of inline summary.
+   */
+  onSchoolsQuizPassed?: (result: { correct: number; total: number }) => void;
   /** When set, inline question progress is hidden (shown in page header instead). */
   externalQuestionProgress?: boolean;
   /** Fires while answering — null when not in the playing phase. */
@@ -149,6 +159,7 @@ const GOLD_BORDER = "rgba(245, 197, 71, 0.40)";
 const GOLD_BORDER_SOFT = "rgba(245, 197, 71, 0.22)";
 const GOLD_GLOW = "rgba(245, 197, 71, 0.45)";
 const GREEN_HI = "#22C58B";
+const GREEN_MISSION = "#15803d";
 const GREEN_BORDER = "rgba(34, 197, 139, 0.55)";
 const RED_HI = "#F47878";
 const RED_BORDER = "rgba(244, 120, 120, 0.55)";
@@ -180,8 +191,10 @@ export function QuestQuizPanel({
   schoolsPrideLine,
   companyName,
   microXpPerCorrect = SCHOOLS_MICRO_XP_PER_CORRECT,
+  rewardMicroOnCorrect = false,
   cardCompleteXp = SCHOOLS_CARD_COMPLETE_XP,
   onBackToIsland,
+  onSchoolsQuizPassed,
   externalQuestionProgress = false,
   onPlayingProgress,
   freshAttemptOnMount = false
@@ -207,7 +220,7 @@ export function QuestQuizPanel({
     markReadPulse: "rgba(245,197,71,0.14)"
   };
 
-  // Engine source of truth â€” XP awarded for this quest?
+  // Engine source of truth - XP awarded for this quest?
   const slugTrackedComplete =
     !metaCompletion &&
     (state.pillars[pillarId]?.completedQuestSlugs.includes(slug) ?? false);
@@ -245,7 +258,7 @@ export function QuestQuizPanel({
   const [lastScore, setLastScore] = useState<number | null>(null);
   const [lastFraction, setLastFraction] = useState<number | null>(null);
   const [didPass, setDidPass] = useState<boolean>(alreadyCompleted);
-  /** First-time meta pass â€” show XP line even before parent re-renders. */
+  /** First-time meta pass - show XP line even before parent re-renders. */
   const [showTenKXpBanner, setShowTenKXpBanner] = useState(false);
   const [phase, setPhase] = useState<Phase>(() =>
     alreadyCompleted ? "summary" : unlocked ? (autoStart ? "playing" : "ready") : "locked"
@@ -261,6 +274,7 @@ export function QuestQuizPanel({
   const answerCheckTimerRef = useRef<number | null>(null);
   const continueCtaRef = useRef<HTMLDivElement | null>(null);
   const isSchoolsReward = rewardFlow === "schools";
+  const microRewardsActive = isSchoolsReward || rewardMicroOnCorrect;
   const isSchoolsMission = isSchoolsReward && accent.cardChrome === "mission";
 
   checkedIdsRef.current = checkedIds;
@@ -361,7 +375,7 @@ export function QuestQuizPanel({
       setCurrentIndex((i) => i + 1);
       return;
     }
-    // Last question â€” tally final score and transition to summary.
+    // Last question - tally final score and transition to summary.
     const correctCount = order.reduce((n, idx) => {
       const q = displayQuestions[idx]!;
       return isQuizAnswerCorrect(q, answers[q.id]) ? n + 1 : n;
@@ -371,7 +385,6 @@ export function QuestQuizPanel({
     setLastFraction(pct);
     const passed = pct >= threshold;
     setDidPass(passed);
-    setPhase("summary");
     if (passed) {
       if (metaCompletion) {
         if (!metaCompletion.completed) {
@@ -389,6 +402,7 @@ export function QuestQuizPanel({
         });
       }
     }
+    setPhase("summary");
   }
 
   // -------------------------------------------------------------------------
@@ -457,10 +471,10 @@ export function QuestQuizPanel({
   const checkedFeedbackMessage = !isCurrentChecked
     ? ""
     : (() => {
-        if (isSchoolsReward && !isCurrentCorrect) return "";
+        if (microRewardsActive && !isCurrentCorrect) return "";
         const schoolsMsg =
           microBeat &&
-          isSchoolsReward &&
+          microRewardsActive &&
           microBeat.questionId === currentQ?.id
             ? microBeat.message
             : null;
@@ -509,7 +523,7 @@ export function QuestQuizPanel({
   }, [phase, isCurrentChecked, currentIndex]);
 
   useEffect(() => {
-    if (phase !== "playing" || !isSchoolsReward || !currentQuestionId) return;
+    if (phase !== "playing" || !microRewardsActive || !currentQuestionId) return;
     if (!checkedIds.includes(currentQuestionId)) return;
     if (celebratedQuestionRef.current === currentQuestionId) return;
 
@@ -522,16 +536,31 @@ export function QuestQuizPanel({
       questionId: currentQuestionId,
       kind: correct ? "correct" : "wrong",
       message: correct
-        ? schoolsCorrectMessage(currentIndex)
-        : schoolsWrongMessage(currentIndex)
+        ? isSchoolsReward
+          ? schoolsCorrectMessage(currentIndex)
+          : quizPlayingCopy.correct
+        : isSchoolsReward
+          ? schoolsWrongMessage(currentIndex)
+          : quizPlayingCopy.wrong
     });
+    if (correct && microXpPerCorrect > 0) {
+      actions.awardBonusXp(microXpPerCorrect, "Correct quiz answer");
+    }
+    if (correct && microRewardsActive) {
+      fireQuizCorrectConfetti();
+    }
   }, [
     phase,
     currentQuestionId,
     currentAnswerValue,
     checkedIds,
     currentIndex,
-    isSchoolsReward
+    microRewardsActive,
+    isSchoolsReward,
+    quizPlayingCopy.correct,
+    quizPlayingCopy.wrong,
+    microXpPerCorrect,
+    actions
   ]);
 
   const perQuestionStatus: PerQuestionStatus[] = order.map((origIdx, slot) => {
@@ -559,6 +588,7 @@ export function QuestQuizPanel({
 
   const isMicroCorrectCelebration =
     microBeat?.questionId === currentQ?.id && microBeat?.kind === "correct";
+  const useMissionQuizSurface = isSchoolsMission || accent.cardChrome === "mission";
 
   // -------------------------------------------------------------------------
   // Render
@@ -632,7 +662,7 @@ export function QuestQuizPanel({
           isPlayingFocus ? "relative" : "relative px-5 py-5 md:px-6 md:py-6"
         }
       >
-        {/* Header row â€” hidden on ready intro (body shows "Quiz unlocked" only). */}
+        {/* Header row - hidden on ready intro (body shows "Quiz unlocked" only). */}
         {!hideHeader ? (
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -773,17 +803,10 @@ export function QuestQuizPanel({
               ) : null}
 
               <div className="relative overflow-visible">
-                {isSchoolsMission && isMicroCorrectCelebration && currentQ ? (
-                  <ConfettiBurst
-                    triggerKey={`panel-${currentQ.id}-correct`}
-                    count={18}
-                    spreadX={220}
-                    fallDistance={200}
-                    originTopPct={12}
-                    particleDurationSec={1.65}
-                    maxParticleDelaySec={0.38}
-                    activeDurationMs={2600}
-                    className="pointer-events-none absolute inset-x-[-8%] -top-6 bottom-0 z-20"
+                {microRewardsActive && isMicroCorrectCelebration && currentQ ? (
+                  <QuizCorrectAnswerCelebration
+                    triggerKey={`${slug}-${currentQ.id}-correct-${checkedIds.length}`}
+                    xp={microXpPerCorrect}
                   />
                 ) : null}
                 <AnimatePresence mode="wait" initial={false}>
@@ -808,13 +831,8 @@ export function QuestQuizPanel({
                         mode={isCurrentChecked ? "review" : "input"}
                         showFeedback={false}
                         variant={isPlayingFocus ? "focus" : "default"}
-                        surfaceTheme={isSchoolsMission ? accent : undefined}
+                        surfaceTheme={useMissionQuizSurface ? accent : undefined}
                         celebrateCorrect={isMicroCorrectCelebration}
-                        successXp={
-                          isSchoolsReward && isMicroCorrectCelebration
-                            ? microXpPerCorrect
-                            : undefined
-                        }
                       />
                     </motion.div>
                   ) : null}
@@ -907,6 +925,24 @@ export function QuestQuizPanel({
                 )}
               </motion.div>
             </motion.div>
+          ) : isSchoolsReward && didPass && onSchoolsQuizPassed && lastScore !== null ? (
+            <motion.div
+              key="schools-quiz-pass-results"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22 }}
+            >
+              <SchoolsQuizPassResultsCelebration
+                correct={lastScore}
+                total={total}
+                microXpPerCorrect={microXpPerCorrect}
+                accent={accent}
+                onContinue={() =>
+                  onSchoolsQuizPassed({ correct: lastScore, total })
+                }
+              />
+            </motion.div>
           ) : isSchoolsReward && didPass && onBackToIsland ? (
             <motion.div
               key="schools-summary"
@@ -942,6 +978,7 @@ export function QuestQuizPanel({
             >
               <SummaryBody
                 isTenK={isTenK}
+                isSchoolsMission={isSchoolsMission}
                 honorRoll={honorRoll}
                 didPass={didPass}
                 score={lastScore}
@@ -1004,7 +1041,7 @@ function LockedBody({
         <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-1">
           Claim the Final Challenge only after every island is fully cleared:
           all quest cards read, every section quiz passed, and your conviction
-          pulse saved after each pillar. Finish the map â€” then come back to
+          pulse saved after each pillar. Finish the map - then come back to
           light the core.
         </p>
       </>
@@ -1052,11 +1089,11 @@ function ReadyBody({
     return (
       <>
         <h3 className="mt-3 font-[var(--font-grotesk)] text-[18px] leading-tight text-ink-0">
-          Final Challenge â€” prove the full picture
+          Final Challenge - prove the full picture
         </h3>
         <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-1">
           Twelve rapid-fire prompts pulled from Business, Forces, Financials,
-          and Management â€” mixed formats, shuffled every run. Clear{" "}
+          and Management - mixed formats, shuffled every run. Clear{" "}
           <span className="font-semibold text-ink-0">
             {requiredCorrect} of {total}
           </span>{" "}
@@ -1166,6 +1203,7 @@ function ProgressDots({ statuses }: { statuses: PerQuestionStatus[] }) {
 
 function SummaryBody({
   isTenK,
+  isSchoolsMission = false,
   honorRoll,
   didPass,
   score,
@@ -1191,6 +1229,7 @@ function SummaryBody({
   celebrateKey
 }: {
   isTenK: boolean;
+  isSchoolsMission?: boolean;
   honorRoll: boolean;
   mapReturnHref: string;
   didPass: boolean;
@@ -1252,22 +1291,32 @@ function SummaryBody({
       ? "High Conviction Rookie"
       : "10-K Rookie unlocked"
     : "Quiz passed";
-  const failTitle = isTenK ? "Close call â€” run it back" : "Almost there";
+  const failTitle = isTenK ? "Close call - run it back" : "Almost there";
   const passDetail =
     score !== null
       ? isTenK
-        ? `You locked ${score} / ${total} â€” full-company read confirmed.`
+        ? `You locked ${score} / ${total} - full-company read confirmed.`
         : `You got ${score} of ${total}`
       : "";
   const failDetail =
     score !== null
       ? isTenK
         ? `You landed ${score} / ${total}. Need ${requiredCorrect} to clear the reactor.`
-        : `You got ${score} of ${total} â€” need ${requiredCorrect} of ${total} to pass`
+        : `You got ${score} of ${total}. Need ${requiredCorrect} of ${total} to pass.`
       : "";
 
+  const failTitleColor = isSchoolsMission ? "#991b1b" : "#fff";
+  const summaryBodyColor = isSchoolsMission ? "#475569" : undefined;
+  const summaryHeadingColor = isSchoolsMission
+    ? didPass
+      ? GREEN_MISSION
+      : "#991b1b"
+    : didPass
+      ? GREEN_HI
+      : failTitleColor;
+
   return (
-    <>
+    <div className={isSchoolsMission ? "iq-schools-quiz-summary" : undefined}>
       <div className="mt-4 flex items-center gap-3">
         <span
           aria-hidden
@@ -1292,11 +1341,14 @@ function SummaryBody({
         <div>
           <h3
             className="font-[var(--font-grotesk)] text-[20px] leading-tight"
-            style={{ color: didPass ? GREEN_HI : "#fff" }}
+            style={{ color: summaryHeadingColor }}
           >
             {didPass ? passTitle : failTitle}
           </h3>
-          <p className="mt-0.5 text-[13px] text-ink-1">
+          <p
+            className="mt-0.5 text-[13px] text-ink-1"
+            style={summaryBodyColor ? { color: summaryBodyColor } : undefined}
+          >
             {didPass ? passDetail : failDetail}
           </p>
         </div>
@@ -1308,7 +1360,7 @@ function SummaryBody({
           animate={{ opacity: 1, y: 0 }}
           className="mt-3 text-[12.5px] leading-relaxed text-ink-1"
         >
-          Rare clear â€” you held 90%+ accuracy across every island lens. That is
+          Rare clear - you held 90%+ accuracy across every island lens. That is
           rookie-tier mastery with investor instincts switched on.
         </motion.p>
       ) : null}
@@ -1337,13 +1389,16 @@ function SummaryBody({
         </motion.div>
       ) : null}
 
-      <p className="mt-4 text-[13px] leading-relaxed text-ink-1">
+      <p
+        className="mt-4 text-[13px] leading-relaxed text-ink-1"
+        style={summaryBodyColor ? { color: summaryBodyColor } : undefined}
+      >
         {didPass
           ? isTenK
-            ? "Badge and XP are saved locally. The map core stays lit â€” your next expedition bridge is warming up."
-            : "XP is locked in for this quest. Replay any time â€” your XP only counts once."
+            ? "Badge and XP are saved locally. The map core stays lit - your next expedition bridge is warming up."
+            : "XP is locked in for this quest. Replay any time - your XP only counts once."
           : isTenK
-          ? "No penalty run â€” shuffle a new lane, skim one weak island, and dive back in."
+          ? "No penalty run - shuffle a new lane, skim one weak island, and dive back in."
           : "Skim the insights once more, then retry the quiz. Questions shuffle every attempt."}
       </p>
 
@@ -1352,6 +1407,7 @@ function SummaryBody({
         accent={accent}
         onReplay={onReplay}
         onReviewQuestCards={onReviewQuestCards}
+        isSchoolsMission={isSchoolsMission}
         primary={
           didPass && nextQuest && !isTenK
             ? { kind: "link", href: nextQuest.href, label: "NEXT QUEST UNLOCKED" }
@@ -1369,7 +1425,7 @@ function SummaryBody({
             : undefined
         }
       />
-    </>
+    </div>
   );
 }
 
@@ -1677,16 +1733,22 @@ function BridgeUnlockPulse({ accent }: { accent: PillarQuestTheme }) {
 
 function QuizSummarySecondaryButton({
   children,
-  onClick
+  onClick,
+  isSchoolsMission = false
 }: {
   children: React.ReactNode;
   onClick: () => void;
+  isSchoolsMission?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-ink-2/70 transition hover:text-ink-1"
+      className={
+        isSchoolsMission
+          ? "text-[10.5px] font-medium uppercase tracking-[0.14em] text-slate-600 transition hover:text-slate-900"
+          : "text-[10.5px] font-medium uppercase tracking-[0.14em] text-ink-2/70 transition hover:text-ink-1"
+      }
     >
       {children}
     </button>
@@ -1700,7 +1762,8 @@ function QuizSummaryActions({
   primary,
   extraLink,
   className = "",
-  primaryVariant = "trail"
+  primaryVariant = "trail",
+  isSchoolsMission = false
 }: {
   accent: PillarQuestTheme;
   onReplay: () => void;
@@ -1711,6 +1774,7 @@ function QuizSummaryActions({
   extraLink?: { href: string; label: string };
   className?: string;
   primaryVariant?: "trail" | "hero";
+  isSchoolsMission?: boolean;
 }) {
   const showSecondaries =
     Boolean(onReviewQuestCards) || primary.kind === "link";
@@ -1741,12 +1805,18 @@ function QuizSummaryActions({
       {showSecondaries ? (
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
           {onReviewQuestCards ? (
-            <QuizSummarySecondaryButton onClick={onReviewQuestCards}>
+            <QuizSummarySecondaryButton
+              onClick={onReviewQuestCards}
+              isSchoolsMission={isSchoolsMission}
+            >
               Review quest cards
             </QuizSummarySecondaryButton>
           ) : null}
           {primary.kind === "link" ? (
-            <QuizSummarySecondaryButton onClick={onReplay}>
+            <QuizSummarySecondaryButton
+              onClick={onReplay}
+              isSchoolsMission={isSchoolsMission}
+            >
               Retry quiz
             </QuizSummarySecondaryButton>
           ) : null}
@@ -1756,7 +1826,11 @@ function QuizSummaryActions({
       {extraLink ? (
         <Link
           href={extraLink.href}
-          className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-ink-2/70 transition hover:text-ink-1"
+          className={
+            isSchoolsMission
+              ? "text-[10.5px] font-medium uppercase tracking-[0.14em] text-slate-600 transition hover:text-slate-900"
+              : "text-[10.5px] font-medium uppercase tracking-[0.14em] text-ink-2/70 transition hover:text-ink-1"
+          }
         >
           {extraLink.label}
         </Link>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import { useGame } from "@/components/GameProvider";
 import { SchoolsBusinessHubIslandLayout } from "@/components/business/hub/SchoolsBusinessHubIslandLayout";
@@ -10,6 +11,8 @@ import { initialCompanyProgress } from "@/engine/progression/state";
 import { usePillarHubQuestData } from "@/hooks/usePillarHubQuestData";
 import { getAnalyticsUserId } from "@/lib/analytics/identity";
 import { markSchoolsBusinessIslandHubEntered } from "@/lib/schools/schoolsBusinessIslandZoomEnter";
+import { consumeSchoolsHubCelebrateReturn } from "@/lib/schools/schoolsQuestRewardFlow";
+import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
 
 type Props = {
   onBackToMap: () => void;
@@ -27,8 +30,10 @@ export function SchoolsMapBusinessIslandHubUiOverlay({
   onProgressTierChange,
   uiVisible = true
 }: Props) {
+  const pathname = usePathname();
   const { state, raw, hydrated } = useGame();
   const [uiRevealed, setUiRevealed] = useState(false);
+  const [hubCelebrateFrom, setHubCelebrateFrom] = useState<number | null>(null);
   const companyId = state.activeCompanyId as CompanyId;
   const company = companyById(companyId);
   const userId = getAnalyticsUserId();
@@ -71,9 +76,16 @@ export function SchoolsMapBusinessIslandHubUiOverlay({
 
   useEffect(() => {
     markSchoolsBusinessIslandHubEntered();
+    preloadQuestDetailChunks();
     const revealTimer = window.setTimeout(() => setUiRevealed(true), 160);
     return () => window.clearTimeout(revealTimer);
   }, []);
+
+  useEffect(() => {
+    if (consumeSchoolsHubCelebrateReturn()) {
+      setHubCelebrateFrom(completedCards > 0 ? completedCards - 1 : 0);
+    }
+  }, [pathname, completedCards]);
 
   useEffect(() => {
     onProgressTierChange?.(completedCards, hubCards.length);
@@ -97,6 +109,7 @@ export function SchoolsMapBusinessIslandHubUiOverlay({
         userId={userId}
         hubProgressPct={islandProgressPct}
         completedCards={completedCards}
+        celebrateFrom={hubCelebrateFrom}
         uiRevealed={uiRevealed && uiVisible}
         cameraSettled={uiVisible}
         mapCameraHub

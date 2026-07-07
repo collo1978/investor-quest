@@ -108,16 +108,17 @@ export function SchoolsBusinessHubIslandLayout({
 
   const principlesPanel = mapCameraHub ? (
     <BusinessIslandAcademySign
+      companyId={company.id}
       cards={cards}
       onOpenLadder={() => setLadderOpen(true)}
     />
   ) : (
     <div className="iq-schools-business-hub-island__principles pointer-events-auto">
       <MasterInvestingPrinciplesPanel
-        cards={cards}
+        companyId={company.id}
         variant="schools"
         presentation="island"
-        celebrateQuestSlug={celebrateQuestSlug}
+        cards={cards}
       />
     </div>
   );
@@ -294,8 +295,8 @@ export function SchoolsBusinessHubIslandLayout({
         <MasterInvestingPrinciplesLadderSheet
           open={ladderOpen}
           onClose={() => setLadderOpen(false)}
+          companyId={company.id}
           cards={cards}
-          celebrateQuestSlug={celebrateQuestSlug}
         />
       ) : null}
     </div>

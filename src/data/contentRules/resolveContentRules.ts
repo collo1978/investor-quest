@@ -2,6 +2,10 @@
  * Lookups for Investor Quest adaptive learning rules (MVP).
  */
 import type { PillarId } from "@/data/pillars";
+import {
+  QUIZ_STANDALONE_RULE_TEXT,
+  TRUE_FALSE_RULE_TEXT
+} from "@/lib/quests/quizTrueFalseEligibility";
 import type { ForcesCategoryId } from "@/data/quests/forcesCategories";
 import { isForcesCategoryId } from "@/data/quests/forcesCategories";
 import {
@@ -255,6 +259,8 @@ export function formatIslandQuizBriefForPrompt(
     `Interaction: ${quiz.interactionStyle}`,
     `Preferred kinds: ${preferred}`,
     `Island teaching: ${island.teachingGoal}`,
-    `Player payoff: ${island.playerFeeling}`
+    `Player payoff: ${island.playerFeeling}`,
+    TRUE_FALSE_RULE_TEXT,
+    QUIZ_STANDALONE_RULE_TEXT
   ].join("\n");
 }

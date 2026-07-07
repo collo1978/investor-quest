@@ -41,6 +41,11 @@ import {
   shuffleIndices
 } from "@/lib/quests/quizOrderShuffle";
 import { SchoolsQuizMicroRewardFx } from "@/components/schools/SchoolsQuizMicroRewardFx";
+import {
+  quizLayoutProfileForKind,
+  quizLayoutProfileForQuestion,
+  usesIntegratedQuizPrompt
+} from "@/lib/quests/quizLayoutProfiles";
 
 // ---------------------------------------------------------------------------
 // Visual tokens
@@ -49,6 +54,7 @@ import { SchoolsQuizMicroRewardFx } from "@/components/schools/SchoolsQuizMicroR
 const GOLD_HI = "#F5C547";
 const GOLD_BORDER = "rgba(245, 197, 71, 0.40)";
 const GOLD_BORDER_SOFT = "rgba(245, 197, 71, 0.22)";
+const GOLD_GLOW = "rgba(245,197,71,0.45)";
 const GREEN_HI = "#22C58B";
 const GREEN_BORDER = "rgba(34, 197, 139, 0.55)";
 const RED_HI = "#F47878";
@@ -103,7 +109,7 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
   const showResult =
     isReview || (showFeedback && question.kind === "order");
   const answeredCorrect =
-    showResult && isQuizAnswerCorrect(question, value);
+    !!showResult && isQuizAnswerCorrect(question, value);
 
   const celebrating = celebrateCorrect && answeredCorrect;
   const showSuccessXp = celebrating && successXp != null;
@@ -146,7 +152,8 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
           : "none";
 
   const cardClassName = [
-    "transition-[border-color,box-shadow] duration-300",
+    "iq-quiz-stage transition-[border-color,box-shadow] duration-300",
+    `iq-quiz-stage--${quizLayoutProfileForQuestion(question)}`,
     celebrating ? "overflow-visible" : "",
     showSuccessXp && isMissionSurface ? "pt-14 sm:pt-16" : "",
     isFocus
@@ -161,6 +168,8 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
   return (
     <div
       className={cardClassName}
+      data-quiz-layout={quizLayoutProfileForQuestion(question)}
+      data-quiz-kind={question.kind}
       style={{
         borderColor: feedbackBorder,
         background: feedbackBg,
@@ -221,16 +230,36 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
         </div>
       ) : null}
 
-      <QuestionPrompt
-        question={question}
-        hero={isFocus}
-        celebrating={showSuccessXp}
-        textColor={isMissionSurface ? bodyText : undefined}
-        mutedText={isMissionSurface ? mutedText : undefined}
-        missionSurface={isMissionSurface}
-      />
+      {isMissionSurface ? (
+        <QuizMiniGameHeader kind={question.kind} answeredCorrect={answeredCorrect} showResult={!!showResult} />
+      ) : null}
 
-      <div className={isFocus ? "mt-9" : isMissionSurface ? "mt-0" : "mt-3"}>
+      {!usesIntegratedQuizPrompt(question.kind) ? (
+        <QuestionPrompt
+          question={question}
+          hero={isFocus}
+          celebrating={showSuccessXp}
+          textColor={isMissionSurface ? bodyText : undefined}
+          mutedText={isMissionSurface ? mutedText : undefined}
+          missionSurface={isMissionSurface}
+        />
+      ) : null}
+
+      <div
+        className={
+          isFocus
+            ? "mt-9"
+            : isMissionSurface
+              ? question.kind === "true-false"
+                ? "mt-3"
+                : question.kind === "fill-blank"
+                  ? "mt-4"
+                  : question.kind === "odd-one-out" || question.kind === "order"
+                    ? "mt-2"
+                    : "mt-5"
+              : "mt-3"
+        }
+      >
         <QuestionInput
           {...props}
           premium={isFocus || isMissionSurface}
@@ -239,66 +268,124 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
       </div>
 
       {(isReview || showFeedback) && question.explain ? (
-        <motion.p
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.22, ease: "easeOut" }}
-          className={
-            isFocus
-              ? `mt-6 border-t pt-5 text-[13px] leading-relaxed${
-                  isMissionSurface ? "" : " border-white/[0.06] text-ink-1/90"
-                }`
-              : "mt-3 rounded-lg border px-3 py-2 text-[12.5px] leading-relaxed text-ink-0/90"
-          }
-          style={
-            isFocus
-              ? isMissionSurface
-                ? {
-                    borderColor: "rgba(202, 138, 4, 0.28)",
-                    color: mutedText
-                  }
-                : undefined
-              : {
-                  borderColor: answeredCorrect
-                    ? "rgba(34,197,139,0.25)"
-                    : "rgba(244,120,120,0.25)",
-                  background: answeredCorrect
-                    ? isMissionSurface
-                      ? "rgba(34,197,139,0.12)"
-                      : "rgba(34,197,139,0.06)"
-                    : isMissionSurface
-                      ? "rgba(244,120,120,0.12)"
-                      : "rgba(244,120,120,0.06)",
-                  color: isMissionSurface
-                    ? mutedText
-                    : undefined
-                }
-          }
-        >
-          <span
-            className="block text-[10px] font-bold uppercase tracking-[0.18em]"
-            style={{ color: isMissionSurface ? MISSION_HEADING : GOLD_HI }}
-          >
-            Why
-          </span>
-          <span className="mt-1 block">{question.explain}</span>
-        </motion.p>
+        <QuizExplanationCallout
+          explain={question.explain}
+          answeredCorrect={!!answeredCorrect}
+          isFocus={isFocus}
+          isMissionSurface={isMissionSurface}
+        />
       ) : null}
     </div>
+  );
+}
+
+function QuizMiniGameHeader({
+  kind,
+  answeredCorrect,
+  showResult
+}: {
+  kind: QuizQuestion["kind"];
+  answeredCorrect: boolean;
+  showResult: boolean;
+}) {
+  const layout = quizLayoutProfileForKind(kind);
+  return (
+    <div className={`iq-quiz-minigame-header iq-quiz-minigame-header--${layout}`}>
+      <p className="iq-quiz-minigame-header__badge">{kindBadgeIcon(kind)} {kindLabel(kind)}</p>
+      <p className="iq-quiz-minigame-header__hint">{kindInstruction(kind)}</p>
+      {showResult ? (
+        <p
+          className="iq-quiz-minigame-header__result"
+          style={{ color: answeredCorrect ? GREEN_HI : RED_HI }}
+        >
+          {answeredCorrect ? "Nice — locked in." : "Not quite — read the explanation."}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function kindBadgeIcon(kind: QuizQuestion["kind"]): string {
+  switch (kind) {
+    case "multiple-choice":
+      return "🎯";
+    case "true-false":
+      return "⚖️";
+    case "fill-blank":
+      return "🧩";
+    case "odd-one-out":
+      return "🔍";
+    case "order":
+      return "📊";
+    case "match":
+      return "🔗";
+    case "scenario":
+      return "📋";
+    default:
+      return "✨";
+  }
+}
+
+function stripTrueFalseDisplayPrompt(prompt: string): string {
+  return prompt.replace(/^(true or false|t\s*\/\s*f)\s*:?\s*/i, "").trim();
+}
+
+function embeddedQuizStem(prompt: string): string {
+  const parts = prompt.split("\n\n").map((part) => part.trim()).filter(Boolean);
+  if (parts.length <= 1) return parts[0] ?? prompt;
+  return parts.slice(1).join(" ");
+}
+
+function QuizExplanationCallout({
+  explain,
+  answeredCorrect,
+  isFocus,
+  isMissionSurface
+}: {
+  explain: string;
+  answeredCorrect: boolean;
+  isFocus: boolean;
+  isMissionSurface: boolean;
+}) {
+  const heading = answeredCorrect
+    ? "Why this is correct"
+    : "Why this isn't quite right";
+  const tone = answeredCorrect ? "correct" : "wrong";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.26, ease: "easeOut" }}
+      className={[
+        "iq-quiz-explanation",
+        `iq-quiz-explanation--${tone}`,
+        isMissionSurface ? "iq-quiz-explanation--mission" : "iq-quiz-explanation--dark",
+        isFocus ? "iq-quiz-explanation--focus" : "iq-quiz-explanation--compact"
+      ].join(" ")}
+      role="note"
+      aria-label={heading}
+    >
+      <p className="iq-quiz-explanation__heading">
+        <span className="iq-quiz-explanation__icon" aria-hidden>
+          {answeredCorrect ? "✅" : "💡"}
+        </span>
+        {heading}
+      </p>
+      <p className="iq-quiz-explanation__body">{explain}</p>
+    </motion.div>
   );
 }
 
 /**
  * Renders the question prompt with optional kind-specific framing.
  * - `scenario` gets a callout card to feel like "an investor brief".
- * - `fill-blank` swaps each `___` / `______` run for styled blank pills (count matches answer word count).
+ * - `fill-blank` shows the question stem only — answer goes in a Best Answer drop zone.
  * - Everything else uses a plain prompt line.
  */
 function formatQuizPrompt(question: QuizQuestion): string {
   if (question.kind !== "true-false") return question.prompt;
-  const prompt = question.prompt.trim();
-  if (/^(true or false|t\s*\/\s*f)\s*:?\s*/i.test(prompt)) return prompt;
-  return `True or False: ${prompt}`;
+  return stripTrueFalseDisplayPrompt(question.prompt);
 }
 
 function QuestionPrompt({
@@ -319,7 +406,7 @@ function QuestionPrompt({
   if (hero) {
     const promptContent =
       question.kind === "fill-blank"
-        ? renderFillBlankPrompt(question, missionSurface)
+        ? stripFillBlankDisplayPrompt(question.prompt)
         : formatQuizPrompt(question);
     return (
       <p
@@ -374,7 +461,7 @@ function QuestionPrompt({
         ].join(" ")}
         style={textColor ? { color: textColor } : undefined}
       >
-        {renderFillBlankPrompt(question, missionSurface)}
+        {stripFillBlankDisplayPrompt(question.prompt)}
       </p>
     );
   }
@@ -393,87 +480,23 @@ function QuestionPrompt({
 
 const FILL_BLANK_PLACEHOLDER = /_{3,}/g;
 
-function countAnswerWords(text: string): number {
-  return text.trim().split(/\s+/).filter(Boolean).length;
-}
+/** Show the question only — blanks and "complete the sentence" framing stay out of the UI. */
+function stripFillBlankDisplayPrompt(prompt: string): string {
+  const withoutFraming = prompt
+    .replace(/^Complete the sentence:\s*\n?/i, "")
+    .replace(/\n\nBest answer: _+/gi, "")
+    .trim();
 
-/** One blank per `___` / `______` run; a single run expands to the correct answer's word count. */
-function getFillBlankRenderPlan(q: FillBlankQuestion): {
-  parts: string[];
-  blankCounts: number[];
-} {
-  const prompt = q.prompt;
-  const matches = [...prompt.matchAll(FILL_BLANK_PLACEHOLDER)];
-  if (matches.length === 0) {
-    return { parts: [prompt], blankCounts: [] };
-  }
+  const withoutBlanks = withoutFraming
+    .replace(FILL_BLANK_PLACEHOLDER, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+([?.!,])/g, "$1")
+    .trim();
 
-  const correctWords = countAnswerWords(q.options[q.correctIndex] ?? "");
-  const parts: string[] = [];
-  const blankCounts: number[] = [];
-  let cursor = 0;
+  if (withoutBlanks) return withoutBlanks;
 
-  for (const match of matches) {
-    const index = match.index ?? 0;
-    parts.push(prompt.slice(cursor, index));
-    blankCounts.push(matches.length === 1 ? Math.max(1, correctWords) : 1);
-    cursor = index + match[0].length;
-  }
-  parts.push(prompt.slice(cursor));
-
-  return { parts, blankCounts };
-}
-
-function FillBlankPlaceholder({
-  missionSurface
-}: {
-  missionSurface: boolean;
-}) {
-  if (missionSurface) {
-    return (
-      <span className="iq-schools-quiz-blank" aria-hidden>
-        ____
-      </span>
-    );
-  }
-  return (
-    <span
-      className="mx-1 inline-block min-w-[2.5rem] rounded-md border px-2 text-center align-baseline text-[12.5px] tracking-[0.1em]"
-      style={{
-        borderColor: GOLD_BORDER_SOFT,
-        background: "rgba(245,197,71,0.08)",
-        color: GOLD_HI
-      }}
-      aria-hidden
-    >
-      ____
-    </span>
-  );
-}
-
-function renderFillBlankPrompt(
-  q: FillBlankQuestion,
-  missionSurface = false
-): React.ReactNode {
-  const { parts, blankCounts } = getFillBlankRenderPlan(q);
-  if (blankCounts.length === 0) return q.prompt;
-
-  const out: React.ReactNode[] = [];
-  parts.forEach((part, i) => {
-    out.push(<span key={`p${i}`}>{part}</span>);
-    const blankCount = blankCounts[i];
-    if (blankCount != null) {
-      for (let b = 0; b < blankCount; b++) {
-        out.push(
-          <FillBlankPlaceholder
-            key={`b${i}-${b}`}
-            missionSurface={missionSurface}
-          />
-        );
-      }
-    }
-  });
-  return out;
+  const firstLine = prompt.split("\n")[0]?.trim() ?? prompt;
+  return firstLine.replace(FILL_BLANK_PLACEHOLDER, "").trim() || prompt;
 }
 
 function kindLabel(kind: QuizQuestion["kind"]): string {
@@ -487,7 +510,7 @@ function kindLabel(kind: QuizQuestion["kind"]): string {
     case "red-flag":
       return "Spot the red flag";
     case "fill-blank":
-      return "Fill in the blank";
+      return "Pick the best answer";
     case "true-false":
       return "True or false";
     case "match":
@@ -514,7 +537,7 @@ function kindInstruction(kind: QuizQuestion["kind"]): string {
     case "red-flag":
       return "Flag the warning sign.";
     case "fill-blank":
-      return "Tap the word that completes the sentence.";
+      return "Drag the correct answer into Best Answer (or tap a choice).";
     case "true-false":
       return "Decide if the statement is true or false.";
     case "match":
@@ -548,7 +571,7 @@ function QuestionInput(
     case "red-flag":
       return <RedFlagInput {...props} question={question} />;
     case "fill-blank":
-      return <FillBlankPillInput {...props} question={question} />;
+      return <FillBlankBestAnswerInput {...props} question={question} />;
     case "true-false":
       return <TrueFalseInput {...props} question={question} />;
     case "match":
@@ -559,6 +582,7 @@ function QuestionInput(
           {...props}
           question={question}
           showStepFeedback={props.showFeedback ?? props.mode === "review"}
+          missionSurface={props.missionSurface}
         />
       );
     case "bull-bear":
@@ -590,7 +614,7 @@ function IndexChoiceInput({
   const selected = typeof value === "number" ? value : null;
   const correctIndex = question.correctIndex;
   return (
-    <div className={premium ? "grid gap-3" : "grid gap-1.5"}>
+    <div className={premium ? "iq-quiz-mc-list iq-quiz-mc-list--premium" : "iq-quiz-mc-list"}>
       {list.map((label, idx) => {
         const isSelected = selected === idx;
         const isCorrectChoice = mode === "review" && idx === correctIndex;
@@ -639,7 +663,7 @@ function IndexChoiceInput({
             />
             <span
               aria-hidden
-              className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
+              className="iq-quiz-mc-letter inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
               style={radioDotStyle({
                 isSelected,
                 isCorrectChoice,
@@ -648,14 +672,7 @@ function IndexChoiceInput({
                 missionSurface
               })}
             >
-              {isSelected || isCorrectChoice ? (
-                <span
-                  className="block h-1.5 w-1.5 rounded-full"
-                  style={{
-                    background: missionSurface ? "#451a03" : "#0a0a16"
-                  }}
-                />
-              ) : null}
+              {String.fromCharCode(65 + idx)}
             </span>
             <span className="flex-1">{label}</span>
             {mode === "review" && isCorrectChoice ? (
@@ -672,37 +689,147 @@ function IndexChoiceInput({
 
 
 // ---------------------------------------------------------------------------
-// Fill in the blank — horizontal pill chips (visually distinct from MC)
+// Fill in the blank — Best Answer drop zone + draggable choice chips
 // ---------------------------------------------------------------------------
 
-function FillBlankPillInput({
+function FillBlankBestAnswerInput({
   question,
   value,
   onChange,
   mode,
+  premium = false,
   missionSurface = false
 }: QuizQuestionViewProps & {
   question: FillBlankQuestion;
+  premium?: boolean;
   missionSurface?: boolean;
 }) {
   const selected = typeof value === "number" ? value : null;
+  const [dragOver, setDragOver] = useState(false);
+  const correctIndex = question.correctIndex;
+  const selectedLabel =
+    selected != null ? question.options[selected] ?? null : null;
+  const zoneCorrect = mode === "review" && selected === correctIndex;
+  const zoneWrong =
+    mode === "review" && selected != null && selected !== correctIndex;
+
+  const selectOption = (idx: number) => {
+    if (mode === "review") return;
+    onChange(idx);
+  };
+
+  const zoneBorder = dragOver
+    ? missionSurface
+      ? "rgba(202, 138, 4, 0.72)"
+      : GOLD_BORDER
+    : zoneCorrect
+      ? GREEN_BORDER
+      : zoneWrong
+        ? RED_BORDER
+        : selectedLabel
+          ? missionSurface
+            ? "rgba(202, 138, 4, 0.55)"
+            : GOLD_BORDER
+          : missionSurface
+            ? "rgba(202, 138, 4, 0.38)"
+            : "rgba(255,255,255,0.14)";
+
+  const zoneBackground = zoneCorrect
+    ? "rgba(34,197,139,0.10)"
+    : zoneWrong
+      ? "rgba(244,120,120,0.08)"
+      : selectedLabel
+        ? missionSurface
+          ? "rgba(255,255,255,0.72)"
+          : "rgba(245,197,71,0.08)"
+        : missionSurface
+          ? "rgba(255,255,255,0.42)"
+          : "rgba(255,255,255,0.03)";
+
   return (
-    <div>
-      {!missionSurface ? (
+    <div className={premium ? "iq-quiz-fb-layout iq-quiz-fb-layout--premium" : "iq-quiz-fb-layout"}>
+      <div className="iq-quiz-fb-dropzone-wrap">
         <p
-          className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.18em]"
-          style={{ color: "rgba(245,197,71,0.7)" }}
+          className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em]"
+          style={{ color: missionSurface ? MISSION_LABEL : "rgba(245,197,71,0.75)" }}
         >
-          Tap the word that fills the blank
+          Best Answer
         </p>
-      ) : null}
-      <div className="flex flex-wrap gap-2">
+        <div
+          role="button"
+          tabIndex={mode === "input" ? 0 : -1}
+          aria-label={
+            selectedLabel
+              ? `Best answer: ${selectedLabel}`
+              : "Drag the correct answer here"
+          }
+          onDragOver={(event) => {
+            if (mode === "review") return;
+            event.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(event) => {
+            if (mode === "review") return;
+            event.preventDefault();
+            setDragOver(false);
+            const idx = Number(event.dataTransfer.getData("text/plain"));
+            if (!Number.isNaN(idx)) selectOption(idx);
+          }}
+          className={[
+            "min-h-[4.5rem] rounded-2xl border px-4 py-4 text-left transition",
+            premium ? "sm:min-h-[5rem] sm:px-5 sm:py-5" : ""
+          ].join(" ")}
+          style={{
+            borderColor: zoneBorder,
+            background: zoneBackground,
+            boxShadow: dragOver
+              ? `0 0 28px -6px ${missionSurface ? "rgba(251,191,36,0.45)" : GOLD_GLOW}`
+              : zoneCorrect
+                ? "0 0 24px -8px rgba(34,197,139,0.45)"
+                : undefined
+          }}
+        >
+          {selectedLabel ? (
+            <p
+              className={[
+                "font-medium leading-snug",
+                premium ? "text-[15px] sm:text-[16px]" : "text-[14.5px]"
+              ].join(" ")}
+              style={{
+                color: zoneCorrect
+                  ? GREEN_HI
+                  : zoneWrong
+                    ? RED_HI
+                    : missionSurface
+                      ? MISSION_BODY
+                      : "rgb(235 235 245)"
+              }}
+            >
+              {selectedLabel}
+            </p>
+          ) : (
+            <p
+              className={[
+                "font-medium leading-snug",
+                premium ? "text-[14.5px]" : "text-[13.5px]"
+              ].join(" ")}
+              style={{
+                color: missionSurface ? MISSION_MUTED : "rgba(210,210,225,0.72)"
+              }}
+            >
+              Drag the correct answer here
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="iq-quiz-fb-chips">
         {question.options.map((label, idx) => {
           const isSelected = selected === idx;
-          const isCorrectChoice =
-            mode === "review" && idx === question.correctIndex;
+          const isCorrectChoice = mode === "review" && idx === correctIndex;
           const isWrongChoice =
-            mode === "review" && isSelected && idx !== question.correctIndex;
+            mode === "review" && isSelected && idx !== correctIndex;
           const missionChoiceClass = missionSurface
             ? [
                 "iq-schools-quiz-choice",
@@ -713,15 +840,29 @@ function FillBlankPillInput({
                 .filter(Boolean)
                 .join(" ")
             : "";
+
           return (
-            <button
+            <div
               key={idx}
-              type="button"
-              disabled={mode === "review"}
-              onClick={() => onChange(idx)}
+              role="button"
+              tabIndex={mode === "input" ? 0 : -1}
+              draggable={mode === "input"}
+              onDragStart={(event) => {
+                event.dataTransfer.setData("text/plain", String(idx));
+                event.dataTransfer.effectAllowed = "move";
+              }}
+              onClick={() => selectOption(idx)}
+              onKeyDown={(event) => {
+                if (mode === "review") return;
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  selectOption(idx);
+                }
+              }}
               className={[
-                "rounded-full border px-4 py-2 text-[13.5px] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65",
-                missionSurface ? "min-h-[2.5rem] px-5 text-[14px]" : "",
+                "iq-quiz-fb-chip inline-flex max-w-full items-center border text-left leading-snug transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65",
+                mode === "review" ? "cursor-default" : "cursor-grab active:cursor-grabbing",
+                premium ? "rounded-full px-4 py-2.5 text-[14.5px] font-medium" : "rounded-full px-3.5 py-2 text-[13.5px] font-medium",
                 missionChoiceClass
               ].join(" ")}
               style={choiceStyle({
@@ -729,21 +870,17 @@ function FillBlankPillInput({
                 isCorrectChoice,
                 isWrongChoice,
                 mode,
+                premium,
                 missionSurface
               })}
             >
-              <span className="inline-flex items-center gap-1.5">
-                {label}
-                {mode === "review" && isCorrectChoice ? (
-                  <CheckGlyph
-                    className="h-3 w-3"
-                    style={{ color: GREEN_HI }}
-                  />
-                ) : mode === "review" && isWrongChoice ? (
-                  <CrossGlyph className="h-3 w-3" style={{ color: RED_HI }} />
-                ) : null}
-              </span>
-            </button>
+              <span className="flex-1">{label}</span>
+              {mode === "review" && isCorrectChoice ? (
+                <CheckGlyph className="h-3.5 w-3.5" style={{ color: GREEN_HI }} />
+              ) : mode === "review" && isWrongChoice ? (
+                <CrossGlyph className="h-3.5 w-3.5" style={{ color: RED_HI }} />
+              ) : null}
+            </div>
           );
         })}
       </div>
@@ -768,12 +905,18 @@ function TrueFalseInput({
   missionSurface?: boolean;
 }) {
   const selected = typeof value === "boolean" ? value : null;
+  const statement = stripTrueFalseDisplayPrompt(question.prompt);
   const options: { label: string; sub: string; bool: boolean }[] = [
     { label: "TRUE", sub: "Yes, that's right", bool: true },
     { label: "FALSE", sub: "No, that's off", bool: false }
   ];
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="iq-quiz-tf-layout">
+      <div className="iq-quiz-tf-statement">
+        <p className="iq-quiz-tf-statement__label">Statement</p>
+        <p className="iq-quiz-tf-statement__text">{statement}</p>
+      </div>
+      <div className="iq-quiz-tf-split grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
       {options.map((opt) => {
         const isSelected = selected === opt.bool;
         const isCorrectChoice = mode === "review" && opt.bool === question.correct;
@@ -799,8 +942,9 @@ function TrueFalseInput({
             whileTap={mode === "review" ? undefined : { scale: 0.97 }}
             transition={{ type: "spring", stiffness: 320, damping: 22 }}
             className={[
-              "relative flex flex-col items-center justify-center gap-1.5 border p-4 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65",
-              premium ? "min-h-[108px] rounded-2xl" : "min-h-[96px] rounded-2xl",
+              "relative flex flex-col items-center justify-center gap-2 border p-5 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/65",
+              premium ? "min-h-[124px] rounded-2xl" : "min-h-[112px] rounded-2xl",
+              missionSurface ? "iq-quiz-tf-split__btn" : "",
               missionChoiceClass
             ].join(" ")}
             style={choiceStyle({
@@ -897,6 +1041,7 @@ function TrueFalseInput({
           </motion.button>
         );
       })}
+      </div>
     </div>
   );
 }
@@ -917,6 +1062,7 @@ function OddOneOutInput({
 }) {
   const selected = typeof value === "number" ? value : null;
   const n = question.choices.length;
+  const stem = embeddedQuizStem(question.prompt);
   const gridCols =
     n === 4
       ? "grid-cols-2"
@@ -926,16 +1072,14 @@ function OddOneOutInput({
       ? "grid-cols-3"
       : "grid-cols-2";
   return (
-    <div>
-      {!missionSurface ? (
-        <p
-          className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.18em]"
-          style={{ color: "rgba(245,197,71,0.7)" }}
-        >
-          Tap the one that doesn&apos;t belong
-        </p>
-      ) : null}
-      <div className={`grid ${gridCols} gap-2.5`}>
+    <div className="iq-quiz-ooo-layout">
+      <p
+        className="iq-quiz-ooo-stem"
+        style={{ color: missionSurface ? MISSION_BODY : "rgb(235 235 245)" }}
+      >
+        {stem}
+      </p>
+      <div className={`grid ${gridCols} gap-3`}>
         {question.choices.map((label, idx) => {
           const isSelected = selected === idx;
           const isCorrectPick = mode === "review" && idx === question.oddIndex;
@@ -1415,12 +1559,15 @@ function OrderInput({
   value,
   onChange,
   mode,
-  showStepFeedback
+  showStepFeedback,
+  missionSurface = false
 }: QuizQuestionViewProps & {
   question: OrderQuestion;
   showStepFeedback: boolean;
+  missionSurface?: boolean;
 }) {
   const steps = question.steps;
+  const stem = embeddedQuizStem(question.prompt);
   const initialOrder = useMemo(
     () => initialOrderPermutation(question.id, steps.length),
     [question.id, steps.length]
@@ -1468,10 +1615,16 @@ function OrderInput({
 
   // ----- Input mode: drag + tap up/down; feedback without locking -----
   return (
-    <div>
+    <div className="iq-quiz-order-layout">
       <p
-        className="mb-2 inline-flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em]"
-        style={{ color: "rgba(245,197,71,0.7)" }}
+        className="iq-quiz-order-stem"
+        style={{ color: missionSurface ? MISSION_BODY : "rgb(235 235 245)" }}
+      >
+        {stem}
+      </p>
+      <p
+        className="mb-3 inline-flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em]"
+        style={{ color: missionSurface ? MISSION_LABEL : "rgba(245,197,71,0.7)" }}
       >
         <GripGlyph className="h-3 w-3" />
         Drag or use arrows to reorder

@@ -1,3 +1,9 @@
+import {
+  clearSchoolsBusinessIslandHubEntered,
+  clearSchoolsBusinessIslandZoomEnter,
+  clearSchoolsBusinessIslandZoomInProgress
+} from "@/lib/schools/schoolsBusinessIslandZoomEnter";
+
 /** Session-only dismiss for the Schools map mission brief (`/schools/map`). */
 export const SCHOOLS_MAP_MISSION_BRIEF_STORAGE_KEY =
   "iq-schools-map-mission-brief-dismissed";
@@ -37,4 +43,15 @@ export function clearSchoolsMapMissionBriefDismiss(): void {
   } catch {
     /* ignore */
   }
+}
+
+/**
+ * Reset map handoff state so the envelope mission brief always replays after
+ * company selection — clears stale Business Island hub session flags.
+ */
+export function prepareSchoolsMapMissionBriefEntry(): void {
+  clearSchoolsMapMissionBriefDismiss();
+  clearSchoolsBusinessIslandHubEntered();
+  clearSchoolsBusinessIslandZoomEnter();
+  clearSchoolsBusinessIslandZoomInProgress();
 }

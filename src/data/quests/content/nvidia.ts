@@ -84,7 +84,7 @@ This helps:
             kind: "true-false",
             id: "nvda-snap-q2",
             prompt:
-              "GPUs help computers process lots of information at the same time.",
+              "NVIDIA's GPUs help computers process many tasks at the same time.",
             correct: true,
             explain:
               "GPUs handle many calculations in parallel — that's what makes AI and games faster."
@@ -104,54 +104,38 @@ This helps:
     },
 
     [contentKey("business", "why-buying")]: {
-      title: "WHAT'S NVIDIA'S PRODUCT SEGMENTS?",
+      title: "WHAT NVIDIA SELLS & WHY IT WINS",
       cards: cards({
         "card-1": {
-          investorQuestion: "What are NVIDIA's two main product segments?",
-          plainEnglishAnswer: lessonAnswer({
-            headline: "🧩 Two main product segments",
-            intro: "NVIDIA splits its business into two big areas.",
-            middle: `🤖 Compute & Networking
-• AI
-• Data Centers
-• Cloud Computing
-• Robotics
-🎮 Graphics
-• Gaming
-• PC Graphics
-• Creative & Design Software`,
-            closing:
-              "Different segments serve different types of customers."
-          })
+          investorQuestion: "What problem does NVIDIA solve?",
+          plainEnglishAnswer: goldAnswer(
+            "NVIDIA helps computers handle incredibly difficult tasks much faster than traditional computers.",
+            `Its technology powers things like:
+• Artificial intelligence
+• Scientific research
+• Self-driving cars
+• Advanced graphics
+Tasks that would otherwise take much longer to process.`
+          )
         },
         "card-2": {
-          investorQuestion: "What does the Compute & Networking segment do?",
-          plainEnglishAnswer: lessonAnswer({
-            headline: "⚡ Powers AI and large data centers",
-            intro:
-              "Think of a data center as a giant warehouse filled with computers.",
-            focusTitle: "What do these computers power?",
-            focusBullets: ["AI tools", "Websites", "Apps", "Cloud services"],
-            closing:
-              "NVIDIA helps these systems process huge amounts of information quickly."
-          })
+          investorQuestion: "What products does NVIDIA sell?",
+          plainEnglishAnswer: goldAnswer(
+            "NVIDIA is best known for its GPUs, but it sells much more than chips.",
+            `It also develops:
+• Networking equipment
+• AI software
+• Complete computing systems
+• Platforms for healthcare, gaming and autonomous driving`
+          )
         },
         "card-3": {
-          investorQuestion: "What does the Graphics segment do?",
-          plainEnglishAnswer: lessonAnswer({
-            headline: "🎮 Focuses on gaming and visual computing",
-            intro:
-              "NVIDIA's graphics technology helps video games look more realistic and run more smoothly.",
-            focusTitle: "Who uses this segment?",
-            focusBullets: [
-              "Video game players",
-              "Designers and engineers",
-              "Architects",
-              "Movie creators"
-            ],
-            closing:
-              "Powerful graphics tools help creative work look real and run fast."
-          })
+          investorQuestion: "Why is innovation so important to NVIDIA?",
+          plainEnglishAnswer: goldAnswer(
+            "Innovation has been at the centre of NVIDIA since the company was founded.",
+            `Many of its biggest successes came from creating entirely new technologies rather than simply improving existing ones.
+By constantly developing new chips, software and AI platforms, NVIDIA stays ahead of changing technology.`
+          )
         }
       }),
       quizConfig: q({
@@ -292,7 +276,7 @@ This helps:
           {
             kind: "true-false",
             id: "nvda-el-q2",
-            prompt: "Better graphics in a new game can be a sign NVIDIA tech is in the loop.",
+            prompt: "NVIDIA's GPUs are widely used in AI data centres.",
             correct: true,
             explain: "Gaming is a real-world touchpoint millions already know."
           },
@@ -727,7 +711,7 @@ This helps:
           {
             kind: "true-false",
             id: "nvda-gr-q2",
-            prompt: "When one product pays most of the bills, results can swing a lot.",
+            prompt: "NVIDIA relies heavily on data-centre AI chip sales.",
             correct: true,
             explain:
               "One product dominating revenue means bumps hit harder."
@@ -772,10 +756,11 @@ This helps:
           {
             kind: "true-false",
             id: "nvda-prof-q2",
-            prompt: "Profit per share helps you see if owners actually benefit.",
+            prompt:
+              "NVIDIA's earnings per share can rise when its share count falls.",
             correct: true,
             explain:
-              "EPS tells you what reaches each owner, not just the company total."
+              "EPS divides net income by shares outstanding — fewer shares can lift EPS without higher profit."
           }
         ]
       })
@@ -817,7 +802,7 @@ This helps:
           {
             kind: "true-false",
             id: "nvda-exp-q2",
-            prompt: "Inventing new chips is spending on the future, not just waste.",
+            prompt: "NVIDIA spends heavily on research and development each year.",
             correct: true,
             explain:
               "R&D is betting they'll still matter next year — not just today's bills."
@@ -862,7 +847,7 @@ This helps:
           {
             kind: "true-false",
             id: "nvda-cash-q2",
-            prompt: "How they spend cash hints at what they think happens next.",
+            prompt: "NVIDIA spends cash on R&D, equipment, and shareholder returns.",
             correct: true,
             explain:
               "Invention vs. buybacks vs. dividends — that's a forecast in dollars."
@@ -907,7 +892,7 @@ This helps:
           {
             kind: "true-false",
             id: "nvda-fs-q2",
-            prompt: "People still watch how much cash is promised to chip factories.",
+            prompt: "NVIDIA commits large sums to chip-factory capacity agreements.",
             correct: true,
             explain:
               "Future chip commitments can lock up cash even when debt looks fine."
@@ -963,7 +948,7 @@ This helps:
           {
             kind: "true-false",
             id: "nvda-m1-q2",
-            prompt: "They bet big on AI before it was everywhere.",
+            prompt: "NVIDIA invested heavily in AI computing before the recent AI boom.",
             correct: true,
             explain:
               "They pushed AI chips early — before AI was on every phone and feed."
@@ -1014,7 +999,7 @@ This helps:
           {
             kind: "true-false",
             id: "nvda-mq-q1",
-            prompt: "When bosses own stock, they feel it when the price drops.",
+            prompt: "NVIDIA executives receive much of their pay in company stock.",
             correct: true,
             explain:
               "Stock-heavy pay means a drop hits them like it hits you."
@@ -1077,7 +1062,7 @@ This helps:
           {
             kind: "true-false",
             id: "nvda-m2-q2",
-            prompt: "Chip shortages and government rules are board-level topics.",
+            prompt: "Chip shortages and export rules are board-level topics at NVIDIA.",
             correct: true,
             explain:
               "Supply and export rules can wreck plans — exactly what a board should stress."
@@ -1112,7 +1097,7 @@ This helps:
           {
             kind: "true-false",
             id: "nvda-gov-q1",
-            prompt: "Stock owners get a say in big company choices.",
+            prompt: "NVIDIA shareholders vote on major corporate decisions.",
             correct: true,
             explain:
               "Votes matter — especially when big holders show up with millions of shares."
@@ -1175,7 +1160,7 @@ This helps:
           {
             kind: "true-false",
             id: "nvda-mf-q2",
-            prompt: "They can reward owners and still pay for new chips.",
+            prompt: "NVIDIA returns cash to shareholders through dividends and buybacks.",
             correct: true,
             explain:
               "They can return cash and still fund invention — not all-or-nothing."

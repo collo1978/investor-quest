@@ -56,6 +56,8 @@ export const SCHOOLS_MICRO_XP_PER_CORRECT = 10;
 export const SCHOOLS_CARD_COMPLETE_XP = 75;
 export const SCHOOLS_BUSINESS_HUB_CARD_TOTAL = 7;
 export const SCHOOLS_MICRO_CELEBRATION_MS = 1000;
+/** Auto-advance from quiz pass recap into Investor Quality Check. */
+export const SCHOOLS_QUIZ_PASS_AUTO_CONTINUE_MS = 3200;
 
 export const SCHOOLS_CORRECT_MESSAGES = [
   "Nice work!",

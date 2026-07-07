@@ -16,6 +16,9 @@ export type BadgeId =
   | "quiz-streak-7"
   | "quiz-streak-30"
   | "quiz-pass"
+  | "company-overview-complete"
+  | "evidence-collector"
+  | "investor-checklist-complete"
   | "level-5"
   | "level-10"
   | "ten-k-rookie";
@@ -69,8 +72,23 @@ export const BADGES: Record<BadgeId, BadgeDef> = {
   },
   "quiz-pass": {
     id: "quiz-pass",
-    title: "Quiz cleared",
-    detail: "Passed a quest quiz."
+    title: "First Quiz Passed",
+    detail: "Passed your first quest quiz."
+  },
+  "company-overview-complete": {
+    id: "company-overview-complete",
+    title: "Company Overview Complete",
+    detail: "Finished the Company Overview checklist section and quiz."
+  },
+  "evidence-collector": {
+    id: "evidence-collector",
+    title: "Evidence Collector",
+    detail: "Collected and rated every evidence card for an Investor Principle."
+  },
+  "investor-checklist-complete": {
+    id: "investor-checklist-complete",
+    title: "Investor Checklist Complete",
+    detail: "Passed every Business Investor Checklist section quiz for a company."
   },
   "level-5": { id: "level-5", title: "Level 5", detail: "Reached level 5." },
   "level-10": {

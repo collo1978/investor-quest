@@ -30,6 +30,8 @@ export type BusinessHubQuestCard = {
   unlockSource?: { slug: string; title: string } | null;
   /** Prior quest completion time — scopes mystery title reveal to this unlock. */
   unlockEpoch?: number | null;
+  /** Quest completion XP — shown on hub cards before opening. */
+  rewardXp: number;
   /** Future: XP ring, streak badge, achievement — not rendered until populated. */
   chrome?: BusinessHubCardChrome;
 };

@@ -3,22 +3,17 @@
 import { motion, useReducedMotion } from "framer-motion";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState
-} from "react";
+import { useState } from "react";
 
 import { resolveBusinessMapCardWidth } from "@/app/business/businessQuestMapPositions";
+import {
+  BusinessQuestDiscoveryMark,
+  BusinessQuestXpChip
+} from "@/components/business/BusinessQuestDiscoveryMark";
 import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
+import { businessQuestDiscoveryAriaLabel } from "@/lib/business/businessQuestDiscovery";
 import type { Company } from "@/data/companies";
 import { trackUserEvent } from "@/lib/analytics/trackUserEvent";
-import {
-  clearHubCardTitleRevealed,
-  isHubCardTitleRevealed,
-  markHubCardTitleRevealed
-} from "@/lib/quests/hubCardRevealStorage";
 import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
 import { resolveSchoolsHubQuestHref } from "@/lib/schools/schoolsDemoHref";
 
@@ -96,138 +91,24 @@ export function SchoolsBusinessMissionCard({
   const reduceMotion = useReducedMotion();
   const cardWidth = resolveBusinessMapCardWidth(card.orderNumber);
   const slotStyle = cardWidth;
-  const unlockEpoch = card.unlockEpoch ?? null;
   const dataLocked = card.locked;
-
-  const [titleRevealed, setTitleRevealed] = useState(() => {
-    if (card.orderNumber <= 1 || card.completed) return true;
-    if (dataLocked || unlockEpoch == null) return false;
-    return isHubCardTitleRevealed(
-      company.id,
-      "business",
-      card.slug,
-      card.orderNumber,
-      card.completed,
-      unlockEpoch
-    );
-  });
-
-  useEffect(() => {
-    if (dataLocked) {
-      setTitleRevealed(false);
-      return;
-    }
-    if (card.orderNumber <= 1 || card.completed) {
-      setTitleRevealed(true);
-      return;
-    }
-    if (unlockEpoch == null) {
-      setTitleRevealed(false);
-      return;
-    }
-    setTitleRevealed(
-      isHubCardTitleRevealed(
-        company.id,
-        "business",
-        card.slug,
-        card.orderNumber,
-        card.completed,
-        unlockEpoch
-      )
-    );
-  }, [
-    dataLocked,
-    company.id,
-    card.slug,
-    card.orderNumber,
-    card.completed,
-    unlockEpoch
-  ]);
-
-  const wasDataLockedRef = useRef(dataLocked);
-  const [unlockBeacon, setUnlockBeacon] = useState(false);
   const [navigating, setNavigating] = useState(false);
 
-  const awaitingDiscovery = !dataLocked && !titleRevealed;
-  const showLockedChrome = dataLocked || awaitingDiscovery;
-  const isPrimary = card.isPrimaryActive && !card.completed && !showLockedChrome;
-
-  useEffect(() => {
-    if (dataLocked) {
-      clearHubCardTitleRevealed(company.id, "business", card.slug);
-      setUnlockBeacon(false);
-      return;
-    }
-    if (awaitingDiscovery) {
-      setUnlockBeacon(true);
-    }
-  }, [dataLocked, awaitingDiscovery, company.id, card.slug]);
-
-  useEffect(() => {
-    if (dataLocked) return;
-    if (wasDataLockedRef.current && !dataLocked && card.orderNumber > 1) {
-      if (awaitingDiscovery) {
-        setUnlockBeacon(true);
-      }
-      trackUserEvent({
-        eventType: "user_unlocked_quest",
-        pillar: "Business",
-        questId: card.questId,
-        companyTicker: company.ticker,
-        companyName: company.name,
-        partnerId,
-        userId,
-        metadata: {
-          unlockedBy: card.unlockSource?.title ?? "previous quest",
-          unlockedBySlug: card.unlockSource?.slug,
-          orderNumber: card.orderNumber,
-          route: card.route,
-          discoveryPending: awaitingDiscovery
-        }
-      });
-    }
-    wasDataLockedRef.current = dataLocked;
-  }, [
-    dataLocked,
-    awaitingDiscovery,
-    card.orderNumber,
-    card.questId,
-    card.route,
-    card.unlockSource,
-    company.name,
-    company.ticker,
-    partnerId,
-    userId
-  ]);
-
-  const handleReveal = useCallback(() => {
-    if (!awaitingDiscovery) return;
-    markHubCardTitleRevealed(
-      company.id,
-      "business",
-      card.slug,
-      unlockEpoch
-    );
-    setTitleRevealed(true);
-    setUnlockBeacon(false);
-  }, [awaitingDiscovery, company.id, card.slug, unlockEpoch]);
+  const isPrimary = card.isPrimaryActive && !card.completed && !dataLocked;
 
   const floatDuration = 4.2 + staggerIndex * 0.35;
-  const floatY = awaitingDiscovery ? 5 : showLockedChrome ? 2 : isPrimary ? 3.5 : 2.5;
+  const floatY = dataLocked ? 2 : isPrimary ? 3.5 : 2.5;
   const slotClass = [
     "iq-schools-hub-mission-slot",
     "business-hub-orbit-slot",
     `business-hub-orbit-slot-${card.orderNumber}`,
-    awaitingDiscovery ? "iq-schools-hub-mission-slot--awaiting" : "",
-    showLockedChrome && !awaitingDiscovery
+    dataLocked
       ? "z-[10]"
-      : awaitingDiscovery
-        ? "z-[28]"
-        : isPrimary
-          ? "z-[22]"
-          : card.completed
-            ? "z-[21]"
-            : "z-[20]"
+      : isPrimary
+        ? "z-[22]"
+        : card.completed
+          ? "z-[21]"
+          : "z-[20]"
   ].join(" ");
 
   const isGridLayout = cardLayout === "grid";
@@ -250,75 +131,29 @@ export function SchoolsBusinessMissionCard({
         animate: {
           opacity: 1,
           y: 0,
-          scale: awaitingDiscovery ? 1.1 : showLockedChrome ? 0.96 : isPrimary ? 1.04 : 1
+          scale: dataLocked ? 0.96 : isPrimary ? 1.04 : 1
         }
       }
     : {
         animate: {
           opacity: 1,
-          y: awaitingDiscovery ? [0, -floatY, 0] : [0, -floatY, 0],
-          scale: awaitingDiscovery
-            ? [1.06, 1.12, 1.06]
-            : showLockedChrome
-              ? 0.96
-              : isPrimary
-                ? 1.04
-                : 1
+          y: [0, -floatY, 0],
+          scale: dataLocked ? 0.96 : isPrimary ? 1.04 : 1
         },
         transition: {
           y: { duration: floatDuration, repeat: Infinity, ease: "easeInOut" as const },
-          scale: awaitingDiscovery
-            ? { duration: 2.2, repeat: Infinity, ease: "easeInOut" as const }
-            : { delay: 0.07 * staggerIndex, duration: 0.45 },
+          scale: { delay: 0.07 * staggerIndex, duration: 0.45 },
           opacity: { delay: 0.07 * staggerIndex, duration: 0.45 }
         }
       };
 
-  if (showLockedChrome) {
-    const lockedHint = awaitingDiscovery
-      ? "Quest unlocked — tap to reveal"
-      : "Complete the previous lesson to unlock";
-
-    if (awaitingDiscovery) {
-      return (
-        <div
-          className={wrapperClass}
-          style={wrapperStyle}
-          title={lockedHint}
-        >
-          <motion.button
-            type="button"
-            className={[
-              "iq-schools-hub-mission-card iq-schools-hub-mission-card--awaiting",
-              "iq-schools-hub-mission-card--beacon"
-            ].join(" ")}
-            style={cardStyle}
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            {...motionProps}
-            aria-label={`Lesson ${card.orderNumber} unlocked — tap to reveal`}
-            onClick={handleReveal}
-          >
-            <MissionCardHeader
-              orderNumber={card.orderNumber}
-              awaitingDiscovery
-            />
-            <div className="iq-schools-hub-mission-card__lock-wrap">
-              <ProdigyLockBadge unlocked />
-              <p className="iq-schools-hub-mission-card__tap-hint">
-                Tap to reveal
-              </p>
-            </div>
-          </motion.button>
-        </div>
-      );
-    }
-
+  if (dataLocked) {
     return (
       <div
-        className={`${wrapperClass}`}
+        className={wrapperClass}
         style={wrapperStyle}
-        title={lockedHint}
-        aria-label={`Lesson ${card.orderNumber} locked`}
+        title="Complete the previous lesson to unlock"
+        aria-label={businessQuestDiscoveryAriaLabel(card.orderNumber, "locked")}
       >
         <motion.div
           className="iq-schools-hub-mission-card iq-schools-hub-mission-card--locked"
@@ -347,11 +182,14 @@ export function SchoolsBusinessMissionCard({
         ? "iq-schools-hub-mission-card--active"
         : "";
 
+  const ariaState = card.completed
+    ? "completed"
+    : isPrimary
+      ? "active"
+      : "available";
+
   return (
-    <div
-      className={wrapperClass}
-      style={wrapperStyle}
-    >
+    <div className={wrapperClass} style={wrapperStyle}>
       <motion.div
         className="relative"
         initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -363,11 +201,7 @@ export function SchoolsBusinessMissionCard({
           scroll
           className={["iq-schools-hub-mission-card", stateClass].join(" ")}
           style={cardStyle}
-          aria-label={
-            card.completed
-              ? `Review completed quest: ${card.title}`
-              : `Open quest: ${card.title}`
-          }
+          aria-label={businessQuestDiscoveryAriaLabel(card.orderNumber, ariaState)}
           onPointerEnter={() => preloadQuestDetailChunks()}
           onPointerDown={() => {
             preloadQuestDetailChunks();
@@ -401,11 +235,20 @@ export function SchoolsBusinessMissionCard({
           <MissionCardHeader
             orderNumber={card.orderNumber}
             completed={card.completed}
+            rewardXp={card.completed ? undefined : card.rewardXp}
           />
-          <h3 className="iq-schools-hub-mission-card__title">{card.title}</h3>
-          {card.subtitle ? (
-            <p className="iq-schools-hub-mission-card__desc">{card.subtitle}</p>
-          ) : null}
+          <div className="iq-schools-hub-mission-card__discovery">
+            {card.completed ? (
+              <span
+                className="iq-schools-hub-mission-card__discovery-complete"
+                aria-hidden
+              >
+                ✓
+              </span>
+            ) : (
+              <BusinessQuestDiscoveryMark variant="card" />
+            )}
+          </div>
           <div className="iq-schools-hub-mission-card__progress">
             <div
               className="iq-schools-hub-mission-card__progress-track"
@@ -435,12 +278,12 @@ export function SchoolsBusinessMissionCard({
 
 function MissionCardHeader({
   orderNumber,
-  awaitingDiscovery = false,
-  completed = false
+  completed = false,
+  rewardXp
 }: {
   orderNumber: number;
-  awaitingDiscovery?: boolean;
   completed?: boolean;
+  rewardXp?: number;
 }) {
   return (
     <header className="iq-schools-hub-mission-card__header">
@@ -449,8 +292,8 @@ function MissionCardHeader({
         <span className="iq-schools-hub-mission-card__done-chip" aria-label="Quest complete">
           Complete
         </span>
-      ) : awaitingDiscovery ? (
-        <span className="iq-schools-hub-mission-card__unlock-label">Unlocked</span>
+      ) : rewardXp != null && rewardXp > 0 ? (
+        <BusinessQuestXpChip rewardXp={rewardXp} />
       ) : null}
     </header>
   );

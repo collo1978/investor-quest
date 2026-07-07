@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 
-import { BusinessIslandQuestDetailModal } from "@/components/business/hub/BusinessIslandQuestDetailModal";
 import { BusinessIslandQuestMarker } from "@/components/business/hub/BusinessIslandQuestMarker";
 import type { QuestMarkerVisualState } from "@/components/business/hub/BusinessIslandQuestMarker";
 import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
@@ -13,6 +13,9 @@ import {
 } from "@/lib/business/businessIslandQuestMarkerPositions";
 import { resolveBusinessHubJourney } from "@/lib/business/resolveBusinessHubJourney";
 import type { Company } from "@/data/companies";
+import { trackUserEvent } from "@/lib/analytics/trackUserEvent";
+import { preloadQuestDetailChunks } from "@/lib/quests/preloadQuestDetailChunks";
+import { resolveSchoolsHubQuestHref } from "@/lib/schools/schoolsDemoHref";
 
 type Props = {
   cards: readonly BusinessHubQuestCard[];
@@ -35,11 +38,11 @@ function resolveMarkerState(
   ) {
     return "active";
   }
-  return "locked";
+  return "available";
 }
 
 /**
- * World-placed quest pins on the zoomed Business Island — one active pulse at a time.
+ * World-placed quest pins on the zoomed Business Island — tap ? to enter quest directly.
  */
 export function BusinessIslandQuestMarkers({
   cards,
@@ -48,8 +51,8 @@ export function BusinessIslandQuestMarkers({
   userId,
   onBeforeQuestNavigate
 }: Props) {
+  const pathname = usePathname();
   const [mobile, setMobile] = useState(false);
-  const [selected, setSelected] = useState<BusinessHubQuestCard | null>(null);
   const { current } = useMemo(() => resolveBusinessHubJourney(cards), [cards]);
 
   useEffect(() => {
@@ -59,6 +62,34 @@ export function BusinessIslandQuestMarkers({
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
+
+  const handleMarkerNavigate = useCallback(
+    (card: BusinessHubQuestCard) => {
+      const questHref =
+        resolveSchoolsHubQuestHref(card.route, pathname) ?? card.route;
+      preloadQuestDetailChunks();
+      trackUserEvent({
+        eventType: "user_started_quest",
+        pillar: "Business",
+        questId: card.questId,
+        companyTicker: company.ticker,
+        companyName: company.name,
+        partnerId,
+        userId,
+        metadata: {
+          questTitle: card.title,
+          orderNumber: card.orderNumber,
+          route: card.route,
+          visualState: card.visualState,
+          entry: "island-quest-marker"
+        }
+      });
+      if (onBeforeQuestNavigate) {
+        onBeforeQuestNavigate(questHref);
+      }
+    },
+    [pathname, company, partnerId, userId, onBeforeQuestNavigate]
+  );
 
   const sorted = useMemo(
     () => [...cards].sort((a, b) => a.orderNumber - b.orderNumber),
@@ -70,38 +101,26 @@ export function BusinessIslandQuestMarkers({
     : BUSINESS_ISLAND_QUEST_MARKER_SLOTS;
 
   return (
-    <>
-      <div
-        className="iq-business-island-quest-markers pointer-events-none"
-        aria-label="Business Island quests"
-      >
-        {sorted.map((card) => {
-          const slot =
-            resolveBusinessIslandQuestMarkerSlot(card.orderNumber, mobile) ??
-            slots.find((s) => s.orderNumber === card.orderNumber);
-          if (!slot) return null;
+    <div
+      className="iq-business-island-quest-markers pointer-events-none"
+      aria-label="Business Island quests"
+    >
+      {sorted.map((card) => {
+        const slot =
+          resolveBusinessIslandQuestMarkerSlot(card.orderNumber, mobile) ??
+          slots.find((s) => s.orderNumber === card.orderNumber);
+        if (!slot) return null;
 
-          return (
-            <BusinessIslandQuestMarker
-              key={card.slug}
-              card={card}
-              slot={slot}
-              state={resolveMarkerState(card, current)}
-              onSelect={setSelected}
-            />
-          );
-        })}
-      </div>
-
-      <BusinessIslandQuestDetailModal
-        open={selected != null}
-        card={selected}
-        company={company}
-        partnerId={partnerId}
-        userId={userId}
-        onClose={() => setSelected(null)}
-        onBeforeQuestNavigate={onBeforeQuestNavigate}
-      />
-    </>
+        return (
+          <BusinessIslandQuestMarker
+            key={card.slug}
+            card={card}
+            slot={slot}
+            state={resolveMarkerState(card, current)}
+            onNavigate={handleMarkerNavigate}
+          />
+        );
+      })}
+    </div>
   );
 }

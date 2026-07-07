@@ -16,10 +16,7 @@ function schoolsLearnerPath(pathname: string): string {
   return pathname;
 }
 
-const LIGHTWEIGHT_LEARNER_PATHS = new Set([
-  "/schools/profile",
-  "/schools/armor-guide"
-]);
+const LIGHTWEIGHT_LEARNER_PATHS = new Set(["/schools/armor-guide"]);
 
 /** Any `/schools/*` funnel screen — skip unrelated platform prefetch/background work. */
 export function isSchoolsFunnelPath(pathname?: string | null): boolean {
