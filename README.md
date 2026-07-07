@@ -2,6 +2,16 @@
 
 Gamified stock research platform (Next.js).
 
+## Live production (Vercel)
+
+| URL | Use |
+|-----|-----|
+| [https://investor-quest.vercel.app/schools/demo](https://investor-quest.vercel.app/schools/demo) | **Schools presenter demo** — share this link for live sessions |
+| [https://investor-quest.vercel.app/schools/business](https://investor-quest.vercel.app/schools/business) | Business island hub |
+| [https://investor-quest.vercel.app/map](https://investor-quest.vercel.app/map) | Main quest map |
+
+Deploys automatically from `main` on GitHub (`collo1978/investor-quest`). After pushing, allow 1–3 minutes for Vercel to finish building.
+
 ## Starting Investor Quest Locally
 
 After a reboot (or any time the browser shows **ERR_CONNECTION_REFUSED**), the dev server is simply **not running**. Nothing listens on port 3003 until you start it again.
