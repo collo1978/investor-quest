@@ -198,9 +198,7 @@ export default function SchoolsMapPageClient() {
   useEffect(() => {
     if (!missionBriefGateActive) {
       setEnvelopeBriefOpen(false);
-      return;
     }
-    setEnvelopeBriefOpen(true);
   }, [missionBriefGateActive]);
 
   useEffect(() => {
