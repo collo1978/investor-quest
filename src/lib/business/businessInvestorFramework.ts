@@ -196,7 +196,7 @@ export const BUSINESS_INVESTOR_PRINCIPLES: readonly BusinessInvestorPrincipleDef
       label: "Revenue Drivers",
       orderInSection: 2,
       whyItMatters:
-        "Knowing what drives revenue helps explain why the business grows."
+        "Investors want to know what is actually driving future growth, not just what the company sells today."
     },
     {
       id: "business-structure",
@@ -204,7 +204,7 @@ export const BUSINESS_INVESTOR_PRINCIPLES: readonly BusinessInvestorPrincipleDef
       label: "Business Structure",
       orderInSection: 3,
       whyItMatters:
-        "Understanding how the business is organised makes it easier to see what drives its performance."
+        "Understanding how a business is organised helps investors see where revenue comes from and how management reports performance."
     },
     {
       id: "competitive-advantage",
@@ -212,7 +212,7 @@ export const BUSINESS_INVESTOR_PRINCIPLES: readonly BusinessInvestorPrincipleDef
       label: "Competitive Advantage",
       orderInSection: 1,
       whyItMatters:
-        "Businesses with lasting advantages are harder for competitors to copy."
+        "Great businesses have something that competitors struggle to copy, allowing them to stay successful for many years."
     },
     {
       id: "market-position",
@@ -220,7 +220,7 @@ export const BUSINESS_INVESTOR_PRINCIPLES: readonly BusinessInvestorPrincipleDef
       label: "Market Position",
       orderInSection: 2,
       whyItMatters:
-        "Strong market positions often lead to more stable long-term performance."
+        "Market leaders often have stronger brands, better customer relationships and more resources to keep growing."
     },
     {
       id: "competitive-strategy",
@@ -228,7 +228,7 @@ export const BUSINESS_INVESTOR_PRINCIPLES: readonly BusinessInvestorPrincipleDef
       label: "Competitive Strategy",
       orderInSection: 3,
       whyItMatters:
-        "Understanding how the company competes helps explain why customers choose it."
+        "Investors want to know how a company plans to stay ahead as technology changes."
     },
     {
       id: "supply-chain",
@@ -259,9 +259,7 @@ export const BUSINESS_INVESTOR_PRINCIPLES: readonly BusinessInvestorPrincipleDef
 /** Principles marked N/A by default for a company (adaptive checklist). */
 export const DEFAULT_NA_PRINCIPLES_BY_COMPANY: Partial<
   Record<CompanyId, readonly InvestorPrincipleId[]>
-> = {
-  nvda: ["business-structure"]
-};
+> = {};
 
 export type ChecklistSectionProgressState = "locked" | "active" | "completed";
 

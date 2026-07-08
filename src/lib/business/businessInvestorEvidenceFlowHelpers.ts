@@ -27,6 +27,13 @@ export const CUSTOMERS_MARKETS_EVIDENCE_PRINCIPLES = [
   "geographic-reach"
 ] as const satisfies readonly InvestorPrincipleId[];
 
+/** Business Model principles — sequential evidence paths on Quest 4. */
+export const BUSINESS_MODEL_EVIDENCE_PRINCIPLES = [
+  "revenue-model",
+  "revenue-drivers",
+  "business-structure"
+] as const satisfies readonly InvestorPrincipleId[];
+
 export type CompanyOverviewEvidencePrinciple =
   (typeof COMPANY_OVERVIEW_EVIDENCE_PRINCIPLES)[number];
 
@@ -36,12 +43,27 @@ export type ProductsServicesEvidencePrinciple =
 export type CustomersMarketsEvidencePrinciple =
   (typeof CUSTOMERS_MARKETS_EVIDENCE_PRINCIPLES)[number];
 
+export type BusinessModelEvidencePrinciple =
+  (typeof BUSINESS_MODEL_EVIDENCE_PRINCIPLES)[number];
+
+/** Competitive Position principles — sequential evidence paths on Quest 5. */
+export const COMPETITIVE_POSITION_EVIDENCE_PRINCIPLES = [
+  "competitive-advantage",
+  "market-position",
+  "competitive-strategy"
+] as const satisfies readonly InvestorPrincipleId[];
+
+export type CompetitivePositionEvidencePrinciple =
+  (typeof COMPETITIVE_POSITION_EVIDENCE_PRINCIPLES)[number];
+
 export const SECTION_EVIDENCE_PRINCIPLES: Partial<
   Record<BusinessChecklistSectionId, readonly InvestorPrincipleId[]>
 > = {
   "company-overview": COMPANY_OVERVIEW_EVIDENCE_PRINCIPLES,
   "products-services": PRODUCTS_SERVICES_EVIDENCE_PRINCIPLES,
-  "customers-markets": CUSTOMERS_MARKETS_EVIDENCE_PRINCIPLES
+  "customers-markets": CUSTOMERS_MARKETS_EVIDENCE_PRINCIPLES,
+  "business-model": BUSINESS_MODEL_EVIDENCE_PRINCIPLES,
+  "competitive-position": COMPETITIVE_POSITION_EVIDENCE_PRINCIPLES
 };
 
 export type PrincipleEvidenceQuestTrigger = {
@@ -60,7 +82,13 @@ const PRINCIPLE_EVIDENCE_TRIGGERS: Partial<
   "innovation": { questSlug: "why-buying", cardId: "card-3" },
   "customer-base": { questSlug: "everyday-life", cardId: "card-1" },
   "end-markets": { questSlug: "everyday-life", cardId: "card-2" },
-  "geographic-reach": { questSlug: "everyday-life", cardId: "card-3" }
+  "geographic-reach": { questSlug: "everyday-life", cardId: "card-3" },
+  "revenue-model": { questSlug: "how-it-works", cardId: "card-1" },
+  "revenue-drivers": { questSlug: "how-it-works", cardId: "card-2" },
+  "business-structure": { questSlug: "how-it-works", cardId: "card-3" },
+  "competitive-advantage": { questSlug: "competition", cardId: "card-1" },
+  "market-position": { questSlug: "competition", cardId: "card-2" },
+  "competitive-strategy": { questSlug: "competition", cardId: "card-3" }
 };
 
 export function resolveSectionEvidencePrinciples(

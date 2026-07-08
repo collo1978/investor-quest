@@ -255,68 +255,72 @@ export const BUSINESS_CHECKLIST_SECTION_QUIZZES: Record<
       {
         kind: "multiple-choice",
         id: "bm-q1-revenue",
-        prompt: "What is a revenue model?",
+        prompt: "How does {Company.name} make most of its money today?",
         choices: [
-          "How the company turns its products into money over time",
-          "A model airplane collection",
-          "Only the company's logo design",
-          "How many emails employees send"
+          "By selling chips, networking equipment and AI software — mostly through its Data Center business",
+          "By running a chain of retail coffee shops",
+          "By licensing its logo on third-party gadgets",
+          "By selling passenger airline tickets"
         ],
         correctIndex: 0,
-        explain: "Revenue model = the pattern of how cash comes in."
+        explain:
+          "NVIDIA earns from hardware, software and AI platforms — with data centres as the biggest revenue engine right now."
       },
       {
         kind: "multiple-choice",
         id: "bm-q2-drivers",
-        prompt: "What are revenue drivers for {Company.name}?",
+        prompt: "What is currently driving {Company.name}'s biggest growth?",
         choices: [
-          "The main forces that make sales grow or shrink",
-          "Only the weather forecast",
-          "Drivers who deliver packages",
-          "Stock price daily moves"
+          "Artificial intelligence and massive investment in AI data centre infrastructure",
+          "Paper notebook sales to schools",
+          "Declining demand for all technology products",
+          "A single product with no other revenue streams"
         ],
         correctIndex: 0,
-        explain: "Drivers explain why revenue rises or falls."
+        explain:
+          "Global AI build-out is the main growth driver — especially demand for GPUs in data centres."
       },
       {
         kind: "multiple-choice",
         id: "bm-q3-structure",
-        prompt: "Why look at business structure?",
+        prompt: "What are {Company.name}'s two main business segments?",
         choices: [
-          "It shows how the company is organised to deliver products profitably",
-          "Structure means office floor plans only",
-          "Investors never need org charts",
-          "Structure replaces all products"
+          "Compute & Networking and Graphics",
+          "Retail stores and restaurants",
+          "Only gaming and nothing else",
+          "Cloud email and file storage"
         ],
         correctIndex: 0,
-        explain: "Structure affects costs, speed and scalability."
+        explain:
+          "NVIDIA reports through Compute & Networking and Graphics so investors can see where growth comes from."
       },
       {
         kind: "multiple-choice",
         id: "bm-q4-combo",
-        prompt:
-          "If {Company.name} earns mostly from one revenue stream, an investor should…",
+        prompt: "Why is {Company.name}'s business model attractive to investors?",
         choices: [
-          "Watch whether that stream stays healthy — diversification reduces risk",
-          "Ignore revenue entirely",
-          "Assume growth never slows",
-          "Only read headlines"
+          "It earns from hardware, software and AI platforms — not just one product",
+          "It relies on a single customer in one country",
+          "It has no connection to AI or data centres",
+          "It never invests in new technology"
         ],
         correctIndex: 0,
-        explain: "One stream can be powerful but fragile."
+        explain:
+          "Multiple revenue layers — chips, software and platforms — create more ways to grow over time."
       },
       {
         kind: "multiple-choice",
         id: "bm-q5-section",
-        prompt: "The Business Model section helps you answer…",
+        prompt: "Which statement best summarises {Company.name}'s business model?",
         choices: [
-          "How {Company.name} makes money and what pushes revenue up or down",
-          "Only the CEO's age",
-          "Nothing about profits",
-          "Which colour the annual report uses"
+          "It sells accelerated computing products and platforms, led by AI data centre demand, across two reported segments",
+          "It is mainly a consumer email and cloud-storage company",
+          "It makes money only from one chip sold in retail stores",
+          "Investors cannot learn how it makes money from public reports"
         ],
         correctIndex: 0,
-        explain: "You cannot judge a business without understanding its money engine."
+        explain:
+          "The Business Model section answers: how does NVIDIA make money, what drives growth, and how the business is organised."
       }
     ]
   },
@@ -326,67 +330,72 @@ export const BUSINESS_CHECKLIST_SECTION_QUIZZES: Record<
       {
         kind: "multiple-choice",
         id: "cp-q1-advantage",
-        prompt: "What is a competitive advantage?",
+        prompt: "What makes {Company.name} difficult for competitors to copy?",
         choices: [
-          "Something that helps a company win against rivals over time",
-          "A bigger office building only",
-          "Lower stock price than peers",
-          "More social media posts"
+          "Its full platform — hardware, CUDA software, developer ecosystem and AI tools together",
+          "Only having a bigger office building than rivals",
+          "A lower stock price than competitors",
+          "More social media posts than other chip companies"
         ],
         correctIndex: 0,
-        explain: "Advantages protect profits from competition."
+        explain:
+          "Chips alone are not enough — CUDA, developers and the full AI stack are much harder to replicate."
       },
       {
         kind: "multiple-choice",
         id: "cp-q2-position",
-        prompt: "Market position describes…",
+        prompt: "Which statement best describes {Company.name}'s position in the AI industry?",
         choices: [
-          "Where {Company.name} stands versus rivals in its industry",
-          "Only the company's street address",
-          "Positions on a sports team",
-          "Random market noise daily"
+          "A leading company whose products power many of the world's largest AI systems and data centres",
+          "A small startup with no major customers",
+          "A company that only sells to hobby gamers",
+          "A business with no real competitors"
         ],
         correctIndex: 0,
-        explain: "Leaders and challengers face different risks and opportunities."
+        explain:
+          "NVIDIA holds a leading position in AI computing despite strong competition from AMD, Intel and others."
       },
       {
         kind: "multiple-choice",
         id: "cp-q3-strategy",
-        prompt: "Competitive strategy is…",
+        prompt: "How is {Company.name} trying to stay ahead of competitors?",
         choices: [
-          "How the company chooses to compete and grow its edge",
-          "A secret never shared with investors",
-          "Only advertising slogans",
-          "The same for every company"
+          "By investing heavily in new technology and expanding its full AI platform across industries",
+          "By stopping all research and development",
+          "By selling only one product forever",
+          "By avoiding software and focusing only on chips"
         ],
         correctIndex: 0,
-        explain: "Strategy shows management's plan to stay ahead."
+        explain:
+          "NVIDIA's strategy is continuous investment in hardware, software and AI platforms — not standing still."
       },
       {
         kind: "multiple-choice",
         id: "cp-q4-combo",
-        prompt: "Strong advantage plus weak strategy most likely means…",
+        prompt: "Why do many customers continue choosing {Company.name} over competitors?",
         choices: [
-          "The edge may erode if rivals catch up or management missteps",
-          "Guaranteed dominance forever",
-          "Investors can ignore competition",
-          "Strategy never matters"
+          "Its products work well together and switching platforms is costly and time-consuming",
+          "Customers are legally required to use only one brand",
+          "Competitors offer identical products at lower quality",
+          "NVIDIA has no competition in any market"
         ],
         correctIndex: 0,
-        explain: "Even strong moats need smart execution."
+        explain:
+          "Ecosystem lock-in and integration make staying on NVIDIA's platform the practical choice for many buyers."
       },
       {
         kind: "multiple-choice",
         id: "cp-q5-section",
-        prompt: "Competitive Position helps an investor judge…",
+        prompt: "Which statement best summarises {Company.name}'s competitive position?",
         choices: [
-          "Whether {Company.name} can defend its lead against rivals",
-          "Only logo design contests",
-          "Nothing about long-term profits",
-          "Only short-term hype"
+          "A market leader with a hard-to-copy full-stack AI platform, strong rivals, and a strategy to keep expanding the ecosystem",
+          "A company with no competitive advantages and no market share",
+          "A business that competes only in gaming and nowhere else",
+          "A firm investors cannot judge against competitors"
         ],
         correctIndex: 0,
-        explain: "Competition determines how durable profits really are."
+        explain:
+          "Competitive Position answers: why is NVIDIA hard to beat, where does it stand, and can it stay ahead?"
       }
     ]
   },

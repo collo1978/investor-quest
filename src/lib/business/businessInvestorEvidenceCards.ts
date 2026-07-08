@@ -391,6 +391,249 @@ const NVDA_GEOGRAPHIC_REACH_CARDS: readonly BusinessInvestorEvidenceCardDef[] = 
   }
 ];
 
+const NVDA_REVENUE_MODEL_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
+  {
+    id: "revenue-1",
+    principleId: "revenue-model",
+    order: 1,
+    question: "How does NVIDIA make money?",
+    answer:
+      "NVIDIA makes money by selling powerful computer chips, networking equipment and AI software. Its biggest customers buy these products to build AI systems, data centres, gaming computers and other advanced technology.",
+    answerHeadline:
+      "NVIDIA makes money by selling powerful computer chips, networking equipment and AI software.",
+    answerBody:
+      "Its biggest customers buy these products to build AI systems, data centres, gaming computers and other advanced technology.",
+    ratingPrompt: "Do you understand how NVIDIA makes money?"
+  },
+  {
+    id: "revenue-2",
+    principleId: "revenue-model",
+    order: 2,
+    question: "What is NVIDIA's biggest source of revenue?",
+    answer:
+      "Today, most of NVIDIA's revenue comes from its Data Center business. As companies invest heavily in artificial intelligence, demand for NVIDIA's AI chips and computing platforms has grown rapidly.",
+    answerHeadline:
+      "Today, most of NVIDIA's revenue comes from its Data Center business.",
+    answerBody:
+      "As companies invest heavily in artificial intelligence, demand for NVIDIA's AI chips and computing platforms has grown rapidly.",
+    ratingPrompt: "Do you understand NVIDIA's biggest revenue source?"
+  },
+  {
+    id: "revenue-3",
+    principleId: "revenue-model",
+    order: 3,
+    question: "Why is NVIDIA's business model attractive?",
+    answer:
+      "NVIDIA doesn't rely on just one product. It earns money from hardware, software and complete AI platforms, giving it multiple ways to grow as technology continues to evolve.",
+    answerHeadline: "NVIDIA doesn't rely on just one product.",
+    answerBody:
+      "It earns money from hardware, software and complete AI platforms, giving it multiple ways to grow as technology continues to evolve.",
+    ratingPrompt: "Do you understand why NVIDIA's business model is attractive?"
+  }
+];
+
+const NVDA_REVENUE_DRIVERS_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
+  {
+    id: "drivers-1",
+    principleId: "revenue-drivers",
+    order: 1,
+    question: "What's driving NVIDIA's rapid growth?",
+    answer:
+      "Artificial intelligence is the biggest growth driver. Businesses around the world are investing billions of dollars into AI infrastructure, and much of that technology runs on NVIDIA platforms.",
+    answerHeadline: "Artificial intelligence is the biggest growth driver.",
+    answerBody:
+      "Businesses around the world are investing billions of dollars into AI infrastructure, and much of that technology runs on NVIDIA platforms.",
+    ratingPrompt: "Do you understand what is driving NVIDIA's rapid growth?"
+  },
+  {
+    id: "drivers-2",
+    principleId: "revenue-drivers",
+    order: 2,
+    question: "Why are data centres so important to NVIDIA?",
+    answer:
+      "Modern AI requires enormous computing power. Companies build huge data centres filled with NVIDIA GPUs to train and run AI models, making this one of NVIDIA's fastest-growing businesses.",
+    answerHeadline: "Modern AI requires enormous computing power.",
+    answerBody:
+      "Companies build huge data centres filled with NVIDIA GPUs to train and run AI models, making this one of NVIDIA's fastest-growing businesses.",
+    ratingPrompt: "Do you understand why data centres matter to NVIDIA?"
+  },
+  {
+    id: "drivers-3",
+    principleId: "revenue-drivers",
+    order: 3,
+    question: "What could keep NVIDIA growing in the future?",
+    answer:
+      "AI is still in its early stages. As industries like healthcare, robotics, cloud computing and autonomous vehicles continue adopting AI, demand for NVIDIA's technology could keep growing for many years.",
+    answerHeadline: "AI is still in its early stages.",
+    answerBody:
+      "As industries like healthcare, robotics, cloud computing and autonomous vehicles continue adopting AI, demand for NVIDIA's technology could keep growing for many years.",
+    ratingPrompt: "Do you understand what could keep NVIDIA growing?"
+  }
+];
+
+const NVDA_BUSINESS_STRUCTURE_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
+  {
+    id: "structure-1",
+    principleId: "business-structure",
+    order: 1,
+    question: "How is NVIDIA organised?",
+    answer:
+      "NVIDIA reports its business through two main segments: Compute & Networking and Graphics. These groups help investors understand which parts of the business are generating growth.",
+    answerHeadline:
+      "NVIDIA reports its business through two main segments: Compute & Networking and Graphics.",
+    answerBody:
+      "These groups help investors understand which parts of the business are generating growth.",
+    ratingPrompt: "Do you understand how NVIDIA is organised?"
+  },
+  {
+    id: "structure-2",
+    principleId: "business-structure",
+    order: 2,
+    question: "Why does NVIDIA separate the business into different segments?",
+    answer:
+      "Each segment serves different customers and markets. Reporting them separately makes it easier for investors to see which areas are performing well and where future growth is coming from.",
+    answerHeadline: "Each segment serves different customers and markets.",
+    answerBody:
+      "Reporting them separately makes it easier for investors to see which areas are performing well and where future growth is coming from.",
+    ratingPrompt: "Do you understand why NVIDIA reports separate segments?"
+  },
+  {
+    id: "structure-3",
+    principleId: "business-structure",
+    order: 3,
+    question: "Why is NVIDIA's business structure important?",
+    answer:
+      "A clear business structure helps investors understand the company more easily. Instead of looking at NVIDIA as one giant business, you can see how each major part contributes to its overall success.",
+    answerHeadline:
+      "A clear business structure helps investors understand the company more easily.",
+    answerBody:
+      "Instead of looking at NVIDIA as one giant business, you can see how each major part contributes to its overall success.",
+    ratingPrompt: "Do you understand why business structure matters?"
+  }
+];
+
+const NVDA_COMPETITIVE_ADVANTAGE_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
+  {
+    id: "advantage-1",
+    principleId: "competitive-advantage",
+    order: 1,
+    question: "What gives NVIDIA an advantage over competitors?",
+    answer:
+      "NVIDIA offers much more than computer chips. It combines powerful hardware, software, networking and AI tools into one complete platform. This makes it easier for customers to build advanced AI systems without needing products from lots of different companies.",
+    answerHeadline: "NVIDIA offers much more than computer chips.",
+    answerBody:
+      "It combines powerful hardware, software, networking and AI tools into one complete platform. This makes it easier for customers to build advanced AI systems without needing products from lots of different companies.",
+    ratingPrompt: "Do you understand NVIDIA's competitive advantage?"
+  },
+  {
+    id: "advantage-2",
+    principleId: "competitive-advantage",
+    order: 2,
+    question: "Why is CUDA so important?",
+    answer:
+      "CUDA is NVIDIA's software platform that developers use to build AI and computing applications. Because millions of developers already use CUDA, many customers prefer to stay within NVIDIA's ecosystem rather than start again with another company's technology.",
+    answerHeadline: "CUDA is NVIDIA's software platform for AI and computing.",
+    answerBody:
+      "Because millions of developers already use CUDA, many customers prefer to stay within NVIDIA's ecosystem rather than start again with another company's technology.",
+    ratingPrompt: "Do you understand why CUDA matters?"
+  },
+  {
+    id: "advantage-3",
+    principleId: "competitive-advantage",
+    order: 3,
+    question: "Why is NVIDIA difficult to compete with?",
+    answer:
+      "Competitors may be able to build similar chips, but matching NVIDIA's software, developer community, AI tools and years of experience is much harder. This gives NVIDIA a strong competitive advantage.",
+    answerHeadline:
+      "Competitors may build similar chips, but matching NVIDIA's full ecosystem is much harder.",
+    answerBody:
+      "Software, developer community, AI tools and years of experience give NVIDIA a strong competitive advantage.",
+    ratingPrompt: "Do you understand why NVIDIA is difficult to compete with?"
+  }
+];
+
+const NVDA_MARKET_POSITION_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
+  {
+    id: "position-1",
+    principleId: "market-position",
+    order: 1,
+    question: "Where does NVIDIA rank in its industry?",
+    answer:
+      "NVIDIA is one of the world's leading companies in AI computing and graphics technology. Its products power many of the world's largest AI systems and data centres.",
+    answerHeadline:
+      "NVIDIA is one of the world's leading companies in AI computing and graphics technology.",
+    answerBody:
+      "Its products power many of the world's largest AI systems and data centres.",
+    ratingPrompt: "Do you understand NVIDIA's industry ranking?"
+  },
+  {
+    id: "position-2",
+    principleId: "market-position",
+    order: 2,
+    question: "Who does NVIDIA compete against?",
+    answer:
+      "NVIDIA competes with companies like AMD, Intel and other technology businesses developing AI chips and computing platforms. Competition is strong, but NVIDIA currently holds a leading position in many AI markets.",
+    answerHeadline:
+      "NVIDIA competes with companies like AMD, Intel and other AI chip makers.",
+    answerBody:
+      "Competition is strong, but NVIDIA currently holds a leading position in many AI markets.",
+    ratingPrompt: "Do you understand who NVIDIA competes against?"
+  },
+  {
+    id: "position-3",
+    principleId: "market-position",
+    order: 3,
+    question: "Why does being a market leader matter?",
+    answer:
+      "Leading companies often attract more customers, developers and business partners. This creates momentum that can make it even harder for competitors to catch up.",
+    answerHeadline: "Leading companies often attract more customers, developers and partners.",
+    answerBody:
+      "This creates momentum that can make it even harder for competitors to catch up.",
+    ratingPrompt: "Do you understand why market leadership matters?"
+  }
+];
+
+const NVDA_COMPETITIVE_STRATEGY_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
+  {
+    id: "strategy-1",
+    principleId: "competitive-strategy",
+    order: 1,
+    question: "How does NVIDIA plan to stay ahead?",
+    answer:
+      "NVIDIA continues investing heavily in new technology, software and AI platforms. Instead of focusing on one product, it keeps expanding into new industries and new opportunities.",
+    answerHeadline:
+      "NVIDIA continues investing heavily in new technology, software and AI platforms.",
+    answerBody:
+      "Instead of focusing on one product, it keeps expanding into new industries and new opportunities.",
+    ratingPrompt: "Do you understand how NVIDIA plans to stay ahead?"
+  },
+  {
+    id: "strategy-2",
+    principleId: "competitive-strategy",
+    order: 2,
+    question: "How does NVIDIA keep customers coming back?",
+    answer:
+      "Customers often continue using NVIDIA because its products work well together and many of their existing systems are already built on NVIDIA's technology. Switching to another platform can take time and cost money.",
+    answerHeadline:
+      "Customers stay because NVIDIA's products work well together.",
+    answerBody:
+      "Many existing systems are already built on NVIDIA's technology — switching to another platform can take time and cost money.",
+    ratingPrompt: "Do you understand how NVIDIA keeps customers?"
+  },
+  {
+    id: "strategy-3",
+    principleId: "competitive-strategy",
+    order: 3,
+    question: "Why is NVIDIA investing beyond computer chips?",
+    answer:
+      "NVIDIA wants to become the company powering the entire AI ecosystem. By offering hardware, software, networking and AI platforms together, it creates more opportunities for future growth and strengthens its competitive position.",
+    answerHeadline: "NVIDIA wants to become the company powering the entire AI ecosystem.",
+    answerBody:
+      "By offering hardware, software, networking and AI platforms together, it creates more opportunities for future growth and strengthens its competitive position.",
+    ratingPrompt: "Do you understand NVIDIA's strategy beyond chips?"
+  }
+];
+
 /** Company-specific evidence cards — extend as more principles ship. */
 export const BUSINESS_INVESTOR_EVIDENCE_BY_COMPANY: Partial<
   Record<CompanyId, Partial<Record<InvestorPrincipleId, readonly BusinessInvestorEvidenceCardDef[]>>>
@@ -404,7 +647,13 @@ export const BUSINESS_INVESTOR_EVIDENCE_BY_COMPANY: Partial<
     "innovation": NVDA_INNOVATION_CARDS,
     "customer-base": NVDA_CUSTOMER_BASE_CARDS,
     "end-markets": NVDA_END_MARKETS_CARDS,
-    "geographic-reach": NVDA_GEOGRAPHIC_REACH_CARDS
+    "geographic-reach": NVDA_GEOGRAPHIC_REACH_CARDS,
+    "revenue-model": NVDA_REVENUE_MODEL_CARDS,
+    "revenue-drivers": NVDA_REVENUE_DRIVERS_CARDS,
+    "business-structure": NVDA_BUSINESS_STRUCTURE_CARDS,
+    "competitive-advantage": NVDA_COMPETITIVE_ADVANTAGE_CARDS,
+    "market-position": NVDA_MARKET_POSITION_CARDS,
+    "competitive-strategy": NVDA_COMPETITIVE_STRATEGY_CARDS
   }
 };
 
@@ -437,7 +686,13 @@ export const PRINCIPLE_EVIDENCE_QUEST_SLUG: Partial<
   "innovation": "why-buying",
   "customer-base": "everyday-life",
   "end-markets": "everyday-life",
-  "geographic-reach": "everyday-life"
+  "geographic-reach": "everyday-life",
+  "revenue-model": "how-it-works",
+  "revenue-drivers": "how-it-works",
+  "business-structure": "how-it-works",
+  "competitive-advantage": "competition",
+  "market-position": "competition",
+  "competitive-strategy": "competition"
 };
 
 export function questSlugForPrincipleEvidence(
