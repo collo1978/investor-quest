@@ -20,17 +20,28 @@ export const PRODUCTS_SERVICES_EVIDENCE_PRINCIPLES = [
   "innovation"
 ] as const satisfies readonly InvestorPrincipleId[];
 
+/** Customers & Markets principles — sequential evidence paths on Quest 3. */
+export const CUSTOMERS_MARKETS_EVIDENCE_PRINCIPLES = [
+  "customer-base",
+  "end-markets",
+  "geographic-reach"
+] as const satisfies readonly InvestorPrincipleId[];
+
 export type CompanyOverviewEvidencePrinciple =
   (typeof COMPANY_OVERVIEW_EVIDENCE_PRINCIPLES)[number];
 
 export type ProductsServicesEvidencePrinciple =
   (typeof PRODUCTS_SERVICES_EVIDENCE_PRINCIPLES)[number];
 
+export type CustomersMarketsEvidencePrinciple =
+  (typeof CUSTOMERS_MARKETS_EVIDENCE_PRINCIPLES)[number];
+
 export const SECTION_EVIDENCE_PRINCIPLES: Partial<
   Record<BusinessChecklistSectionId, readonly InvestorPrincipleId[]>
 > = {
   "company-overview": COMPANY_OVERVIEW_EVIDENCE_PRINCIPLES,
-  "products-services": PRODUCTS_SERVICES_EVIDENCE_PRINCIPLES
+  "products-services": PRODUCTS_SERVICES_EVIDENCE_PRINCIPLES,
+  "customers-markets": CUSTOMERS_MARKETS_EVIDENCE_PRINCIPLES
 };
 
 export type PrincipleEvidenceQuestTrigger = {
@@ -46,7 +57,10 @@ const PRINCIPLE_EVIDENCE_TRIGGERS: Partial<
   "global-presence": { questSlug: "what-they-do", cardId: "card-3" },
   "value-proposition": { questSlug: "why-buying", cardId: "card-1" },
   "product-portfolio": { questSlug: "why-buying", cardId: "card-2" },
-  "innovation": { questSlug: "why-buying", cardId: "card-3" }
+  "innovation": { questSlug: "why-buying", cardId: "card-3" },
+  "customer-base": { questSlug: "everyday-life", cardId: "card-1" },
+  "end-markets": { questSlug: "everyday-life", cardId: "card-2" },
+  "geographic-reach": { questSlug: "everyday-life", cardId: "card-3" }
 };
 
 export function resolveSectionEvidencePrinciples(

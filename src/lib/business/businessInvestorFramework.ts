@@ -164,7 +164,7 @@ export const BUSINESS_INVESTOR_PRINCIPLES: readonly BusinessInvestorPrincipleDef
       label: "Customer Base",
       orderInSection: 1,
       whyItMatters:
-        "Understanding the customer helps you understand how reliable the business really is."
+        "Investors prefer companies with a large and diverse customer base rather than relying on just a few customers."
     },
     {
       id: "end-markets",
@@ -172,7 +172,7 @@ export const BUSINESS_INVESTOR_PRINCIPLES: readonly BusinessInvestorPrincipleDef
       label: "End Markets",
       orderInSection: 2,
       whyItMatters:
-        "Knowing which markets the company serves helps you understand where future growth may come from."
+        "Companies serving multiple growing markets often have more opportunities to grow over time."
     },
     {
       id: "geographic-reach",
@@ -180,7 +180,7 @@ export const BUSINESS_INVESTOR_PRINCIPLES: readonly BusinessInvestorPrincipleDef
       label: "Geographic Reach",
       orderInSection: 3,
       whyItMatters:
-        "Selling across different regions can reduce dependence on a single market."
+        "Companies that operate globally can reach more customers and aren't dependent on one country's economy."
     },
     {
       id: "revenue-model",

@@ -179,68 +179,73 @@ export const BUSINESS_CHECKLIST_SECTION_QUIZZES: Record<
       {
         kind: "multiple-choice",
         id: "cm-q1-customers",
-        prompt: "Why map {Company.name}'s customer base?",
+        prompt: "Who are {Company.name}'s biggest customers?",
         choices: [
-          "Knowing who pays reveals demand strength and concentration risk",
-          "Customers never matter to investors",
-          "Only the CEO's opinion counts",
-          "Customer lists are always secret forever"
+          "Some of the world's largest cloud companies, internet platforms and technology businesses",
+          "Only hobby gamers upgrading home graphics cards each year",
+          "Mostly small local shops with no enterprise buyers",
+          "Only governments running classified supercomputers"
         ],
         correctIndex: 0,
-        explain: "Who pays — and how much they matter — shapes the whole business."
+        explain:
+          "Hyperscale cloud and big tech are major buyers — but they are not NVIDIA's only customers."
       },
       {
         kind: "multiple-choice",
         id: "cm-q2-markets",
-        prompt: "What are end markets for {Company.name}?",
+        prompt: "Which market is driving {Company.name}'s biggest growth today?",
         choices: [
-          "The industries and use cases where its products create value",
-          "Only the company's parking lot",
-          "Markets that never change",
-          "Stock exchanges exclusively"
+          "Artificial intelligence and data centres",
+          "Paper notebooks for schools",
+          "Passenger airline tickets",
+          "Coffee shop franchises"
         ],
         correctIndex: 0,
-        explain: "End markets show where growth — or slowdown — will show up first."
+        explain:
+          "Global AI infrastructure investment is the main growth engine right now."
       },
       {
         kind: "multiple-choice",
         id: "cm-q3-geography",
-        prompt: "Why does geographic reach matter?",
+        prompt: "Why is global reach important for investors?",
         choices: [
-          "Global spread can reduce reliance on one region's economy",
+          "A global customer base creates more growth opportunities and reduces reliance on one region",
           "Geography only matters for tourism companies",
           "All sales always come from one city",
           "Maps replace financial statements"
         ],
         correctIndex: 0,
-        explain: "Geographic diversity can cushion regional downturns."
+        explain:
+          "Spreading demand across regions cushions a business when one economy slows."
       },
       {
         kind: "multiple-choice",
         id: "cm-q4-combo",
-        prompt:
-          "If a few huge customers buy most of {Company.name}'s products, that mainly signals…",
+        prompt: "Does {Company.name} only sell to big tech companies?",
         choices: [
-          "Customer concentration risk — losing one buyer would hurt",
-          "Guaranteed profits forever",
-          "No competition exists",
-          "The business has no growth potential"
+          "No — it also serves researchers, healthcare, finance, manufacturers, car companies, startups, designers and gamers",
+          "Yes — only three cloud companies are allowed to buy its products",
+          "Yes — it never sells outside the United States",
+          "No — it only sells to individual consumers in retail stores"
         ],
         correctIndex: 0,
-        explain: "Big buyers can be great — until they cut orders."
+        explain:
+          "A diverse customer base across many industries lowers concentration risk."
       },
       {
         kind: "multiple-choice",
         id: "cm-q5-section",
-        prompt: "Customers & Markets helps an investor understand…",
+        prompt:
+          "What does the Customers & Markets section help you answer about {Company.name}?",
         choices: [
-          "Who pays, which industries drive demand and how global the business is",
-          "Only insider trading rules",
-          "Nothing about revenue",
-          "Only social media follower counts"
+          "Who actually buys its products, and where is the business growing?",
+          "Only how many office buildings it owns",
+          "Nothing useful for investing",
+          "The exact dividend date every year"
         ],
         correctIndex: 0,
-        explain: "Demand comes from real customers in real markets."
+        explain:
+          "This section builds on Company Overview and Products & Services — who buys it, and where growth comes from."
       }
     ]
   },

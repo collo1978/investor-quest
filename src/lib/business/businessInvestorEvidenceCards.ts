@@ -270,6 +270,127 @@ const NVDA_INNOVATION_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
   }
 ];
 
+const NVDA_CUSTOMER_BASE_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
+  {
+    id: "customers-1",
+    principleId: "customer-base",
+    order: 1,
+    question: "Who are NVIDIA's biggest customers?",
+    answer:
+      "NVIDIA's biggest customers include some of the world's largest cloud companies, internet platforms and technology businesses. These companies use NVIDIA's technology to power AI services, cloud computing and massive data centres.",
+    answerHeadline:
+      "NVIDIA's biggest customers include some of the world's largest cloud companies, internet platforms and technology businesses.",
+    answerBody:
+      "These companies use NVIDIA's technology to power AI services, cloud computing and massive data centres.",
+    ratingPrompt: "Do you understand who NVIDIA's biggest customers are?"
+  },
+  {
+    id: "customers-2",
+    principleId: "customer-base",
+    order: 2,
+    question: "Does NVIDIA only sell to big tech companies?",
+    answer:
+      "No. While large technology companies are major customers, NVIDIA also serves researchers, healthcare companies, financial institutions, manufacturers, car companies, startups, designers and gamers.",
+    answerHeadline: "No — NVIDIA serves far more than big tech alone.",
+    answerBody:
+      "While large technology companies are major customers, NVIDIA also serves researchers, healthcare companies, financial institutions, manufacturers, car companies, startups, designers and gamers.",
+    ratingPrompt: "Do you understand the breadth of NVIDIA's customer base?"
+  },
+  {
+    id: "customers-3",
+    principleId: "customer-base",
+    order: 3,
+    question: "Why is having lots of different customers important?",
+    answer:
+      "Selling to many different industries reduces risk. If demand slows in one market, NVIDIA still has many other customers and industries driving growth.",
+    answerHeadline: "Selling to many different industries reduces risk.",
+    answerBody:
+      "If demand slows in one market, NVIDIA still has many other customers and industries driving growth.",
+    ratingPrompt: "Do you understand why customer diversity matters?"
+  }
+];
+
+const NVDA_END_MARKETS_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
+  {
+    id: "markets-1",
+    principleId: "end-markets",
+    order: 1,
+    question: "Which markets does NVIDIA operate in?",
+    answer:
+      "NVIDIA operates across many markets including AI, cloud computing, gaming, autonomous vehicles, healthcare, scientific research and professional design.",
+    answerHeadline:
+      "NVIDIA operates across AI, cloud computing, gaming, autonomous vehicles and more.",
+    answerBody:
+      "Its markets also include healthcare, scientific research and professional design.",
+    ratingPrompt: "Do you understand which markets NVIDIA operates in?"
+  },
+  {
+    id: "markets-2",
+    principleId: "end-markets",
+    order: 2,
+    question: "Which market is driving NVIDIA's biggest growth today?",
+    answer:
+      "Artificial intelligence and data centres are currently the biggest drivers of NVIDIA's growth. Businesses around the world are investing heavily in AI infrastructure powered by NVIDIA technology.",
+    answerHeadline:
+      "Artificial intelligence and data centres are currently the biggest drivers of NVIDIA's growth.",
+    answerBody:
+      "Businesses around the world are investing heavily in AI infrastructure powered by NVIDIA technology.",
+    ratingPrompt: "Do you understand what is driving NVIDIA's growth today?"
+  },
+  {
+    id: "markets-3",
+    principleId: "end-markets",
+    order: 3,
+    question: "Why does serving many different markets matter?",
+    answer:
+      "It means NVIDIA isn't dependent on one single industry. As new technologies emerge, the company already has products that can be used across many different sectors.",
+    answerHeadline: "NVIDIA isn't dependent on one single industry.",
+    answerBody:
+      "As new technologies emerge, the company already has products that can be used across many different sectors.",
+    ratingPrompt: "Do you understand why serving many markets matters?"
+  }
+];
+
+const NVDA_GEOGRAPHIC_REACH_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
+  {
+    id: "geography-1",
+    principleId: "geographic-reach",
+    order: 1,
+    question: "Does NVIDIA sell its products around the world?",
+    answer:
+      "Yes. NVIDIA's products are used by businesses, researchers and consumers across many countries around the world.",
+    answerHeadline: "Yes — NVIDIA's products are used across many countries.",
+    answerBody:
+      "Businesses, researchers and consumers around the world rely on its technology.",
+    ratingPrompt: "Do you understand NVIDIA's global sales reach?"
+  },
+  {
+    id: "geography-2",
+    principleId: "geographic-reach",
+    order: 2,
+    question: "Is NVIDIA helping industries beyond the United States?",
+    answer:
+      "Absolutely. Its AI platforms are being used globally in healthcare, finance, manufacturing, automotive, telecommunications and scientific research.",
+    answerHeadline: "NVIDIA's AI platforms are being used globally.",
+    answerBody:
+      "Industries worldwide — including healthcare, finance, manufacturing, automotive, telecommunications and scientific research — rely on its technology.",
+    ratingPrompt: "Do you understand NVIDIA's global industry impact?"
+  },
+  {
+    id: "geography-3",
+    principleId: "geographic-reach",
+    order: 3,
+    question: "Why is global reach important for investors?",
+    answer:
+      "A global customer base gives NVIDIA more opportunities to grow and helps reduce the risk of relying too heavily on one region or economy.",
+    answerHeadline:
+      "A global customer base gives NVIDIA more opportunities to grow.",
+    answerBody:
+      "It also helps reduce the risk of relying too heavily on one region or economy.",
+    ratingPrompt: "Do you understand why global reach matters to investors?"
+  }
+];
+
 /** Company-specific evidence cards — extend as more principles ship. */
 export const BUSINESS_INVESTOR_EVIDENCE_BY_COMPANY: Partial<
   Record<CompanyId, Partial<Record<InvestorPrincipleId, readonly BusinessInvestorEvidenceCardDef[]>>>
@@ -280,7 +401,10 @@ export const BUSINESS_INVESTOR_EVIDENCE_BY_COMPANY: Partial<
     "global-presence": NVDA_GLOBAL_PRESENCE_CARDS,
     "value-proposition": NVDA_VALUE_PROPOSITION_CARDS,
     "product-portfolio": NVDA_PRODUCT_PORTFOLIO_CARDS,
-    "innovation": NVDA_INNOVATION_CARDS
+    "innovation": NVDA_INNOVATION_CARDS,
+    "customer-base": NVDA_CUSTOMER_BASE_CARDS,
+    "end-markets": NVDA_END_MARKETS_CARDS,
+    "geographic-reach": NVDA_GEOGRAPHIC_REACH_CARDS
   }
 };
 
@@ -310,7 +434,10 @@ export const PRINCIPLE_EVIDENCE_QUEST_SLUG: Partial<
   "global-presence": "what-they-do",
   "value-proposition": "why-buying",
   "product-portfolio": "why-buying",
-  "innovation": "why-buying"
+  "innovation": "why-buying",
+  "customer-base": "everyday-life",
+  "end-markets": "everyday-life",
+  "geographic-reach": "everyday-life"
 };
 
 export function questSlugForPrincipleEvidence(
