@@ -1001,6 +1001,12 @@ function BusinessIslandQuestReadingInner(
     return cardIdx >= 0 && cardReadFlags[cardIdx] === true;
   }, [effectiveEvidencePrincipleId, slug, cards, cardReadFlags]);
 
+  /** Keep the active principle row lit while the player works through evidence cards. */
+  const checklistHighlightPrincipleId =
+    evidenceGateActive && effectiveEvidencePrincipleId
+      ? effectiveEvidencePrincipleId
+      : highlightPrincipleId;
+
   useEffect(() => {
     const bumpFramework = () => setEvidenceFrameworkTick((tick) => tick + 1);
     window.addEventListener(BUSINESS_INVESTOR_FRAMEWORK_CHANGED_EVENT, bumpFramework);
@@ -1502,7 +1508,7 @@ function BusinessIslandQuestReadingInner(
         companyId={company.id}
         questSlug={slug}
         questProgressPct={checklistQuestProgressPct}
-        highlightPrincipleId={highlightPrincipleId}
+        highlightPrincipleId={checklistHighlightPrincipleId}
         highlightSectionQuizId={highlightSectionQuizId}
       >
         <motion.div className={shellClass}>
@@ -1584,7 +1590,7 @@ function BusinessIslandQuestReadingInner(
       companyId={company.id}
       questSlug={slug}
       questProgressPct={checklistQuestProgressPct}
-      highlightPrincipleId={highlightPrincipleId}
+      highlightPrincipleId={checklistHighlightPrincipleId}
       highlightSectionQuizId={highlightSectionQuizId}
     >
       <motion.div className={shellClass}>

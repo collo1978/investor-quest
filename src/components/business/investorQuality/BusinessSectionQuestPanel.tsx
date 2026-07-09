@@ -40,6 +40,7 @@ function PrincipleQuestRow({
   const isActive = principle.status === "active";
   const hasEvidenceDots =
     !isNa && !isLocked && principle.evidenceSlotCards.length > 0 && principle.status !== "rated";
+  const isEvidenceFocus = (highlighted && isActive) || (isActive && hasEvidenceDots);
   const [evidenceGlow, setEvidenceGlow] = useState(false);
 
   useEffect(() => {
@@ -68,6 +69,7 @@ function PrincipleQuestRow({
         isActive ? "iq-business-section-quest-panel__principle--active" : "",
         principle.status === "rated" ? "iq-business-section-quest-panel__principle--rated" : "",
         highlighted ? "iq-business-section-quest-panel__principle--unlock-pulse" : "",
+        isEvidenceFocus ? "iq-business-framework__principle--evidence-focus" : "",
         evidenceGlow ? "iq-business-section-quest-panel__principle--evidence-glow" : ""
       ]
         .filter(Boolean)

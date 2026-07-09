@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
+import { useState } from "react";
 import { ForcesHubSceneImage } from "@/components/forces/ForcesHubSceneImage";
+import { ForcesChecklistLadderSheet } from "@/components/forces/hub/ForcesChecklistLadderSheet";
+import { ForcesIslandAcademySign } from "@/components/forces/hub/ForcesIslandAcademySign";
 import {
   FORCES_MAP_AMBIENT_PARTICLES,
   FORCES_MAP_CARD_POSITIONS,
@@ -35,6 +38,7 @@ export function ForcesQuestMap({
   const logo = resolveCompanyLogoUrl(company, companyLogoUrl);
   const pct = Math.max(0, Math.min(100, Math.round(hubProgressPct)));
   const reduceMotion = useReducedMotion();
+  const [ladderOpen, setLadderOpen] = useState(false);
 
   return (
     <motion.div
@@ -138,7 +142,25 @@ export function ForcesQuestMap({
               Map
             </Link>
           </motion.div>
+
+          <motion.div
+            className="pointer-events-none absolute bottom-3 left-3 z-50 sm:bottom-4 sm:left-4"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35, duration: 0.4 }}
+          >
+            <ForcesIslandAcademySign
+              companyId={company.id}
+              onOpenLadder={() => setLadderOpen(true)}
+            />
+          </motion.div>
         </motion.div>
+
+        <ForcesChecklistLadderSheet
+          open={ladderOpen}
+          onClose={() => setLadderOpen(false)}
+          companyId={company.id}
+        />
 
         <motion.div
           className="pointer-events-none absolute right-3 top-3 z-30 sm:right-4 sm:top-4"

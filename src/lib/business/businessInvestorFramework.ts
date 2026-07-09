@@ -280,6 +280,8 @@ export type InvestorPrincipleView = BusinessInvestorPrincipleDef & {
   evidenceRatingCount: number;
   /** Per-card evidence collection — empty when no evidence cards defined. */
   evidenceSlotCards: readonly InvestorEvidenceSlotView[];
+  /** First unrated evidence card while principle is active — highlights the current dot. */
+  activeEvidenceCardId: string | null;
 };
 
 export type BusinessChecklistSectionView = BusinessInvestorSectionDef & {
@@ -591,6 +593,18 @@ function isPrincipleFullyEvidenceRated(
   );
 }
 
+function resolveActiveEvidenceCardId(
+  companyId: CompanyId,
+  principleId: InvestorPrincipleId,
+  stored: BusinessInvestorFrameworkStoredState
+): string | null {
+  const cards = resolveInvestorEvidenceCards(companyId, principleId);
+  const next = cards.find(
+    (card) => stored.evidenceRatings[`${principleId}#${card.id}`] == null
+  );
+  return next?.id ?? null;
+}
+
 function buildPrincipleView(
   principleDef: BusinessInvestorPrincipleDef,
   input: {
@@ -601,17 +615,24 @@ function buildPrincipleView(
     evidenceRatingCount: number;
   }
 ): InvestorPrincipleView {
+  const evidenceSlotCards = resolveEvidenceSlotCards(
+    input.companyId,
+    principleDef.id,
+    input.stored
+  );
+  const activeEvidenceCardId =
+    input.status === "active"
+      ? resolveActiveEvidenceCardId(input.companyId, principleDef.id, input.stored)
+      : null;
+
   return {
     ...principleDef,
     status: input.status,
     rating: input.rating,
     ratingLabel: input.rating ? formatRollupRatingLabel(input.rating) : null,
     evidenceRatingCount: input.evidenceRatingCount,
-    evidenceSlotCards: resolveEvidenceSlotCards(
-      input.companyId,
-      principleDef.id,
-      input.stored
-    )
+    evidenceSlotCards,
+    activeEvidenceCardId
   };
 }
 

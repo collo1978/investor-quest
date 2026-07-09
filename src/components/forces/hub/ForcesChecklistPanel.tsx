@@ -1,34 +1,30 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { BusinessChecklistInfoHint } from "@/components/business/hub/BusinessChecklistInfoHint";
-import { BusinessChecklistJourneyProgress } from "@/components/business/hub/BusinessChecklistJourneyProgress";
-import { BusinessInvestorPrincipleHint } from "@/components/business/hub/BusinessInvestorPrincipleHint";
 import { InvestorChecklistLockBadge } from "@/components/business/hub/InvestorChecklistLockBadge";
-import { BusinessChecklistSectionQuizRow } from "@/components/business/investorFramework/BusinessChecklistSectionQuizRow";
-import { InvestorPrincipleEvidenceDots } from "@/components/business/investorFramework/InvestorPrincipleEvidenceDots";
-import { navigateToChecklistSectionQuiz } from "@/lib/business/businessChecklistSectionQuizNavigation";
+import { ForcesChecklistJourneyProgress } from "@/components/forces/hub/ForcesChecklistJourneyProgress";
+import { ForcesChecklistSectionHint } from "@/components/forces/hub/ForcesChecklistSectionHint";
+import { ForcesInvestorPrincipleHint } from "@/components/forces/hub/ForcesInvestorPrincipleHint";
 import type { CompanyId } from "@/data/companies";
-import { useBusinessChecklistProgress } from "@/hooks/useBusinessChecklistProgress";
+import { useForcesChecklistProgress } from "@/hooks/useForcesChecklistProgress";
 import {
-  INVESTOR_CHECKLIST_BUSINESS_INTRO,
-  INVESTOR_CHECKLIST_HEADER_INTRO,
-  resolvePrincipleMarker,
-  type BusinessChecklistSectionView,
-  type InvestorPrincipleView
-} from "@/lib/business/businessInvestorFramework";
-import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
+  INVESTOR_CHECKLIST_FORCES_INTRO,
+  INVESTOR_CHECKLIST_RISK_INTRO,
+  resolveForcesPrincipleMarker,
+  type ForcesChecklistGroupView,
+  type ForcesChecklistSectionView,
+  type ForcesPrincipleView
+} from "@/lib/forces/forcesInvestorFramework";
 
 type Props = {
   companyId: CompanyId;
   variant?: "schools" | "dark";
-  presentation?: "default" | "journey" | "island" | "island-kiosk" | "ladder";
-  cards?: readonly BusinessHubQuestCard[];
+  presentation?: "default" | "island" | "island-kiosk" | "ladder";
 };
 
-function SectionStatusBadge({ section }: { section: BusinessChecklistSectionView }) {
+function SectionStatusBadge({ section }: { section: ForcesChecklistSectionView }) {
   if (section.state === "locked") {
     return <InvestorChecklistLockBadge size="section" />;
   }
@@ -38,12 +34,7 @@ function SectionStatusBadge({ section }: { section: BusinessChecklistSectionView
       className={[
         "iq-business-framework__section-status",
         section.state === "active" ? "iq-business-framework__section-status--active" : "",
-        section.state === "completed" ? "iq-business-framework__section-status--completed" : "",
-        section.overallRating === "strong"
-          ? "iq-business-framework__section-status--strong"
-          : "",
-        section.overallRating === "weak" ? "iq-business-framework__section-status--weak" : "",
-        section.overallRating === "mixed" ? "iq-business-framework__section-status--mixed" : ""
+        section.state === "completed" ? "iq-business-framework__section-status--completed" : ""
       ]
         .filter(Boolean)
         .join(" ")}
@@ -53,31 +44,20 @@ function SectionStatusBadge({ section }: { section: BusinessChecklistSectionView
   );
 }
 
-function PrincipleRatingGlyph({ principle }: { principle: InvestorPrincipleView }) {
-  if (principle.status !== "rated" || !principle.rating) return null;
-  if (principle.rating === "strong") return <span aria-hidden>🟢</span>;
-  if (principle.rating === "weak") return <span aria-hidden>🔴</span>;
-  return <span aria-hidden>🟡</span>;
-}
-
-function PrincipleRow({ principle }: { principle: InvestorPrincipleView }) {
+function PrincipleRow({ principle }: { principle: ForcesPrincipleView }) {
   const isLocked = principle.status === "locked";
   const isNa = principle.status === "na";
   const isActive = principle.status === "active";
-  const hasEvidenceDots =
-    !isNa && !isLocked && principle.evidenceSlotCards.length > 0 && principle.status !== "rated";
-  const isEvidenceFocus = isActive && hasEvidenceDots;
+  const isRated = principle.status === "rated";
 
   return (
     <li
       className={[
         "iq-business-framework__principle",
-        hasEvidenceDots ? "iq-business-framework__principle--has-evidence" : "",
         isLocked ? "iq-business-framework__principle--locked" : "",
         isNa ? "iq-business-framework__principle--na" : "",
         isActive ? "iq-business-framework__principle--active" : "",
-        isEvidenceFocus ? "iq-business-framework__principle--evidence-focus" : "",
-        principle.status === "rated" ? "iq-business-framework__principle--rated" : ""
+        isRated ? "iq-business-framework__principle--rated" : ""
       ]
         .filter(Boolean)
         .join(" ")}
@@ -88,13 +68,13 @@ function PrincipleRow({ principle }: { principle: InvestorPrincipleView }) {
           {isLocked ? (
             <InvestorChecklistLockBadge size="principle" />
           ) : (
-            <span aria-hidden>{resolvePrincipleMarker(principle)}</span>
+            <span aria-hidden>{resolveForcesPrincipleMarker(principle)}</span>
           )}
         </span>
         <span className="iq-business-framework__principle-title">
           <span className="iq-business-framework__principle-label">{principle.label}</span>
           {!isNa ? (
-            <BusinessInvestorPrincipleHint
+            <ForcesInvestorPrincipleHint
               principleId={principle.id}
               className="iq-business-framework__principle-hint"
             />
@@ -102,10 +82,8 @@ function PrincipleRow({ principle }: { principle: InvestorPrincipleView }) {
         </span>
         <span className="iq-business-framework__principle-status">
           {isNa ? "N/A" : null}
-          <PrincipleRatingGlyph principle={principle} />
         </span>
       </div>
-      {hasEvidenceDots ? <InvestorPrincipleEvidenceDots principle={principle} /> : null}
     </li>
   );
 }
@@ -114,14 +92,12 @@ function SectionBlock({
   section,
   expanded,
   onToggle,
-  compact,
-  onQuizStart
+  compact
 }: {
-  section: BusinessChecklistSectionView;
+  section: ForcesChecklistSectionView;
   expanded: boolean;
   onToggle: () => void;
   compact?: boolean;
-  onQuizStart: (section: BusinessChecklistSectionView) => void;
 }) {
   const isLocked = section.state === "locked";
   const canExpand = !isLocked && !compact;
@@ -146,65 +122,103 @@ function SectionBlock({
             aria-expanded={expanded}
             onClick={onToggle}
           >
-            <span className="iq-business-framework__section-emoji" aria-hidden>
-              {section.emoji}
+            <span className="iq-business-framework__section-order" aria-hidden>
+              {section.order}.
             </span>
             <span className="iq-business-framework__section-label">{section.label}</span>
+            <ForcesChecklistSectionHint
+              sectionId={section.id}
+              className="iq-business-framework__section-hint"
+            />
           </button>
         ) : (
           <div className="iq-business-framework__section-toggle iq-business-framework__section-toggle--static">
-            <span className="iq-business-framework__section-emoji" aria-hidden>
-              {section.emoji}
+            <span className="iq-business-framework__section-order" aria-hidden>
+              {section.order}.
             </span>
             <span className="iq-business-framework__section-label">{section.label}</span>
+            {!isLocked ? (
+              <ForcesChecklistSectionHint
+                sectionId={section.id}
+                className="iq-business-framework__section-hint"
+              />
+            ) : null}
           </div>
         )}
         <SectionStatusBadge section={section} />
       </div>
 
       {expanded && canExpand ? (
-        <ul className="iq-business-framework__principles">
-          {section.principles.map((principle) => (
-            <PrincipleRow key={principle.id} principle={principle} />
-          ))}
-          <BusinessChecklistSectionQuizRow
-            section={section}
-            onStartRequest={onQuizStart}
-            listClassName="iq-business-framework__principle iq-business-section-quest-panel__quiz"
-            buttonClassName="iq-business-section-quest-panel__quiz-button"
-            labelClassName="iq-business-framework__principle-label"
-            markerClassName="iq-business-framework__principle-marker"
-          />
-        </ul>
+        <div className="iq-forces-framework__section-body">
+          <p className="iq-forces-framework__investor-question">{section.investorQuestion}</p>
+          <ul className="iq-business-framework__principles">
+            {section.principles.map((principle) => (
+              <PrincipleRow key={principle.id} principle={principle} />
+            ))}
+          </ul>
+        </div>
       ) : null}
     </li>
   );
 }
 
+function GroupBlock({
+  group,
+  expandedSectionId,
+  onToggleSection,
+  compact
+}: {
+  group: ForcesChecklistGroupView;
+  expandedSectionId: string | null;
+  onToggleSection: (sectionId: string) => void;
+  compact?: boolean;
+}) {
+  return (
+    <li className="iq-forces-framework__group">
+      <div className="iq-forces-framework__group-head">
+        <span className="iq-forces-framework__group-emoji" aria-hidden>
+          {group.emoji}
+        </span>
+        <div className="iq-forces-framework__group-copy">
+          <p className="iq-forces-framework__group-label">{group.label}</p>
+          <p className="iq-forces-framework__group-subtitle">{group.subtitle}</p>
+        </div>
+      </div>
+      <ul className="iq-business-framework__sections iq-forces-framework__sections">
+        {group.sections.map((section) => (
+          <SectionBlock
+            key={section.id}
+            section={section}
+            expanded={
+              expandedSectionId === section.id ||
+              (section.state === "active" && !compact)
+            }
+            onToggle={() => onToggleSection(section.id)}
+            compact={compact}
+          />
+        ))}
+      </ul>
+    </li>
+  );
+}
+
 /**
- * Business Investor Checklist — quest-log progression through investor milestones.
+ * Risk Island Investor Checklist — Inside / Outside Forces with investing principles.
  */
-export function BusinessChecklistPanel({
+export function ForcesChecklistPanel({
   companyId,
   variant = "schools",
-  presentation = "default",
-  cards
+  presentation = "default"
 }: Props) {
   const isIsland = presentation === "island" || presentation === "island-kiosk";
   const isKiosk = presentation === "island-kiosk";
   const isLadder = presentation === "ladder";
   const compact = isIsland || isKiosk;
 
-  const pathname = usePathname();
-  const router = useRouter();
-  const { snapshot } = useBusinessChecklistProgress({ companyId, cards });
+  const { snapshot } = useForcesChecklistProgress({ companyId });
   const [expandedSectionId, setExpandedSectionId] = useState<string | null>(
     snapshot.activeSection?.id ?? null
   );
-
-  const handleQuizStart = (section: BusinessChecklistSectionView) => {
-    navigateToChecklistSectionQuiz(section.questSlug, section.id, pathname, router);
-  };
 
   useEffect(() => {
     if (snapshot.activeSection?.id) {
@@ -219,7 +233,7 @@ export function BusinessChecklistPanel({
   return (
     <section
       className={[
-        "iq-master-principles-panel iq-business-checklist-panel iq-business-framework pointer-events-auto",
+        "iq-master-principles-panel iq-forces-checklist-panel iq-business-framework iq-forces-framework pointer-events-auto",
         variant === "schools" ? "iq-master-principles-panel--schools" : "iq-master-principles-panel--dark",
         isIsland ? "iq-master-principles-panel--island" : "",
         isKiosk ? "iq-master-principles-panel--island-kiosk" : "",
@@ -227,46 +241,42 @@ export function BusinessChecklistPanel({
       ]
         .filter(Boolean)
         .join(" ")}
-      aria-label="Investor Checklist, Business section"
+      aria-label="Investor Checklist, Risk section"
     >
-      <header className="iq-master-principles-panel__header-band iq-business-checklist-panel__header">
+      <header className="iq-master-principles-panel__header-band iq-forces-checklist-panel__header">
         <div className="iq-business-checklist-panel__title-row">
           <h2 className="iq-master-principles-panel__title">Investor Checklist</h2>
           <BusinessChecklistInfoHint
             label="About the Investor Checklist"
-            content={INVESTOR_CHECKLIST_HEADER_INTRO}
+            content={INVESTOR_CHECKLIST_FORCES_INTRO}
             className="iq-business-checklist-panel__header-hint"
           />
         </div>
         <div className="iq-business-checklist-panel__pillar-row">
-          <p className="iq-business-checklist-panel__pillar">Business</p>
+          <p className="iq-business-checklist-panel__pillar">Risk</p>
           <BusinessChecklistInfoHint
-            label="About the Business section"
-            content={INVESTOR_CHECKLIST_BUSINESS_INTRO}
+            label="About the Risk section"
+            content={INVESTOR_CHECKLIST_RISK_INTRO}
             className="iq-business-checklist-panel__header-hint"
           />
         </div>
-        <BusinessChecklistJourneyProgress
+        <ForcesChecklistJourneyProgress
           snapshot={snapshot}
           variant={compact ? "compact" : "full"}
-          className="iq-business-checklist-panel__journey"
+          className="iq-forces-checklist-panel__journey"
         />
         <div className="iq-master-principles-panel__title-divider" aria-hidden />
       </header>
 
       <div className="iq-master-principles-panel__body">
-        <ul className="iq-business-framework__sections">
-          {snapshot.sections.map((section) => (
-            <SectionBlock
-              key={section.id}
-              section={section}
-              expanded={
-                expandedSectionId === section.id ||
-                (section.state === "active" && !compact)
-              }
-              onToggle={() => toggleSection(section.id)}
+        <ul className="iq-forces-framework__groups">
+          {snapshot.groups.map((group) => (
+            <GroupBlock
+              key={group.id}
+              group={group}
+              expandedSectionId={expandedSectionId}
+              onToggleSection={toggleSection}
               compact={compact && !isLadder}
-              onQuizStart={handleQuizStart}
             />
           ))}
         </ul>
