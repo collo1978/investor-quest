@@ -17,7 +17,8 @@ type Props = {
 };
 
 /**
- * Full-size Business Checklist — opens from the island academy sign.
+ * Full-size Investor Questions roadmap — opens from the island academy sign.
+ * Progress display only; island markers start quests.
  */
 export function MasterInvestingPrinciplesLadderSheet({
   open,

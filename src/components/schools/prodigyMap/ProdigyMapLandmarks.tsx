@@ -67,33 +67,33 @@ export function ProdigyBusinessCityLandmark() {
     <g className="iq-prodigy-landmark iq-prodigy-landmark--business" style={{ pointerEvents: "none" }}>
       <defs>
         <linearGradient id="prod-biz-glass" x1="0" y1="0" x2="0.3" y2="1">
-          <stop offset="0%" stopColor="#e0f2fe" />
-          <stop offset="50%" stopColor="#38bdf8" />
-          <stop offset="100%" stopColor="#1d4ed8" />
+          <stop offset="0%" stopColor="#1a2e05" />
+          <stop offset="50%" stopColor="#14532d" />
+          <stop offset="100%" stopColor="#052e16" />
         </linearGradient>
         <linearGradient id="prod-biz-glass-dk" x1="0" y1="0" x2="0.3" y2="1">
-          <stop offset="0%" stopColor="#7dd3fc" />
-          <stop offset="100%" stopColor="#1e40af" />
+          <stop offset="0%" stopColor="#365314" />
+          <stop offset="100%" stopColor="#0a1204" />
         </linearGradient>
         <linearGradient id="prod-biz-stone" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f1f5f9" />
-          <stop offset="100%" stopColor="#94a3b8" />
+          <stop offset="0%" stopColor="#3f3f46" />
+          <stop offset="100%" stopColor="#18181b" />
         </linearGradient>
         <linearGradient id="prod-biz-steel" x1="0" y1="0" x2="0.3" y2="1">
-          <stop offset="0%" stopColor="#cbd5e1" />
-          <stop offset="100%" stopColor="#475569" />
+          <stop offset="0%" stopColor="#52525b" />
+          <stop offset="100%" stopColor="#18181b" />
         </linearGradient>
         <linearGradient id="prod-biz-gold" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#fef08a" />
-          <stop offset="100%" stopColor="#d97706" />
+          <stop offset="0%" stopColor="#bef264" />
+          <stop offset="100%" stopColor="#76b900" />
         </linearGradient>
         <radialGradient id="prod-biz-glow" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
+          <stop offset="0%" stopColor="#76b900" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#76b900" stopOpacity="0" />
         </radialGradient>
         <linearGradient id="prod-biz-water" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#a5f3fc" />
-          <stop offset="100%" stopColor="#0891b2" />
+          <stop offset="0%" stopColor="#a3e635" />
+          <stop offset="100%" stopColor="#3f6212" />
         </linearGradient>
       </defs>
 
@@ -118,38 +118,38 @@ export function ProdigyBusinessCityLandmark() {
       >
         <g className="iq-vault-react">
           {/* Entrance plaza */}
-          <rect x="6" y="148" width="244" height="30" rx="13" fill="url(#prod-biz-stone)" stroke="#475569" strokeWidth="4" />
-          <rect x="16" y="152" width="228" height="6" rx="3" fill="#fde68a" opacity="0.55" />
+          <rect x="6" y="148" width="244" height="30" rx="13" fill="url(#prod-biz-stone)" stroke="#3f3f46" strokeWidth="4" />
+          <rect x="16" y="152" width="228" height="6" rx="3" fill="#76b900" opacity="0.55" />
           {/* Plaza steps to entrance */}
-          <rect x="104" y="150" width="48" height="6" rx="2" fill="#cbd5e1" stroke="#64748b" strokeWidth="1.4" />
-          <rect x="110" y="156" width="36" height="6" rx="2" fill="#cbd5e1" stroke="#64748b" strokeWidth="1.4" />
+          <rect x="104" y="150" width="48" height="6" rx="2" fill="#3f3f46" stroke="#52525b" strokeWidth="1.4" />
+          <rect x="110" y="156" width="36" height="6" rx="2" fill="#3f3f46" stroke="#52525b" strokeWidth="1.4" />
 
           {/* Podium connecting all buildings */}
-          <rect x="28" y="116" width="200" height="38" rx="9" fill="url(#prod-biz-steel)" stroke="#1e293b" strokeWidth="4" />
+          <rect x="28" y="116" width="200" height="38" rx="9" fill="url(#prod-biz-steel)" stroke="#18181b" strokeWidth="4" />
           <rect x="28" y="116" width="200" height="5" rx="2.5" fill="url(#prod-biz-gold)" opacity="0.85" />
 
           {/* Left building */}
-          <rect x="34" y="82" width="54" height="72" rx="8" fill="url(#prod-biz-glass-dk)" stroke="#1e3a8a" strokeWidth="3.5" />
+          <rect x="34" y="82" width="54" height="72" rx="8" fill="url(#prod-biz-glass-dk)" stroke="#365314" strokeWidth="3.5" />
           <rect x="34" y="100" width="54" height="3" fill="url(#prod-biz-gold)" opacity="0.8" />
           {/* Digital display panel — financial graph integrated */}
-          <rect x="40" y="88" width="42" height="26" rx="3" fill="#0f172a" stroke="#1e293b" strokeWidth="2" />
+          <rect x="40" y="88" width="42" height="26" rx="3" fill="#050505" stroke="#27272a" strokeWidth="2" />
           <polyline
             points="44,108 51,101 57,104 64,95 71,98 78,90"
             fill="none"
-            stroke="#4ade80"
+            stroke="#76b900"
             strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          <path d="M74 90 L80 89 L78 95 Z" fill="#4ade80" />
+          <path d="M74 90 L80 89 L78 95 Z" fill="#76b900" />
           {[120, 136].map((wy) =>
             [42, 58, 74].map((wx) => (
-              <rect key={`bizL-${wx}-${wy}`} x={wx} y={wy} width="12" height="9" rx="1.5" fill="#bae6fd" opacity="0.92" />
+              <rect key={`bizL-${wx}-${wy}`} x={wx} y={wy} width="12" height="9" rx="1.5" fill="#a3e635" opacity="0.75" />
             ))
           )}
 
           {/* Right building */}
-          <rect x="168" y="58" width="56" height="96" rx="8" fill="url(#prod-biz-glass-dk)" stroke="#1e3a8a" strokeWidth="3.5" />
+          <rect x="168" y="58" width="56" height="96" rx="8" fill="url(#prod-biz-glass-dk)" stroke="#365314" strokeWidth="3.5" />
           <rect x="168" y="76" width="56" height="3" fill="url(#prod-biz-gold)" opacity="0.8" />
           {[68, 84, 100, 116, 132].map((wy) =>
             [176, 192, 208].map((wx) => (
@@ -160,19 +160,19 @@ export function ProdigyBusinessCityLandmark() {
                 width="12"
                 height="10"
                 rx="1.5"
-                fill={(wy + wx) % 2 ? "#fef9c3" : "#bae6fd"}
+                fill={(wy + wx) % 2 ? "#bef264" : "#4d7c0f"}
                 className="iq-prodigy-landmark__window"
               />
             ))
           )}
 
           {/* Main glass tower */}
-          <rect x="94" y="22" width="66" height="132" rx="9" fill="url(#prod-biz-glass)" stroke="#1e40af" strokeWidth="4" />
+          <rect x="94" y="22" width="66" height="132" rx="9" fill="url(#prod-biz-glass)" stroke="#76b900" strokeWidth="4" />
           {/* Glass facade highlight streak */}
-          <path d="M100 28 L114 28 L104 150 L96 150 Z" fill="#ffffff" opacity="0.18" />
+          <path d="M100 28 L114 28 L104 150 L96 150 Z" fill="#ffffff" opacity="0.12" />
           {/* Mullions */}
           {[116, 138].map((mx) => (
-            <line key={`mull-${mx}`} x1={mx} y1="28" x2={mx} y2="150" stroke="#ffffff" strokeWidth="1.4" opacity="0.28" />
+            <line key={`mull-${mx}`} x1={mx} y1="28" x2={mx} y2="150" stroke="#bef264" strokeWidth="1.4" opacity="0.28" />
           ))}
           {[48, 64, 80, 96, 112].map((wy) =>
             [104, 122, 140].map((wx) => (
@@ -183,33 +183,33 @@ export function ProdigyBusinessCityLandmark() {
                 width="12"
                 height="10"
                 rx="1.5"
-                fill={(wy + wx) % 2 ? "#bae6fd" : "#fef9c3"}
+                fill={(wy + wx) % 2 ? "#a3e635" : "#14532d"}
                 className="iq-prodigy-landmark__window"
               />
             ))
           )}
           {/* Rooftop + beacon */}
-          <rect x="88" y="12" width="78" height="12" rx="4" fill="url(#prod-biz-steel)" stroke="#1e293b" strokeWidth="3" />
+          <rect x="88" y="12" width="78" height="12" rx="4" fill="url(#prod-biz-steel)" stroke="#18181b" strokeWidth="3" />
           <rect x="94" y="40" width="66" height="3.5" fill="url(#prod-biz-gold)" />
-          <rect x="120" y="2" width="14" height="12" rx="3" fill="url(#prod-biz-steel)" stroke="#1e293b" strokeWidth="2" />
-          <circle cx="127" cy="3" r="4" fill="#ef4444" className="iq-prodigy-landmark__beacon" />
+          <rect x="120" y="2" width="14" height="12" rx="3" fill="url(#prod-biz-steel)" stroke="#18181b" strokeWidth="2" />
+          <circle cx="127" cy="3" r="4" fill="#76b900" className="iq-prodigy-landmark__beacon" />
           {/* Rooftop corporate flag */}
-          <line x1="150" y1="14" x2="150" y2="-12" stroke="#475569" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M150 -12 L170 -7 L150 -1 Z" fill="url(#prod-biz-gold)" stroke="#92400e" strokeWidth="1.4" strokeLinejoin="round" className="iq-prodigy-prop-flag" />
-          <path d="M150 -12 L162 -8.5 L150 -5 Z" fill="#fffbeb" opacity="0.5" />
+          <line x1="150" y1="14" x2="150" y2="-12" stroke="#52525b" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M150 -12 L170 -7 L150 -1 Z" fill="url(#prod-biz-gold)" stroke="#3f6212" strokeWidth="1.4" strokeLinejoin="round" className="iq-prodigy-prop-flag" />
+          <path d="M150 -12 L162 -8.5 L150 -5 Z" fill="#ecfccb" opacity="0.5" />
 
           {/* Company logo plate over entrance */}
-          <circle cx="128" cy="110" r="13" fill="url(#prod-biz-steel)" stroke="#1e293b" strokeWidth="3" />
-          <circle cx="128" cy="110" r="9" fill="#0f172a" />
+          <circle cx="128" cy="110" r="13" fill="url(#prod-biz-steel)" stroke="#18181b" strokeWidth="3" />
+          <circle cx="128" cy="110" r="9" fill="#050505" />
           <polyline
             points="122,114 127,108 131,111 136,104"
             fill="none"
-            stroke="#4ade80"
+            stroke="#76b900"
             strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          <path d="M133 104 L137 103 L136 108 Z" fill="#4ade80" />
+          <path d="M133 104 L137 103 L136 108 Z" fill="#76b900" />
 
           {/* Entrance archway */}
           <ellipse

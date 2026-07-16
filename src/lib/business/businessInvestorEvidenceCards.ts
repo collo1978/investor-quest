@@ -23,6 +23,11 @@ export type BusinessInvestorEvidenceCardDef = {
   callout?: string;
   /** Shown on the rating card — specific to this evidence piece. */
   ratingPrompt: string;
+  /**
+   * Company Evolution timeline milestone ids unlocked/completed by this card.
+   * One card may cover multiple milestones.
+   */
+  timelineMilestoneIds?: readonly string[];
 };
 
 const NVDA_BUSINESS_PURPOSE_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
@@ -50,18 +55,6 @@ const NVDA_BUSINESS_PURPOSE_CARDS: readonly BusinessInvestorEvidenceCardDef[] = 
     answerBody:
       "Its goal is to help people and businesses solve problems that ordinary computers struggle with, making AI and advanced computing useful in everyday industries like healthcare, finance, manufacturing and transportation.",
     ratingPrompt: "Do you understand NVIDIA's mission?"
-  },
-  {
-    id: "purpose-3",
-    principleId: "business-purpose",
-    order: 3,
-    question: "What makes NVIDIA different from other chip companies?",
-    answer:
-      "Most chip companies mainly sell computer chips. NVIDIA goes a step further. It builds the chips, the software and the AI tools that all work together as one complete system. That makes it much easier for customers to build powerful AI products and much harder for competitors to catch up.",
-    answerHeadline: "Most chip companies mainly sell computer chips.",
-    answerBody:
-      "NVIDIA goes a step further. It builds the chips, the software and the AI tools that all work together as one complete system. That makes it much easier for customers to build powerful AI products and much harder for competitors to catch up.",
-    ratingPrompt: "Do you understand what makes NVIDIA different?"
   }
 ];
 
@@ -70,39 +63,100 @@ const NVDA_COMPANY_EVOLUTION_CARDS: readonly BusinessInvestorEvidenceCardDef[] =
     id: "evolution-1",
     principleId: "company-evolution",
     order: 1,
-    question: "How did NVIDIA get started?",
+    question: "How did NVIDIA begin changing computing?",
     answer:
-      "NVIDIA began in 1993 with the idea of making computer graphics much faster. Its invention of the GPU transformed gaming and later became the foundation for modern AI.",
+      "NVIDIA's first major turning point came in 1999, when it invented the GPU. The GPU helped redefine computer graphics and supported the growth of PC gaming. NVIDIA was not simply making another computer chip — it helped create a new category of computing technology.",
     answerHeadline:
-      "NVIDIA began in 1993 with the idea of making computer graphics much faster.",
+      "NVIDIA invented the GPU — and helped create a new category of computing.",
     answerBody:
-      "Its invention of the GPU transformed gaming and later became the foundation for modern AI.",
-    ratingPrompt: "Do you understand how NVIDIA got started?"
+      "The GPU redefined computer graphics and powered the rise of PC gaming. NVIDIA was not simply making another computer chip. It opened an entirely new product category.",
+    callout:
+      "Investor Takeaway: Great companies can begin by creating an entirely new product category.",
+    ratingPrompt: "Do you understand how NVIDIA began changing computing?",
+    timelineMilestoneIds: ["gpu-1999"]
   },
   {
     id: "evolution-2",
     principleId: "company-evolution",
     order: 2,
-    question: "What were the biggest turning points in NVIDIA's history?",
+    question: "How did CUDA transform NVIDIA?",
     answer:
-      "Some of NVIDIA's biggest milestones include inventing the GPU, creating CUDA to unlock the power of GPUs for many industries, acquiring Mellanox to expand into networking, and launching products built specifically for AI.",
-    answerHeadline: "NVIDIA's biggest milestones reshaped computing.",
+      "In 2006, NVIDIA introduced the CUDA programming model. CUDA allowed developers to use GPUs for much more than graphics — scientific computing, data processing, and other demanding workloads. This transformed NVIDIA from mainly a gaming graphics company into a broader computing platform company, and helped pave the way for modern AI.",
+    answerHeadline: "CUDA turned one product into a platform.",
     answerBody:
-      "They include inventing the GPU, creating CUDA to unlock the power of GPUs for many industries, acquiring Mellanox to expand into networking, and launching products built specifically for AI.",
-    ratingPrompt: "Do you understand NVIDIA's biggest turning points?"
+      "Developers could now use GPUs for scientific computing, data processing and other demanding workloads — far beyond games. NVIDIA shifted from a graphics specialist into a broader computing platform company, paving the way for modern AI.",
+    callout:
+      "Investor Takeaway: The biggest turning points often come when a company turns one product into a platform.",
+    ratingPrompt: "Do you understand how CUDA transformed NVIDIA?",
+    timelineMilestoneIds: ["cuda-2006"]
   },
   {
     id: "evolution-3",
     principleId: "company-evolution",
     order: 3,
-    question: "How did NVIDIA become an AI leader?",
+    question: "What proved NVIDIA's technology could power modern AI?",
     answer:
-      "Although NVIDIA started in gaming, its technology turned out to be perfect for training AI models. Over time, it invested heavily in AI software, networking and computing platforms, becoming one of the world's leading AI companies.",
+      'In 2012, the AlexNet neural network was trained using NVIDIA GPUs and won the ImageNet image-recognition competition. NVIDIA describes this as the "Big Bang" moment of AI. It showed that GPUs were extremely effective for deep learning and helped establish NVIDIA as a major force in AI computing.',
     answerHeadline:
-      "NVIDIA's gaming roots turned out to be perfect for training AI models.",
+      "AlexNet on NVIDIA GPUs — the AI \"Big Bang.\"",
     answerBody:
-      "Over time, it invested heavily in AI software, networking and computing platforms, becoming one of the world's leading AI companies.",
-    ratingPrompt: "Do you understand how NVIDIA became an AI leader?"
+      "Winning ImageNet proved GPUs were extraordinarily effective for deep learning. That moment unlocked a much larger future for NVIDIA's technology.",
+    callout:
+      "Investor Takeaway: One breakthrough can reveal a much larger future opportunity for a company's technology.",
+    ratingPrompt: "Do you understand NVIDIA's AI breakthrough moment?",
+    timelineMilestoneIds: ["ai-2012"]
+  },
+  {
+    id: "evolution-4",
+    principleId: "company-evolution",
+    order: 4,
+    question: "How did NVIDIA start building technology specifically for AI?",
+    answer:
+      "NVIDIA continued adapting its products for the new AI era. In 2017, it introduced its first Tensor Core GPU, designed specifically for AI workloads. In 2018, it introduced its first autonomous-driving system-on-chip. NVIDIA was no longer only adapting graphics technology — it was deliberately building products for AI and autonomous systems.",
+    answerHeadline: "NVIDIA began designing chips specifically for AI.",
+    answerBody:
+      "In 2017 came the first Tensor Core GPU. In 2018, the first autonomous-driving system-on-chip followed. NVIDIA was no longer only adapting graphics tech — it was building for the AI era on purpose.",
+    callout:
+      "Investor Takeaway: Strong companies do not stand still. They redesign their technology for new opportunities.",
+    ratingPrompt: "Do you understand how NVIDIA built specifically for AI?",
+    timelineMilestoneIds: ["built-for-ai-2017"]
+  },
+  {
+    id: "evolution-5",
+    principleId: "company-evolution",
+    order: 5,
+    question: "How did NVIDIA expand beyond chips into the full computing platform?",
+    answer:
+      "In 2020, NVIDIA acquired Mellanox. This expanded NVIDIA into high-performance networking and allowed its computing platforms to operate at data-centre scale — a critical step toward becoming more than a chip company.",
+    answerHeadline: "Mellanox brought NVIDIA networking — and data-centre scale.",
+    answerBody:
+      "High-performance networking let NVIDIA platforms operate as complete data-centre systems, not isolated chips. The company was expanding the platform around the GPU.",
+    callout:
+      "Investor Takeaway: Platform companies grow by surrounding their core technology with what customers need next.",
+    ratingPrompt: "Do you understand how NVIDIA expanded the platform?",
+    timelineMilestoneIds: ["expand-2020"]
+  },
+  {
+    id: "evolution-6",
+    principleId: "company-evolution",
+    order: 6,
+    question: "How did NVIDIA become a full-stack computing infrastructure company?",
+    answer:
+      "NVIDIA built complete software stacks for major industries and, in 2023, introduced Grace — its first data-centre CPU. Today NVIDIA describes itself as a full-stack computing infrastructure company combining GPUs, CPUs, networking, systems, software, AI libraries, APIs and services.",
+    answerHeadline:
+      "Today NVIDIA is a full-stack computing infrastructure company.",
+    answerBody:
+      "Grace, its first data-centre CPU, arrived in 2023. Combined with software stacks across industries, NVIDIA is no longer simply a graphics-chip company.",
+    bullets: [
+      "DRIVE — autonomous driving",
+      "Clara — healthcare",
+      "Omniverse — industrial digitalisation",
+      "NVIDIA AI Enterprise — enterprise AI"
+    ],
+    callout:
+      "Investor Takeaway: Investors should understand what a company has become, not only where it started.",
+    ratingPrompt: "Do you understand NVIDIA as a full-stack platform?",
+    timelineMilestoneIds: ["fullstack-today"]
   }
 ];
 
@@ -132,19 +186,6 @@ const NVDA_GLOBAL_PRESENCE_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
     answerBody:
       "Automotive, telecommunications, scientific research, gaming and many other industries that need powerful computing also rely on it.",
     ratingPrompt: "Do you understand which industries rely on NVIDIA?"
-  },
-  {
-    id: "presence-3",
-    principleId: "global-presence",
-    order: 3,
-    question: "Where is NVIDIA making the biggest impact?",
-    answer:
-      "NVIDIA's technology is helping power some of the world's biggest trends, including artificial intelligence, autonomous vehicles, cloud computing, robotics and scientific discovery.",
-    answerHeadline:
-      "NVIDIA is helping power some of the world's biggest technology trends.",
-    answerBody:
-      "That includes artificial intelligence, autonomous vehicles, cloud computing, robotics and scientific discovery.",
-    ratingPrompt: "Do you understand where NVIDIA is making the biggest impact?"
   }
 ];
 
@@ -432,45 +473,6 @@ const NVDA_REVENUE_MODEL_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
   }
 ];
 
-const NVDA_REVENUE_DRIVERS_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
-  {
-    id: "drivers-1",
-    principleId: "revenue-drivers",
-    order: 1,
-    question: "What's driving NVIDIA's rapid growth?",
-    answer:
-      "Artificial intelligence is the biggest growth driver. Businesses around the world are investing billions of dollars into AI infrastructure, and much of that technology runs on NVIDIA platforms.",
-    answerHeadline: "Artificial intelligence is the biggest growth driver.",
-    answerBody:
-      "Businesses around the world are investing billions of dollars into AI infrastructure, and much of that technology runs on NVIDIA platforms.",
-    ratingPrompt: "Do you understand what is driving NVIDIA's rapid growth?"
-  },
-  {
-    id: "drivers-2",
-    principleId: "revenue-drivers",
-    order: 2,
-    question: "Why are data centres so important to NVIDIA?",
-    answer:
-      "Modern AI requires enormous computing power. Companies build huge data centres filled with NVIDIA GPUs to train and run AI models, making this one of NVIDIA's fastest-growing businesses.",
-    answerHeadline: "Modern AI requires enormous computing power.",
-    answerBody:
-      "Companies build huge data centres filled with NVIDIA GPUs to train and run AI models, making this one of NVIDIA's fastest-growing businesses.",
-    ratingPrompt: "Do you understand why data centres matter to NVIDIA?"
-  },
-  {
-    id: "drivers-3",
-    principleId: "revenue-drivers",
-    order: 3,
-    question: "What could keep NVIDIA growing in the future?",
-    answer:
-      "AI is still in its early stages. As industries like healthcare, robotics, cloud computing and autonomous vehicles continue adopting AI, demand for NVIDIA's technology could keep growing for many years.",
-    answerHeadline: "AI is still in its early stages.",
-    answerBody:
-      "As industries like healthcare, robotics, cloud computing and autonomous vehicles continue adopting AI, demand for NVIDIA's technology could keep growing for many years.",
-    ratingPrompt: "Do you understand what could keep NVIDIA growing?"
-  }
-];
-
 const NVDA_BUSINESS_STRUCTURE_CARDS: readonly BusinessInvestorEvidenceCardDef[] = [
   {
     id: "structure-1",
@@ -649,7 +651,6 @@ export const BUSINESS_INVESTOR_EVIDENCE_BY_COMPANY: Partial<
     "end-markets": NVDA_END_MARKETS_CARDS,
     "geographic-reach": NVDA_GEOGRAPHIC_REACH_CARDS,
     "revenue-model": NVDA_REVENUE_MODEL_CARDS,
-    "revenue-drivers": NVDA_REVENUE_DRIVERS_CARDS,
     "business-structure": NVDA_BUSINESS_STRUCTURE_CARDS,
     "competitive-advantage": NVDA_COMPETITIVE_ADVANTAGE_CARDS,
     "market-position": NVDA_MARKET_POSITION_CARDS,
@@ -688,7 +689,6 @@ export const PRINCIPLE_EVIDENCE_QUEST_SLUG: Partial<
   "end-markets": "everyday-life",
   "geographic-reach": "everyday-life",
   "revenue-model": "how-it-works",
-  "revenue-drivers": "how-it-works",
   "business-structure": "how-it-works",
   "competitive-advantage": "competition",
   "market-position": "competition",

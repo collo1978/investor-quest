@@ -37,29 +37,37 @@ export const NVIDIA_CONTENT: CompanyContent = {
     [contentKey("business", "what-they-do")]: {
       cards: cards({
         "card-1": {
-          investorQuestion: "What does NVIDIA actually sell?",
+          investorQuestion: "What does NVIDIA actually do?",
           plainEnglishAnswer: goldAnswer(
-            "NVIDIA sells powerful computer chips called GPUs (Graphics Processing Units).",
-            `• Think of a GPU as a super-powered brain built for difficult computer tasks.
-• Used in:
-  - AI
-  - Video games
-  - Data centers
-  - Scientific research
-• 🏆 NVIDIA is one of the world's leading GPU companies.`
+            'NVIDIA builds the "brains" behind modern AI and advanced computing.',
+            `• It designs powerful computer chips and software for difficult tasks.
+• You see the results when:
+  - ChatGPT answers quickly
+  - Video games run smoothly
+  - Scientists run huge simulations
+• NVIDIA is one of the world's leading companies in this space.`
           )
         },
         "card-2": {
-          investorQuestion: "Why do customers buy NVIDIA chips?",
+          investorQuestion: "How has NVIDIA evolved over time?",
           plainEnglishAnswer: goldAnswer(
-            "Because they help computers think faster.",
-            `Imagine trying to solve 1,000 maths questions at once.
-A normal computer might take a long time.
-NVIDIA's chips are designed to work on many problems at the same time.
-This helps:
-- AI answer questions faster
-- Video games run more smoothly
-- Companies process information more quickly`
+            "NVIDIA evolved from gaming graphics into an AI and full-stack computing platform.",
+            `• 1999 — Birth of the GPU
+• 2006 — CUDA turned GPUs into a broader computing platform
+• 2012 — AI Breakthrough (AlexNet)
+• 2017 — Built for AI with Tensor Cores
+• 2020 — Expanded the platform (Mellanox networking)
+• Today — Full-stack computing infrastructure`
+          )
+        },
+        "card-3": {
+          investorQuestion: "Who uses NVIDIA's products around the world?",
+          plainEnglishAnswer: goldAnswer(
+            "Customers span cloud giants, AI builders, researchers, gamers, and large enterprises.",
+            `• The world's biggest cloud companies order huge volumes for AI services
+• Startups and researchers use its tools to train new models
+• Gamers and designers still rely on its graphics products
+• Healthcare, cars, and finance also depend on its computing power`
           )
         }
       }),
@@ -69,35 +77,34 @@ This helps:
           {
             kind: "multiple-choice",
             id: "nvda-snap-q1",
-            prompt: "What does NVIDIA actually sell?",
+            prompt: "What does NVIDIA actually do?",
             choices: [
-              "Powerful computer chips called GPUs",
-              "Smartphones",
-              "Streaming subscriptions",
-              "Electric cars"
+              "Builds chips and software for AI, gaming, and heavy computing",
+              "Runs a consumer email and cloud-storage service",
+              "Manufactures smartphones for retail stores",
+              "Licenses its brand on third-party gadgets"
             ],
             correctIndex: 0,
             explain:
-              "NVIDIA sells GPUs — specialized chips built for heavy computing work."
+              "NVIDIA designs accelerated computing — chips plus software for demanding workloads."
           },
           {
             kind: "true-false",
             id: "nvda-snap-q2",
-            prompt:
-              "NVIDIA's GPUs help computers process many tasks at the same time.",
+            prompt: "NVIDIA was founded to make computer graphics much faster.",
             correct: true,
             explain:
-              "GPUs handle many calculations in parallel — that's what makes AI and games faster."
+              "Gaming roots came first — the same chip design later helped power AI training."
           },
           {
             kind: "fill-blank",
             id: "nvda-snap-q3",
             prompt:
-              "Complete the sentence:\nNVIDIA's chips help computers think ______.",
-            options: ["Faster", "Smaller", "Slower", "Louder"],
+              "Complete the sentence:\nNVIDIA's customers include cloud companies, AI startups, researchers, and ______.",
+            options: ["Gamers", "Airlines", "Coffee shops", "Book publishers"],
             correctIndex: 0,
             explain:
-              "NVIDIA chips are built for speed — that's what powers AI and smooth games."
+              "NVIDIA serves a broad mix — from the largest cloud providers to gamers and enterprise buyers."
           }
         ]
       })

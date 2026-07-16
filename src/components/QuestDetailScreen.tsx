@@ -491,16 +491,22 @@ export function QuestDetailScreen({
   return (
     <main
       className={[
-        "pointer-events-auto relative mx-auto w-full max-w-4xl px-4 pb-28 pt-6 md:px-6 md:pt-8",
+        "pointer-events-auto relative mx-auto w-full",
         schoolsBusinessQuest
-          ? "iq-schools-business-quest min-h-[100dvh]"
-          : usePillarQuestCardTemplate
-            ? "bg-[#010104]"
-            : ""
+          ? "iq-schools-business-quest iq-schools-business-quest--mission-shell max-w-none px-0 pb-0 pt-0 min-h-[100dvh]"
+          : "max-w-4xl px-4 pb-28 pt-6 md:px-6 md:pt-8",
+        !schoolsBusinessQuest && usePillarQuestCardTemplate ? "bg-[#010104]" : ""
       ].join(" ")}
     >
       {/* Top bar: back link + quest progress */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div
+        className={[
+          "flex flex-wrap items-center justify-between gap-3",
+          schoolsBusinessQuest
+            ? "iq-schools-business-quest__topbar px-4 pt-4 md:px-5 md:pt-5"
+            : ""
+        ].join(" ")}
+      >
         <Link
           href={islandBackHref}
           aria-label={
@@ -579,7 +585,10 @@ export function QuestDetailScreen({
         }
         className={[
           "relative mt-3 w-full overflow-hidden rounded-full",
-          usePillarQuestCardTemplate ? "h-1" : "h-1.5"
+          usePillarQuestCardTemplate ? "h-1" : "h-1.5",
+          schoolsBusinessQuest
+            ? "iq-schools-business-quest__progress mx-4 md:mx-5"
+            : ""
         ].join(" ")}
         style={{
           background: schoolsBusinessQuest
@@ -627,10 +636,10 @@ export function QuestDetailScreen({
           scale: { duration: 0.55, ease: "easeOut" }
         }}
         className={[
-          "relative mt-5",
+          "relative",
           schoolsBusinessQuest
-            ? "overflow-visible"
-            : "overflow-hidden rounded-2xl border backdrop-blur-xl",
+            ? "iq-schools-business-quest__mission mt-3 overflow-visible"
+            : "mt-5 overflow-hidden rounded-2xl border backdrop-blur-xl",
           !schoolsBusinessQuest && usePillarQuestCardTemplate
             ? "border-2 bg-[rgba(4,4,10,0.99)]"
             : !schoolsBusinessQuest

@@ -14,13 +14,13 @@ import type {
 
 function resolveSectionQuizMarker(status: ChecklistSectionQuizStatus): string {
   if (status === "passed") return "✅";
-  if (status === "ready") return "🔓";
+  if (status === "ready") return "🏆";
   return "🔒";
 }
 
 function resolveQuizLabel(status: ChecklistSectionQuizStatus): string {
   if (status === "passed") return "Section Quiz — Complete";
-  if (status === "ready") return "Start quiz";
+  if (status === "ready") return "Section Quiz — Ready";
   return "Section Quiz";
 }
 

@@ -23,6 +23,9 @@ import { getPlayableDemoCompanies } from "@/lib/demo/playableDemo";
 const EMPTY_FRAMEWORK_STATE: BusinessInvestorFrameworkStoredState = {
   naPrinciples: {},
   evidenceRatings: {},
+  evidenceCardsRead: {},
+  principleQuizPassed: {},
+  principleChallengePassed: {},
   sectionQuizPassed: {}
 };
 

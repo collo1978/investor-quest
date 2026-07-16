@@ -8,6 +8,8 @@ import {
 
 import type { BusinessInvestorFrameworkStoredState } from "@/lib/business/businessInvestorFrameworkStorage";
 import { resolveInvestorEvidenceCards } from "@/lib/business/businessInvestorEvidenceCards";
+import { usesInvestorChallengeFlow } from "@/lib/business/businessInvestorChallengeFlow";
+import { isPrincipleEvidenceComplete as isPrincipleEvidenceCompleteHelper } from "@/lib/business/businessInvestorEvidenceHelpers";
 
 export type { ChecklistSectionQuizStatus } from "@/lib/business/businessChecklistSectionQuizHelpers";
 
@@ -36,7 +38,6 @@ export type InvestorPrincipleId =
   | "end-markets"
   | "geographic-reach"
   | "revenue-model"
-  | "revenue-drivers"
   | "business-structure"
   | "competitive-advantage"
   | "market-position"
@@ -52,6 +53,11 @@ export type BusinessInvestorSectionDef = {
   order: number;
   /** Hub quest that unlocks this section's evidence path. */
   questSlug: string;
+  /**
+   * Outcome investor question for this section.
+   * Use `{company}` for the live company name (e.g. NVIDIA).
+   */
+  keyQuestion: string;
 };
 
 export type BusinessInvestorPrincipleDef = {
@@ -69,42 +75,48 @@ export const BUSINESS_INVESTOR_CHECKLIST_SECTIONS: readonly BusinessInvestorSect
       label: "Company Overview",
       emoji: "🏢",
       order: 1,
-      questSlug: "what-they-do"
+      questSlug: "what-they-do",
+      keyQuestion: "Can I explain what {company} does?"
     },
     {
       id: "products-services",
       label: "Products & Services",
       emoji: "📦",
       order: 2,
-      questSlug: "why-buying"
+      questSlug: "why-buying",
+      keyQuestion: "Can I explain what {company} sells — and why customers buy it?"
     },
     {
       id: "customers-markets",
       label: "Customers & Markets",
       emoji: "👥",
       order: 3,
-      questSlug: "everyday-life"
+      questSlug: "everyday-life",
+      keyQuestion: "Can I explain who {company}'s customers are and where it competes?"
     },
     {
       id: "business-model",
       label: "Business Model",
       emoji: "💰",
       order: 4,
-      questSlug: "how-it-works"
+      questSlug: "how-it-works",
+      keyQuestion: "Can I explain how {company} makes money?"
     },
     {
       id: "competitive-position",
       label: "Competitive Position",
       emoji: "🏆",
       order: 5,
-      questSlug: "competition"
+      questSlug: "competition",
+      keyQuestion: "Can I explain {company}'s advantage over competitors?"
     },
     {
       id: "operations",
       label: "Operations",
       emoji: "⚙️",
       order: 6,
-      questSlug: "why-they-stay"
+      questSlug: "why-they-stay",
+      keyQuestion: "Can I explain how {company} operates reliably at scale?"
     }
   ];
 
@@ -191,18 +203,10 @@ export const BUSINESS_INVESTOR_PRINCIPLES: readonly BusinessInvestorPrincipleDef
         "Understanding how a company makes money is essential before investing."
     },
     {
-      id: "revenue-drivers",
-      sectionId: "business-model",
-      label: "Revenue Drivers",
-      orderInSection: 2,
-      whyItMatters:
-        "Investors want to know what is actually driving future growth, not just what the company sells today."
-    },
-    {
       id: "business-structure",
       sectionId: "business-model",
-      label: "Business Structure",
-      orderInSection: 3,
+      label: "Operating Model",
+      orderInSection: 2,
       whyItMatters:
         "Understanding how a business is organised helps investors see where revenue comes from and how management reports performance."
     },
@@ -318,10 +322,18 @@ export type BusinessInvestorChecklistSnapshot = {
 };
 
 export const INVESTOR_CHECKLIST_HEADER_INTRO =
-  "The criteria great investors use to judge the quality of a business before investing.";
+  "A roadmap of investing questions you'll be able to answer as you master each Business section.";
 
 export const INVESTOR_CHECKLIST_BUSINESS_INTRO =
-  "This section focuses on understanding how the company works, who it serves, how it makes money, and how it competes.";
+  "Each row is an outcome: the investor question you unlock by completing that section's missions on Business Island.";
+
+/** Fill `{company}` in a section key question for display. */
+export function formatSectionInvestorQuestion(
+  section: Pick<BusinessInvestorSectionDef, "keyQuestion">,
+  companyName: string
+): string {
+  return section.keyQuestion.replace(/\{company\}/g, companyName);
+}
 
 export function resolveInvestorPrinciple(
   principleId: InvestorPrincipleId
@@ -391,12 +403,9 @@ export function resolveSectionStatusLabel(
     "state" | "overallRating"
   >
 ): string {
-  if (section.state === "active") return "✨ Active";
-  if (section.state === "locked") return "";
-  if (section.overallRating === "strong") return "🟢 Strong";
-  if (section.overallRating === "weak") return "🔴 Weak";
-  if (section.overallRating === "mixed") return "🟡 Mixed";
-  return "✅ Complete";
+  if (section.state === "active") return "⭐ Active";
+  if (section.state === "locked") return "🔒 Locked";
+  return "✅ Completed";
 }
 
 export function resolvePrincipleMarker(
@@ -405,7 +414,7 @@ export function resolvePrincipleMarker(
   if (principle.status === "na") return "—";
   if (principle.status === "locked") return "🔒";
   if (principle.status === "rated") return "✅";
-  return "🔓";
+  return "⭐";
 }
 
 export function resolveChecklistFooterHint(
@@ -422,13 +431,7 @@ export function resolveChecklistFooterHint(
   }
 
   if (activeSection) {
-    const activePrinciple = activeSection.principles.find(
-      (principle) => principle.status === "active"
-    );
-    if (activePrinciple) {
-      return `🔓 Current quest: ${activePrinciple.label}`;
-    }
-    return `✨ In progress: ${activeSection.emoji} ${activeSection.label}`;
+    return `⭐ Active question: ${activeSection.emoji} ${activeSection.label}`;
   }
 
   if (nextLockedSection) {
@@ -575,6 +578,16 @@ function resolveEvidenceSlotCards(
   stored: BusinessInvestorFrameworkStoredState
 ): readonly InvestorEvidenceSlotView[] {
   const cards = resolveInvestorEvidenceCards(companyId, principleId);
+  if (usesInvestorChallengeFlow(principleId)) {
+    return cards.map((card) => {
+      const read = stored.evidenceCardsRead?.[`${principleId}#${card.id}`] === true;
+      const rated = stored.evidenceRatings[`${principleId}#${card.id}`];
+      return {
+        cardId: card.id,
+        rating: rated ?? (read ? null : null)
+      };
+    });
+  }
   return cards.map((card) => ({
     cardId: card.id,
     rating: stored.evidenceRatings[`${principleId}#${card.id}`] ?? null
@@ -586,11 +599,7 @@ function isPrincipleFullyEvidenceRated(
   principleId: InvestorPrincipleId,
   stored: BusinessInvestorFrameworkStoredState
 ): boolean {
-  const cards = resolveInvestorEvidenceCards(companyId, principleId);
-  if (cards.length === 0) return false;
-  return cards.every(
-    (card) => stored.evidenceRatings[`${principleId}#${card.id}`] != null
-  );
+  return isPrincipleEvidenceCompleteHelper(companyId, principleId, stored);
 }
 
 function resolveActiveEvidenceCardId(
@@ -599,6 +608,12 @@ function resolveActiveEvidenceCardId(
   stored: BusinessInvestorFrameworkStoredState
 ): string | null {
   const cards = resolveInvestorEvidenceCards(companyId, principleId);
+  if (usesInvestorChallengeFlow(principleId)) {
+    const next = cards.find(
+      (card) => stored.evidenceCardsRead?.[`${principleId}#${card.id}`] !== true
+    );
+    return next?.id ?? null;
+  }
   const next = cards.find(
     (card) => stored.evidenceRatings[`${principleId}#${card.id}`] == null
   );

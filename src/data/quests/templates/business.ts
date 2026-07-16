@@ -3,7 +3,7 @@ import { BUSINESS_QUEST_QUIZZES } from "@/data/quests/businessQuestQuizzes";
 
 /**
  * Business pillar — seven adaptive-learning sections (Item 1 Business / 10-K).
- * Each section: insight cards → section checkpoint quiz (what-they-do: 2 cards).
+ * Each section: insight cards → section checkpoint quiz (what-they-do: 3 cards).
  */
 export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
   {
@@ -11,20 +11,21 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     type: "snapshot",
     pillarId: "business",
     title: "WHAT {Company.name} ACTUALLY DOES",
-    objective: "Explain what the company does in normal language.",
+    objective:
+      "Build a clear picture of what the company does, how it evolved, and who relies on it.",
     description:
-      "Two quick cards: what they sell and why customers buy — grounded in Item 1 Business.",
-    investorQuestion: "What does {Company.name} actually sell?",
+      "Three quick cards: business purpose, company evolution, and global presence — grounded in Item 1 Business.",
+    investorQuestion: "What does {Company.name} actually do?",
     plainEnglishAnswer: null,
     whyItMatters:
-      "If you cannot explain what they sell in everyday words, every later judgment is guesswork.",
+      "If you cannot explain what a company does in everyday words, every later judgment is guesswork.",
     secSection: {
       form: "10-K",
       section: "Item 1 Business",
       hint: "Products, services, and business overview."
     },
     aiTask:
-      "Explain what {Company.name} sells and why customers buy in plain English — products and buyer benefits.",
+      "Explain what {Company.name} does, how it evolved, and who uses its products — in plain English from Item 1 Business.",
     artifactType: "one-pager",
     rewardXp: 100,
     unlockRequirements: { pillar: "business" },
@@ -34,24 +35,31 @@ export const BUSINESS_QUEST_TEMPLATES: readonly QuestTemplate[] = [
     estimatedTime: 3,
     displayOrder: 1,
     hubIcon: "what-they-do",
-    hubCardCount: 2,
+    hubCardCount: 3,
     hubLocked: false,
     tags: ["overview", "intro", "company"],
     quizConfig: BUSINESS_QUEST_QUIZZES["what-they-do"],
     cards: [
       {
         id: "card-1",
-        investorQuestion: "What does {Company.name} actually sell?",
+        investorQuestion: "What does {Company.name} actually do?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "You cannot judge growth if you cannot say what people actually buy."
+          "You cannot judge a company until you can explain what it does in plain words."
       },
       {
         id: "card-2",
-        investorQuestion: "Why do customers buy {Company.name} products?",
+        investorQuestion: "How has {Company.name} evolved over time?",
         plainEnglishAnswer: null,
         whyItMatters:
-          "When buyers get real speed and efficiency, they keep ordering."
+          "Seeing how a company evolved shows whether it can adapt and grow."
+      },
+      {
+        id: "card-3",
+        investorQuestion: "Who uses {Company.name}'s products around the world?",
+        plainEnglishAnswer: null,
+        whyItMatters:
+          "Knowing who depends on the business helps you understand its size and reach."
       }
     ]
   },

@@ -13,6 +13,8 @@ type Props = {
   companyName?: string;
   /** Animate the counter from this value (e.g. 0 → 1 after quiz return). */
   celebrateFrom?: number | null;
+  /** Story-map foundation — progress by places, not quest cards. */
+  progressMode?: "quests" | "places";
 };
 
 const RING_CX = 50;
@@ -153,6 +155,54 @@ function SegmentedQuestRing({
   );
 }
 
+function ContinuousProgressRing({
+  completed,
+  total,
+  uid,
+  celebrate
+}: {
+  completed: number;
+  total: number;
+  uid: string;
+  celebrate: boolean;
+}) {
+  const circumference = 2 * Math.PI * RING_R;
+  const pct = total > 0 ? Math.min(1, completed / total) : 0;
+  const dash = pct * circumference;
+
+  return (
+    <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden>
+      <defs>
+        <linearGradient id={`${uid}-gold`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#fff4c2" />
+          <stop offset="40%" stopColor="#fcd34d" />
+          <stop offset="100%" stopColor="#d97706" />
+        </linearGradient>
+      </defs>
+      <circle
+        cx={RING_CX}
+        cy={RING_CY}
+        r={RING_R}
+        fill="none"
+        stroke="rgba(148, 163, 184, 0.35)"
+        strokeWidth={RING_STROKE}
+      />
+      <circle
+        cx={RING_CX}
+        cy={RING_CY}
+        r={RING_R}
+        fill="none"
+        stroke={`url(#${uid}-gold)`}
+        strokeWidth={RING_STROKE}
+        strokeLinecap="round"
+        strokeDasharray={`${dash} ${circumference}`}
+        transform={`rotate(-90 ${RING_CX} ${RING_CY})`}
+        className={celebrate ? "iq-schools-hub-progress-card__ring-celebrate" : ""}
+      />
+    </svg>
+  );
+}
+
 /**
  * Schools Business Island — compact game-style quest progress tracker.
  */
@@ -162,7 +212,8 @@ export function BusinessIslandQuestHud({
   cards,
   companyLogoUrl: _companyLogoUrl,
   companyName: _companyName,
-  celebrateFrom = null
+  celebrateFrom = null,
+  progressMode = "quests"
 }: Props) {
   const uid = useId().replace(/:/g, "");
   const reduceMotion = useReducedMotion();
@@ -171,6 +222,7 @@ export function BusinessIslandQuestHud({
   const [celebrate, setCelebrate] = useState(false);
   const [celebrateSegmentIndex, setCelebrateSegmentIndex] = useState(-1);
   const [displayCompleted, setDisplayCompleted] = useState(completedCards);
+  const unitLabel = progressMode === "places" ? "Districts" : "Quests";
 
   useEffect(() => {
     if (
@@ -221,16 +273,25 @@ export function BusinessIslandQuestHud({
     <div
       className="iq-schools-hub-progress-card pointer-events-auto"
       role="status"
-      aria-label={`Business Island progress, ${displayCompleted} of ${totalCards} quests complete`}
+      aria-label={`Business Island progress, ${displayCompleted} of ${totalCards} ${unitLabel.toLowerCase()} complete`}
     >
       <span className="iq-schools-hub-progress-card__ring-pulse" aria-hidden />
       <div className="iq-schools-hub-progress-card__ring-wrap">
-        <SegmentedQuestRing
-          cards={cards}
-          uid={uid}
-          celebrate={celebrate}
-          celebrateSegmentIndex={celebrateSegmentIndex}
-        />
+        {progressMode === "places" ? (
+          <ContinuousProgressRing
+            completed={displayCompleted}
+            total={totalCards}
+            uid={uid}
+            celebrate={celebrate}
+          />
+        ) : (
+          <SegmentedQuestRing
+            cards={cards}
+            uid={uid}
+            celebrate={celebrate}
+            celebrateSegmentIndex={celebrateSegmentIndex}
+          />
+        )}
         <span className="iq-schools-hub-progress-card__ring-center" aria-hidden>
           {displayCompleted}
         </span>
@@ -238,7 +299,7 @@ export function BusinessIslandQuestHud({
       <div className="iq-schools-hub-progress-card__copy">
         <p className="iq-schools-hub-progress-card__label">Business Island Progress</p>
         <p className="iq-schools-hub-progress-card__count">
-          {displayCompleted} / {totalCards} Quests
+          {displayCompleted} / {totalCards} {unitLabel}
         </p>
       </div>
     </div>

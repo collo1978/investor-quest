@@ -27,7 +27,7 @@ export function SchoolsDemoHubResetButton({ className = DEFAULT_CLASS }: Props) 
   const onReset = useCallback(() => {
     if (busy) return;
     const ok = window.confirm(
-      "Reset Schools demo progress? Business Island returns to 0/7 (quest 1 unlocked). The map envelope mission brief will replay."
+      "Reset Schools demo progress? Business Island story trail and notebook return to the start. The map envelope mission brief will replay."
     );
     if (!ok) return;
 

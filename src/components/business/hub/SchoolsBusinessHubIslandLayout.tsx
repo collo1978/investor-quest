@@ -1,16 +1,26 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { BusinessQuestMapCard } from "@/components/business/BusinessQuestMapCard";
-import { BusinessIslandAcademySign } from "@/components/business/hub/BusinessIslandAcademySign";
+import { BusinessInvestorNotebookPanel } from "@/components/business/hub/BusinessInvestorNotebookPanel";
 import { BusinessIslandQuestHud } from "@/components/business/hub/BusinessIslandQuestHud";
-import { BusinessIslandQuestMarkers } from "@/components/business/hub/BusinessIslandQuestMarkers";
-import { MasterInvestingPrinciplesLadderSheet } from "@/components/business/hub/MasterInvestingPrinciplesLadderSheet";
+import { BusinessIslandStoryMarkers } from "@/components/business/hub/BusinessIslandStoryMarkers";
 import { MasterInvestingPrinciplesPanel } from "@/components/business/hub/MasterInvestingPrinciplesPanel";
 import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
+import type { InvestorNotebookQuestionId } from "@/lib/business/businessIslandInvestorNotebook";
+import {
+  BUSINESS_ISLAND_STORY_LOCATIONS,
+  primaryLocationForNotebookQuestion,
+  type BusinessIslandStoryLocationId
+} from "@/lib/business/businessIslandStoryLocations";
+import {
+  BUSINESS_ISLAND_STORY_PROGRESS_EVENT,
+  isInvestorNotebookQuestionUnlocked,
+  readBusinessIslandStoryProgress
+} from "@/lib/business/businessIslandStoryProgress";
 import { resolveBusinessHubJourney } from "@/lib/business/resolveBusinessHubJourney";
 import type { Company } from "@/data/companies";
-import { useMemo, useState, type CSSProperties } from "react";
 
 import { PRODIGY_MAP_ISLANDS } from "@/lib/schools/schoolsProdigyMapConfig";
 
@@ -60,6 +70,25 @@ export function SchoolsBusinessHubIslandLayout({
   onEnterHub
 }: Props) {
   const reduceMotion = useReducedMotion();
+  const [storyTick, setStoryTick] = useState(0);
+  const [openLocationId, setOpenLocationId] =
+    useState<BusinessIslandStoryLocationId | null>(null);
+  const [openQuestionId, setOpenQuestionId] =
+    useState<InvestorNotebookQuestionId | null>(null);
+
+  const handleOpenMasteryQuestion = (questionId: InvestorNotebookQuestionId) => {
+    const progress = readBusinessIslandStoryProgress(company.id);
+    if (
+      !progress.masteredQuestionIds.includes(questionId) &&
+      !isInvestorNotebookQuestionUnlocked(questionId, progress)
+    ) {
+      return;
+    }
+    const place = primaryLocationForNotebookQuestion(questionId);
+    if (!place) return;
+    setOpenQuestionId(questionId);
+    setOpenLocationId(place.id);
+  };
   const businessIslandMeta = PRODIGY_MAP_ISLANDS.find((i) => i.id === "business");
   const entrySignStyle = businessIslandMeta
     ? ({
@@ -70,7 +99,30 @@ export function SchoolsBusinessHubIslandLayout({
     : undefined;
   const { current } = useMemo(() => resolveBusinessHubJourney(cards), [cards]);
   const allComplete = current.completed && cards.every((c) => c.completed);
-  const [ladderOpen, setLadderOpen] = useState(false);
+
+  useEffect(() => {
+    if (!mapCameraHub) return;
+    const bump = () => setStoryTick((n) => n + 1);
+    window.addEventListener(BUSINESS_ISLAND_STORY_PROGRESS_EVENT, bump);
+    window.addEventListener("storage", bump);
+    return () => {
+      window.removeEventListener(BUSINESS_ISLAND_STORY_PROGRESS_EVENT, bump);
+      window.removeEventListener("storage", bump);
+    };
+  }, [mapCameraHub]);
+
+  const storyVisitedCount = useMemo(() => {
+    if (!mapCameraHub) return completedCards;
+    const progress = readBusinessIslandStoryProgress(company.id);
+    return BUSINESS_ISLAND_STORY_LOCATIONS.filter((loc) =>
+      loc.notebookQuestionIds.every((qid) =>
+        progress.masteredQuestionIds.includes(qid)
+      )
+    ).length;
+  }, [mapCameraHub, company.id, storyTick, completedCards]);
+  const storyTotal = mapCameraHub
+    ? BUSINESS_ISLAND_STORY_LOCATIONS.length
+    : cards.length;
 
   const showUi = uiRevealed && cameraSettled;
   const showEntryCard = entryGateActive && entryPhase === "preview";
@@ -107,11 +159,12 @@ export function SchoolsBusinessHubIslandLayout({
       };
 
   const principlesPanel = mapCameraHub ? (
-    <BusinessIslandAcademySign
-      companyId={company.id}
-      cards={cards}
-      onOpenLadder={() => setLadderOpen(true)}
-    />
+    <div className="iq-schools-island-checklist-companion pointer-events-auto">
+      <BusinessInvestorNotebookPanel
+        companyId={company.id}
+        onOpenMasteryQuestion={handleOpenMasteryQuestion}
+      />
+    </div>
   ) : (
     <div className="iq-schools-business-hub-island__principles pointer-events-auto">
       <MasterInvestingPrinciplesPanel
@@ -198,7 +251,9 @@ export function SchoolsBusinessHubIslandLayout({
             style={entrySignStyle}
           >
             <span className="iq-prodigy-map__sign-title">Business Island</span>
-            <span className="iq-prodigy-map__sign-sub">How do they make money?</span>
+            <span className="iq-prodigy-map__sign-sub">
+              Travel through {company.name}&apos;s story
+            </span>
             <div className="iq-prodigy-map__sign-row">
               <button
                 type="button"
@@ -221,7 +276,7 @@ export function SchoolsBusinessHubIslandLayout({
       >
         <p className="iq-schools-business-hub-island__location-title">Business Island</p>
         <p className="iq-schools-business-hub-island__location-sub">
-          How do they make money?
+          Travel through {company.name}&apos;s story
         </p>
       </motion.header>
       ) : null}
@@ -238,18 +293,19 @@ export function SchoolsBusinessHubIslandLayout({
         transition={{ duration: 0.48, delay: showUi ? 0.12 : 0, ease: [0.22, 1, 0.36, 1] }}
       >
         <BusinessIslandQuestHud
-          completedCards={completedCards}
-          totalCards={cards.length}
+          completedCards={storyVisitedCount}
+          totalCards={storyTotal}
           cards={cards}
           companyName={company.name}
           celebrateFrom={celebrateFrom}
+          progressMode={mapCameraHub ? "places" : "quests"}
         />
       </motion.div>
 
       {mapCameraHub ? (
         <>
           <motion.aside
-            className="iq-schools-island-hud__academy pointer-events-none"
+            className="iq-schools-island-hud__academy iq-schools-island-hud__academy--companion pointer-events-none"
             {...riseIn}
             transition={{ duration: 0.5, delay: showUi ? 0.2 : 0, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -260,12 +316,17 @@ export function SchoolsBusinessHubIslandLayout({
             {...riseIn}
             transition={{ duration: 0.52, delay: showUi ? 0.28 : 0, ease: [0.22, 1, 0.36, 1] }}
           >
-            <BusinessIslandQuestMarkers
-              cards={cards}
+            <BusinessIslandStoryMarkers
               company={company}
               partnerId={partnerId}
               userId={userId}
               onBeforeQuestNavigate={onBeforeQuestNavigate}
+              openLocationId={openLocationId}
+              openQuestionId={openQuestionId}
+              onOpenLocationConsumed={() => {
+                setOpenLocationId(null);
+                setOpenQuestionId(null);
+              }}
             />
           </motion.div>
         </>
@@ -290,15 +351,6 @@ export function SchoolsBusinessHubIslandLayout({
         </motion.div>
       </div>
       )}
-
-      {mapCameraHub ? (
-        <MasterInvestingPrinciplesLadderSheet
-          open={ladderOpen}
-          onClose={() => setLadderOpen(false)}
-          companyId={company.id}
-          cards={cards}
-        />
-      ) : null}
     </div>
   );
 }

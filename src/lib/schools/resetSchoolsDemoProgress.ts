@@ -13,6 +13,7 @@ import { CONTROLLED_DEMO_COMPANY_ID } from "@/lib/demo/controlledDemo";
 import { clearAllHubCardRevealForPillar } from "@/lib/quests/hubCardRevealStorage";
 import { clearInvestorQualityChecklist, syncChecklistEvidenceFromReadSlugs } from "@/lib/business/investorQualityChecklistStorage";
 import { clearBusinessInvestorFrameworkState } from "@/lib/business/businessInvestorFrameworkStorage";
+import { resetBusinessIslandStoryProgress } from "@/lib/business/businessIslandStoryProgress";
 import { clearForcesInvestorFrameworkState } from "@/lib/forces/forcesInvestorFrameworkStorage";
 import { clearInvestorEvidencePhaseStorage } from "@/lib/business/businessInvestorEvidencePhaseStorage";
 import { clearQuestChecklistSessions } from "@/lib/business/investorQualityQuestSession";
@@ -91,6 +92,7 @@ export function resetSchoolsDemoProgress(
   clearAllHubCardRevealForPillar(CONTROLLED_DEMO_COMPANY_ID, "business");
   clearInvestorQualityChecklist(CONTROLLED_DEMO_COMPANY_ID);
   clearBusinessInvestorFrameworkState(CONTROLLED_DEMO_COMPANY_ID);
+  resetBusinessIslandStoryProgress(CONTROLLED_DEMO_COMPANY_ID);
   clearForcesInvestorFrameworkState(CONTROLLED_DEMO_COMPANY_ID);
   clearInvestorEvidencePhaseStorage(CONTROLLED_DEMO_COMPANY_ID, "business-purpose");
   clearQuestChecklistSessions(CONTROLLED_DEMO_COMPANY_ID);

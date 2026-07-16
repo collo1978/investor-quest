@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
+import "./evidence-file.css";
 import { ClientAppRoot } from "@/components/ClientAppRoot";
 import { REQUEST_PATHNAME_HEADER } from "@/lib/requestPathname";
 

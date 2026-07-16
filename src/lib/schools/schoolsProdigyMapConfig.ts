@@ -97,8 +97,9 @@ export const PRODIGY_BUSINESS_ISLAND_ZOOM_BOOST = 1.028;
 /** Corporate HQ entrance — second camera beat before opening a quest. */
 export const PRODIGY_BUSINESS_HQ_VIEWPORT_FILL = 0.78;
 
-/** HQ cluster is the camera target — not UI, not island centroid. */
-export const PRODIGY_BUSINESS_ISLAND_FRAME_ANCHOR = { x: 0.5, y: 0.5 } as const;
+/** HQ cluster is the camera target — not UI, not island centroid.
+ *  Slight right bias so the full land mass stays on-screen (avoids left-edge clip). */
+export const PRODIGY_BUSINESS_ISLAND_FRAME_ANCHOR = { x: 0.58, y: 0.5 } as const;
 
 /** Approx local bounds of {@link ProdigyBusinessCityLandmark} (viewBox units). */
 const PRODIGY_BUSINESS_LANDMARK_LOCAL_BOUNDS = {
@@ -374,14 +375,14 @@ export function computeProdigyBusinessHqCamera(
   };
 }
 
-/** 0–7 visual tier for Business Island progress (quests completed). */
+/** 0–N visual tier for Business Island progress (quests completed). */
 export function resolveBusinessIslandProgressTier(
   completedCards: number,
   totalCards: number
 ): number {
   if (totalCards <= 0) return 0;
-  if (completedCards >= totalCards) return 7;
-  return Math.max(0, Math.min(6, completedCards));
+  if (completedCards >= totalCards) return totalCards;
+  return Math.max(0, Math.min(totalCards - 1, completedCards));
 }
 
 export const PRODIGY_MAP_TITLE = "NVIDIA 10-K REALM";
@@ -437,10 +438,10 @@ export const PRODIGY_MAP_ISLANDS: readonly ProdigyIslandMeta[] = [
     id: "business",
     label: "Business Island",
     subtitle: "How do they make money?",
-    land: "#fef08a",
-    landEdge: "#ca8a04",
-    path: "#fbbf24",
-    glow: "rgba(251,191,36,0.45)",
+    land: "#365314",
+    landEdge: "#76b900",
+    path: "#76b900",
+    glow: "rgba(118,185,0,0.5)",
     xpReward: XP_ISLAND_COMPLETION,
     x: prodigyLeftSignAnchorXPct(PRODIGY_ISLAND_OUTER_EDGE_X.business),
     y: prodigyCanvasYPct(PRODIGY_ISLAND_CENTER_Y.business),
@@ -450,10 +451,10 @@ export const PRODIGY_MAP_ISLANDS: readonly ProdigyIslandMeta[] = [
     id: "forces",
     label: "Risk Island",
     subtitle: "What are the threats?",
-    land: "#fecdd3",
+    land: "#4c0519",
     landEdge: "#e11d48",
     path: "#fb7185",
-    glow: "rgba(244,63,94,0.42)",
+    glow: "rgba(244,63,94,0.32)",
     xpReward: XP_ISLAND_COMPLETION,
     x: prodigyRightSignAnchorXPct(PRODIGY_ISLAND_OUTER_EDGE_X.forces),
     y: prodigyCanvasYPct(PRODIGY_ISLAND_CENTER_Y.forces),
@@ -463,10 +464,10 @@ export const PRODIGY_MAP_ISLANDS: readonly ProdigyIslandMeta[] = [
     id: "financials",
     label: "Financial Island",
     subtitle: "Are they financially strong?",
-    land: "#bbf7d0",
+    land: "#052e16",
     landEdge: "#15803d",
     path: "#4ade80",
-    glow: "rgba(74,222,128,0.4)",
+    glow: "rgba(74,222,128,0.28)",
     xpReward: XP_ISLAND_COMPLETION,
     x: prodigyLeftSignAnchorXPct(PRODIGY_ISLAND_OUTER_EDGE_X.financials),
     y: prodigyCanvasYPct(PRODIGY_ISLAND_CENTER_Y.financials),
@@ -476,10 +477,10 @@ export const PRODIGY_MAP_ISLANDS: readonly ProdigyIslandMeta[] = [
     id: "management",
     label: "Management Island",
     subtitle: "Would you trust them?",
-    land: "#c7d2fe",
-    landEdge: "#4338ca",
+    land: "#1e1b4b",
+    landEdge: "#6366f1",
     path: "#818cf8",
-    glow: "rgba(129,140,248,0.42)",
+    glow: "rgba(129,140,248,0.3)",
     xpReward: XP_ISLAND_COMPLETION,
     x: prodigyRightSignAnchorXPct(PRODIGY_ISLAND_OUTER_EDGE_X.management),
     y: prodigyCanvasYPct(PRODIGY_ISLAND_CENTER_Y.management),
