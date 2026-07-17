@@ -61,9 +61,6 @@ export function BusinessIslandStoryLocationMarker({
         ? `${location.placeName}: ${mission} — next destination`
         : `${location.placeName}`;
 
-  /** Only the current adventure destination shows its guide description. */
-  const showTooltip = isActive;
-
   return (
     <div
       className={[
@@ -155,15 +152,6 @@ export function BusinessIslandStoryLocationMarker({
           ) : null}
         </span>
       </motion.button>
-
-      {showTooltip ? (
-        <div className="iq-business-island-story-tooltip pointer-events-none" role="tooltip">
-          <p className="iq-business-island-story-tooltip__place">
-            {location.emoji} {location.placeName}
-          </p>
-          <p className="iq-business-island-story-tooltip__mission">{mission}</p>
-        </div>
-      ) : null}
     </div>
   );
 }

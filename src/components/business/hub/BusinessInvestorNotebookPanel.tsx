@@ -4,7 +4,6 @@ import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { useOptionalGame } from "@/components/GameProvider";
 import { BusinessChecklistInfoHint } from "@/components/business/hub/BusinessChecklistInfoHint";
 import { InvestorChecklistCircuitEye } from "@/components/business/hub/BusinessInvestorNotebookIcons";
 import type { CompanyId } from "@/data/companies";
@@ -19,11 +18,11 @@ import {
   type InvestorNotebookQuestionId
 } from "@/lib/business/businessIslandInvestorNotebook";
 import {
+  armBonusInvestigation,
   BUSINESS_ISLAND_STORY_PROGRESS_EVENT,
   clearBusinessIslandStoryPulse,
   isInvestorNotebookQuestionMastered,
   isInvestorNotebookQuestionUnlocked,
-  markInvestorNotebookDigDeeperComplete,
   readBusinessIslandStoryProgress
 } from "@/lib/business/businessIslandStoryProgress";
 
@@ -31,6 +30,11 @@ type Props = {
   companyId: CompanyId;
   /** Open the campus learning experience for this mastery question. */
   onOpenMasteryQuestion?: (questionId: InvestorNotebookQuestionId) => void;
+  /** Fired when a Dig Deeper is turned into a Bonus Investigation (marker armed). */
+  onStartBonusInvestigation?: (
+    questionId: InvestorNotebookQuestionId,
+    index: number
+  ) => void;
 };
 
 function MissionCheckmark({ celebrate }: { celebrate: boolean }) {
@@ -86,7 +90,7 @@ function MasteryRow({
   expanded,
   onToggleExpand,
   onOpenMastery,
-  onCompleteDigDeeper
+  onStartBonus
 }: {
   question: InvestorNotebookQuestionDef;
   companyName: string;
@@ -99,7 +103,7 @@ function MasteryRow({
   expanded: boolean;
   onToggleExpand: () => void;
   onOpenMastery: () => void;
-  onCompleteDigDeeper: (index: number) => void;
+  onStartBonus: (index: number) => void;
 }) {
   const title = formatInvestorNotebookQuestion(
     question.questionTemplate,
@@ -211,11 +215,15 @@ function MasteryRow({
           ) : (
             <>
               <p className="iq-island-tracker__deeper-heading">
-                <span>⭐ Dig Deeper (+{digBonusXp} XP)</span>
+                <span>🔍 Bonus Investigations (+{digBonusXp} XP)</span>
                 <span className="iq-island-tracker__deeper-meta">
                   {digDoneCount}/{digCount}
                   {remainingDigXp > 0 ? ` · ${remainingDigXp} XP left` : " · complete"}
                 </span>
+              </p>
+              <p className="iq-island-tracker__deeper-intro">
+                Optional detective cases. Launch one to add a glowing marker on
+                Headquarters — solve the case to earn its XP.
               </p>
               <ul className="iq-island-tracker__deeper-list">
                 {question.digDeeperTemplates.map((template, index) => {
@@ -236,20 +244,18 @@ function MasteryRow({
                           .filter(Boolean)
                           .join(" ")}
                         disabled={done}
-                        onClick={() => onCompleteDigDeeper(index)}
+                        onClick={() => onStartBonus(index)}
                       >
                         <span
                           className="iq-island-tracker__deeper-check"
                           aria-hidden
                         >
-                          {done ? "✓" : "□"}
+                          {done ? "✓" : "🔍"}
                         </span>
                         <span className="iq-island-tracker__deeper-q">{label}</span>
-                        {!done ? (
-                          <span className="iq-island-tracker__deeper-xp">
-                            +{XP_DIG_DEEPER_CHALLENGE} XP
-                          </span>
-                        ) : null}
+                        <span className="iq-island-tracker__deeper-xp">
+                          {done ? "Solved" : "Investigate →"}
+                        </span>
                       </button>
                     </li>
                   );
@@ -268,10 +274,10 @@ function MasteryRow({
  */
 export function BusinessInvestorNotebookPanel({
   companyId,
-  onOpenMasteryQuestion
+  onOpenMasteryQuestion,
+  onStartBonusInvestigation
 }: Props) {
   const company = companyById(companyId);
-  const game = useOptionalGame();
   const reduceMotion = useReducedMotion();
   const [tick, setTick] = useState(0);
   const prevMasteredRef = useRef<Set<InvestorNotebookQuestionId>>(new Set());
@@ -337,20 +343,15 @@ export function BusinessInvestorNotebookPanel({
   const fillPct = total > 0 ? Math.round((masteredCount / total) * 100) : 0;
   const companyCaps = company.name.toUpperCase();
 
-  const handleDigDeeper = (
+  // Dig Deeper is now an optional Bonus Investigation: clicking arms a glowing
+  // Headquarters marker. No XP on click — it's earned by solving the case.
+  const handleStartBonus = (
     questionId: InvestorNotebookQuestionId,
     index: number
   ) => {
-    const result = markInvestorNotebookDigDeeperComplete(
-      companyId,
-      questionId,
-      index
-    );
-    if (!result) return;
-    game?.actions.awardBonusXp(
-      XP_DIG_DEEPER_CHALLENGE,
-      `Dig Deeper: ${digDeeperKey(questionId, index)}`
-    );
+    if (digDeeperDone.has(digDeeperKey(questionId, index))) return;
+    armBonusInvestigation(companyId, questionId, index);
+    onStartBonusInvestigation?.(questionId, index);
   };
 
   return (
@@ -463,7 +464,7 @@ export function BusinessInvestorNotebookPanel({
                 if (locked) return;
                 onOpenMasteryQuestion?.(question.id);
               }}
-              onCompleteDigDeeper={(index) => handleDigDeeper(question.id, index)}
+              onStartBonus={(index) => handleStartBonus(question.id, index)}
             />
           );
         })}

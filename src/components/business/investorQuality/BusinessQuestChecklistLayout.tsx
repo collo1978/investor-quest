@@ -4,6 +4,7 @@ import { useMemo, type ReactNode } from "react";
 
 import { BusinessChecklistChapterNav } from "@/components/business/checklist/BusinessChecklistChapterNav";
 import { BusinessChecklistSectionWorkspace } from "@/components/business/checklist/BusinessChecklistSectionWorkspace";
+import { BusinessInvestorNotebookPanel } from "@/components/business/hub/BusinessInvestorNotebookPanel";
 import { InvestorPrincipleEvidenceFlyProvider } from "@/components/business/investorFramework/InvestorPrincipleEvidenceFly";
 import {
   InvestorQualityRatingSyncProvider
@@ -68,15 +69,9 @@ function ChecklistLayoutInner({
         <div className="iq-quest-checklist-layout iq-quest-checklist-layout--section-mission">
           <aside
             className="iq-quest-checklist-layout__sidebar"
-            aria-label="Section mission tracker"
+            aria-label="Investor Checklist"
           >
-            <BusinessChecklistSectionWorkspace
-              section={workspaceSection}
-              companyId={companyId}
-              highlightPrincipleId={highlightPrincipleId}
-              highlightSectionQuizId={highlightSectionQuizId}
-              className="iq-quest-checklist-layout__mission-tracker"
-            />
+            <BusinessInvestorNotebookPanel companyId={companyId} />
           </aside>
           <div className="iq-quest-checklist-layout__main">{children}</div>
         </div>

@@ -31,6 +31,13 @@ export type BusinessIslandStoryProgressState = {
   masteredQuestionIds: InvestorNotebookQuestionId[];
   /** Completed Dig Deeper challenge keys (`questionId:index`). */
   digDeeperCompletedKeys: string[];
+  /** Armed-but-not-solved Bonus Investigation — shows the glowing HQ marker. */
+  pendingBonus: BonusInvestigationRef | null;
+};
+
+export type BonusInvestigationRef = {
+  questionId: InvestorNotebookQuestionId;
+  index: number;
 };
 
 const EMPTY: BusinessIslandStoryProgressState = {
@@ -39,7 +46,8 @@ const EMPTY: BusinessIslandStoryProgressState = {
   evidenceByQuestion: {},
   lastEvidenceLabel: null,
   masteredQuestionIds: [],
-  digDeeperCompletedKeys: []
+  digDeeperCompletedKeys: [],
+  pendingBonus: null
 };
 
 function storageKey(companyId: CompanyId): string {
@@ -84,6 +92,21 @@ function normalizeDigDeeperKeys(value: unknown): string[] {
   return value.filter((key): key is string => typeof key === "string");
 }
 
+function normalizePendingBonus(value: unknown): BonusInvestigationRef | null {
+  if (!value || typeof value !== "object") return null;
+  const questionId = (value as { questionId?: unknown }).questionId;
+  const index = (value as { index?: unknown }).index;
+  if (
+    isQuestionId(questionId) &&
+    typeof index === "number" &&
+    Number.isInteger(index) &&
+    index >= 0
+  ) {
+    return { questionId, index };
+  }
+  return null;
+}
+
 export function readBusinessIslandStoryProgress(
   companyId: CompanyId
 ): BusinessIslandStoryProgressState {
@@ -106,7 +129,8 @@ export function readBusinessIslandStoryProgress(
           ? parsed.lastEvidenceLabel
           : null,
       masteredQuestionIds: normalizeQuestionIds(parsed.masteredQuestionIds),
-      digDeeperCompletedKeys: normalizeDigDeeperKeys(parsed.digDeeperCompletedKeys)
+      digDeeperCompletedKeys: normalizeDigDeeperKeys(parsed.digDeeperCompletedKeys),
+      pendingBonus: normalizePendingBonus(parsed.pendingBonus)
     };
   } catch {
     return EMPTY;
@@ -205,6 +229,65 @@ export function markInvestorNotebookDigDeeperComplete(
   };
   writeProgress(companyId, next);
   return next;
+}
+
+/**
+ * Arms a Bonus Investigation from the checklist (Dig Deeper click). No XP yet —
+ * this just surfaces the glowing marker on Headquarters. Skips already-solved ones.
+ */
+export function armBonusInvestigation(
+  companyId: CompanyId,
+  questionId: InvestorNotebookQuestionId,
+  index: number
+): BusinessIslandStoryProgressState {
+  const current = readBusinessIslandStoryProgress(companyId);
+  const key = digDeeperKey(questionId, index);
+  if (current.digDeeperCompletedKeys.includes(key)) return current;
+  if (
+    current.pendingBonus &&
+    current.pendingBonus.questionId === questionId &&
+    current.pendingBonus.index === index
+  ) {
+    return current;
+  }
+  const next: BusinessIslandStoryProgressState = {
+    ...current,
+    pendingBonus: { questionId, index }
+  };
+  writeProgress(companyId, next);
+  return next;
+}
+
+export function clearPendingBonusInvestigation(companyId: CompanyId): void {
+  const current = readBusinessIslandStoryProgress(companyId);
+  if (!current.pendingBonus) return;
+  writeProgress(companyId, { ...current, pendingBonus: null });
+}
+
+/**
+ * Marks a Bonus Investigation solved: records the Dig Deeper key and clears the
+ * armed marker. Returns null when it was already solved (so XP isn't re-awarded).
+ */
+export function completeBonusInvestigation(
+  companyId: CompanyId,
+  questionId: InvestorNotebookQuestionId,
+  index: number
+): BusinessIslandStoryProgressState | null {
+  const key = digDeeperKey(questionId, index);
+  const current = readBusinessIslandStoryProgress(companyId);
+  const pendingMatches =
+    current.pendingBonus?.questionId === questionId &&
+    current.pendingBonus?.index === index;
+  const alreadyDone = current.digDeeperCompletedKeys.includes(key);
+  const next: BusinessIslandStoryProgressState = {
+    ...current,
+    digDeeperCompletedKeys: alreadyDone
+      ? current.digDeeperCompletedKeys
+      : [...current.digDeeperCompletedKeys, key],
+    pendingBonus: pendingMatches ? null : current.pendingBonus
+  };
+  writeProgress(companyId, next);
+  return alreadyDone ? null : next;
 }
 
 export function clearBusinessIslandStoryPulse(companyId: CompanyId): void {

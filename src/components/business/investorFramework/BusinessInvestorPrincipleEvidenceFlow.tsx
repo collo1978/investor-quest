@@ -80,6 +80,16 @@ type Props = {
 type LegacyFlowPhase = "cards" | "complete" | "unlock";
 type ChallengeFlowPhase = "cards" | "challenge" | "success";
 
+/**
+ * Business Purpose evidence is now gathered in the Headquarters decode mission,
+ * so the legacy in-quest evidence-read cards are skipped — jump to the challenge.
+ */
+function principleSkipsEvidenceReading(
+  principleId: InvestorChallengePrincipleId
+): boolean {
+  return principleId === "business-purpose";
+}
+
 function resolveChallengeInitialPhase(
   companyId: Company["id"],
   principleId: InvestorChallengePrincipleId
@@ -89,14 +99,18 @@ function resolveChallengeInitialPhase(
     return "success";
   }
 
+  const challengePassed = stored.principleChallengePassed[principleId];
+  if (challengePassed === "great" || challengePassed === "good") return "success";
+
+  // Evidence already gathered upstream — go straight to the Investor Challenge.
+  if (principleSkipsEvidenceReading(principleId)) return "challenge";
+
   const cards = resolveInvestorEvidenceCards(companyId, principleId);
   const read = evidenceCardsReadForPrinciple(principleId, stored);
   const allRead = cards.length > 0 && cards.every((card) => read.has(card.id));
 
   if (!allRead) return "cards";
 
-  const challenge = stored.principleChallengePassed[principleId];
-  if (challenge === "great" || challenge === "good") return "success";
   // Evolution keeps "cards" so the timeline finale can play; others go straight to challenge.
   if (principleId === "company-evolution") return "cards";
   return "challenge";
@@ -320,21 +334,9 @@ function BusinessInvestorChallengePrincipleFlow({
     [company.id, principleId]
   );
 
-  const [phase, setPhase] = useState<ChallengeFlowPhase>(() => {
-    // Demo polish: start Company Evolution from milestone 1 once per browser session.
-    if (principleId === "company-evolution") {
-      try {
-        const flag = "iq-company-evolution-journey-fresh-v5";
-        if (typeof sessionStorage !== "undefined" && !sessionStorage.getItem(flag)) {
-          sessionStorage.setItem(flag, "1");
-          resetCompanyEvolutionProgress(company.id);
-        }
-      } catch {
-        /* ignore */
-      }
-    }
-    return resolveChallengeInitialPhase(company.id, principleId);
-  });
+  const [phase, setPhase] = useState<ChallengeFlowPhase>(() =>
+    resolveChallengeInitialPhase(company.id, principleId)
+  );
   const [viewCardId, setViewCardId] = useState<string | null>(null);
   const [stored, setStored] = useState(() =>
     readBusinessInvestorFrameworkState(company.id)
@@ -348,6 +350,26 @@ function BusinessInvestorChallengePrincipleFlow({
   });
   const celebrationLine = resolveChallengeSuccessCopy(principleId, company.name);
   const finishedRef = useRef(false);
+
+  // Demo polish: start Company Evolution from milestone 1 once per browser session.
+  // Runs in an effect (not during render) so the storage write's change event
+  // never triggers setState in sibling components mid-render.
+  const evolutionResetRef = useRef(false);
+  useEffect(() => {
+    if (principleId !== "company-evolution" || evolutionResetRef.current) return;
+    evolutionResetRef.current = true;
+    try {
+      const flag = "iq-company-evolution-journey-fresh-v5";
+      if (typeof sessionStorage !== "undefined" && !sessionStorage.getItem(flag)) {
+        sessionStorage.setItem(flag, "1");
+        resetCompanyEvolutionProgress(company.id);
+        setStored(readBusinessInvestorFrameworkState(company.id));
+        setPhase(resolveChallengeInitialPhase(company.id, principleId));
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [principleId, company.id]);
 
   const readIds = useMemo(
     () => evidenceCardsReadForPrinciple(principleId, stored),
@@ -416,6 +438,22 @@ function BusinessInvestorChallengePrincipleFlow({
     setStored(nextState);
     onEvidenceSaved?.();
   }, [skipReadForFirstCard, cards, readIds, company.id, principleId, onEvidenceSaved]);
+
+  /**
+   * Evidence gathered in the Headquarters decode mission — mark the legacy
+   * evidence cards read so the checklist completes when the challenge passes.
+   */
+  useEffect(() => {
+    if (!principleSkipsEvidenceReading(principleId)) return;
+    const unread = cards.filter((card) => !readIds.has(card.id));
+    if (unread.length === 0) return;
+    let nextState = stored;
+    for (const card of unread) {
+      nextState = saveEvidenceCardRead(company.id, principleId, card.id);
+    }
+    setStored(nextState);
+    onEvidenceSaved?.();
+  }, [principleId, cards, readIds, stored, company.id, onEvidenceSaved]);
 
   const handleEvidenceMarkRead = useCallback(() => {
     const cardToMark = displayCard;

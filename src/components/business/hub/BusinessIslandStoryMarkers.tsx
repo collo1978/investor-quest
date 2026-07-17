@@ -3,12 +3,16 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { BusinessIslandBonusInvestigation } from "@/components/business/hub/BusinessIslandBonusInvestigation";
 import { BusinessIslandLocationExperience } from "@/components/business/hub/BusinessIslandLocationExperience";
 import { BusinessIslandNvidiaCampusAtmosphere } from "@/components/business/hub/BusinessIslandNvidiaCampusAtmosphere";
 import { BusinessIslandStoryLocationDock } from "@/components/business/hub/BusinessIslandStoryLocationDock";
 import { BusinessIslandStoryLocationMarker } from "@/components/business/hub/BusinessIslandStoryLocationMarker";
 import type { Company } from "@/data/companies";
-import type { InvestorNotebookQuestionId } from "@/lib/business/businessIslandInvestorNotebook";
+import {
+  digDeeperKey,
+  type InvestorNotebookQuestionId
+} from "@/lib/business/businessIslandInvestorNotebook";
 import { resolveLocationExperience } from "@/lib/business/businessIslandLocationExperience";
 import {
   BUSINESS_ISLAND_CAMPUS_HUB,
@@ -20,6 +24,7 @@ import {
 } from "@/lib/business/businessIslandStoryLocations";
 import {
   BUSINESS_ISLAND_STORY_PROGRESS_EVENT,
+  completeBonusInvestigation,
   isBusinessIslandDistrictCleared,
   markBusinessIslandStoryLocationVisited,
   markInvestorNotebookQuestionMastered,
@@ -27,10 +32,15 @@ import {
   resolveActiveBusinessIslandStoryLocationId,
   resolveBusinessIslandStoryLocationState,
   resolveClearedBusinessIslandDistrictIds,
-  resolveNextBusinessIslandStoryLocation
+  resolveNextBusinessIslandStoryLocation,
+  type BonusInvestigationRef
 } from "@/lib/business/businessIslandStoryProgress";
+import { resolveBonusInvestigationPrompt } from "@/lib/business/businessIslandBonusInvestigations";
 import { trackUserEvent } from "@/lib/analytics/trackUserEvent";
-import { XP_CHECKLIST_MASTERY } from "@/engine/progression/xpEconomy";
+import {
+  XP_CHECKLIST_MASTERY,
+  XP_DIG_DEEPER_CHALLENGE
+} from "@/engine/progression/xpEconomy";
 import { useOptionalGame } from "@/components/GameProvider";
 
 type Props = {
@@ -83,6 +93,9 @@ export function BusinessIslandStoryMarkers({
     useState<InvestorNotebookQuestionId | null>(null);
   const [travel, setTravel] = useState<TravelBeat | null>(null);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [activeBonus, setActiveBonus] = useState<BonusInvestigationRef | null>(
+    null
+  );
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
@@ -130,6 +143,36 @@ export function BusinessIslandStoryMarkers({
         : null,
     [insideId]
   );
+
+  const pendingBonus = progress.pendingBonus;
+  const hqLocation = useMemo(
+    () =>
+      BUSINESS_ISLAND_STORY_LOCATIONS.find((loc) => loc.id === "district-hq") ??
+      null,
+    []
+  );
+  // Sits just above the Headquarters node — the Bonus Investigation belongs to HQ.
+  const bonusMarkerPos = useMemo(() => {
+    if (!hqLocation) return null;
+    const pos = businessIslandStoryLocationPosition(hqLocation, mobile);
+    return {
+      left: `${parsePercent(pos.left)}%`,
+      top: `${Math.max(parsePercent(pos.top) - 14, 4)}%`
+    };
+  }, [hqLocation, mobile]);
+  const bonusPrompt = useMemo(
+    () =>
+      pendingBonus
+        ? resolveBonusInvestigationPrompt(
+            pendingBonus.questionId,
+            pendingBonus.index,
+            company.name
+          )
+        : "",
+    [pendingBonus, company.name]
+  );
+  const showBonusMarker =
+    Boolean(pendingBonus) && !inside && !activeBonus && Boolean(bonusMarkerPos);
 
   const pathPoints = useMemo(
     () =>
@@ -291,6 +334,32 @@ export function BusinessIslandStoryMarkers({
     [inside, company.id]
   );
 
+  const handleOpenBonus = useCallback(() => {
+    if (!pendingBonus) return;
+    setSelectedId(null);
+    setActiveBonus(pendingBonus);
+  }, [pendingBonus]);
+
+  const handleBonusSolved = useCallback(() => {
+    if (!activeBonus) return;
+    const result = completeBonusInvestigation(
+      company.id,
+      activeBonus.questionId,
+      activeBonus.index
+    );
+    if (result) {
+      game?.actions.awardBonusXp(
+        XP_DIG_DEEPER_CHALLENGE,
+        `Bonus Investigation: ${digDeeperKey(activeBonus.questionId, activeBonus.index)}`
+      );
+    }
+    setTick((n) => n + 1);
+  }, [activeBonus, company.id, game]);
+
+  const handleBonusExit = useCallback(() => {
+    setActiveBonus(null);
+  }, []);
+
   return (
     <div
       className={[
@@ -367,6 +436,27 @@ export function BusinessIslandStoryMarkers({
             />
           );
         })}
+
+        {showBonusMarker && bonusMarkerPos ? (
+          <motion.button
+            type="button"
+            className="iq-business-island-bonus-marker pointer-events-auto"
+            style={{ left: bonusMarkerPos.left, top: bonusMarkerPos.top }}
+            initial={reduceMotion ? false : { opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            onClick={handleOpenBonus}
+            aria-label={`Start Bonus Investigation: ${bonusPrompt}`}
+          >
+            <span className="iq-business-island-bonus-marker__pulse" aria-hidden />
+            <span className="iq-business-island-bonus-marker__badge" aria-hidden>
+              🔍
+            </span>
+            <span className="iq-business-island-bonus-marker__label">
+              Bonus Investigation
+            </span>
+          </motion.button>
+        ) : null}
       </motion.div>
 
       {!inside ? (
@@ -407,6 +497,19 @@ export function BusinessIslandStoryMarkers({
             onBeforeQuestNavigate={onBeforeQuestNavigate}
             onMissionMastered={handleMissionMastered}
             onLeave={handleLeavePlace}
+          />
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {activeBonus ? (
+          <BusinessIslandBonusInvestigation
+            key={digDeeperKey(activeBonus.questionId, activeBonus.index)}
+            companyName={company.name}
+            questionId={activeBonus.questionId}
+            index={activeBonus.index}
+            onSolved={handleBonusSolved}
+            onExit={handleBonusExit}
           />
         ) : null}
       </AnimatePresence>

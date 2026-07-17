@@ -4,36 +4,56 @@ import { motion, useReducedMotion } from "framer-motion";
 
 import {
   InvestorKeyTermDecodeCard,
-  type InvestorKeyTermItem
+  type InvestorKeyTermItem,
+  type InvestorKeyTermMode
 } from "@/components/business/investorFramework/InvestorKeyTermDecodeCard";
 
 type Props = {
   heading?: string;
+  helperText?: string;
   terms: readonly InvestorKeyTermItem[];
-  expandedIds: ReadonlySet<string>;
-  decodedIds: ReadonlySet<string>;
-  onToggleTerm: (termId: string, isExpanded: boolean) => void;
+  /** Terms decoded earlier in this mission — trigger recall instead of Decode. */
+  seenBeforeIds: ReadonlySet<string>;
+  /** Terms already recalled correctly this mission. */
+  masteredIds: ReadonlySet<string>;
+  /** Called the first time a term's definition is revealed. */
+  onDecoded: (termId: string) => void;
+  /** Grade a recall attempt — returns true when remembered. */
+  onSubmitRecall: (term: InvestorKeyTermItem, response: string) => boolean;
   layout?: "grid" | "list";
 };
 
-/** Expandable investor-term cards — platform-wide decode mechanic. */
+/** Expandable investor-term cards — platform-wide decode + recall mechanic. */
 export function InvestorKeyTermsPanel({
-  heading = "📘 Key Terms They Mentioned",
+  heading = "📘 Key Terms to Remember",
+  helperText,
   terms,
-  expandedIds,
-  decodedIds,
-  onToggleTerm,
+  seenBeforeIds,
+  masteredIds,
+  onDecoded,
+  onSubmitRecall,
   layout = "grid"
 }: Props) {
   const reduceMotion = useReducedMotion();
 
+  const resolveMode = (termId: string): InvestorKeyTermMode => {
+    if (masteredIds.has(termId)) return "mastered";
+    if (seenBeforeIds.has(termId)) return "recall";
+    return "new";
+  };
+
   return (
     <section className="iq-investor-key-terms" aria-label="Key investor terms">
       <h2 className="iq-investor-key-terms__heading">{heading}</h2>
+      {helperText ? (
+        <p className="iq-investor-key-terms__helper">{helperText}</p>
+      ) : null}
       <ul
         className={[
           "iq-investor-key-terms__list",
-          layout === "grid" ? "iq-investor-key-terms__list--grid" : "iq-investor-key-terms__list--list"
+          layout === "grid"
+            ? "iq-investor-key-terms__list--grid"
+            : "iq-investor-key-terms__list--list"
         ].join(" ")}
       >
         {terms.map((term, index) => (
@@ -49,9 +69,9 @@ export function InvestorKeyTermsPanel({
           >
             <InvestorKeyTermDecodeCard
               term={term}
-              expanded={expandedIds.has(term.id)}
-              decoded={decodedIds.has(term.id)}
-              onToggle={() => onToggleTerm(term.id, expandedIds.has(term.id))}
+              mode={resolveMode(term.id)}
+              onDecoded={onDecoded}
+              onSubmitRecall={onSubmitRecall}
               layout={layout}
             />
           </motion.li>

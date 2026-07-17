@@ -36,6 +36,8 @@ export function Official10KEvidenceFile({
         unoptimized
       />
 
+      <div className="iq-evidence-file__age" aria-hidden />
+
       <div className="iq-evidence-file__quote-slot">
         <blockquote className="iq-evidence-file__quote">{children}</blockquote>
       </div>

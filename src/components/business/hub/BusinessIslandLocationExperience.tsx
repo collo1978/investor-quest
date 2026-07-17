@@ -1,21 +1,16 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { BusinessIslandHqDecodeExperience } from "@/components/business/hub/BusinessIslandHqDecodeExperience";
+import { BusinessIslandMissionFlow } from "@/components/business/hub/BusinessIslandMissionFlow";
 import { BusinessIslandPlaceGlyph } from "@/components/business/hub/BusinessIslandPlaceGlyph";
-import {
-  formatInvestorNotebookQuestion,
-  INVESTOR_NOTEBOOK_QUESTIONS,
-  type InvestorNotebookQuestionId
-} from "@/lib/business/businessIslandInvestorNotebook";
+import type { InvestorNotebookQuestionId } from "@/lib/business/businessIslandInvestorNotebook";
 import type { BusinessIslandStoryLocationDef } from "@/lib/business/businessIslandStoryLocations";
 import {
   atmosphereLabelForTheme,
-  resolveDistrictMission,
-  resolveLocationExperience,
-  type DistrictMissionExperience
+  resolveLocationExperience
 } from "@/lib/business/businessIslandLocationExperience";
 
 type Props = {
@@ -32,17 +27,17 @@ type Props = {
 };
 
 /**
- * District hub — pick missions inside a landmark; game-room feel, not a quiz card.
+ * District room — arrive, then chain each checklist question:
+ * evidence → answer → checklist tick → next question.
  */
 export function BusinessIslandLocationExperience(props: Props) {
   if (props.location.id === "district-hq") {
     return (
       <BusinessIslandHqDecodeExperience
         location={props.location}
-        companyId={props.companyId}
         companyName={props.companyName}
-        onBeforeQuestNavigate={props.onBeforeQuestNavigate}
-        onLeave={() => props.onLeave(props.alreadyExplored)}
+        onMissionMastered={props.onMissionMastered}
+        onLeave={() => props.onLeave(true)}
       />
     );
   }
@@ -52,7 +47,6 @@ export function BusinessIslandLocationExperience(props: Props) {
 
 function BusinessIslandDistrictExperience({
   location,
-  companyId: _companyId,
   companyName,
   alreadyExplored,
   masteredQuestionIds,
@@ -67,50 +61,32 @@ function BusinessIslandDistrictExperience({
     [masteredQuestionIds]
   );
 
-  const [phase, setPhase] = useState<"arrive" | "hub" | "mission">(
-    reduceMotion ? "hub" : "arrive"
+  const [phase, setPhase] = useState<"arrive" | "flow">(
+    reduceMotion ? "flow" : "arrive"
   );
-  const [activeMission, setActiveMission] =
-    useState<DistrictMissionExperience | null>(null);
-  const [revealed, setRevealed] = useState(0);
   const [completedThisVisit, setCompletedThisVisit] = useState(false);
-  const focusConsumedRef = useRef(false);
 
   useEffect(() => {
     if (phase !== "arrive" || reduceMotion) return;
-    const t = window.setTimeout(() => setPhase("hub"), 900);
+    const t = window.setTimeout(() => setPhase("flow"), 900);
     return () => window.clearTimeout(t);
   }, [phase, reduceMotion]);
 
-  useEffect(() => {
-    if (!focusQuestionId || focusConsumedRef.current || phase === "arrive") return;
-    const mission = resolveDistrictMission(location.id, focusQuestionId);
-    if (!mission) return;
-    focusConsumedRef.current = true;
-    setActiveMission(mission);
-    setRevealed(masteredSet.has(focusQuestionId) ? mission.insights.length : 0);
-    setPhase("mission");
-  }, [focusQuestionId, location.id, masteredSet, phase]);
+  const startIndex = useMemo(() => {
+    if (!focusQuestionId) return 0;
+    const idx = location.notebookQuestionIds.indexOf(focusQuestionId);
+    return idx >= 0 ? idx : 0;
+  }, [focusQuestionId, location.notebookQuestionIds]);
 
-  const missionLine = location.missionLine.replace(/NVIDIA/g, companyName);
   const allDistrictMastered = location.notebookQuestionIds.every((id) =>
     masteredSet.has(id)
   );
 
-  const openMission = (mission: DistrictMissionExperience) => {
-    setActiveMission(mission);
-    setRevealed(masteredSet.has(mission.questionId) ? mission.insights.length : 0);
-    setPhase("mission");
-  };
-
-  const finishMission = () => {
-    if (!activeMission) return;
-    if (!masteredSet.has(activeMission.questionId)) {
-      onMissionMastered(activeMission.questionId);
+  const handleQuestionMastered = (questionId: InvestorNotebookQuestionId) => {
+    if (!masteredSet.has(questionId)) {
       setCompletedThisVisit(true);
     }
-    setActiveMission(null);
-    setPhase("hub");
+    onMissionMastered(questionId);
   };
 
   const leaveIsland = () => {
@@ -154,9 +130,9 @@ function BusinessIslandDistrictExperience({
               {location.placeName}
             </p>
           </motion.div>
-        ) : phase === "hub" ? (
+        ) : (
           <motion.div
-            key="hub"
+            key="flow"
             className="iq-business-island-location-xp__panel"
             initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -184,163 +160,20 @@ function BusinessIslandDistrictExperience({
               </button>
             </header>
 
-            <p className="iq-business-island-location-xp__ambience">
-              {experience.ambience.replace(/NVIDIA/g, companyName)}
-            </p>
-            <p className="iq-business-island-location-xp__mission">{missionLine}</p>
-
-            <p className="iq-business-island-location-xp__missions-label">
-              District missions
-            </p>
-            <ul className="iq-business-island-location-xp__missions">
-              {experience.missions.map((mission) => {
-                const done = masteredSet.has(mission.questionId);
-                const question = INVESTOR_NOTEBOOK_QUESTIONS.find(
-                  (q) => q.id === mission.questionId
-                );
-                const prompt = question
-                  ? formatInvestorNotebookQuestion(
-                      question.questionTemplate,
-                      companyName
-                    )
-                  : mission.missionTitle;
-                return (
-                  <li key={mission.questionId}>
-                    <button
-                      type="button"
-                      className={[
-                        "iq-business-island-location-xp__mission-card",
-                        done
-                          ? "iq-business-island-location-xp__mission-card--done"
-                          : ""
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                      onClick={() => openMission(mission)}
-                    >
-                      <span className="iq-business-island-location-xp__mission-status" aria-hidden>
-                        {done ? "✓" : "●"}
-                      </span>
-                      <span className="iq-business-island-location-xp__mission-copy">
-                        <span className="iq-business-island-location-xp__mission-title">
-                          {mission.missionTitle}
-                        </span>
-                        <span className="iq-business-island-location-xp__mission-prompt">
-                          {prompt}
-                        </span>
-                      </span>
-                      <span className="iq-business-island-location-xp__mission-cta">
-                        {done ? "Replay" : "Enter →"}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <footer className="iq-business-island-location-xp__footer">
-              <button
-                type="button"
-                className="iq-business-island-location-xp__cta"
-                onClick={leaveIsland}
-              >
-                {allDistrictMastered
+            <BusinessIslandMissionFlow
+              questionIds={location.notebookQuestionIds}
+              companyName={companyName}
+              startIndex={startIndex}
+              onQuestionMastered={handleQuestionMastered}
+              onComplete={leaveIsland}
+              completeLabel={
+                allDistrictMastered
                   ? "District cleared — return to island →"
-                  : alreadyExplored || completedThisVisit
-                    ? "Return to the island →"
-                    : "Leave district →"}
-              </button>
-            </footer>
+                  : "Return to the island →"
+              }
+            />
           </motion.div>
-        ) : activeMission ? (
-          <motion.div
-            key={activeMission.questionId}
-            className="iq-business-island-location-xp__panel"
-            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <header className="iq-business-island-location-xp__header">
-              <span className="iq-business-island-location-xp__glyph" aria-hidden>
-                <BusinessIslandPlaceGlyph theme={location.placeTheme} />
-              </span>
-              <div>
-                <p className="iq-business-island-location-xp__room">
-                  {location.placeName}
-                </p>
-                <h2 className="iq-business-island-location-xp__title">
-                  {activeMission.missionTitle}
-                </h2>
-              </div>
-              <button
-                type="button"
-                className="iq-business-island-location-xp__close"
-                aria-label="Back to district hub"
-                onClick={() => {
-                  setActiveMission(null);
-                  setPhase("hub");
-                }}
-              >
-                ← District
-              </button>
-            </header>
-
-            <ol className="iq-business-island-location-xp__insights">
-              {activeMission.insights.map((insight, index) => {
-                const open = index < revealed;
-                return (
-                  <li
-                    key={insight}
-                    className={[
-                      "iq-business-island-location-xp__insight",
-                      open
-                        ? "iq-business-island-location-xp__insight--open"
-                        : "iq-business-island-location-xp__insight--sealed"
-                    ].join(" ")}
-                  >
-                    {open ? (
-                      <>
-                        <span className="iq-business-island-location-xp__insight-index">
-                          {index + 1}
-                        </span>
-                        <p>{insight.replace(/NVIDIA/g, companyName)}</p>
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        className="iq-business-island-location-xp__reveal"
-                        disabled={index !== revealed}
-                        onClick={() => setRevealed((n) => n + 1)}
-                      >
-                        {index === revealed
-                          ? "Uncover this discovery →"
-                          : "Locked until prior discovery"}
-                      </button>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-
-            <footer className="iq-business-island-location-xp__footer">
-              {revealed >= activeMission.insights.length ? (
-                <button
-                  type="button"
-                  className="iq-business-island-location-xp__cta"
-                  onClick={finishMission}
-                >
-                  {masteredSet.has(activeMission.questionId)
-                    ? "Back to district missions →"
-                    : "I can explain this — mark mastery →"}
-                </button>
-              ) : (
-                <p className="iq-business-island-location-xp__hint">
-                  Uncover each discovery to complete this mission.
-                </p>
-              )}
-            </footer>
-          </motion.div>
-        ) : null}
+        )}
       </AnimatePresence>
     </motion.div>
   );

@@ -18,6 +18,9 @@ export const XP_CHECKLIST_MASTERY = 40;
 /** Bonus XP when unlocking an investor term via Decode (HQ prototype). */
 export const XP_DECODE_TERM = 5;
 
+/** Bonus XP for acing the end-of-mission Key Terms Check (matching game). */
+export const XP_KEY_TERMS_CHECK = 25;
+
 /** One-time bonus when quiz streak first reaches 3 consecutive days (lifetime per company). */
 export const XP_QUIZ_STREAK_3 = 50;
 /** One-time bonus at 7-day quiz streak. */

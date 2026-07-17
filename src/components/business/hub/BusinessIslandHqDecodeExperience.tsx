@@ -2,21 +2,11 @@
 
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 
-import { InvestorDecodeTakeaways } from "@/components/business/investorFramework/InvestorDecodeTakeaways";
-import { Official10KEvidenceFile } from "@/components/business/investorFramework/Official10KEvidenceFile";
-import { InvestorKeyTermsPanel } from "@/components/business/investorFramework/InvestorKeyTermsPanel";
-import {
-  buildHqDecodeParagraphSegments,
-  HQ_DECODE_EVIDENCE,
-  HQ_DECODE_KEY_TERMS_HEADING,
-  HQ_DECODE_MESSAGE_HEADING,
-  HQ_FIRST_QUEST_ROUTE
-} from "@/lib/business/businessIslandHqDecodeContent";
+import { BusinessIslandMissionFlow } from "@/components/business/hub/BusinessIslandMissionFlow";
+import type { InvestorNotebookQuestionId } from "@/lib/business/businessIslandInvestorNotebook";
 import type { BusinessIslandStoryLocationDef } from "@/lib/business/businessIslandStoryLocations";
-import { resolveSchoolsHubQuestHref } from "@/lib/schools/schoolsDemoHref";
 
 const HQ_MISSION_BRIEF_SRC = "/images/business-island/hq-mission-brief.png";
 
@@ -24,96 +14,24 @@ type HqPhase = "brief" | "mission";
 
 type Props = {
   location: BusinessIslandStoryLocationDef;
-  companyId: string;
   companyName: string;
-  onBeforeQuestNavigate?: (href: string) => void;
+  onMissionMastered: (questionId: InvestorNotebookQuestionId) => void;
   onLeave: () => void;
 };
 
 /**
- * Headquarters — Brief → (Evidence file → Decode → Translator) × N → Challenge.
+ * Headquarters — Brief case file → for each HQ question:
+ * (Evidence → Decode → Answer → Checklist tick) → return to island.
  */
 export function BusinessIslandHqDecodeExperience({
   location,
-  onBeforeQuestNavigate,
+  companyName,
+  onMissionMastered,
   onLeave
 }: Props) {
-  const router = useRouter();
-  const pathname = usePathname();
   const reduceMotion = useReducedMotion();
-
-  const evidenceTotal = HQ_DECODE_EVIDENCE.length;
-  const [evidenceIndex, setEvidenceIndex] = useState(0);
   const [phase, setPhase] = useState<HqPhase>("brief");
-  const [decoded, setDecoded] = useState(false);
-  const [expandedTermIds, setExpandedTermIds] = useState<Set<string>>(() => new Set());
-  const [decodedTermIds, setDecodedTermIds] = useState<Set<string>>(() => new Set());
-  const [navigating, setNavigating] = useState(false);
-
-  const evidence = HQ_DECODE_EVIDENCE[evidenceIndex] ?? HQ_DECODE_EVIDENCE[0];
-  const isFinalEvidence = evidenceIndex >= evidenceTotal - 1;
-
-  const segments = useMemo(
-    () => buildHqDecodeParagraphSegments(evidence),
-    [evidence]
-  );
-  const keyTerms = useMemo(
-    () =>
-      evidence.terms.map((term) => ({
-        id: term.id,
-        title: term.title,
-        explanation: term.explanation
-      })),
-    [evidence]
-  );
-
-  const questHref =
-    resolveSchoolsHubQuestHref(HQ_FIRST_QUEST_ROUTE, pathname) ?? HQ_FIRST_QUEST_ROUTE;
-
-  const resetTermState = useCallback(() => {
-    setExpandedTermIds(new Set());
-    setDecodedTermIds(new Set());
-  }, []);
-
-  const toggleTerm = useCallback((termId: string, isExpanded: boolean) => {
-    if (isExpanded) {
-      setExpandedTermIds((prev) => {
-        const next = new Set(prev);
-        next.delete(termId);
-        return next;
-      });
-      setDecodedTermIds((prev) => {
-        if (prev.has(termId)) return prev;
-        const next = new Set(prev);
-        next.add(termId);
-        return next;
-      });
-      return;
-    }
-
-    setExpandedTermIds((prev) => {
-      const next = new Set(prev);
-      next.add(termId);
-      return next;
-    });
-  }, []);
-
-  const goToNextEvidence = useCallback(() => {
-    if (isFinalEvidence) return;
-    resetTermState();
-    setDecoded(false);
-    setEvidenceIndex((prev) => prev + 1);
-  }, [isFinalEvidence, resetTermState]);
-
-  const enterAnalystChallenge = useCallback(() => {
-    if (navigating) return;
-    setNavigating(true);
-    if (onBeforeQuestNavigate) {
-      onBeforeQuestNavigate(questHref);
-    } else {
-      router.push(questHref);
-    }
-  }, [navigating, onBeforeQuestNavigate, questHref, router]);
+  const [sessionKey, setSessionKey] = useState(0);
 
   return (
     <motion.div
@@ -161,9 +79,7 @@ export function BusinessIslandHqDecodeExperience({
               type="button"
               className="iq-hq-mission__primary iq-hq-mission-brief__cta"
               onClick={() => {
-                resetTermState();
-                setEvidenceIndex(0);
-                setDecoded(false);
+                setSessionKey((n) => n + 1);
                 setPhase("mission");
               }}
             >
@@ -172,94 +88,20 @@ export function BusinessIslandHqDecodeExperience({
           </motion.section>
         ) : (
           <motion.section
-            key={`mission-${evidence.id}`}
-            className="iq-hq-mission__screen iq-hq-mission__screen--source iq-hq-mission__screen--mission"
+            key={`mission-${sessionKey}`}
+            className="iq-hq-mission__flow"
             initial={reduceMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           >
-            <Official10KEvidenceFile
-              action={
-                decoded ? null : (
-                  <button
-                    type="button"
-                    className="iq-evidence-file__decode"
-                    onClick={() => setDecoded(true)}
-                  >
-                    <span aria-hidden>⚡</span> Decode
-                  </button>
-                )
-              }
-            >
-              {segments.map((sentenceSegments, sentenceIndex) => (
-                <p key={sentenceIndex} className="iq-evidence-file__sentence">
-                  {sentenceSegments.map((segment, index) =>
-                    segment.kind === "text" ? (
-                      <span key={`text-${sentenceIndex}-${index}`}>
-                        {segment.text}
-                      </span>
-                    ) : (
-                      <mark
-                        key={segment.termId}
-                        className="iq-evidence-file__highlight"
-                      >
-                        {segment.text}
-                      </mark>
-                    )
-                  )}
-                </p>
-              ))}
-            </Official10KEvidenceFile>
-
-            <AnimatePresence initial={false}>
-              {decoded ? (
-                <motion.div
-                  key={`translator-${evidence.id}`}
-                  className="iq-investor-translator iq-investor-translator--under-file"
-                  initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={reduceMotion ? undefined : { opacity: 0, y: 8 }}
-                  transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <header className="iq-investor-translator__hero">
-                    <h2 className="iq-investor-translator__headline">
-                      {HQ_DECODE_MESSAGE_HEADING}
-                    </h2>
-                  </header>
-
-                  <InvestorDecodeTakeaways takeaways={evidence.takeaways} />
-
-                  <InvestorKeyTermsPanel
-                    heading={HQ_DECODE_KEY_TERMS_HEADING}
-                    terms={keyTerms}
-                    expandedIds={expandedTermIds}
-                    decodedIds={decodedTermIds}
-                    onToggleTerm={toggleTerm}
-                    layout="grid"
-                  />
-
-                  {isFinalEvidence ? (
-                    <button
-                      type="button"
-                      className="iq-hq-mission__primary iq-investor-translator__cta"
-                      onClick={enterAnalystChallenge}
-                      disabled={navigating}
-                    >
-                      {navigating ? "Launching…" : "Enter Analyst Challenge →"}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className="iq-hq-mission__primary iq-investor-translator__cta"
-                      onClick={goToNextEvidence}
-                    >
-                      Next Evidence →
-                    </button>
-                  )}
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
+            <BusinessIslandMissionFlow
+              questionIds={location.notebookQuestionIds}
+              companyName={companyName}
+              onQuestionMastered={onMissionMastered}
+              onComplete={onLeave}
+              completeLabel="Return to the island →"
+            />
           </motion.section>
         )}
       </AnimatePresence>
