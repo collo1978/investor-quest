@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 
 import { companyByTicker } from "@/data/companies";
 import { isOpenAiConfigured, OpenAiConfigError } from "@/lib/ai/env";
+import { apiErrorResponse } from "@/lib/api/errorResponse";
+import { checkRateLimit } from "@/lib/api/rateLimit";
+import { isTickerAllowedForGeneration } from "@/lib/demo/controlledDemo";
 import {
   generateForcesQuestAnswers,
   parseForcesQuestSlugParam
@@ -16,6 +19,13 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 export async function POST(request: Request) {
+  if (!checkRateLimit(request, "forces/generate")) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again shortly." },
+      { status: 429 }
+    );
+  }
+
   if (!isOpenAiConfigured()) {
     return NextResponse.json(
       { error: "OPENAI_API_KEY is not configured." },
@@ -35,6 +45,13 @@ export async function POST(request: Request) {
 
   if (!validated.ok) {
     return NextResponse.json({ error: validated.error }, { status: 400 });
+  }
+
+  if (!isTickerAllowedForGeneration(validated.ticker)) {
+    return NextResponse.json(
+      { error: `Generation is limited to the demo company while in controlled-demo mode.` },
+      { status: 403 }
+    );
   }
 
   const company = companyByTicker(validated.ticker);
@@ -73,16 +90,26 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     if (err instanceof OpenAiConfigError) {
-      return NextResponse.json({ error: err.message }, { status: 503 });
-    }
-    if (err instanceof OpenAiRequestError) {
-      return NextResponse.json(
-        { error: "OpenAI request failed.", detail: err.message },
-        { status: err.status >= 400 && err.status < 600 ? err.status : 502 }
+      return apiErrorResponse(
+        "forces/generate",
+        err,
+        503,
+        "AI generation is not configured."
       );
     }
-    const message =
-      err instanceof Error ? err.message : "Forces quest generation failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    if (err instanceof OpenAiRequestError) {
+      return apiErrorResponse(
+        "forces/generate",
+        err,
+        err.status >= 400 && err.status < 600 ? err.status : 502,
+        "AI generation request failed."
+      );
+    }
+    return apiErrorResponse(
+      "forces/generate",
+      err,
+      500,
+      "Forces quest generation failed."
+    );
   }
 }

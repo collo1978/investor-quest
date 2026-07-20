@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { apiErrorResponse } from "@/lib/api/errorResponse";
+import { checkRateLimit } from "@/lib/api/rateLimit";
+import { isTickerAllowedForGeneration } from "@/lib/demo/controlledDemo";
 import { SecCompanyNotFoundError } from "@/lib/sec/companyService";
 import { runCompanySectionExtraction } from "@/lib/sec/extractionPipeline";
 import { isSecApiConfigured, SecApiConfigError } from "@/lib/sec/env";
@@ -15,6 +18,13 @@ export const dynamic = "force-dynamic";
  * Does not invoke AI.
  */
 export async function POST(request: Request) {
+  if (!checkRateLimit(request, "sec/extract")) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again shortly." },
+      { status: 429 }
+    );
+  }
+
   if (!isSecApiConfigured()) {
     return NextResponse.json(
       { error: "SEC_API_KEY is not configured." },
@@ -39,6 +49,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: validated.error }, { status: 400 });
   }
 
+  if (!isTickerAllowedForGeneration(validated.ticker)) {
+    return NextResponse.json(
+      { error: `Generation is limited to the demo company while in controlled-demo mode.` },
+      { status: 403 }
+    );
+  }
+
   try {
     const result = await runCompanySectionExtraction(validated.ticker);
     return NextResponse.json(result, {
@@ -46,19 +63,25 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     if (err instanceof SecCompanyNotFoundError) {
+      // Controlled, expected message (e.g. "Company AAPL not found") — safe to show as-is.
       return NextResponse.json({ error: err.message }, { status: 404 });
     }
     if (err instanceof SecApiConfigError) {
-      return NextResponse.json({ error: err.message }, { status: 503 });
-    }
-    if (err instanceof SecApiRequestError) {
-      return NextResponse.json(
-        { error: "SEC-API.io request failed.", detail: err.message },
-        { status: 502 }
+      return apiErrorResponse(
+        "sec/extract",
+        err,
+        503,
+        "SEC filing lookup is not configured."
       );
     }
-    const message =
-      err instanceof Error ? err.message : "Section extraction failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    if (err instanceof SecApiRequestError) {
+      return apiErrorResponse(
+        "sec/extract",
+        err,
+        502,
+        "SEC filing lookup request failed."
+      );
+    }
+    return apiErrorResponse("sec/extract", err, 500, "Section extraction failed.");
   }
 }

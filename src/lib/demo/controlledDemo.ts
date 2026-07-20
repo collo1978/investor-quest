@@ -79,6 +79,21 @@ export function getControlledDemoDefaultCompanyId(): CompanyId {
   return CONTROLLED_DEMO_MODE ? CONTROLLED_DEMO_COMPANY_ID : "aapl";
 }
 
+const CONTROLLED_DEMO_TICKERS = new Set(
+  CONTROLLED_DEMO_COMPANY_IDS.map((id) => companyById(id).ticker.toUpperCase())
+);
+
+/**
+ * In controlled-demo mode (the default in production), only the demo
+ * company's own ticker may trigger paid AI-generation / SEC-API calls —
+ * closes off the "any valid ticker" budget-drain surface on `*\/generate`
+ * and `/api/sec/*` without requiring a new auth system.
+ */
+export function isTickerAllowedForGeneration(ticker: string): boolean {
+  if (!CONTROLLED_DEMO_MODE) return true;
+  return CONTROLLED_DEMO_TICKERS.has(ticker.toUpperCase());
+}
+
 export function isControlledDemoCompanyId(
   id: string
 ): id is ControlledDemoCompanyId {
