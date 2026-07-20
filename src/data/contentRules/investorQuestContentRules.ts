@@ -345,7 +345,7 @@ export const BUSINESS_SECTION_QUIZ_RULES: Record<
     readyIntro: (required, total) =>
       `Explain it back in everyday words — ${required} of ${total} right to show you get what this company actually does.`,
     startCta: "Start understanding check",
-    lockedHint: "Read both cards first — then prove you get what they do.",
+    lockedHint: "Read all three cards first — then prove you get what this company actually does.",
     defaultPassMessage:
       "You can explain what this company does in normal life terms — that's the foundation.",
     playingFeedback: {

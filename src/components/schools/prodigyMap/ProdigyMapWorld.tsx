@@ -304,8 +304,8 @@ const ISLANDS: readonly IslandArt[] = [
     rx: 320,
     ry: 156,
     mults: [1.0, 0.93, 1.06, 0.9, 1.03, 0.95, 1.07, 0.91, 1.0, 0.96, 1.04, 0.92],
-    bridge: { color: "#fbbf24", edge: "#b45309" },
-    glow: "#fcd34d",
+    bridge: { color: "#76b900", edge: "#3f6212" },
+    glow: "#bef264",
     decor: [
       { t: "tree", dx: -214, dy: -26, s: 1.1 },
       { t: "tree", dx: -244, dy: 30, s: 0.78 },
@@ -321,8 +321,8 @@ const ISLANDS: readonly IslandArt[] = [
       { t: "flowers", dx: -150, dy: 118, s: 1.0 },
       { t: "flowers", dx: 40, dy: 128, s: 0.9 },
       { t: "fountain", dx: 196, dy: 86, s: 0.78 },
-      { t: "lamp", dx: 70, dy: 112, s: 0.84, c: "#fde68a" },
-      { t: "lamp", dx: -96, dy: 96, s: 0.74, c: "#fde68a" }
+      { t: "lamp", dx: 70, dy: 112, s: 0.84, c: "#bef264" },
+      { t: "lamp", dx: -96, dy: 96, s: 0.74, c: "#bef264" }
     ]
   },
   {
@@ -485,17 +485,17 @@ export function ProdigyIslandBase({
       <ellipse cx={cx} cy={cy + depth * 0.45} rx={rx * 1.16} ry={ry * 1.2} fill={glow} opacity="0.12" />
 
       {/* Water shadow */}
-      <ellipse cx={cx} cy={cy + depth + 30} rx={rx * 1.05} ry={ry * 0.82} fill="#04102e" opacity="0.6" />
-      <ellipse cx={cx} cy={cy + depth + 18} rx={rx * 0.92} ry={ry * 0.62} fill="#020a22" opacity="0.45" />
+      <ellipse cx={cx} cy={cy + depth + 30} rx={rx * 1.05} ry={ry * 0.82} fill="#020508" opacity="0.7" />
+      <ellipse cx={cx} cy={cy + depth + 18} rx={rx * 0.92} ry={ry * 0.62} fill="#000000" opacity="0.5" />
 
       {/* Coastline foam */}
-      <path d={foamPath} fill="none" stroke="#bae6fd" strokeWidth="8" opacity="0.5" />
-      <path d={foamPath} fill="none" stroke="#e0f2fe" strokeWidth="2.5" strokeDasharray="3 16" opacity="0.7" />
+      <path d={foamPath} fill="none" stroke="#365314" strokeWidth="8" opacity="0.35" />
+      <path d={foamPath} fill="none" stroke="#76b900" strokeWidth="2.5" strokeDasharray="3 16" opacity="0.28" />
 
       {/* Cliff body (extruded rock) */}
-      <path d={cliffPath} fill="url(#prod-rock)" stroke="#2a1c12" strokeWidth="3.5" />
+      <path d={cliffPath} fill="url(#prod-rock)" stroke="#18181b" strokeWidth="3.5" />
       {/* Darker lower cliff band for grounding */}
-      <path d={cliffPath} fill="#1a1009" opacity="0.4" transform={`translate(0 ${depth * 0.5})`} />
+      <path d={cliffPath} fill="#09090b" opacity="0.45" transform={`translate(0 ${depth * 0.5})`} />
       {/* Rocky spikes along lower rim */}
       {rockAngles.map((deg) => {
         const p = ellipsePoint(cx, cy, rx, ry, deg);
@@ -505,19 +505,19 @@ export function ProdigyIslandBase({
             key={`spike-${island.id}-${deg}`}
             d={`M${svgCoord(p.x - w)} ${svgCoord(p.y)} L${svgCoord(p.x)} ${svgCoord(p.y + depth + 22)} L${svgCoord(p.x + w)} ${svgCoord(p.y)} Z`}
             fill="url(#prod-rock)"
-            stroke="#33241a"
+            stroke="#27272a"
             strokeWidth="2.4"
             strokeLinejoin="round"
           />
         );
       })}
       {/* Cliff shading + cracks */}
-      <path d={cliffPath} fill="#1f140d" opacity="0.3" transform={`translate(0 ${depth * 0.32})`} />
+      <path d={cliffPath} fill="#09090b" opacity="0.35" transform={`translate(0 ${depth * 0.32})`} />
       {/* Sunlit upper cliff edge */}
-      <path d={topPath} fill="none" stroke="#b8946d" strokeWidth="5" opacity="0.45" transform={`translate(0 ${depth * 0.12})`} />
+      <path d={topPath} fill="none" stroke="#52525b" strokeWidth="5" opacity="0.4" transform={`translate(0 ${depth * 0.12})`} />
       <path
         d={`M${cx - rx * 0.5} ${cy + depth * 0.4} l10 40 M${cx - rx * 0.18} ${cy + depth * 0.52} l6 30 M${cx + rx * 0.2} ${cy + depth * 0.5} l-8 34 M${cx + rx * 0.55} ${cy + depth * 0.36} l8 34 M${cx - rx * 0.72} ${cy + depth * 0.34} l6 24`}
-        stroke="#241710"
+        stroke="#18181b"
         strokeWidth="3"
         opacity="0.55"
         fill="none"
@@ -525,22 +525,22 @@ export function ProdigyIslandBase({
       />
 
       {/* Grass top */}
-      <path d={topPath} fill="url(#prod-grass)" stroke="#3f6212" strokeWidth="4" />
-      {/* Sandy beach rim just inside coast */}
-      <path d={blobPath(cx, cy, rx * 0.96, ry * 0.95, mults)} fill="none" stroke="#fde9b8" strokeWidth="6" opacity="0.35" />
-      {/* Inner lighter grass */}
-      <path d={blobPath(cx, cy - 6, rx * 0.86, ry * 0.82, mults)} fill="#86efac" opacity="0.45" />
+      <path d={topPath} fill="url(#prod-grass)" stroke="#365314" strokeWidth="4" />
+      {/* Dark tech rim just inside coast */}
+      <path d={blobPath(cx, cy, rx * 0.96, ry * 0.95, mults)} fill="none" stroke="#76b900" strokeWidth="5" opacity="0.22" />
+      {/* Inner darker grass */}
+      <path d={blobPath(cx, cy - 6, rx * 0.86, ry * 0.82, mults)} fill="#14532d" opacity="0.4" />
       {/* Grass patches for texture */}
-      <ellipse cx={cx - rx * 0.4} cy={cy + ry * 0.3} rx={rx * 0.18} ry={ry * 0.16} fill="#15803d" opacity="0.25" />
-      <ellipse cx={cx + rx * 0.34} cy={cy - ry * 0.18} rx={rx * 0.16} ry={ry * 0.14} fill="#4ade80" opacity="0.4" />
-      <ellipse cx={cx + rx * 0.12} cy={cy + ry * 0.42} rx={rx * 0.2} ry={ry * 0.14} fill="#15803d" opacity="0.2" />
+      <ellipse cx={cx - rx * 0.4} cy={cy + ry * 0.3} rx={rx * 0.18} ry={ry * 0.16} fill="#052e16" opacity="0.35" />
+      <ellipse cx={cx + rx * 0.34} cy={cy - ry * 0.18} rx={rx * 0.16} ry={ry * 0.14} fill="#3f6212" opacity="0.35" />
+      <ellipse cx={cx + rx * 0.12} cy={cy + ry * 0.42} rx={rx * 0.2} ry={ry * 0.14} fill="#052e16" opacity="0.28" />
       {/* Top sheen */}
-      <ellipse cx={cx - rx * 0.26} cy={cy - ry * 0.46} rx={rx * 0.4} ry={ry * 0.28} fill="#ffffff" opacity="0.12" />
+      <ellipse cx={cx - rx * 0.26} cy={cy - ry * 0.46} rx={rx * 0.4} ry={ry * 0.28} fill="#bef264" opacity="0.06" />
 
       {/* Stone path from landing to centre */}
       <path
         d={`M${landing.x} ${landing.y} Q${svgCoord((landing.x + cx) / 2)} ${svgCoord((landing.y + cy) / 2 + 8)} ${cx} ${cy + 6}`}
-        stroke="#a8896a"
+        stroke="#18181b"
         strokeWidth="26"
         strokeLinecap="round"
         fill="none"
@@ -548,14 +548,14 @@ export function ProdigyIslandBase({
       />
       <path
         d={`M${landing.x} ${landing.y} Q${svgCoord((landing.x + cx) / 2)} ${svgCoord((landing.y + cy) / 2 + 8)} ${cx} ${cy + 6}`}
-        stroke="#d6c39a"
+        stroke="#27272a"
         strokeWidth="18"
         strokeLinecap="round"
         fill="none"
       />
       <path
         d={`M${landing.x} ${landing.y} Q${svgCoord((landing.x + cx) / 2)} ${svgCoord((landing.y + cy) / 2 + 8)} ${cx} ${cy + 6}`}
-        stroke="#fff7e6"
+        stroke="#76b900"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeDasharray="2 18"
@@ -622,10 +622,10 @@ function BusinessIslandProgressFx({
   return (
     <g className="iq-prodigy-island-progress-fx pointer-events-none" aria-hidden>
       {tier >= 2 ? (
-        <WorldBanner x={cx - 180} y={cy - 40} s={0.9} color="#fbbf24" edge="#b45309" />
+        <WorldBanner x={cx - 180} y={cy - 40} s={0.9} color="#76b900" edge="#365314" />
       ) : null}
       {tier >= 3 ? <WorldFlowers x={cx + 120} y={cy + 90} s={1.05} /> : null}
-      {tier >= 4 ? <WorldLamp x={cx - 90} y={cy + 96} s={0.9} glow="#fde68a" /> : null}
+      {tier >= 4 ? <WorldLamp x={cx - 90} y={cy + 96} s={0.9} glow="#bef264" /> : null}
       {tier >= 5 ? <WorldPlanter x={cx + 158} y={cy + 104} s={0.95} /> : null}
       {tier >= 6 ? (
         <ellipse
@@ -633,12 +633,12 @@ function BusinessIslandProgressFx({
           cy={cy - 20}
           rx={rx * 0.5}
           ry={ry * 0.35}
-          fill="rgba(251,191,36,0.12)"
+          fill="rgba(118,185,0,0.14)"
           className="iq-prodigy-island-progress-fx__mastery-glow"
         />
       ) : null}
       {tier >= 7 ? (
-        <WorldBanner x={cx + 40} y={cy - 52} s={1.05} color="#fde047" edge="#ca8a04" />
+        <WorldBanner x={cx + 40} y={cy - 52} s={1.05} color="#a3e635" edge="#4d7c0f" />
       ) : null}
     </g>
   );
@@ -834,19 +834,19 @@ function ProdigyWaterBackdrop() {
     <g>
       <rect width={CANVAS_W} height={CANVAS_H} fill="url(#prod-water)" />
       {/* Concentric ripple bands — span full canvas so gutters share the same water field */}
-      <ellipse cx={CANVAS_HUB.x} cy={CANVAS_HUB.y} rx={CANVAS_W * 0.56} ry={CANVAS_H * 0.52} fill="none" stroke="#1d4ed8" strokeWidth="3" opacity="0.16" />
-      <ellipse cx={CANVAS_HUB.x} cy={CANVAS_HUB.y} rx={CANVAS_W * 0.44} ry={CANVAS_H * 0.4} fill="none" stroke="#2563eb" strokeWidth="3" opacity="0.14" />
-      <ellipse cx={CANVAS_HUB.x} cy={CANVAS_HUB.y} rx={CANVAS_W * 0.3} ry={CANVAS_H * 0.28} fill="none" stroke="#3b82f6" strokeWidth="3" opacity="0.12" />
+      <ellipse cx={CANVAS_HUB.x} cy={CANVAS_HUB.y} rx={CANVAS_W * 0.56} ry={CANVAS_H * 0.52} fill="none" stroke="#14532d" strokeWidth="3" opacity="0.14" />
+      <ellipse cx={CANVAS_HUB.x} cy={CANVAS_HUB.y} rx={CANVAS_W * 0.44} ry={CANVAS_H * 0.4} fill="none" stroke="#365314" strokeWidth="3" opacity="0.12" />
+      <ellipse cx={CANVAS_HUB.x} cy={CANVAS_HUB.y} rx={CANVAS_W * 0.3} ry={CANVAS_H * 0.28} fill="none" stroke="#76b900" strokeWidth="3" opacity="0.1" />
       {/* Caustic glints */}
       {WATER_CAUSTICS.map((c, i) => (
         <path
           key={`caustic-${i}`}
           d={`M${c.x - 26 * c.s} ${c.y} q${13 * c.s} ${-9 * c.s} ${26 * c.s} 0 q${13 * c.s} ${9 * c.s} ${26 * c.s} 0`}
           fill="none"
-          stroke="#7dd3fc"
+          stroke="#a3e635"
           strokeWidth="3"
           strokeLinecap="round"
-          opacity="0.18"
+          opacity="0.14"
         />
       ))}
       {/* Sparkles */}
@@ -856,8 +856,8 @@ function ProdigyWaterBackdrop() {
           cx={s.x}
           cy={s.y}
           r={s.r}
-          fill="#e0f2fe"
-          opacity="0.8"
+          fill="#ecfccb"
+          opacity="0.55"
           className={`iq-prodigy-map__star${s.d ? " iq-prodigy-landmark__sparkle--delay" : ""}`}
         />
       ))}
@@ -885,19 +885,19 @@ export function ProdigyWorldArt({
     >
       <defs>
         <radialGradient id="prod-water" cx="0.5" cy="0.46" r="0.78">
-          <stop offset="0%" stopColor="#2f6bf0" />
-          <stop offset="50%" stopColor="#1e40af" />
-          <stop offset="100%" stopColor="#0a1a4f" />
+          <stop offset="0%" stopColor="#0c1a12" />
+          <stop offset="45%" stopColor="#061018" />
+          <stop offset="100%" stopColor="#020508" />
         </radialGradient>
         <linearGradient id="prod-rock" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ab8763" />
-          <stop offset="38%" stopColor="#6b5340" />
-          <stop offset="100%" stopColor="#2c1e15" />
+          <stop offset="0%" stopColor="#3f3f46" />
+          <stop offset="38%" stopColor="#27272a" />
+          <stop offset="100%" stopColor="#09090b" />
         </linearGradient>
         <linearGradient id="prod-grass" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#9bf6ab" />
-          <stop offset="55%" stopColor="#34d058" />
-          <stop offset="100%" stopColor="#1f9e3f" />
+          <stop offset="0%" stopColor="#3f6212" />
+          <stop offset="55%" stopColor="#1a2e05" />
+          <stop offset="100%" stopColor="#0a1204" />
         </linearGradient>
         <linearGradient id="prod-fountain-water" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#a5f3fc" />

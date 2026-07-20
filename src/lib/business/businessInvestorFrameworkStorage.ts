@@ -5,18 +5,24 @@ import type {
   InvestorPrincipleId,
   BusinessChecklistSectionId
 } from "@/lib/business/businessInvestorFramework";
+import type { InvestorChallengeOutcome } from "@/lib/business/businessInvestorChallengeFlow";
 
 const STORAGE_PREFIX = "iq-business-investor-framework";
 
 export const BUSINESS_INVESTOR_FRAMEWORK_CHANGED_EVENT =
   "iq-business-investor-framework-changed";
 
-/** Persisted adaptive checklist + evidence ratings (cards wired later). */
 export type BusinessInvestorFrameworkStoredState = {
   /** Principle marked not applicable for this company. */
   naPrinciples: Partial<Record<InvestorPrincipleId, true>>;
-  /** Key: `${principleId}#${evidenceCardId}` — populated when evidence cards ship. */
+  /** Key: `${principleId}#${evidenceCardId}` — thumbs rating (legacy principles). */
   evidenceRatings: Partial<Record<string, InvestorEvidenceRating>>;
+  /** Key: `${principleId}#${evidenceCardId}` — evidence card read (challenge flow). */
+  evidenceCardsRead: Partial<Record<string, true>>;
+  /** Legacy: principle quiz flag (no longer required; Investor Challenge gates completion). */
+  principleQuizPassed: Partial<Record<InvestorPrincipleId, true>>;
+  /** Explain-in-your-own-words challenge passed (challenge flow). */
+  principleChallengePassed: Partial<Record<InvestorPrincipleId, InvestorChallengeOutcome>>;
   /** Section-end checklist quiz passed — unlocks next checklist section. */
   sectionQuizPassed: Partial<Record<BusinessChecklistSectionId, true>>;
 };
@@ -26,7 +32,14 @@ function storageKey(companyId: CompanyId): string {
 }
 
 function emptyState(): BusinessInvestorFrameworkStoredState {
-  return { naPrinciples: {}, evidenceRatings: {}, sectionQuizPassed: {} };
+  return {
+    naPrinciples: {},
+    evidenceRatings: {},
+    evidenceCardsRead: {},
+    principleQuizPassed: {},
+    principleChallengePassed: {},
+    sectionQuizPassed: {}
+  };
 }
 
 export function readBusinessInvestorFrameworkState(
@@ -40,6 +53,9 @@ export function readBusinessInvestorFrameworkState(
     return {
       naPrinciples: parsed.naPrinciples ?? {},
       evidenceRatings: parsed.evidenceRatings ?? {},
+      evidenceCardsRead: parsed.evidenceCardsRead ?? {},
+      principleQuizPassed: parsed.principleQuizPassed ?? {},
+      principleChallengePassed: parsed.principleChallengePassed ?? {},
       sectionQuizPassed: parsed.sectionQuizPassed ?? {}
     };
   } catch {
@@ -105,6 +121,73 @@ export function markSectionQuizPassed(
 ): BusinessInvestorFrameworkStoredState {
   const state = readBusinessInvestorFrameworkState(companyId);
   state.sectionQuizPassed[sectionId] = true;
+  writeState(companyId, state);
+  return state;
+}
+
+export function saveEvidenceCardRead(
+  companyId: CompanyId,
+  principleId: InvestorPrincipleId,
+  evidenceCardId: string
+): BusinessInvestorFrameworkStoredState {
+  const state = readBusinessInvestorFrameworkState(companyId);
+  state.evidenceCardsRead[`${principleId}#${evidenceCardId}`] = true;
+  writeState(companyId, state);
+  return state;
+}
+
+export function markPrincipleQuizPassed(
+  companyId: CompanyId,
+  principleId: InvestorPrincipleId
+): BusinessInvestorFrameworkStoredState {
+  const state = readBusinessInvestorFrameworkState(companyId);
+  state.principleQuizPassed[principleId] = true;
+  writeState(companyId, state);
+  return state;
+}
+
+export function savePrincipleChallengeOutcome(
+  companyId: CompanyId,
+  principleId: InvestorPrincipleId,
+  outcome: InvestorChallengeOutcome
+): BusinessInvestorFrameworkStoredState {
+  const state = readBusinessInvestorFrameworkState(companyId);
+  if (outcome === "retry") {
+    writeState(companyId, state);
+    return state;
+  }
+
+  state.principleChallengePassed[principleId] = outcome;
+
+  for (const key of Object.keys(state.evidenceCardsRead)) {
+    if (!key.startsWith(`${principleId}#`)) continue;
+    state.evidenceRatings[key] = outcome === "great" ? "strong" : "weak";
+  }
+
+  writeState(companyId, state);
+  return state;
+}
+
+/** Demo/QA: wipe Company Evolution reads + challenge so the timeline starts fresh. */
+export function resetCompanyEvolutionProgress(
+  companyId: CompanyId
+): BusinessInvestorFrameworkStoredState {
+  const state = readBusinessInvestorFrameworkState(companyId);
+  const principleId: InvestorPrincipleId = "company-evolution";
+
+  for (const key of Object.keys(state.evidenceCardsRead)) {
+    if (key.startsWith(`${principleId}#`)) {
+      delete state.evidenceCardsRead[key];
+    }
+  }
+  for (const key of Object.keys(state.evidenceRatings)) {
+    if (key.startsWith(`${principleId}#`)) {
+      delete state.evidenceRatings[key];
+    }
+  }
+  delete state.principleChallengePassed[principleId];
+  delete state.principleQuizPassed[principleId];
+
   writeState(companyId, state);
   return state;
 }

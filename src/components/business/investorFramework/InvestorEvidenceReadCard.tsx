@@ -19,6 +19,8 @@ export type InvestorEvidenceReadCardProps = {
   pillarId: PillarId;
   theme: PillarQuestTheme;
   footerSlot: ReactNode;
+  /** Review replay — answer visible immediately (no SHOW ME). */
+  startRevealed?: boolean;
 };
 
 /**
@@ -32,13 +34,14 @@ export function InvestorEvidenceReadCard({
   card,
   pillarId,
   theme,
-  footerSlot
+  footerSlot,
+  startRevealed = false
 }: InvestorEvidenceReadCardProps) {
-  const [answerRevealed, setAnswerRevealed] = useState(false);
+  const [answerRevealed, setAnswerRevealed] = useState(startRevealed);
 
   useEffect(() => {
-    setAnswerRevealed(false);
-  }, [card.id]);
+    setAnswerRevealed(startRevealed);
+  }, [card.id, startRevealed]);
 
   const answerContent = useMemo(
     () => resolveInvestorEvidenceAnswerContent(card),

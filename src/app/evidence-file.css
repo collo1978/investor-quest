@@ -1,0 +1,275 @@
+/* Official Evidence File — blank artwork frame + live quote + Decode */
+
+.iq-evidence-file {
+  position: relative;
+  width: 100%;
+  max-width: 54rem;
+  margin: 0 auto 0.35rem;
+  isolation: isolate;
+}
+
+.iq-evidence-file__frame {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+/*
+ * Subtle ageing — a document handled by investors over time.
+ * Confined to the paper area, blended under the live text (z-index 1).
+ * Very low opacity: darker edges + a faint coffee ring + a turned page corner.
+ */
+.iq-evidence-file__age {
+  position: absolute;
+  left: 12%;
+  right: 14%;
+  top: 20%;
+  bottom: 15%;
+  z-index: 1;
+  border-radius: 2px;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  background:
+    /* faint coffee ring, upper-right of the page */
+    radial-gradient(
+      circle at 81% 21%,
+      transparent 0 2.1%,
+      rgba(120, 82, 36, 0.13) 2.2% 2.9%,
+      rgba(120, 82, 36, 0.05) 3.0% 3.8%,
+      transparent 3.9%
+    ),
+    /* darker paper edges / gentle wear vignette */
+    radial-gradient(
+      ellipse at 50% 48%,
+      transparent 58%,
+      rgba(58, 44, 20, 0.05) 84%,
+      rgba(38, 28, 12, 0.11) 100%
+    );
+  opacity: 0.9;
+}
+
+/* Small folded page corner, lower-right */
+.iq-evidence-file__age::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: clamp(1rem, 2.8vw, 1.6rem);
+  height: clamp(1rem, 2.8vw, 1.6rem);
+  background: linear-gradient(
+    135deg,
+    transparent 0 50%,
+    rgba(0, 0, 0, 0.05) 50% 61%,
+    rgba(0, 0, 0, 0.14) 61% 63%,
+    rgba(255, 255, 255, 0.5) 63% 100%
+  );
+  border-radius: 0 0 3px 0;
+}
+
+/* Live quote sits in the blank chamfered document area */
+.iq-evidence-file__quote-slot {
+  position: absolute;
+  left: 13.5%;
+  right: 16%;
+  top: 27%;
+  bottom: 24%;
+  z-index: 2;
+  overflow: visible;
+  padding: 0.55rem 0.9rem 1rem;
+  background: transparent;
+  pointer-events: none;
+}
+
+.iq-evidence-file__quote {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: #1a1a1a;
+  font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+  font-size: clamp(0.98rem, 2.2vw, 1.18rem);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.72;
+  pointer-events: auto;
+}
+
+.iq-evidence-file__quote::before,
+.iq-evidence-file__quote::after {
+  display: block;
+  color: #76b900;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.85rem, 4vw, 2.55rem);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 0.65;
+  pointer-events: none;
+}
+
+.iq-evidence-file__quote::before {
+  content: "\201C";
+  margin-bottom: 0.4rem;
+}
+
+.iq-evidence-file__quote::after {
+  content: "\201D";
+  margin-top: 0.45rem;
+  text-align: right;
+}
+
+.iq-evidence-file__sentence {
+  margin: 0;
+}
+
+.iq-evidence-file__sentence + .iq-evidence-file__sentence {
+  margin-top: 0.95rem;
+}
+
+.iq-evidence-file__highlight {
+  padding: 0;
+  background: transparent;
+  color: #76b900;
+  font-weight: 700;
+  font-style: italic;
+}
+
+/* Decode sits on the lower paper edge */
+.iq-evidence-file__action {
+  position: absolute;
+  left: 50%;
+  bottom: 9.5%;
+  z-index: 4;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+}
+
+.iq-evidence-file__decode {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: 11rem;
+  min-height: 2.85rem;
+  padding: 0.55rem 1.7rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #8fd400 0%, #76b900 55%, #5f9800 100%);
+  color: #0a1a00;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 8px 22px rgba(118, 185, 0, 0.42),
+    0 1px 0 rgba(255, 255, 255, 0.35) inset;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.iq-evidence-file__decode:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 28px rgba(118, 185, 0, 0.52),
+    0 1px 0 rgba(255, 255, 255, 0.4) inset;
+}
+
+.iq-evidence-file__decode:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+}
+
+.iq-hq-mission__screen--mission {
+  width: min(100%, 54rem);
+  max-height: calc(100dvh - 3.5rem);
+  overflow: auto;
+  padding-bottom: 1.25rem;
+}
+
+.iq-investor-translator--under-file {
+  margin-top: 1.75rem;
+  padding-top: 0.25rem;
+}
+
+.iq-investor-translator--under-file .iq-investor-translator__headline {
+  font-size: clamp(1.45rem, 4vw, 2.15rem);
+}
+
+@media (max-width: 720px) {
+  .iq-evidence-file__quote-slot {
+    left: 11%;
+    right: 11%;
+    top: 26%;
+    bottom: 20%;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .iq-evidence-file__quote {
+    font-size: clamp(0.86rem, 3.3vw, 1rem);
+  }
+
+  .iq-evidence-file__action {
+    bottom: 8%;
+  }
+
+  .iq-evidence-file__decode {
+    min-width: 9.5rem;
+    min-height: 2.45rem;
+    font-size: 0.84rem;
+  }
+}
+
+/* Headquarters mission brief — case-file artwork + Access CTA */
+.iq-hq-mission__screen--brief {
+  width: min(100%, 56rem);
+  max-height: calc(100dvh - 2.5rem);
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  padding: 0.25rem 0.5rem 0.5rem;
+}
+
+.iq-hq-mission-brief {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.iq-hq-mission-brief__image {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: calc(100dvh - 7.5rem);
+  object-fit: contain;
+  object-position: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.iq-hq-mission-brief__cta {
+  flex-shrink: 0;
+  width: auto;
+  min-width: 14rem;
+  max-width: 22rem;
+  margin-top: 0;
+  padding-inline: 1.75rem;
+}
+
+@media (max-height: 780px) {
+  .iq-hq-mission-brief__image {
+    max-height: calc(100dvh - 6.75rem);
+  }
+
+  .iq-hq-mission__screen--brief {
+    gap: 0.65rem;
+  }
+}

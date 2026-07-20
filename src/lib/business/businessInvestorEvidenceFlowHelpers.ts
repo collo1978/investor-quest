@@ -30,7 +30,6 @@ export const CUSTOMERS_MARKETS_EVIDENCE_PRINCIPLES = [
 /** Business Model principles — sequential evidence paths on Quest 4. */
 export const BUSINESS_MODEL_EVIDENCE_PRINCIPLES = [
   "revenue-model",
-  "revenue-drivers",
   "business-structure"
 ] as const satisfies readonly InvestorPrincipleId[];
 
@@ -84,8 +83,7 @@ const PRINCIPLE_EVIDENCE_TRIGGERS: Partial<
   "end-markets": { questSlug: "everyday-life", cardId: "card-2" },
   "geographic-reach": { questSlug: "everyday-life", cardId: "card-3" },
   "revenue-model": { questSlug: "how-it-works", cardId: "card-1" },
-  "revenue-drivers": { questSlug: "how-it-works", cardId: "card-2" },
-  "business-structure": { questSlug: "how-it-works", cardId: "card-3" },
+  "business-structure": { questSlug: "how-it-works", cardId: "card-2" },
   "competitive-advantage": { questSlug: "competition", cardId: "card-1" },
   "market-position": { questSlug: "competition", cardId: "card-2" },
   "competitive-strategy": { questSlug: "competition", cardId: "card-3" }

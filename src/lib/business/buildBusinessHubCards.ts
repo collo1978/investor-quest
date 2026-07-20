@@ -8,6 +8,9 @@ import type { BusinessHubQuestCard } from "@/lib/business/businessHubTypes";
 
 import { resolveHubCardCount } from "@/lib/quests/resolveHubCardCount";
 
+import { isChecklistSectionQuestComplete } from "@/lib/business/isChecklistHubPriorComplete";
+import type { BusinessInvestorFrameworkStoredState } from "@/lib/business/businessInvestorFrameworkStorage";
+
 import { isHubPriorSlotComplete } from "@/lib/quests/isHubPriorSlotComplete";
 
 import { resolveHubSlotLocked } from "@/lib/quests/resolveHubChainUnlock";
@@ -30,15 +33,17 @@ import type { QuestView } from "@/engine";
 const NVDA_DEMO_HUB_SUBTITLES_OFF =
   process.env.NEXT_PUBLIC_CONTROLLED_DEMO !== "false";
 
-const SLUG_FALLBACK_ORDER: Record<string, number> = {
+/** Six hub slots — one per Investor Checklist section (who-competes stays off the island map). */
+export const BUSINESS_HUB_CHECKLIST_SLUG_ORDER: Record<string, number> = {
   "what-they-do": 1,
   "why-buying": 2,
   "everyday-life": 3,
   "how-it-works": 4,
-  "why-they-stay": 5,
-  competition: 6,
-  "who-competes": 7
+  competition: 5,
+  "why-they-stay": 6
 };
+
+const SLUG_FALLBACK_ORDER = BUSINESS_HUB_CHECKLIST_SLUG_ORDER;
 
 /** Canonical prior quest slug for each hub slot (not “whatever occupies slot N−1”). */
 const CANONICAL_PRIOR_SLUG: Record<number, string | undefined> = {
@@ -46,8 +51,7 @@ const CANONICAL_PRIOR_SLUG: Record<number, string | undefined> = {
   3: "why-buying",
   4: "everyday-life",
   5: "how-it-works",
-  6: "why-they-stay",
-  7: "competition"
+  6: "competition"
 };
 
 
@@ -78,7 +82,9 @@ export function buildBusinessHubCards(
 
   readSlugs: ReadonlySet<string>,
 
-  questCompletedAtBySlug: Readonly<Record<string, number>> = {}
+  questCompletedAtBySlug: Readonly<Record<string, number>> = {},
+
+  checklistStored?: BusinessInvestorFrameworkStoredState
 
 ): BusinessHubQuestCard[] {
 
@@ -110,7 +116,9 @@ export function buildBusinessHubCards(
 
         : priorSlug && priorQuest
 
-          ? isHubPriorSlotComplete(priorQuest, priorView, readSlugs)
+          ? isHubPriorSlotComplete(priorQuest, priorView, readSlugs) ||
+
+            isChecklistSectionQuestComplete(priorSlug, checklistStored)
 
           : false;
 

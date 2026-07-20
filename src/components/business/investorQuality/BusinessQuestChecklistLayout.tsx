@@ -2,14 +2,16 @@
 
 import { useMemo, type ReactNode } from "react";
 
-import { BusinessSectionQuestPanel } from "@/components/business/investorQuality/BusinessSectionQuestPanel";
+import { BusinessChecklistChapterNav } from "@/components/business/checklist/BusinessChecklistChapterNav";
+import { BusinessChecklistSectionWorkspace } from "@/components/business/checklist/BusinessChecklistSectionWorkspace";
+import { BusinessInvestorNotebookPanel } from "@/components/business/hub/BusinessInvestorNotebookPanel";
 import { InvestorPrincipleEvidenceFlyProvider } from "@/components/business/investorFramework/InvestorPrincipleEvidenceFly";
 import {
-  InvestorQualityRatingSyncProvider,
-  useInvestorQualityRatingSync
+  InvestorQualityRatingSyncProvider
 } from "@/components/business/investorQuality/InvestorQualityRatingSyncContext";
 import type { CompanyId } from "@/data/companies";
 import { useBusinessChecklistProgress } from "@/hooks/useBusinessChecklistProgress";
+import { resolveChecklistWorkspaceSection } from "@/lib/business/businessChecklistWorkspaceHelpers";
 import type { InvestorQualityChecklistSnapshot } from "@/lib/business/investorQualityChecklist";
 
 export { useEvidenceFly } from "@/components/business/investorQuality/InvestorQualityEvidenceFlyover";
@@ -27,6 +29,8 @@ type Props = {
   questSlug?: string;
   questProgressPct?: number;
   ratingFocusMode?: boolean;
+  /** Hide chapter rail — section-only mission tracker during Schools section missions. */
+  hideChapterNav?: boolean;
   highlightPrincipleId?: string | null;
   highlightSectionQuizId?: string | null;
   children: ReactNode;
@@ -38,6 +42,7 @@ function ChecklistLayoutInner({
   questSlug,
   questProgressPct = 0,
   ratingFocusMode = false,
+  hideChapterNav = false,
   highlightPrincipleId = null,
   highlightSectionQuizId = null,
   children
@@ -48,27 +53,57 @@ function ChecklistLayoutInner({
     currentQuestProgressPct: questProgressPct
   });
 
+  const workspaceSection = useMemo(
+    () => resolveChecklistWorkspaceSection(checklistSnapshot, questSlug),
+    [checklistSnapshot, questSlug]
+  );
+
   if (!enabled || !companyId) {
     return <>{children}</>;
+  }
+
+  /* Section mission: docked left sidebar + lesson main (no floating card). */
+  if (hideChapterNav) {
+    return (
+      <InvestorPrincipleEvidenceFlyProvider>
+        <div className="iq-quest-checklist-layout iq-quest-checklist-layout--section-mission">
+          <aside
+            className="iq-quest-checklist-layout__sidebar"
+            aria-label="Investor Checklist"
+          >
+            <BusinessInvestorNotebookPanel companyId={companyId} />
+          </aside>
+          <div className="iq-quest-checklist-layout__main">{children}</div>
+        </div>
+      </InvestorPrincipleEvidenceFlyProvider>
+    );
   }
 
   return (
     <InvestorPrincipleEvidenceFlyProvider>
       <div className="iq-quest-checklist-layout">
-        <BusinessSectionQuestPanel
+        <BusinessChecklistChapterNav
           snapshot={checklistSnapshot}
+          workspaceSectionId={workspaceSection?.id ?? null}
           ratingFocusMode={ratingFocusMode}
-          highlightPrincipleId={highlightPrincipleId}
-          highlightSectionQuizId={highlightSectionQuizId}
-          className="iq-quest-checklist-layout__panel"
+          className="iq-quest-checklist-layout__nav"
         />
-        <div className="iq-quest-checklist-layout__main">{children}</div>
+        <div className="iq-quest-checklist-layout__workspace">
+          <BusinessChecklistSectionWorkspace
+            section={workspaceSection}
+            companyId={companyId}
+            highlightPrincipleId={highlightPrincipleId}
+            highlightSectionQuizId={highlightSectionQuizId}
+            className="iq-quest-checklist-layout__section-panel"
+          />
+          <div className="iq-quest-checklist-layout__main">{children}</div>
+        </div>
       </div>
     </InvestorPrincipleEvidenceFlyProvider>
   );
 }
 
-/** Quest reading shell — section progression rail + scrollable Q&A column. */
+/** Quest reading shell — chapter nav + active section workspace + lesson column. */
 export function BusinessQuestChecklistLayout({
   ratingFocusMode = false,
   questProgressPct,

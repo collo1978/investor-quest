@@ -166,8 +166,8 @@ type QuestLabel = Pick<
 const NVDA_QUEST_LABELS: Record<string, QuestLabel> = {
   [contentKey("business", "what-they-do")]: {
     title: "WHAT NVIDIA DOES",
-    investorQuestion: "What does NVIDIA actually sell?",
-    objective: "Explain the company in normal language.",
+    investorQuestion: "What does NVIDIA actually do?",
+    objective: "Explain what the company does, how it evolved, and who relies on it.",
     whyItMatters:
       "If you can't explain it in everyday words, you're guessing about the stock."
   },

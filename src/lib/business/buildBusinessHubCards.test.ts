@@ -42,6 +42,9 @@ test("fresh state: only what-they-do unlocked", () => {
 
   const bySlug = Object.fromEntries(cards.map((c) => [c.slug, c]));
 
+  assert.equal(cards.length, 6);
+  assert.equal(bySlug["who-competes"], undefined);
+
   assert.equal(bySlug["what-they-do"]?.locked, false);
   assert.equal(bySlug["what-they-do"]?.visualState, "active");
   assert.equal(bySlug["what-they-do"]?.isPrimaryActive, true);
@@ -50,16 +53,44 @@ test("fresh state: only what-they-do unlocked", () => {
     "why-buying",
     "everyday-life",
     "how-it-works",
-    "why-they-stay",
     "competition",
-    "who-competes"
+    "why-they-stay"
   ] as const) {
     assert.equal(bySlug[slug]?.locked, true, `${slug} should be locked`);
     assert.equal(bySlug[slug]?.visualState, "locked", `${slug} visual`);
     assert.equal(bySlug[slug]?.isPrimaryActive, false, `${slug} primary`);
   }
 
-  assert.equal(cards.length, 7);
+  assert.equal(bySlug["competition"]?.orderNumber, 5);
+  assert.equal(bySlug["why-they-stay"]?.orderNumber, 6);
+});
+
+test("checklist section quiz pass unlocks next hub marker without engine completion", () => {
+  const quests = demoQuests();
+  const views = Object.fromEntries(
+    quests.map((q) => [
+      q.slug,
+      {
+        quest: q,
+        completed: false,
+        read: false,
+        readAt: null,
+        unlocked: true,
+        work: null
+      }
+    ])
+  );
+  const cards = buildBusinessHubCards(quests, views, new Set(), {}, {
+    naPrinciples: {},
+    evidenceRatings: {},
+    evidenceCardsRead: {},
+    principleQuizPassed: {},
+    principleChallengePassed: {},
+    sectionQuizPassed: { "company-overview": true }
+  });
+  const whyBuying = cards.find((c) => c.slug === "why-buying");
+  assert.equal(whyBuying?.locked, false, "why-buying unlocks when section 1 quiz passed");
+  assert.equal(whyBuying?.visualState, "active");
 });
 
 test("missing why-buying row still locks everyday-life (canonical prior chain)", () => {

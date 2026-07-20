@@ -6,6 +6,10 @@ import { usePathname } from "next/navigation";
 import { useGame } from "@/components/GameProvider";
 import { SchoolsBusinessHubIslandLayout } from "@/components/business/hub/SchoolsBusinessHubIslandLayout";
 import { buildBusinessHubCards } from "@/lib/business/buildBusinessHubCards";
+import {
+  BUSINESS_INVESTOR_FRAMEWORK_CHANGED_EVENT,
+  readBusinessInvestorFrameworkState
+} from "@/lib/business/businessInvestorFrameworkStorage";
 import { companyById, type CompanyId } from "@/data/companies";
 import { initialCompanyProgress } from "@/engine/progression/state";
 import { usePillarHubQuestData } from "@/hooks/usePillarHubQuestData";
@@ -34,6 +38,7 @@ export function SchoolsMapBusinessIslandHubUiOverlay({
   const { state, raw, hydrated } = useGame();
   const [uiRevealed, setUiRevealed] = useState(false);
   const [hubCelebrateFrom, setHubCelebrateFrom] = useState<number | null>(null);
+  const [checklistTick, setChecklistTick] = useState(0);
   const companyId = state.activeCompanyId as CompanyId;
   const company = companyById(companyId);
   const userId = getAnalyticsUserId();
@@ -49,15 +54,31 @@ export function SchoolsMapBusinessIslandHubUiOverlay({
     [companyProgress.pillars.business?.completedAt]
   );
 
+  const checklistStored = useMemo(
+    () => readBusinessInvestorFrameworkState(companyId),
+    [companyId, checklistTick]
+  );
+
+  useEffect(() => {
+    const bump = () => setChecklistTick((n) => n + 1);
+    window.addEventListener(BUSINESS_INVESTOR_FRAMEWORK_CHANGED_EVENT, bump);
+    window.addEventListener("storage", bump);
+    return () => {
+      window.removeEventListener(BUSINESS_INVESTOR_FRAMEWORK_CHANGED_EVENT, bump);
+      window.removeEventListener("storage", bump);
+    };
+  }, []);
+
   const hubCards = useMemo(
     () =>
       buildBusinessHubCards(
         quests,
         questViewBySlug,
         readSet,
-        questCompletedAtBySlug
+        questCompletedAtBySlug,
+        checklistStored
       ),
-    [quests, questViewBySlug, readSet, questCompletedAtBySlug]
+    [quests, questViewBySlug, readSet, questCompletedAtBySlug, checklistStored]
   );
 
   const islandProgressPct = useMemo(() => {

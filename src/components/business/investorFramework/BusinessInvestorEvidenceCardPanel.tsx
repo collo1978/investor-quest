@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { BusinessInvestorEvidenceRatingCard } from "@/components/business/investorFramework/BusinessInvestorEvidenceRatingCard";
 import { InvestorEvidenceMarkAsReadButton } from "@/components/business/investorFramework/InvestorEvidenceMarkAsReadButton";
@@ -22,6 +23,7 @@ type Props = {
   principleLabel: string;
   pillarId: PillarId;
   theme: PillarQuestTheme;
+  cardIsRead?: boolean;
   onMarkRead: () => void;
   onRate: (
     rating: InvestorEvidenceRating,
@@ -39,22 +41,53 @@ export function BusinessInvestorEvidenceCardPanel({
   principleLabel,
   pillarId,
   theme,
+  cardIsRead = false,
   onMarkRead,
   onRate
 }: Props) {
   const reduceMotion = useReducedMotion();
   const isReadPhase = phase === "read";
+  const [markReadPending, setMarkReadPending] = useState(false);
+  const markReadTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setMarkReadPending(false);
+    if (markReadTimerRef.current != null) {
+      window.clearTimeout(markReadTimerRef.current);
+      markReadTimerRef.current = null;
+    }
+  }, [card.id, phase]);
+
+  useEffect(() => {
+    return () => {
+      if (markReadTimerRef.current != null) {
+        window.clearTimeout(markReadTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleMarkRead = useCallback(() => {
+    if (markReadPending || phase !== "read") return;
+    setMarkReadPending(true);
+    if (markReadTimerRef.current != null) {
+      window.clearTimeout(markReadTimerRef.current);
+    }
+    markReadTimerRef.current = window.setTimeout(() => {
+      markReadTimerRef.current = null;
+      onMarkRead();
+    }, 320);
+  }, [markReadPending, onMarkRead, phase]);
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
+    <AnimatePresence mode="sync" initial={false}>
       {isReadPhase ? (
         <motion.div
           key={`${card.id}-read`}
           className="mx-auto w-full max-w-2xl"
           initial={reduceMotion ? false : { opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={reduceMotion ? undefined : { opacity: 0, y: -10, scale: 0.99 }}
-          transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+          exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
+          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
         >
           <InvestorEvidenceReadCard
             principleLabel={principleLabel}
@@ -64,7 +97,13 @@ export function BusinessInvestorEvidenceCardPanel({
             pillarId={pillarId}
             theme={theme}
             footerSlot={
-              <InvestorEvidenceMarkAsReadButton theme={theme} onClick={onMarkRead} />
+              <InvestorEvidenceMarkAsReadButton
+                theme={theme}
+                isRead={cardIsRead}
+                pending={markReadPending}
+                disabled={markReadPending}
+                onClick={handleMarkRead}
+              />
             }
           />
         </motion.div>

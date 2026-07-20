@@ -78,7 +78,8 @@ export function useBusinessChecklistProgress({
       quests,
       questViewBySlug,
       readSet,
-      questCompletedAtBySlug
+      questCompletedAtBySlug,
+      stored
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps -- tick busts cache after demo reset
   }, [
@@ -87,6 +88,7 @@ export function useBusinessChecklistProgress({
     questViewBySlug,
     readSet,
     questCompletedAtBySlug,
+    stored,
     tick
   ]);
 

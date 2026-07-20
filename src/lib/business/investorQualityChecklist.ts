@@ -119,7 +119,8 @@ export const BUSINESS_QUEST_CARD_CHECKLIST_MAP: Record<
 > = {
   "what-they-do": {
     "card-1": ["business-understanding"],
-    "card-2": ["business-understanding", "value-proposition"]
+    "card-2": ["business-understanding", "value-proposition"],
+    "card-3": ["business-understanding"]
   },
   "why-buying": {
     "card-1": ["business-understanding"],

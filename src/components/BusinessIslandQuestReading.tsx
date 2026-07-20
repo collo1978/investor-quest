@@ -69,6 +69,7 @@ import {
   SCHOOLS_MICRO_XP_PER_CORRECT
 } from "@/lib/schools/schoolsQuestRewardFlow";
 import { BusinessInvestorPrincipleEvidenceFlow } from "@/components/business/investorFramework/BusinessInvestorPrincipleEvidenceFlow";
+import { BusinessInvestorPrincipleEvidenceReviewFlow } from "@/components/business/investorFramework/BusinessInvestorPrincipleEvidenceReviewFlow";
 import { BusinessChecklistSectionQuizFlow } from "@/components/business/investorFramework/BusinessChecklistSectionQuizFlow";
 import { InvestorEvidenceMarkAsReadButton } from "@/components/business/investorFramework/InvestorEvidenceMarkAsReadButton";
 import { InvestorEvidenceReadCard } from "@/components/business/investorFramework/InvestorEvidenceReadCard";
@@ -103,6 +104,16 @@ import {
   isSectionPrinciplesEvidenceComplete
 } from "@/lib/business/businessChecklistSectionQuizHelpers";
 import { consumePendingChecklistSectionQuiz } from "@/lib/business/businessChecklistSectionQuizNavigation";
+import {
+  BUSINESS_MISSION_STEP_START_EVENT,
+  consumePendingInvestorMission,
+  resolveMissionStepTarget,
+  type InvestorMissionStepTarget
+} from "@/lib/business/businessChecklistMissionStepNavigation";
+import {
+  BUSINESS_PRINCIPLE_REVIEW_START_EVENT,
+  consumePendingChecklistPrincipleReview
+} from "@/lib/business/businessChecklistPrincipleNavigation";
 import { resolveInvestorEvidenceCards } from "@/lib/business/businessInvestorEvidenceCards";
 import {
   canStartPrincipleEvidenceFlow,
@@ -121,6 +132,7 @@ import {
   type InvestorRollupRating
 } from "@/lib/business/businessInvestorFramework";
 import { BUSINESS_INVESTOR_FRAMEWORK_CHANGED_EVENT } from "@/lib/business/businessInvestorFrameworkStorage";
+import { usesInvestorMissionFlow } from "@/lib/business/businessInvestorMissionFlow";
 import { SCHOOLS_DEMO_RESET_EVENT } from "@/lib/schools/resetSchoolsDemoProgress";
 import { hasSchoolsBusinessIslandHubEntered } from "@/lib/schools/schoolsBusinessIslandZoomEnter";
 
@@ -822,8 +834,14 @@ function BusinessIslandQuestReadingInner(
   /** Active principle evidence gate — set on mark-read or auto-chained unlock. */
   const [activeEvidencePrincipleId, setActiveEvidencePrincipleId] =
     useState<InvestorPrincipleId | null>(null);
+  /** Read-only replay for a completed principle (checklist tap). */
+  const [reviewPrincipleId, setReviewPrincipleId] =
+    useState<InvestorPrincipleId | null>(null);
   /** Keep evidence flow mounted through principle-complete / unlock panels. */
   const [evidenceFlowSessionActive, setEvidenceFlowSessionActive] = useState(false);
+  /** Mission tracker launched a specific quest-card step in the main column. */
+  const [missionStepTarget, setMissionStepTarget] =
+    useState<InvestorMissionStepTarget | null>(null);
   const [highlightPrincipleId, setHighlightPrincipleId] = useState<string | null>(
     null
   );
@@ -832,7 +850,6 @@ function BusinessIslandQuestReadingInner(
   >(null);
   const [quizSessionKey, setQuizSessionKey] = useState(0);
   const [answerRevealed, setAnswerRevealed] = useState(false);
-  const [continueHint, setContinueHint] = useState(false);
   const [pulseChecklistItems, setPulseChecklistItems] = useState<
     InvestorQualityChecklistItemId[]
   >([]);
@@ -842,6 +859,9 @@ function BusinessIslandQuestReadingInner(
   const [questRatingSubmitted, setQuestRatingSubmitted] = useState(false);
   const prevQuestCompletedRef = useRef(questCompleted);
   const markReadAnchorRef = useRef<HTMLDivElement>(null);
+  /** Quest card just marked read — skip re-read on first evidence card before flags hydrate. */
+  const justLaunchedEvidenceReadRef = useRef<string | null>(null);
+  const markReadAdvanceTimerRef = useRef<number | null>(null);
   const evidenceFly = useEvidenceFly();
   /** Q → SHOW ME → A reveal for every Business quest card (same flow as Quest 1). */
   const useAnswerReveal = pillarId === "business";
@@ -944,9 +964,44 @@ function BusinessIslandQuestReadingInner(
     [company.id, slug]
   );
 
+  const resolvedActiveMissionPrinciple = useMemo((): InvestorPrincipleId | null => {
+    void evidenceFrameworkTick;
+    if (!checklistEnabled || !questHasSectionEvidence) return null;
+    for (const principleId of sectionEvidencePrinciples) {
+      if (!usesInvestorMissionFlow(principleId)) continue;
+      if (!canStartPrincipleEvidenceFlow(company.id, principleId)) continue;
+      const trigger = resolvePrincipleEvidenceTrigger(principleId);
+      if (!trigger || trigger.questSlug !== slug) continue;
+      return principleId;
+    }
+    return null;
+  }, [
+    checklistEnabled,
+    questHasSectionEvidence,
+    sectionEvidencePrinciples,
+    company.id,
+    slug,
+    evidenceFrameworkTick
+  ]);
+
+  useEffect(() => {
+    if (!schoolsRewardFlow || !checklistEnabled) return;
+    const pending = consumePendingInvestorMission();
+    if (!pending) return;
+    const trigger = resolvePrincipleEvidenceTrigger(pending);
+    if (trigger?.questSlug !== slug) return;
+    setReviewPrincipleId(null);
+    setActiveEvidencePrincipleId(pending);
+    setEvidenceFlowSessionActive(true);
+    setScreen("cards");
+  }, [schoolsRewardFlow, checklistEnabled, slug]);
+
+  const useChecklistSplitLayout = checklistEnabled;
+
   const resolvedActiveEvidencePrinciple = useMemo((): InvestorPrincipleId | null => {
     void evidenceFrameworkTick;
     if (!checklistEnabled || !questHasSectionEvidence) return null;
+    if (resolvedActiveMissionPrinciple) return resolvedActiveMissionPrinciple;
     for (const principleId of sectionEvidencePrinciples) {
       if (!canStartPrincipleEvidenceFlow(company.id, principleId)) continue;
       const trigger = resolvePrincipleEvidenceTrigger(principleId);
@@ -960,6 +1015,7 @@ function BusinessIslandQuestReadingInner(
   }, [
     checklistEnabled,
     questHasSectionEvidence,
+    resolvedActiveMissionPrinciple,
     sectionEvidencePrinciples,
     company.id,
     cards,
@@ -995,17 +1051,111 @@ function BusinessIslandQuestReadingInner(
 
   const skipReadForActivePrincipleFirstCard = useMemo(() => {
     if (!effectiveEvidencePrincipleId) return false;
+    // Only Business Purpose card-1 overlaps the quest teaser enough to skip re-read.
+    // Company Evolution / Global Presence teach a fuller evidence path — always show card 1.
+    if (effectiveEvidencePrincipleId !== "business-purpose") return false;
     const trigger = resolvePrincipleEvidenceTrigger(effectiveEvidencePrincipleId);
     if (!trigger || trigger.questSlug !== slug) return false;
     const cardIdx = cards.findIndex((card) => card.id === trigger.cardId);
-    return cardIdx >= 0 && cardReadFlags[cardIdx] === true;
+    const justLaunched =
+      justLaunchedEvidenceReadRef.current ===
+      `${effectiveEvidencePrincipleId}#${trigger.cardId}`;
+    return (
+      (cardIdx >= 0 && cardReadFlags[cardIdx] === true) || justLaunched
+    );
   }, [effectiveEvidencePrincipleId, slug, cards, cardReadFlags]);
+
+  useEffect(() => {
+    if (!resolvedActiveMissionPrinciple || reviewPrincipleId) return;
+    if (activeEvidencePrincipleId === resolvedActiveMissionPrinciple) return;
+    const trigger = resolvePrincipleEvidenceTrigger(resolvedActiveMissionPrinciple);
+    if (trigger?.questSlug === slug) {
+      const markSlug = cardSlug(slug, trigger.cardId);
+      if (!readQuestSlugs.includes(markSlug)) {
+        onMarkRead(markSlug);
+      }
+      justLaunchedEvidenceReadRef.current = `${resolvedActiveMissionPrinciple}#${trigger.cardId}`;
+    }
+    setReviewPrincipleId(null);
+    setActiveEvidencePrincipleId(resolvedActiveMissionPrinciple);
+    setEvidenceFlowSessionActive(true);
+  }, [
+    resolvedActiveMissionPrinciple,
+    reviewPrincipleId,
+    activeEvidencePrincipleId,
+    slug,
+    readQuestSlugs,
+    onMarkRead
+  ]);
+
+  const handleMissionStepTargetApplied = useCallback(() => {
+    setMissionStepTarget(null);
+  }, []);
+
+  const startMissionStep = useCallback(
+    (principleId: InvestorPrincipleId, stepId: string) => {
+      setReviewPrincipleId(null);
+      setActiveEvidencePrincipleId(principleId);
+      setEvidenceFlowSessionActive(true);
+      setMissionStepTarget(resolveMissionStepTarget(stepId));
+      setScreen("cards");
+      justLaunchedEvidenceReadRef.current = null;
+    },
+    []
+  );
+
+  useEffect(() => {
+    const onStartMissionStep = (event: Event) => {
+      const detail = (
+        event as CustomEvent<{
+          principleId?: InvestorPrincipleId;
+          stepId?: string;
+          questSlug?: string;
+        }>
+      ).detail;
+      if (detail?.questSlug !== slug || !detail.principleId || !detail.stepId) return;
+      startMissionStep(detail.principleId, detail.stepId);
+    };
+    window.addEventListener(BUSINESS_MISSION_STEP_START_EVENT, onStartMissionStep);
+    return () =>
+      window.removeEventListener(BUSINESS_MISSION_STEP_START_EVENT, onStartMissionStep);
+  }, [slug, startMissionStep]);
+
+  useEffect(() => {
+    if (!justLaunchedEvidenceReadRef.current) return;
+    const launched = justLaunchedEvidenceReadRef.current;
+    const hashIdx = launched.indexOf("#");
+    if (hashIdx < 0) return;
+    const principleId = launched.slice(0, hashIdx) as InvestorPrincipleId;
+    const trigger = resolvePrincipleEvidenceTrigger(principleId);
+    if (!trigger) {
+      justLaunchedEvidenceReadRef.current = null;
+      return;
+    }
+    const cardIdx = cards.findIndex((card) => card.id === trigger.cardId);
+    if (cardIdx >= 0 && cardReadFlags[cardIdx] === true) {
+      justLaunchedEvidenceReadRef.current = null;
+    }
+  }, [cardReadFlags, cards]);
 
   /** Keep the active principle row lit while the player works through evidence cards. */
   const checklistHighlightPrincipleId =
     evidenceGateActive && effectiveEvidencePrincipleId
       ? effectiveEvidencePrincipleId
-      : highlightPrincipleId;
+      : reviewPrincipleId ?? highlightPrincipleId;
+
+  const startPrincipleReview = useCallback((principleId: InvestorPrincipleId) => {
+    setReviewPrincipleId(principleId);
+    setActiveEvidencePrincipleId(null);
+    setEvidenceFlowSessionActive(false);
+    setMissionStepTarget(null);
+    setScreen("cards");
+    justLaunchedEvidenceReadRef.current = null;
+  }, []);
+
+  const handlePrincipleReviewExit = useCallback(() => {
+    setReviewPrincipleId(null);
+  }, []);
 
   useEffect(() => {
     const bumpFramework = () => setEvidenceFrameworkTick((tick) => tick + 1);
@@ -1041,38 +1191,39 @@ function BusinessIslandQuestReadingInner(
     }
   }, [usesChecklistSectionQuiz, checklistSectionDef, startSectionQuizFlow]);
 
+  useEffect(() => {
+    const onStartPrincipleReview = (event: Event) => {
+      const detail = (
+        event as CustomEvent<{
+          principleId?: InvestorPrincipleId;
+          questSlug?: string;
+        }>
+      ).detail;
+      if (detail?.questSlug !== slug || !detail.principleId) return;
+      startPrincipleReview(detail.principleId);
+    };
+    window.addEventListener(BUSINESS_PRINCIPLE_REVIEW_START_EVENT, onStartPrincipleReview);
+    return () =>
+      window.removeEventListener(
+        BUSINESS_PRINCIPLE_REVIEW_START_EVENT,
+        onStartPrincipleReview
+      );
+  }, [slug, startPrincipleReview]);
+
+  useEffect(() => {
+    if (!checklistEnabled) return;
+    const pendingPrincipleId = consumePendingChecklistPrincipleReview();
+    if (!pendingPrincipleId) return;
+    const trigger = resolvePrincipleEvidenceTrigger(pendingPrincipleId);
+    if (trigger?.questSlug === slug) {
+      startPrincipleReview(pendingPrincipleId);
+    }
+  }, [checklistEnabled, slug, startPrincipleReview]);
+
   const handleEvidenceFlowSaved = useCallback(() => {
     refreshFrameworkChecklist();
     setEvidenceFrameworkTick((tick) => tick + 1);
   }, [refreshFrameworkChecklist]);
-
-  const handleEvidenceFlowComplete = useCallback(
-    ({
-      unlockedPrincipleId
-    }: {
-      overallRating: InvestorRollupRating;
-      unlockedPrincipleId: InvestorPrincipleId | null;
-    }) => {
-      handleEvidenceFlowSaved();
-      if (unlockedPrincipleId) {
-        setHighlightPrincipleId(unlockedPrincipleId);
-        setActiveEvidencePrincipleId(unlockedPrincipleId);
-        setEvidenceFlowSessionActive(true);
-        window.setTimeout(() => setHighlightPrincipleId(null), 3200);
-      } else {
-        setActiveEvidencePrincipleId(null);
-        setEvidenceFlowSessionActive(false);
-        if (
-          checklistSectionDef &&
-          isSectionPrinciplesEvidenceComplete(company.id, checklistSectionDef.id)
-        ) {
-          highlightSectionQuizRow(checklistSectionDef.id);
-        }
-      }
-      setEvidenceFrameworkTick((tick) => tick + 1);
-    },
-    [handleEvidenceFlowSaved, checklistSectionDef, company.id, highlightSectionQuizRow]
-  );
 
   const handleMarkRead = useCallback(
     (markSlug: string) => {
@@ -1081,6 +1232,8 @@ function BusinessIslandQuestReadingInner(
         ? markSlug.split("#")[1]!
         : cards[cardIndex]?.id ?? "card-1";
       onMarkRead(markSlug);
+
+      let launchesEvidenceGate = false;
 
       if (checklistEnabled && !wasRead) {
         const items = resolveCardChecklistItems(slug, cardId);
@@ -1117,28 +1270,44 @@ function BusinessIslandQuestReadingInner(
           triggeredPrinciple &&
           canStartPrincipleEvidenceFlow(company.id, triggeredPrinciple)
         ) {
+          justLaunchedEvidenceReadRef.current = `${triggeredPrinciple}#${cardId}`;
           setActiveEvidencePrincipleId(triggeredPrinciple);
           setEvidenceFlowSessionActive(true);
           setEvidenceFrameworkTick((tick) => tick + 1);
         }
+
+        launchesEvidenceGate =
+          questHasSectionEvidence &&
+          triggeredPrinciple != null &&
+          canStartPrincipleEvidenceFlow(company.id, triggeredPrinciple);
       }
 
-      const triggeredPrinciple = resolvePrincipleForQuestEvidenceTrigger(slug, cardId);
-      const launchesEvidenceGate =
-        checklistEnabled &&
-        questHasSectionEvidence &&
-        !wasRead &&
-        triggeredPrinciple != null &&
-        canStartPrincipleEvidenceFlow(company.id, triggeredPrinciple);
+      if (markReadAdvanceTimerRef.current != null) {
+        window.clearTimeout(markReadAdvanceTimerRef.current);
+        markReadAdvanceTimerRef.current = null;
+      }
 
-      if (schoolsRewardFlow && isMissionCard && !launchesEvidenceGate) {
-        setContinueHint(true);
-        window.setTimeout(() => setContinueHint(false), 3200);
+      if (!wasRead && !launchesEvidenceGate) {
+        const hasMoreCards = cardIndex < cards.length - 1;
+        const markingLastUnread = missingCardCount <= 1;
+        const advanceDelayMs = isMissionCard ? 520 : 380;
+
+        markReadAdvanceTimerRef.current = window.setTimeout(() => {
+          markReadAdvanceTimerRef.current = null;
+          if (hasMoreCards) {
+            setCardIndex((i) => Math.min(cards.length - 1, i + 1));
+            setAnswerRevealed(false);
+            return;
+          }
+          if (markingLastUnread && showLegacyQuestQuiz) {
+            setQuizSessionKey((key) => key + 1);
+            setScreen("quiz");
+          }
+        }, advanceDelayMs);
       }
     },
     [
       onMarkRead,
-      schoolsRewardFlow,
       isMissionCard,
       checklistEnabled,
       readQuestSlugs,
@@ -1146,6 +1315,8 @@ function BusinessIslandQuestReadingInner(
       companyId,
       cards,
       cardIndex,
+      missingCardCount,
+      showLegacyQuestQuiz,
       refreshChecklistSnapshot,
       evidenceFly,
       company.id,
@@ -1155,12 +1326,19 @@ function BusinessIslandQuestReadingInner(
 
   /** Quest slug change — reset card flow only (not on hydration-driven companyId ticks). */
   useEffect(() => {
+    if (markReadAdvanceTimerRef.current != null) {
+      window.clearTimeout(markReadAdvanceTimerRef.current);
+      markReadAdvanceTimerRef.current = null;
+    }
     setCardIndex(0);
     setScreen("cards");
     setAnswerRevealed(false);
     setPulseChecklistItems([]);
     setActiveEvidencePrincipleId(null);
     setEvidenceFlowSessionActive(false);
+    setMissionStepTarget(null);
+    justLaunchedEvidenceReadRef.current = null;
+    setReviewPrincipleId(null);
     setHighlightSectionQuizId(null);
     if (schoolsRewardFlow) {
       clearSchoolsQuestSummaryExited(slug);
@@ -1203,6 +1381,9 @@ function BusinessIslandQuestReadingInner(
       setHighlightPrincipleId(null);
       setActiveEvidencePrincipleId(null);
       setEvidenceFlowSessionActive(false);
+      setMissionStepTarget(null);
+      justLaunchedEvidenceReadRef.current = null;
+      setReviewPrincipleId(null);
       setHighlightSectionQuizId(null);
       setEvidenceFrameworkTick((tick) => tick + 1);
       refreshChecklistSnapshot();
@@ -1213,8 +1394,12 @@ function BusinessIslandQuestReadingInner(
   }, [refreshChecklistSnapshot, refreshFrameworkChecklist]);
 
   useEffect(() => {
-    setContinueHint(false);
-  }, [cardIndex, slug]);
+    return () => {
+      if (markReadAdvanceTimerRef.current != null) {
+        window.clearTimeout(markReadAdvanceTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const wasComplete = prevQuestCompletedRef.current;
@@ -1297,6 +1482,64 @@ function BusinessIslandQuestReadingInner(
       router.push(resolveSchoolsLearnerHref(hubPath, pathname));
     }
   }, [pathname, router, slug]);
+
+  const handleEvidenceFlowComplete = useCallback(
+    ({
+      unlockedPrincipleId
+    }: {
+      overallRating: InvestorRollupRating;
+      unlockedPrincipleId: InvestorPrincipleId | null;
+    }) => {
+      handleEvidenceFlowSaved();
+
+      if (unlockedPrincipleId) {
+        const unlockTrigger = resolvePrincipleEvidenceTrigger(unlockedPrincipleId);
+        if (unlockTrigger?.questSlug === slug) {
+          const unlockMarkSlug = cardSlug(slug, unlockTrigger.cardId);
+          if (!readQuestSlugs.includes(unlockMarkSlug)) {
+            onMarkRead(unlockMarkSlug);
+          }
+          justLaunchedEvidenceReadRef.current = `${unlockedPrincipleId}#${unlockTrigger.cardId}`;
+        }
+        // Stay inside the section mission — chain straight into the next principle.
+        setReviewPrincipleId(null);
+        setHighlightPrincipleId(unlockedPrincipleId);
+        setActiveEvidencePrincipleId(unlockedPrincipleId);
+        setEvidenceFlowSessionActive(true);
+        setMissionStepTarget(null);
+        setEvidenceFrameworkTick((tick) => tick + 1);
+        window.setTimeout(() => setHighlightPrincipleId(null), 3200);
+        return;
+      }
+
+      justLaunchedEvidenceReadRef.current = null;
+      setActiveEvidencePrincipleId(null);
+      setEvidenceFlowSessionActive(false);
+      setMissionStepTarget(null);
+      setEvidenceFrameworkTick((tick) => tick + 1);
+
+      if (
+        checklistSectionDef &&
+        isSectionPrinciplesEvidenceComplete(company.id, checklistSectionDef.id)
+      ) {
+        startSectionQuizFlow(checklistSectionDef.id);
+        return;
+      }
+      if (checklistSectionDef) {
+        highlightSectionQuizRow(checklistSectionDef.id);
+      }
+    },
+    [
+      handleEvidenceFlowSaved,
+      checklistSectionDef,
+      company.id,
+      highlightSectionQuizRow,
+      startSectionQuizFlow,
+      slug,
+      readQuestSlugs,
+      onMarkRead
+    ]
+  );
 
   const handleSectionQuizFinished = useCallback(() => {
     if (schoolsRewardFlow) {
@@ -1445,6 +1688,7 @@ function BusinessIslandQuestReadingInner(
   const questUsesInvestorEvidenceReadCard =
     questCardEvidenceCards.length > 0 &&
     questCardEvidencePrinciple != null &&
+    !usesInvestorMissionFlow(questCardEvidencePrinciple) &&
     canStartPrincipleEvidenceFlow(company.id, questCardEvidencePrinciple) &&
     !evidenceGateActive;
 
@@ -1459,8 +1703,16 @@ function BusinessIslandQuestReadingInner(
     return section ? formatChecklistSectionHeading(section) : null;
   }, [checklistEnabled, slug]);
 
-  const shellClass =
-    "relative px-5 pb-2 pt-5 sm:px-6 md:px-9 md:pt-7";
+  const shellClass = [
+    schoolsRewardFlow
+      ? "relative px-3 pb-6 pt-3 sm:px-4 md:px-5 md:pt-4"
+      : "relative px-5 pb-2 pt-5 sm:px-6 md:px-9 md:pt-7",
+    evidenceGateActive && effectiveEvidencePrincipleId === "company-evolution"
+      ? "iq-schools-evidence-shell--evolution"
+      : ""
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const passCelebration = useMemo(
     () => ({
@@ -1475,12 +1727,13 @@ function BusinessIslandQuestReadingInner(
   if (screen === "quality-check" && checklistEnabled && pendingRatingItems.length > 0) {
     return (
       <BusinessQuestChecklistLayout
-        enabled={checklistEnabled}
+        enabled={useChecklistSplitLayout}
         snapshot={checklistSnapshot}
         ratingFocusMode
         companyId={company.id}
         questSlug={slug}
         questProgressPct={checklistQuestProgressPct}
+        hideChapterNav={schoolsRewardFlow}
       >
         <motion.div className="relative px-3 pb-2 pt-2 sm:px-4 md:px-5 md:pt-3">
           <InvestorQualityRatingScreen
@@ -1503,16 +1756,17 @@ function BusinessIslandQuestReadingInner(
   ) {
     return (
       <BusinessQuestChecklistLayout
-        enabled={checklistEnabled}
+        enabled={useChecklistSplitLayout}
         snapshot={checklistSnapshot}
         companyId={company.id}
         questSlug={slug}
         questProgressPct={checklistQuestProgressPct}
         highlightPrincipleId={checklistHighlightPrincipleId}
         highlightSectionQuizId={highlightSectionQuizId}
+        hideChapterNav={schoolsRewardFlow}
       >
         <motion.div className={shellClass}>
-          {checklistSectionHeading ? (
+          {checklistSectionHeading && !schoolsRewardFlow ? (
             <ChecklistSectionHeader title={checklistSectionHeading} theme={theme} />
           ) : null}
           <div className="mx-auto w-full max-w-2xl px-1">
@@ -1585,32 +1839,55 @@ function BusinessIslandQuestReadingInner(
 
   return (
     <BusinessQuestChecklistLayout
-      enabled={checklistEnabled}
+      enabled={useChecklistSplitLayout}
       snapshot={checklistSnapshot}
       companyId={company.id}
       questSlug={slug}
       questProgressPct={checklistQuestProgressPct}
       highlightPrincipleId={checklistHighlightPrincipleId}
       highlightSectionQuizId={highlightSectionQuizId}
+      hideChapterNav={schoolsRewardFlow}
     >
       <motion.div className={shellClass}>
-      {checklistSectionHeading ? (
+      {checklistSectionHeading && !schoolsRewardFlow ? (
         <ChecklistSectionHeader title={checklistSectionHeading} theme={theme} />
       ) : null}
-      {evidenceGateActive && effectiveEvidencePrincipleId ? (
+      {reviewPrincipleId ? (
         <div
           className={[
             "mx-auto w-full max-w-2xl px-1",
             schoolsRewardFlow ? "iq-schools-evidence-gate pt-1" : "pt-0"
           ].join(" ")}
         >
+          <BusinessInvestorPrincipleEvidenceReviewFlow
+            key={reviewPrincipleId}
+            companyId={company.id}
+            principleId={reviewPrincipleId}
+            pillarId={pillarId}
+            theme={theme}
+            onExit={handlePrincipleReviewExit}
+          />
+        </div>
+      ) : evidenceGateActive && effectiveEvidencePrincipleId ? (
+        <div
+          className={[
+            "mx-auto w-full px-1",
+            effectiveEvidencePrincipleId === "company-evolution"
+              ? "max-w-none w-full"
+              : "max-w-2xl",
+            schoolsRewardFlow ? "iq-schools-evidence-gate pt-1" : "pt-0"
+          ].join(" ")}
+        >
           <BusinessInvestorPrincipleEvidenceFlow
             key={effectiveEvidencePrincipleId}
-            companyId={company.id}
+            company={company}
             principleId={effectiveEvidencePrincipleId}
             pillarId={pillarId}
             theme={theme}
             skipReadForFirstCard={skipReadForActivePrincipleFirstCard}
+            stepTarget={missionStepTarget}
+            onStepTargetApplied={handleMissionStepTargetApplied}
+            hubReturnOnComplete={false}
             onEvidenceSaved={handleEvidenceFlowSaved}
             onComplete={handleEvidenceFlowComplete}
           />
@@ -1654,6 +1931,8 @@ function BusinessIslandQuestReadingInner(
                   <div ref={markReadAnchorRef} className="inline-flex">
                     <InvestorEvidenceMarkAsReadButton
                       theme={theme}
+                      isRead={cardView.isRead}
+                      disabled={cardView.isRead && !allowReadToggle}
                       onClick={() => {
                         if (allowReadToggle && cardView.isRead) {
                           onMarkUnread(cardView.markReadSlug);
@@ -1741,24 +2020,6 @@ function BusinessIslandQuestReadingInner(
               cardIndex < cardView.cardTotal - 1
             }
           />
-          <AnimatePresence initial={false}>
-            {continueHint &&
-            isMissionCard &&
-            cardView.isRead &&
-            cardIndex < cardView.cardTotal - 1 ? (
-              <motion.p
-                key="continue-hint"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.28, ease: "easeOut" }}
-                className="iq-schools-mission-read-hint mx-auto block w-fit max-w-md"
-                aria-live="polite"
-              >
-                Great! Continue to the next card.
-              </motion.p>
-            ) : null}
-          </AnimatePresence>
         </>
       ) : showLegacyQuestQuiz ? (
         <nav
