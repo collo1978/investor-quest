@@ -1,6 +1,6 @@
 import type { PillarId } from "@/data/pillars";
 import type { PromptQualityAnalysis } from "@/lib/ai/promptQualityAnalysis";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 import type {
@@ -24,7 +24,7 @@ export type PromptVersionBody = {
 export async function getPromptVersionBody(
   versionId: string
 ): Promise<PromptVersionBody> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("prompt_template_versions")
     .select(
@@ -71,7 +71,7 @@ export async function savePromptPreviewEvaluation(params: {
 }): Promise<string | null> {
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("prompt_preview_evaluations")
     .insert({
@@ -106,7 +106,7 @@ export async function getPromptVersionInsights(
 ): Promise<PromptVersionInsightsDto[]> {
   if (!isSupabaseConfigured()) return [];
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
 
   const { data: versions, error: vErr } = await supabase
     .from("prompt_template_versions")
@@ -238,7 +238,7 @@ export async function updatePromptVersionMeta(
     changeNote?: string;
   }
 ): Promise<void> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const payload: Record<string, unknown> = {};
 
   if (patch.tags) payload.tags = patch.tags;

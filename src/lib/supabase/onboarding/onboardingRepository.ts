@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import {
   buildRecommendations,
@@ -51,7 +51,7 @@ function mapTag(row: CompanyInterestTagRow): CompanyInterestTag {
 export async function listOnboardingInterests(): Promise<OnboardingInterest[]> {
   if (!isSupabaseConfigured()) return [];
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("interests")
     .select("id, label, icon, sort_order, is_active")
@@ -71,7 +71,7 @@ export async function fetchRecommendationsFromSupabase(
     throw new Error("Supabase is not configured.");
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
 
   const { data: companyRows, error: companyError } = await supabase
     .from("companies")
@@ -121,7 +121,7 @@ export async function saveUserInterests(options: {
   }
 
   const uniqueIds = [...new Set(interestIds.map((id) => id.trim().toLowerCase()))];
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
 
   if (guestId) {
     const { error: delError } = await supabase
@@ -155,7 +155,7 @@ export async function listUserInterests(options: {
 }): Promise<string[]> {
   if (!isSupabaseConfigured()) return [];
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   let query = supabase.from("user_interests").select("interest_id");
 
   if (options.guestId) query = query.eq("guest_id", options.guestId);

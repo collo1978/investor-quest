@@ -8,7 +8,7 @@ import {
   SYNC_FROM_CODE_CHANGE_NOTE
 } from "@/lib/ai/promptDefaults";
 import type { PillarId } from "@/data/pillars";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 import type {
@@ -67,7 +67,7 @@ function mapVersion(
 export async function ensurePromptTemplatesSeeded(): Promise<number> {
   if (!isSupabaseConfigured()) return 0;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { count, error: countError } = await supabase
     .from("prompt_templates")
     .select("id", { count: "exact", head: true });
@@ -140,7 +140,7 @@ export async function listPromptTemplates(): Promise<PromptTemplateDto[]> {
 
   await ensurePromptTemplatesSeeded();
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data: templates, error } = await supabase
     .from("prompt_templates")
     .select("*")
@@ -187,7 +187,7 @@ export async function getPromptTemplateDetail(
 
   await ensurePromptTemplatesSeeded();
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data: template, error } = await supabase
     .from("prompt_templates")
     .select("*")
@@ -230,7 +230,7 @@ async function getOrCreateTemplate(
     throw new Error(`Invalid template key: ${templateKey}`);
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data: existing } = await supabase
     .from("prompt_templates")
     .select("*")
@@ -279,7 +279,7 @@ export async function savePromptTemplateVersion(
   if (!body) throw new Error("Prompt body is required.");
 
   const template = await getOrCreateTemplate(templateKey);
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
 
   const { data: latest } = await supabase
     .from("prompt_template_versions")
@@ -338,7 +338,7 @@ export async function activatePromptTemplateVersion(
     throw new Error("Supabase is not configured.");
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const template = await getOrCreateTemplate(templateKey);
 
   const { data: version, error: versionError } = await supabase
@@ -380,7 +380,7 @@ async function loadActiveSlot(
 ): Promise<ActivePromptSlot | null> {
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data: template } = await supabase
     .from("prompt_templates")
     .select("id, active_version_id, scope, pillar_id")

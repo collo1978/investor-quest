@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { buildAiPromptFromSectionIds } from "@/lib/sec/aiPromptBuilder";
 import type { AiGenerationJobRow } from "@/lib/supabase/sec/types";
@@ -21,7 +21,7 @@ export async function createPendingAiGenerationJob(
 
   const promptPayload = await buildAiPromptFromSectionIds(input.sectionIds);
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("ai_generation_jobs")
     .insert({

@@ -27,7 +27,7 @@ import type {
   FixActionId
 } from "@/lib/gameHealth/types";
 import type { PillarId } from "@/data/pillars";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export type FixActionResult = {
@@ -211,7 +211,7 @@ async function clearAndRegenerate(
   const cardId = issue.cardId ?? "card-1";
 
   if (isSupabaseConfigured()) {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabaseServiceRoleClient();
     await supabase
       .from("company_quest_card_answers")
       .delete()

@@ -4,7 +4,7 @@ import type {
   AnalyticsDashboardPayload,
   UserActivityEventRow
 } from "@/lib/analytics/types";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 /** Demo rows when Supabase is empty — mirrors SQL seed personas. */
@@ -76,7 +76,7 @@ export async function fetchAnalyticsDashboard(
   }
 
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabaseServiceRoleClient();
     const since = new Date();
     if (filters.dateRange === "7d") since.setDate(since.getDate() - 7);
     else if (filters.dateRange === "90d") since.setDate(since.getDate() - 90);

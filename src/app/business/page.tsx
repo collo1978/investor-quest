@@ -13,5 +13,6 @@ export default async function BusinessPage({ searchParams }: PageProps) {
   const { dev } = (await searchParams) ?? {};
   preload(BUSINESS_HUB_IMG_SRC, { as: "image" });
   preload(SCHOOLS_MISSION_BRIEF_IMG_SRC, { as: "image" });
-  return <BusinessPageClient showDevPanel={dev === "1"} />;
+  const showDevPanel = dev === "1" && process.env.NODE_ENV !== "production";
+  return <BusinessPageClient showDevPanel={showDevPanel} />;
 }

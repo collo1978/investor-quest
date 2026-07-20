@@ -3,7 +3,7 @@ import {
   fetchOpenIssues
 } from "@/lib/gameHealth/storage";
 import type { DemoRefreshJob } from "@/lib/demoContentRefresh/config";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 function issueKeyForJob(job: DemoRefreshJob): string {
@@ -32,7 +32,7 @@ export async function upsertDemoRefreshIssue(params: {
     ? issueKeyForCard(params.job, params.cardId)
     : issueKeyForJob(params.job);
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const open = await fetchOpenIssues(200);
   const existing = open.find((o) => o.issueKey === issueKey);
 
@@ -72,7 +72,7 @@ export async function resolveDemoRefreshIssuesForJob(
 
   const prefix = `demo_refresh:${job.ticker}:${job.pillarId}:${job.questSlug}`;
   const open = await fetchOpenIssues(200);
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
 
   for (const issue of open) {
     if (issue.issueKey.startsWith(prefix)) {

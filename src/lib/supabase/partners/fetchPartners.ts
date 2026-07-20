@@ -1,6 +1,6 @@
 import { DEMO_PARTNERS } from "@/platform/partners/examplePartners";
 import type { PartnerConfig } from "@/platform/types";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 import { mapPartnerWithRelations, mapPackageTierRow } from "./mapPartnerConfig";
@@ -53,7 +53,7 @@ const PARTNER_SELECT = `
 `;
 
 export async function fetchPartnersFromSupabase(): Promise<PartnerConfig[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("partners")
     .select(PARTNER_SELECT)
@@ -68,7 +68,7 @@ export async function fetchPartnersFromSupabase(): Promise<PartnerConfig[]> {
 }
 
 export async function fetchPackageTiersFromSupabase() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("package_tiers")
     .select("*")

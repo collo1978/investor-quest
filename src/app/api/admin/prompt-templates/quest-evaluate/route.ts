@@ -4,6 +4,7 @@ import type { CompanyId } from "@/data/companies";
 import { COMPANIES } from "@/data/companies";
 import type { PillarId } from "@/data/pillars";
 import { isOpenAiConfigured, OpenAiConfigError } from "@/lib/ai/env";
+import { apiErrorResponse } from "@/lib/api/errorResponse";
 import { runQuestBatchEvaluation } from "@/lib/ai/runQuestBatchEvaluation";
 import type { PromptDraftOverrides } from "@/lib/ai/resolveActivePrompts";
 import { OpenAiRequestError } from "@/lib/ai/openaiClient";
@@ -98,16 +99,26 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     if (err instanceof OpenAiConfigError) {
-      return NextResponse.json({ error: err.message }, { status: 503 });
-    }
-    if (err instanceof OpenAiRequestError) {
-      return NextResponse.json(
-        { error: "OpenAI request failed.", detail: err.message },
-        { status: err.status >= 400 && err.status < 600 ? err.status : 502 }
+      return apiErrorResponse(
+        "admin/prompt-templates/quest-evaluate",
+        err,
+        503,
+        "AI generation is not configured."
       );
     }
-    const message =
-      err instanceof Error ? err.message : "Quest evaluation failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    if (err instanceof OpenAiRequestError) {
+      return apiErrorResponse(
+        "admin/prompt-templates/quest-evaluate",
+        err,
+        err.status >= 400 && err.status < 600 ? err.status : 502,
+        "AI generation request failed."
+      );
+    }
+    return apiErrorResponse(
+      "admin/prompt-templates/quest-evaluate",
+      err,
+      500,
+      "Quest evaluation failed."
+    );
   }
 }

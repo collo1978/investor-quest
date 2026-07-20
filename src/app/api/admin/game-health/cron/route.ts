@@ -9,15 +9,19 @@ export const maxDuration = 120;
 /**
  * POST /api/admin/game-health/cron
  * Scheduled health check (call every 15 min from cron or dashboard timer).
- * Optional header: x-game-health-secret matches GAME_HEALTH_CRON_SECRET
+ * Required header: x-game-health-secret matches GAME_HEALTH_CRON_SECRET
  */
 export async function POST(request: Request) {
   const secret = process.env.GAME_HEALTH_CRON_SECRET?.trim();
-  if (secret) {
-    const header = request.headers.get("x-game-health-secret");
-    if (header !== secret) {
-      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-    }
+  if (!secret) {
+    return NextResponse.json(
+      { error: "GAME_HEALTH_CRON_SECRET is not configured." },
+      { status: 503 }
+    );
+  }
+  const header = request.headers.get("x-game-health-secret");
+  if (header !== secret) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
   if (!isSupabaseConfigured()) {

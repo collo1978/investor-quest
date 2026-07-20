@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type {
   FilingSectionRow,
@@ -33,7 +33,7 @@ export async function upsertFilingWithSections(params: {
 }): Promise<StoredFilingExtraction | null> {
   if (!isSupabaseConfigured() || !params.sections.length) return null;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const formType = params.filing.formType as SecFilingFormType;
 
   const { data: filingRow, error: filingError } = await supabase
@@ -113,7 +113,7 @@ export async function listStoredSectionsForTicker(
 > {
   if (!isSupabaseConfigured()) return [];
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const symbol = ticker.toUpperCase();
 
   const { data: filings, error } = await supabase
@@ -188,7 +188,7 @@ export async function loadLatestFilingSectionText(
 } | null> {
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const symbol = ticker.toUpperCase();
 
   const { data: filing, error: filingError } = await supabase
@@ -235,7 +235,7 @@ export async function loadSectionsForAiPrompt(
 > {
   if (!sectionIds.length || !isSupabaseConfigured()) return [];
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("filing_sections")
     .select("id, section_key, section_label, quest_category, content_text, char_count, truncated")

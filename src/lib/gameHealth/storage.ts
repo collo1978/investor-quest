@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 import { platformReportFromCheckRecord } from "@/lib/gameHealth/buildPlatformReport";
@@ -116,7 +116,7 @@ export async function fetchGameHealthSettings(): Promise<GameHealthSettings> {
 
   if (!isSupabaseConfigured()) return defaults;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("game_health_settings")
     .select("*")
@@ -145,7 +145,7 @@ export async function updateGameHealthSettings(
     throw new Error("Supabase is not configured.");
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (patch.alertEmail !== undefined) row.alert_email = patch.alertEmail || null;
   if (patch.alertBelowScore !== undefined) row.alert_below_score = patch.alertBelowScore;
@@ -188,7 +188,7 @@ export async function insertGameHealthCheck(input: {
     throw new Error("Supabase is not configured.");
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
 
   const insertPayload: Record<string, unknown> = {
     score: input.score,
@@ -257,7 +257,7 @@ async function syncIssuesForCheck(
     "id" | "checkId" | "createdAt" | "updatedAt" | "status"
   >[]
 ): Promise<GameHealthIssueRecord[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const activeKeys = new Set(drafts.map((d) => d.issueKey));
 
   const { data: openRows } = await supabase
@@ -358,7 +358,7 @@ async function syncIssuesForCheck(
 export async function pruneGameHealthChecks(keep = 20): Promise<void> {
   if (!isSupabaseConfigured()) return;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data: stale } = await supabase
     .from("game_health_checks")
     .select("id")
@@ -374,7 +374,7 @@ export async function pruneGameHealthChecks(keep = 20): Promise<void> {
 export async function fetchLatestGameHealthCheck(): Promise<GameHealthCheckRecord | null> {
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("game_health_checks")
     .select("*")
@@ -392,7 +392,7 @@ export async function fetchLatestGameHealthCheck(): Promise<GameHealthCheckRecor
 export async function fetchGameHealthHistory(limit = 20): Promise<GameHealthCheckRecord[]> {
   if (!isSupabaseConfigured()) return [];
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("game_health_checks")
     .select("id, score, status_label, passed_checks, warnings, failed_checks, suggested_fixes, slowest_route, duration_ms, created_at")
@@ -406,7 +406,7 @@ export async function fetchGameHealthHistory(limit = 20): Promise<GameHealthChec
 export async function fetchOpenIssues(limit = 30): Promise<GameHealthIssueRecord[]> {
   if (!isSupabaseConfigured()) return [];
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("game_health_issues")
     .select("*")
@@ -421,7 +421,7 @@ export async function fetchOpenIssues(limit = 30): Promise<GameHealthIssueRecord
 async function fetchOpenIssuesForCheck(checkId: string): Promise<GameHealthIssueRecord[]> {
   if (!isSupabaseConfigured()) return [];
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("game_health_issues")
     .select("*")
@@ -438,7 +438,7 @@ export async function fetchGameHealthIssue(
 ): Promise<GameHealthIssueRecord | null> {
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("game_health_issues")
     .select("*")
@@ -453,7 +453,7 @@ export async function resolveGameHealthIssue(issueId: string): Promise<void> {
   if (!isSupabaseConfigured()) return;
 
   const issue = await fetchGameHealthIssue(issueId);
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
 
   const resolution = issue ? readResolutionIntelligence(issue.metadata) : null;
   const nextResolution = resolution
@@ -498,7 +498,7 @@ export async function updateGameHealthIssueMetadata(
   const issue = await fetchGameHealthIssue(issueId);
   if (!issue) return;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   await supabase
     .from("game_health_issues")
     .update({
@@ -524,7 +524,7 @@ export async function probeGameHealthSchema(): Promise<{
     return { ok: false, missingTables: [...GAME_HEALTH_TABLES], settingsRowExists: false };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const missingTables: string[] = [];
 
   for (const table of GAME_HEALTH_TABLES) {
@@ -561,7 +561,7 @@ export async function probeGameHealthSchema(): Promise<{
 export async function markAlertSent(score: number): Promise<void> {
   if (!isSupabaseConfigured()) return;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   await supabase
     .from("game_health_settings")
     .update({
