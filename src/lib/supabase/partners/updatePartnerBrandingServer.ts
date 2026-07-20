@@ -1,5 +1,5 @@
 import type { PartnerBranding } from "@/platform/types";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getPartnerById } from "@/platform/partners/partnerRegistry";
 import { mapBranding } from "./mapPartnerConfig";
@@ -50,7 +50,7 @@ export async function updatePartnerBrandingInSupabase(
     throw new Error(`Partner not found: ${partnerId}`);
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("partner_branding")
     .update({

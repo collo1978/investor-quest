@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import {
   APPLE_DEMO_GEOGRAPHIC_REVENUE,
@@ -71,7 +71,7 @@ function mapRow(row: ReportRow): GeographicRevenueReport {
 async function fetchReportRow(
   ticker: string
 ): Promise<GeographicRevenueReport | null> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("company_geographic_revenue_reports")
     .select(
@@ -98,7 +98,7 @@ export async function upsertGeographicRevenueReport(params: {
 }): Promise<void> {
   if (!isSupabaseConfigured() || params.segments.length < 2) return;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const segmentsJson = params.segments.map((s) => ({
     regionKey: s.regionKey,
     label: s.label,

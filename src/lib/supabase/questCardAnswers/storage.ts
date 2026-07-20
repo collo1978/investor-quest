@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 
 import { sanitizeQuestAnswerText } from "@/lib/quests/sanitizeQuestAnswer";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 import type {
@@ -48,7 +48,7 @@ export async function upsertQuestCardAnswer(
 ): Promise<StoredQuestCardAnswer | null> {
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const ticker = input.ticker.trim().toUpperCase();
 
   const { data, error } = await supabase
@@ -90,7 +90,7 @@ export async function fetchQuestCardAnswersForSlug(params: {
 }): Promise<Record<string, StoredQuestCardAnswer>> {
   if (!isSupabaseConfigured()) return {};
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("company_quest_card_answers")
     .select(

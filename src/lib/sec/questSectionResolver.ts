@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type { SecFilingFormType } from "@/lib/sec/types";
 
@@ -19,7 +19,7 @@ export async function loadExtractedSectionForQuest(params: {
 } | null> {
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data: filing } = await supabase
     .from("sec_filings")
     .select("id, accession_number")

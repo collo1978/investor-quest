@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import {
   mapInputToRow,
@@ -26,7 +26,7 @@ export async function listQuestContentCards(options?: {
 }): Promise<QuestContentCardRow[]> {
   if (!isSupabaseConfigured()) return [];
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   let query = supabase
     .from("quest_content_cards")
     .select("*")
@@ -59,7 +59,7 @@ export async function getQuestContentCardById(
 ): Promise<QuestContentCardRow | null> {
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("quest_content_cards")
     .select("*")
@@ -75,7 +75,7 @@ export async function createQuestContentCard(input: QuestContentCardInput) {
     throw new Error("Supabase is not configured.");
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const row = mapInputToRow(input);
 
   const { data, error } = await supabase
@@ -147,7 +147,7 @@ export async function updateQuestContentCard(
     isActive: patch.isActive ?? existing.is_active
   };
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("quest_content_cards")
     .update({
@@ -170,7 +170,7 @@ export async function reorderQuestContentCards(
     throw new Error("Supabase is not configured.");
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
 
   for (let i = 0; i < orderedIds.length; i++) {
     const { error } = await supabase

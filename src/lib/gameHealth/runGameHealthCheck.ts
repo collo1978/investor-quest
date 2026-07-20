@@ -25,7 +25,7 @@ import { isOpenAiConfigured } from "@/lib/ai/env";
 import { isSecApiConfigured } from "@/lib/sec/env";
 import { passesQuestJargonGate } from "@/lib/quests/questJargonGate";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { fetchQuestCardAnswersForSlug } from "@/lib/supabase/questCardAnswers/storage";
 import { runQuestFlowHealthChecks } from "@/lib/gameHealth/questFlowChecks";
 import {
@@ -204,7 +204,7 @@ export async function runGameHealthCheck(options?: {
     );
 
     try {
-      const supabase = await createSupabaseServerClient();
+      const supabase = createSupabaseServiceRoleClient();
       const t0 = Date.now();
       const { error } = await supabase
         .from("company_quest_card_answers")
@@ -517,7 +517,7 @@ export async function runGameHealthCheck(options?: {
   // Prompt templates
   if (isSupabaseConfigured()) {
     try {
-      const supabase = await createSupabaseServerClient();
+      const supabase = createSupabaseServiceRoleClient();
       const { data, error } = await supabase
         .from("prompt_templates")
         .select("template_key")
@@ -607,7 +607,7 @@ export async function runGameHealthCheck(options?: {
 
   if (isSupabaseConfigured()) {
     try {
-      const supabase = await createSupabaseServerClient();
+      const supabase = createSupabaseServiceRoleClient();
       const { count, error } = await supabase
         .from("quest_content_cards")
         .select("id", { count: "exact", head: true })

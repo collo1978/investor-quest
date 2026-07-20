@@ -8,7 +8,7 @@ import type {
   PartnerAnalyticsSettingsRow,
   PartnerAnalyticsSettingsUpdate
 } from "@/lib/analytics/partnerSettingsTypes";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceRoleClient } from "@/lib/supabase/serviceClient";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { listPartners } from "@/platform/partners/partnerRegistry";
 
@@ -66,7 +66,7 @@ export async function listPartnerAnalyticsSettings(): Promise<
     return listPartners().map((p) => demoRow(p.id));
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("partner_analytics_settings")
     .select("*")
@@ -87,7 +87,7 @@ export async function getPartnerAnalyticsSettings(
     return demoRow(partnerId);
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("partner_analytics_settings")
     .select("*")
@@ -128,7 +128,7 @@ export async function upsertPartnerAnalyticsSettings(
     };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseServiceRoleClient();
   const { data, error } = await supabase
     .from("partner_analytics_settings")
     .upsert(payload, { onConflict: "partner_id" })
