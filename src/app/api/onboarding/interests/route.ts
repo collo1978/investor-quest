@@ -16,7 +16,16 @@ export async function GET() {
   });
 }
 
-/** Persist user-selected interests (guest or authenticated). */
+/**
+ * Persist user-selected interests for the anonymous demo guest.
+ *
+ * `guestId` is a client-generated local pairing key (see
+ * `getOrCreateOnboardingGuestId`), not an identity claim, so trusting a
+ * client-supplied value is fine — it only ever addresses that guest's own
+ * local record. There is no authenticated-user path in this app (no login,
+ * no session), so this route no longer accepts a client-supplied `userId`:
+ * nothing verifies it belongs to the caller, and no live caller sends one.
+ */
 export async function POST(request: Request) {
   let body: unknown;
   try {
@@ -31,18 +40,14 @@ export async function POST(request: Request) {
 
   const b = body as Record<string, unknown>;
   const guestId = typeof b.guestId === "string" ? b.guestId.trim() : undefined;
-  const userId = typeof b.userId === "string" ? b.userId.trim() : undefined;
   const interestIds = Array.isArray(b.interestIds)
     ? normalizeInterestSlugs((b.interestIds as string[]).join(","))
     : typeof b.interests === "string"
       ? normalizeInterestSlugs(b.interests)
       : [];
 
-  if (!guestId && !userId) {
-    return NextResponse.json(
-      { error: "guestId or userId is required." },
-      { status: 400 }
-    );
+  if (!guestId) {
+    return NextResponse.json({ error: "guestId is required." }, { status: 400 });
   }
 
   if (interestIds.length === 0) {
@@ -51,7 +56,6 @@ export async function POST(request: Request) {
 
   const result = await persistUserInterestsWithFallback({
     guestId,
-    userId,
     interestIds
   });
 
