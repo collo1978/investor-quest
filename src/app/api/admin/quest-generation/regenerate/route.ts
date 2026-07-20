@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import type { PillarId } from "@/data/pillars";
 import { isOpenAiConfigured, OpenAiConfigError } from "@/lib/ai/env";
+import { apiErrorResponse } from "@/lib/api/errorResponse";
 import {
   regenerateAllCompanies,
   regenerateQuestContent
@@ -107,16 +108,26 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     if (err instanceof OpenAiConfigError) {
-      return NextResponse.json({ error: err.message }, { status: 503 });
-    }
-    if (err instanceof OpenAiRequestError) {
-      return NextResponse.json(
-        { error: "OpenAI request failed.", detail: err.message },
-        { status: err.status >= 400 && err.status < 600 ? err.status : 502 }
+      return apiErrorResponse(
+        "admin/quest-generation/regenerate",
+        err,
+        503,
+        "AI generation is not configured."
       );
     }
-    const message =
-      err instanceof Error ? err.message : "Quest regeneration failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    if (err instanceof OpenAiRequestError) {
+      return apiErrorResponse(
+        "admin/quest-generation/regenerate",
+        err,
+        err.status >= 400 && err.status < 600 ? err.status : 502,
+        "AI generation request failed."
+      );
+    }
+    return apiErrorResponse(
+      "admin/quest-generation/regenerate",
+      err,
+      500,
+      "Quest regeneration failed."
+    );
   }
 }

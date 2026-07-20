@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { apiErrorResponse } from "@/lib/api/errorResponse";
 import {
   createQuestContentCard,
   listQuestContentAdmin
@@ -142,10 +143,10 @@ export async function GET(request: Request) {
       source: "supabase" as const
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to load quest content.";
+    console.error("[admin/quest-content GET]", err);
     return NextResponse.json(
       {
-        error: message,
+        error: "Failed to load quest content.",
         cards: [],
         countsByPillar: {},
         sectionOptions: SEC_QUEST_SECTION_MAPPINGS
@@ -176,7 +177,6 @@ export async function POST(request: Request) {
     const card = await createQuestContentCard(validated.data);
     return NextResponse.json({ card }, { status: 201 });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Create failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return apiErrorResponse("admin/quest-content POST", err, 500, "Create failed.");
   }
 }
