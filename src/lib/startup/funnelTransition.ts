@@ -7,6 +7,8 @@ const KEY = "iq-funnel-transition";
 
 export type FunnelTransitionTarget =
   | "welcome"
+  | "name"
+  | "pick-avatar"
   | "avatar"
   | "onboarding"
   | "map"
@@ -36,6 +38,8 @@ export function getFunnelTransition(): FunnelTransitionTarget | null {
     const v = sessionStorage.getItem(KEY);
     if (
       v === "welcome" ||
+      v === "name" ||
+      v === "pick-avatar" ||
       v === "avatar" ||
       v === "onboarding" ||
       v === "map" ||

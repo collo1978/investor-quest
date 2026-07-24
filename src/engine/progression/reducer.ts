@@ -41,7 +41,8 @@ import {
   type CompanyProgress,
   type GameState,
   type PillarState,
-  type QuestWork
+  type QuestWork,
+  type SchoolsLearnerProfile
 } from "@/engine/progression/state";
 import { questCardCompositeSlug } from "@/lib/quests/questCardReadProgress";
 
@@ -53,6 +54,10 @@ export type GameAction =
   | { type: "hydrate"; state: GameState }
   | { type: "reset" }
   | { type: "set-profile"; playerName: string; goal: string }
+  | {
+      type: "set-schools-profile";
+      patch: Partial<Omit<SchoolsLearnerProfile, "updatedAt">>;
+    }
   | { type: "set-onboarding-step"; step: number }
   | { type: "complete-onboarding" }
   | { type: "complete-opening-screen" }
@@ -372,6 +377,19 @@ export function reduce(state: GameState, action: GameAction): ReduceResult {
           ...state,
           playerName: action.playerName,
           goal: action.goal
+        },
+        events
+      };
+
+    case "set-schools-profile":
+      return {
+        state: {
+          ...state,
+          schoolsProfile: {
+            ...state.schoolsProfile,
+            ...action.patch,
+            updatedAt: Date.now()
+          }
         },
         events
       };

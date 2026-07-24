@@ -21,7 +21,7 @@ export type SchoolsPickInterestsScreenProps = {
   onBack: () => void;
 };
 
-type SchoolsInterestCard = {
+export type SchoolsInterestCard = {
   id: string;
   label: string;
   subtitle: string;
@@ -32,7 +32,7 @@ type SchoolsInterestCard = {
   highlight: string;
 };
 
-const SCHOOLS_INTEREST_CARDS: readonly SchoolsInterestCard[] = [
+export const SCHOOLS_INTEREST_CARDS: readonly SchoolsInterestCard[] = [
   {
     id: "ai",
     label: "AI & Robotics",
@@ -597,12 +597,17 @@ function CinematicInterestCard({
       }
       whileTap={dimmed ? undefined : { scale: 0.98 }}
       animate={{
-        scale: selected ? 1.018 : 1,
+        y: selected ? [0, -3, 0] : [0, -1.5, 0],
+        scale: selected ? [1.018, 1.035, 1.018] : [1, 1.006, 1],
         opacity: dimmed ? 0.42 : 1
       }}
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      transition={{
+        duration: selected ? 2.6 : 4.2,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
       className={[
-        "group relative isolate flex h-[10.15rem] w-full flex-col items-stretch gap-2 rounded-3xl text-center md:h-[9.8rem]",
+        "group relative isolate flex h-[11.35rem] w-full flex-col items-stretch gap-2.5 rounded-3xl text-center md:h-[10.95rem]",
         "pointer-events-auto touch-manipulation",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/75",
         dimmed ? "cursor-not-allowed" : "cursor-pointer"
@@ -610,7 +615,7 @@ function CinematicInterestCard({
     >
       <div
         className={[
-          "relative isolate h-[7.45rem] shrink-0 overflow-hidden rounded-3xl border md:h-[7.1rem]",
+          "relative isolate h-[8.25rem] shrink-0 overflow-hidden rounded-3xl border md:h-[7.95rem]",
           "shadow-[0_18px_42px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.16)]",
           selected ? "border-violet-100/75" : "border-violet-300/20"
         ].join(" ")}
@@ -689,9 +694,9 @@ function CinematicInterestCard({
         ) : null}
       </div>
 
-      <div className="pointer-events-none relative z-10 h-[2.35rem] shrink-0 px-1 text-center">
+      <div className="pointer-events-none relative z-10 h-[2.55rem] shrink-0 px-1 text-center">
         <span
-          className="mx-auto grid h-full w-full place-items-center rounded-full border border-white/10 bg-[rgba(8,6,18,0.54)] px-3 py-1 font-[var(--font-grotesk)] text-[clamp(0.68rem,1vw,0.82rem)] font-black uppercase leading-tight tracking-[0.075em] text-white shadow-[0_8px_22px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.12)] drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]"
+          className="mx-auto grid h-full w-full place-items-center rounded-full border border-white/10 bg-[rgba(8,6,18,0.54)] px-3 py-1 font-[var(--font-grotesk)] text-[clamp(0.74rem,1.05vw,0.9rem)] font-black uppercase leading-tight tracking-[0.075em] text-white shadow-[0_8px_22px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.12)] drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]"
           style={{
             boxShadow: selected
               ? `0 0 0 1px rgba(255,255,255,0.12), 0 0 22px ${card.glow}, 0 8px 22px rgba(0,0,0,0.32)`
@@ -708,7 +713,7 @@ function CinematicInterestCard({
 /** Schools onboarding — cinematic pick 1 interest. */
 export function SchoolsPickInterestsScreen({
   onContinue,
-  onBack
+  onBack: _onBack
 }: SchoolsPickInterestsScreenProps) {
   const [selected, setSelected] = useState<string[]>([]);
   const canContinue = selected.length === SCHOOLS_PICK_INTERESTS_REQUIRED_COUNT;
@@ -757,20 +762,22 @@ export function SchoolsPickInterestsScreen({
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0 opacity-30 [background-image:radial-gradient(rgba(139,92,246,0.35)_1px,transparent_1px)] [background-size:32px_32px]"
       />
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-0 iq-schools-interest-vault-bg" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-0 iq-schools-interest-ribbon-bg" />
 
-      <div className="iq-schools-deck-pick-body relative z-20 flex min-h-0 flex-1 flex-col px-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] pb-[calc(5.65rem+env(safe-area-inset-bottom))]">
-        <div className="absolute left-[max(1.25rem,env(safe-area-inset-left))] top-[max(0.5rem,env(safe-area-inset-top))] z-40">
+      <div className="iq-schools-deck-pick-body relative z-20 flex min-h-0 flex-1 flex-col items-center px-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] pb-[calc(7.6rem+env(safe-area-inset-bottom))]">
+        <div className="hidden">
           <button
             type="button"
             aria-label="Go back"
-            onClick={onBack}
-            className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-xl border border-violet-500/35 bg-[rgba(8,6,18,0.75)] text-lg text-violet-200/90 shadow-[0_0_14px_rgba(139,92,246,0.18)] transition hover:border-violet-400/55 hover:bg-violet-500/10"
+            onClick={_onBack}
+            className="iq-schools-interest-back-btn pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-violet-500/35 bg-[rgba(8,6,18,0.75)] text-lg text-violet-200/90 shadow-[0_0_14px_rgba(139,92,246,0.18)] transition hover:border-violet-400/55 hover:bg-violet-500/10"
           >
             ‹
           </button>
         </div>
 
-        <header className="pointer-events-none shrink-0 px-12 pb-1.5 pt-[max(0.45rem,env(safe-area-inset-top))] text-center">
+        <header className="pointer-events-none shrink-0 px-12 pb-3 pt-[max(0.65rem,env(safe-area-inset-top))] text-center">
           <motion.h1
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -789,9 +796,9 @@ export function SchoolsPickInterestsScreen({
           </motion.p>
         </header>
 
-        <div className="relative z-30 min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-1">
+        <div className="iq-schools-interest-stage relative z-30 mx-auto w-full max-w-[min(1580px,96vw)] overflow-y-auto overflow-x-hidden px-6 py-6">
           <motion.div
-            className="iq-schools-deck-pick-grid pointer-events-auto mx-auto grid w-full max-w-[min(1360px,97vw)] grid-cols-2 gap-3 md:grid-cols-4 md:gap-3.5 xl:grid-cols-6"
+            className="iq-schools-deck-pick-grid pointer-events-auto mx-auto grid w-full grid-cols-2 gap-4 md:grid-cols-4 md:gap-5 xl:grid-cols-6 xl:gap-7"
             variants={gridContainerVariants}
             initial="hidden"
             animate="visible"
@@ -816,14 +823,14 @@ export function SchoolsPickInterestsScreen({
         </div>
       </div>
 
-      <footer className="iq-schools-opening-cta-dock pointer-events-none absolute inset-x-0 bottom-0 z-40">
-        <div className="pointer-events-auto mx-auto w-full max-w-lg px-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] text-center">
+      <footer className="iq-schools-interest-cta-dock pointer-events-none absolute inset-x-0 bottom-0 z-40">
+        <div className="pointer-events-auto mx-auto flex w-full max-w-xl flex-col items-center px-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] text-center">
           {canContinue ? (
-            <p className="mb-3 text-sm font-semibold tracking-[0.04em] text-violet-200/90">
+            <p className="iq-schools-interest-status mb-3 text-sm font-semibold tracking-[0.04em] text-violet-100/90">
               Worlds unlocked — ready to explore.
             </p>
           ) : (
-            <p className="mb-3 text-xs text-ink-2">
+            <p className="iq-schools-interest-status mb-3 text-xs text-violet-100/70">
               {remaining === SCHOOLS_PICK_INTERESTS_REQUIRED_COUNT
                 ? `Select ${SCHOOLS_PICK_INTERESTS_REQUIRED_COUNT} to continue`
                 : `Select ${remaining} more`}
@@ -834,7 +841,8 @@ export function SchoolsPickInterestsScreen({
             disabled={!canContinue}
             onClick={handleContinue}
             className={[
-              "iq-schools-opening-cta-primary w-full justify-center",
+              "iq-schools-interest-continue-btn w-full justify-center",
+              canContinue ? "iq-schools-interest-continue-btn--armed" : "",
               "min-h-[54px] rounded-full px-8 py-3.5",
               "border-2 border-violet-300/45",
               "text-sm font-bold uppercase tracking-[0.14em]"

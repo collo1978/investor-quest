@@ -2,13 +2,15 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 
 import { GlassCard } from "@/components/GlassCard";
 import { InvestorQuestBrandLogo } from "@/components/InvestorQuestBrandLogo";
 import { NeonButton } from "@/components/NeonButton";
 import { useInvestorProfileSnapshot } from "@/hooks/useInvestorProfileSnapshot";
 import { formatAnalyticsNumber } from "@/lib/analytics/formatDisplay";
+import { getSchoolsAvatarPortraitSrc } from "@/lib/schools/schoolsAvatarPortraits";
+import type { SchoolsAvatarId } from "@/lib/schools/avatars";
 import type {
   ProfileAchievement,
   ProfileCompanyView,
@@ -25,12 +27,15 @@ type Props = {
   variant?: "default" | "schools";
   backHref?: string;
   backLabel?: string;
+  /** Extra header action(s) rendered alongside back/nav buttons (e.g. replay-profile). */
+  headerExtra?: ReactNode;
 };
 
 export function InvestorProfileDashboard({
   variant = "default",
   backHref,
-  backLabel = "Back"
+  backLabel = "Back",
+  headerExtra
 }: Props) {
   const { snapshot, selectedCompanyId, setSelectedCompanyId } =
     useInvestorProfileSnapshot();
@@ -104,6 +109,7 @@ export function InvestorProfileDashboard({
                 XP ladder
               </NeonButton>
             )}
+            {headerExtra}
           </div>
         </header>
 
@@ -167,7 +173,7 @@ function InvestorHeroCard({
     <GlassCard className="border-white/10 bg-[rgba(12,10,24,0.55)] backdrop-blur-xl">
       <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-center">
         <div
-          className="mx-auto flex h-24 w-24 shrink-0 items-center justify-center rounded-full border-2 md:mx-0 md:h-28 md:w-28"
+          className="mx-auto flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 md:mx-0 md:h-28 md:w-28"
           style={{
             borderColor: "rgba(168,85,247,0.5)",
             background:
@@ -175,9 +181,21 @@ function InvestorHeroCard({
             boxShadow: "0 0 40px rgba(168,85,247,0.35)"
           }}
         >
-          <span className="font-[var(--font-grotesk)] text-xl font-bold tracking-[0.18em] md:text-2xl">
-            {snapshot.initials}
-          </span>
+          {snapshot.schoolsIdentity?.avatar ? (
+            <img
+              src={getSchoolsAvatarPortraitSrc(
+                snapshot.schoolsIdentity.avatar.id as SchoolsAvatarId
+              )}
+              alt={snapshot.schoolsIdentity.avatar.name}
+              draggable={false}
+              decoding="async"
+              className="h-full w-full select-none object-cover object-top"
+            />
+          ) : (
+            <span className="font-[var(--font-grotesk)] text-xl font-bold tracking-[0.18em] md:text-2xl">
+              {snapshot.initials}
+            </span>
+          )}
         </div>
         <div className="min-w-0 text-center md:text-left">
           <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-2">
@@ -198,7 +216,41 @@ function InvestorHeroCard({
               Level {snapshot.level}
             </span>
             <span className="text-sm font-semibold text-amber-100/95">{snapshot.title}</span>
+            {snapshot.schoolsIdentity?.armor ? (
+              <span
+                className="rounded-lg border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em]"
+                style={{
+                  borderColor: "rgba(245,197,71,0.4)",
+                  color: GOLD,
+                  background: "rgba(245,197,71,0.08)"
+                }}
+              >
+                {snapshot.schoolsIdentity.armor.title}
+              </span>
+            ) : null}
           </div>
+          {snapshot.schoolsIdentity &&
+          snapshot.schoolsIdentity.interestLabels.length > 0 ? (
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5 md:justify-start">
+              {snapshot.schoolsIdentity.interestLabels.map((label) => (
+                <span
+                  key={label}
+                  className="rounded-full border border-white/10 bg-black/30 px-2 py-0.5 text-[10px] font-medium text-ink-1"
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          {snapshot.schoolsIdentity &&
+          snapshot.schoolsIdentity.learnerTypeLabels.length > 0 ? (
+            <p className="mt-2 text-xs italic text-ink-2">
+              &ldquo;{snapshot.schoolsIdentity.learnerTypeLabels[0]}&rdquo;
+              {snapshot.schoolsIdentity.learnerTypeLabels.length > 1
+                ? ` +${snapshot.schoolsIdentity.learnerTypeLabels.length - 1} more`
+                : ""}
+            </p>
+          ) : null}
           <p className="mt-2 text-sm text-ink-1">
             <span className="font-semibold tabular-nums text-ink-0">
               {formatAnalyticsNumber(snapshot.xp)}

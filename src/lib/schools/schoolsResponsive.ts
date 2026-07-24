@@ -8,5 +8,5 @@
 export const SCHOOLS_DEVICE = {
   mobileOnly: "md:hidden",
   tabletOnly: "hidden md:flex lg:hidden",
-  desktopOnly: "hidden lg:block"
+  desktopOnly: "hidden lg:flex"
 } as const;

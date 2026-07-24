@@ -41,6 +41,7 @@ import {
   type ProgressionStore,
   type QuestWork,
   type RewardEvent,
+  type SchoolsLearnerProfile,
   type StreakKind
 } from "@/engine";
 import type { PillarId } from "@/data/pillars";
@@ -72,6 +73,7 @@ import { isSchoolsDemoStoryModeActive } from "@/lib/schools/schoolsDemoStoryMode
 import { getMaxProgressRevision } from "@/lib/gameState/stateActivity";
 import {
   buildSchoolsDemoPresenterResetState,
+  consumeSchoolsDemoResetKind,
   SCHOOLS_DEMO_RESET_EVENT
 } from "@/lib/schools/resetSchoolsDemoProgress";
 
@@ -107,8 +109,13 @@ const initialFx: FxState = {
   completionXp: null
 };
 
+const PERSIST_SAVE_DEBOUNCE_MS = 300;
+
 type GameActions = {
   setProfile: (profile: { playerName: string; goal: string }) => void;
+  setSchoolsProfile: (
+    patch: Partial<Omit<SchoolsLearnerProfile, "updatedAt">>
+  ) => void;
   setActiveCompany: (companyId: string) => void;
   setActivePillar: (pillarId: PillarId) => void;
   setActiveQuest: (pillarId: PillarId, slug: string | null) => void;
@@ -176,6 +183,7 @@ type ContextState = {
   unlockedCompanyIds: string[];
   lastActivityAt: number | null;
   pendingConvictionQueue: CompanyProgress["pendingConvictionQueue"];
+  schoolsProfile: SchoolsLearnerProfile;
 };
 
 type GameContextValue = {
@@ -409,7 +417,11 @@ export function GameProvider({
 
   useEffect(() => {
     const applySchoolsDemoReset = () => {
-      const next = buildSchoolsDemoPresenterResetState();
+      const kind = consumeSchoolsDemoResetKind();
+      const next =
+        kind === "profile"
+          ? readClientGameState()
+          : buildSchoolsDemoPresenterResetState();
       const stamped: GameState = {
         ...next,
         version: next.version,
@@ -433,9 +445,32 @@ export function GameProvider({
   useEffect(() => {
     if (skipProgressStoreSync()) return;
     if (!persistReadyRef.current || corruptSaveBlocked) return;
-    void store.save(state).then(() => {
-      logQuestProgress("persist.saved", summarizeReadProgress(state));
-    });
+
+    let cancelled = false;
+    let idleId: number | null = null;
+    const saveSnapshot = () => {
+      if (cancelled) return;
+      void store.save(state).then(() => {
+        if (!cancelled) {
+          logQuestProgress("persist.saved", summarizeReadProgress(state));
+        }
+      });
+    };
+    const timeoutId = window.setTimeout(() => {
+      if (typeof requestIdleCallback !== "undefined") {
+        idleId = requestIdleCallback(saveSnapshot, { timeout: 1500 });
+      } else {
+        saveSnapshot();
+      }
+    }, PERSIST_SAVE_DEBOUNCE_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+      if (idleId !== null && typeof cancelIdleCallback !== "undefined") {
+        cancelIdleCallback(idleId);
+      }
+    };
   }, [hydrated, state, store, corruptSaveBlocked]);
 
   const dispatch = useCallback(
@@ -515,6 +550,8 @@ export function GameProvider({
     () => ({
       setProfile: ({ playerName, goal }) =>
         dispatch({ type: "set-profile", playerName, goal }),
+      setSchoolsProfile: (patch) =>
+        dispatch({ type: "set-schools-profile", patch }),
       setActiveCompany: (companyId) =>
         dispatch({
           type: "set-active-company",
@@ -635,7 +672,8 @@ export function GameProvider({
         onboarding: state.onboarding,
         unlockedCompanyIds: state.unlockedCompanyIds,
         lastActivityAt: state.lastActivityAt,
-        pendingConvictionQueue: prog.pendingConvictionQueue
+        pendingConvictionQueue: prog.pendingConvictionQueue,
+        schoolsProfile: state.schoolsProfile
       },
       raw: state,
       actions,

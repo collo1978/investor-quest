@@ -25,6 +25,7 @@
  *   v11 — sequential pillar unlock (business first), `questMapBriefDismissedAt`
  *   v12 — `onboarding.openingScreenSeenAt` (cinematic opening gate)
  *   v13 — `onboarding.welcomeScreenSeenAt` (post-logo welcome landing)
+ *   v14 — `schoolsProfile` (Schools funnel avatar/armor/learner-type/interests)
  */
 
 import {
@@ -42,6 +43,7 @@ import type { BadgeId } from "@/engine/progression/badges";
 import { isQuestMapDefaultUnlocked } from "@/engine/progression/pillarUnlockPolicy";
 import { isPillarComplete } from "@/engine/progression/unlocks";
 import {
+  emptySchoolsLearnerProfile,
   initialCompanyProgress,
   initialState,
   STATE_VERSION,
@@ -51,6 +53,7 @@ import {
   type OnboardingState,
   type PendingConvictionItem,
   type PillarState,
+  type SchoolsLearnerProfile,
   type TenKRookieChallengeRecord
 } from "@/engine/progression/state";
 import { computeLevel } from "@/engine/progression/xp";
@@ -403,6 +406,22 @@ function migrateOnboarding(raw: unknown): OnboardingState {
   return { step, completedAt, openingScreenSeenAt, welcomeScreenSeenAt };
 }
 
+function migrateSchoolsProfile(raw: unknown): SchoolsLearnerProfile {
+  const base = emptySchoolsLearnerProfile();
+  if (!isPlainObject(raw)) return base;
+  const avatarId = typeof raw.avatarId === "string" ? raw.avatarId : null;
+  const armorId = typeof raw.armorId === "string" ? raw.armorId : null;
+  const learnerType = Array.isArray(raw.learnerType)
+    ? raw.learnerType.filter((x): x is string => typeof x === "string")
+    : [];
+  const interests = Array.isArray(raw.interests)
+    ? raw.interests.filter((x): x is string => typeof x === "string")
+    : [];
+  const updatedAt =
+    typeof raw.updatedAt === "number" ? (raw.updatedAt as number) : null;
+  return { avatarId, armorId, learnerType, interests, updatedAt };
+}
+
 function migrateUnlockedCompanies(raw: unknown): CompanyId[] {
   if (!Array.isArray(raw)) return normalizePlayableUnlockedCompanies([]);
   const filtered = raw.filter((x): x is CompanyId => {
@@ -435,7 +454,8 @@ export function migrateRaw(raw: unknown): GameState | null {
         openingScreenSeenAt: null,
         welcomeScreenSeenAt: null
       },
-      lastActivityAt: null
+      lastActivityAt: null,
+      schoolsProfile: migrateSchoolsProfile(raw.schoolsProfile)
     };
   }
 
@@ -474,7 +494,8 @@ export function migrateRaw(raw: unknown): GameState | null {
     lastActivityAt:
       typeof raw.lastActivityAt === "number"
         ? (raw.lastActivityAt as number)
-        : null
+        : null,
+    schoolsProfile: migrateSchoolsProfile(raw.schoolsProfile)
   };
 }
 

@@ -6,6 +6,7 @@ import {
 import type { BadgeId } from "@/engine/progression/badges";
 import {
   emptyPillarStates,
+  emptySchoolsLearnerProfile,
   initialCompanyProgress,
   initialState,
   type CompanyProgress,
@@ -205,7 +206,8 @@ export function buildNewUserDemoState(): GameState {
       openingScreenSeenAt: null,
       welcomeScreenSeenAt: null
     },
-    lastActivityAt: null
+    lastActivityAt: null,
+    schoolsProfile: emptySchoolsLearnerProfile()
   };
 }
 
@@ -231,7 +233,8 @@ export function buildInvestorDemoState(): GameState {
       openingScreenSeenAt: now - 60_000,
       welcomeScreenSeenAt: now - 60_000
     },
-    lastActivityAt: now
+    lastActivityAt: now,
+    schoolsProfile: emptySchoolsLearnerProfile()
   };
 }
 

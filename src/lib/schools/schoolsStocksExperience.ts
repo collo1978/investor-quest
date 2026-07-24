@@ -88,3 +88,12 @@ export function writeSchoolsStocksExperienceSelections(
     /* ignore */
   }
 }
+
+export function clearSchoolsStocksExperienceSelections(): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.removeItem(SCHOOLS_STOCKS_EXPERIENCE_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}

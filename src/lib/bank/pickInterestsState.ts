@@ -40,3 +40,12 @@ export function writePickInterestsSelection(ids: string[]): void {
     /* ignore */
   }
 }
+
+export function clearPickInterestsSelection(): void {
+  if (typeof sessionStorage === "undefined") return;
+  try {
+    sessionStorage.removeItem(PICK_INTERESTS_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}

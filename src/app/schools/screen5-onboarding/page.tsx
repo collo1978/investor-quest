@@ -3,21 +3,27 @@
 import { useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
+import { useGame } from "@/components/GameProvider";
 import { SchoolsSoundsLikeYouScreen } from "@/components/schools/SchoolsSoundsLikeYouScreen";
 import { hrefForSchoolsOnboardingStep } from "@/lib/schools/schoolsOnboardingFlow";
 import { resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
+import { readSchoolsStocksExperienceSelections } from "@/lib/schools/schoolsStocksExperience";
 import { SCHOOLS_MISSION_BRIEF_INVITATION_ROUTE } from "@/lib/schools/schoolsMissionBriefInvitationContent";
 
 /** Schools onboarding step 1 — stocks experience multi-select. */
 export default function SchoolsScreen5OnboardingPage() {
   const router = useRouter();
   const pathname = usePathname();
+  const { actions } = useGame();
 
   const onContinue = useCallback(() => {
+    actions.setSchoolsProfile({
+      learnerType: readSchoolsStocksExperienceSelections()
+    });
     router.replace(
       hrefForSchoolsOnboardingStep("/schools/pick-interests", pathname)
     );
-  }, [pathname, router]);
+  }, [actions, pathname, router]);
 
   const onBack = useCallback(() => {
     router.replace(

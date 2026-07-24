@@ -80,8 +80,8 @@ function MobileCarouselSlide({
   let scale = 0.84;
   if (distance === 1) scale = 0.94;
   if (focused && !selected) scale = 1.04;
-  if (focused && selected) scale = 1.08;
-  if (!focused && selected) scale = distance === 1 ? 0.96 : 0.86;
+  if (focused && selected) scale = 1.13;
+  if (!focused && selected) scale = distance === 1 ? 1 : 0.9;
 
   let opacity = 0.42;
   if (distance === 1) opacity = 0.72;

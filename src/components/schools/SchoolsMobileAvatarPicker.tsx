@@ -44,7 +44,8 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
   const carousel = useSchoolsAvatarCarousel(selectedId, onSelect, {
     slideVw: SLIDE_VW,
     slideGap: SLIDE_GAP,
-    selectOnSnap: false
+    selectOnSnap: false,
+    portraitHeightScale: PORTRAIT_HEIGHT_SCALE
   });
 
   const handleContinue = () => {
@@ -64,6 +65,8 @@ export function SchoolsMobileAvatarPicker({ selectedId, onSelect, onContinue }: 
       <div aria-hidden className="pointer-events-none absolute inset-0 iq-schools-armor-bg" />
       <div aria-hidden className="pointer-events-none absolute inset-0 iq-schools-avatar-mobile-nebula" />
       <div aria-hidden className="pointer-events-none absolute inset-0 iq-schools-avatar-mobile-hologram" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 iq-schools-avatar-tech-grid" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 iq-schools-avatar-light-ribbons" />
       <div aria-hidden className="pointer-events-none absolute inset-0 iq-schools-armor-vignette" />
       {AVATAR_BG_PARTICLES.map((p, i) => (
         <span

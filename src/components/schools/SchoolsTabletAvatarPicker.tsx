@@ -37,6 +37,8 @@ export function SchoolsTabletAvatarPicker({ selectedId, onSelect, onContinue }: 
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(1100px_620px_at_65%_22%,rgba(139,92,246,0.14),transparent_58%),radial-gradient(680px_480px_at_12%_68%,rgba(99,102,241,0.1),transparent_55%)]"
       />
+      <div aria-hidden className="pointer-events-none absolute inset-0 iq-schools-avatar-tech-grid" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 iq-schools-avatar-light-ribbons" />
 
       <SchoolsAvatarProgressPanel />
 

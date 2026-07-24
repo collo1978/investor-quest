@@ -81,7 +81,10 @@ export function SchoolsAvatarPortraitCard({
         aria-hidden
         draggable={false}
         decoding="async"
-        className="pointer-events-none block h-full w-full select-none object-cover object-top"
+        className={[
+          "pointer-events-none block h-full w-full select-none object-cover object-top transition-transform duration-300 ease-out",
+          selected ? "scale-[1.08]" : active ? "scale-[1.035]" : "scale-100"
+        ].join(" ")}
       />
       <div
         aria-hidden

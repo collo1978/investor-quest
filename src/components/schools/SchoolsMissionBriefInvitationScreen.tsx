@@ -5,13 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { useGame } from "@/components/GameProvider";
-import { getSchoolsArmorById } from "@/lib/schools/schoolsIdentities";
 import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
-import {
-  SCHOOLS_SCREEN5_ONBOARDING_ROUTE
-} from "@/lib/schools/schoolsMissionBriefInvitationContent";
 import { isSchoolsDemoPath, resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
-import { saveSchoolsArmor } from "@/lib/schools/schoolsIdentityStorage";
 import { markFunnelTransition } from "@/lib/startup/funnelTransition";
 
 const LETTER_LINES = [
@@ -35,18 +30,16 @@ const OPEN_EMERGE_RATIO = 0.22;
 const FIRST_LINE_EMERGE_RATIO = 0.3;
 const LINE_STEP_RATIO = 0.034;
 
-const MBI_LOGO_SRC = "/logos/current-schools-logo.png";
-
-type ScenePhase = "logo" | "envelope" | "opening" | "reading";
+type ScenePhase = "envelope" | "opening" | "reading";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 export function SchoolsMissionBriefInvitationScreen() {
   const router = useRouter();
   const pathname = usePathname();
-  const { actions, state } = useGame();
+  const { actions } = useGame();
   const reduceMotion = useReducedMotion();
-  const [phase, setPhase] = useState<ScenePhase>("logo");
+  const [phase, setPhase] = useState<ScenePhase>("envelope");
   const [lineIndex, setLineIndex] = useState(-1);
   const [charCount, setCharCount] = useState(0);
   const [typingDone, setTypingDone] = useState(false);
@@ -62,6 +55,7 @@ export function SchoolsMissionBriefInvitationScreen() {
   const openTimerRef = useRef<number | null>(null);
   const typeTimerRef = useRef<number | null>(null);
   const acceptanceTimerRef = useRef<number | null>(null);
+  const autoLineTimerRef = useRef<number | null>(null);
 
   const opened = phase === "opening" || phase === "reading";
   const reading = phase === "reading";
@@ -130,8 +124,7 @@ export function SchoolsMissionBriefInvitationScreen() {
   const acceptanceReady = isLastLine && typingDone;
   const currentLine = lineIndex >= 0 ? LETTER_LINES[lineIndex] : "";
   const display = currentLine.slice(0, charCount);
-  const sealInteractive =
-    phase === "envelope" || (reading && lineIndex >= 0 && !acceptanceReady);
+  const sealInteractive = phase === "envelope";
 
   const clearTimers = useCallback(() => {
     if (openTimerRef.current != null) {
@@ -142,16 +135,15 @@ export function SchoolsMissionBriefInvitationScreen() {
       window.clearTimeout(typeTimerRef.current);
       typeTimerRef.current = null;
     }
-  }, []);
-
-  const finishTyping = useCallback(() => {
-    if (typeTimerRef.current != null) {
-      window.clearTimeout(typeTimerRef.current);
-      typeTimerRef.current = null;
+    if (autoLineTimerRef.current != null) {
+      window.clearTimeout(autoLineTimerRef.current);
+      autoLineTimerRef.current = null;
     }
-    setCharCount(currentLine.length);
-    setTypingDone(true);
-  }, [currentLine]);
+    if (acceptanceTimerRef.current != null) {
+      window.clearTimeout(acceptanceTimerRef.current);
+      acceptanceTimerRef.current = null;
+    }
+  }, []);
 
   const startTyping = useCallback(
     (line: string) => {
@@ -186,13 +178,6 @@ export function SchoolsMissionBriefInvitationScreen() {
     [reduceMotion]
   );
 
-  useEffect(() => {
-    if (phase !== "logo") return;
-    const delay = reduceMotion === true ? 300 : 2000;
-    const id = window.setTimeout(() => setPhase("envelope"), delay);
-    return () => window.clearTimeout(id);
-  }, [phase, reduceMotion]);
-
   useEffect(() => () => clearTimers(), [clearTimers]);
 
   useEffect(() => {
@@ -205,6 +190,27 @@ export function SchoolsMissionBriefInvitationScreen() {
       }
     };
   }, [lineIndex, startTyping]);
+
+  useEffect(() => {
+    if (autoLineTimerRef.current != null) {
+      window.clearTimeout(autoLineTimerRef.current);
+      autoLineTimerRef.current = null;
+    }
+
+    if (!reading || !typingDone || isLastLine) return;
+
+    autoLineTimerRef.current = window.setTimeout(() => {
+      setLineIndex((index) => Math.min(index + 1, LETTER_LINES.length - 1));
+      autoLineTimerRef.current = null;
+    }, reduceMotion === true ? 120 : 620);
+
+    return () => {
+      if (autoLineTimerRef.current != null) {
+        window.clearTimeout(autoLineTimerRef.current);
+        autoLineTimerRef.current = null;
+      }
+    };
+  }, [isLastLine, reading, reduceMotion, typingDone]);
 
   useLayoutEffect(() => {
     scheduleMeasure();
@@ -290,93 +296,75 @@ export function SchoolsMissionBriefInvitationScreen() {
     openTimerRef.current = window.setTimeout(beginReading, delay);
   }
 
-  function advanceLetter() {
-    if (lineIndex < 0) return;
-
-    if (!typingDone) {
-      finishTyping();
-      return;
-    }
-
-    if (isLastLine) return;
-
-    setLineIndex((index) => index + 1);
-  }
-
   function handleSealClick() {
     if (phase === "envelope") {
       openSeal();
-      return;
-    }
-    if (reading) {
-      advanceLetter();
     }
   }
 
+  function skipInvitationAnimation() {
+    clearTimers();
+    if (acceptanceTimerRef.current != null) {
+      window.clearTimeout(acceptanceTimerRef.current);
+      acceptanceTimerRef.current = null;
+    }
+
+    const lastIndex = LETTER_LINES.length - 1;
+    const envH = envelopeRef.current?.offsetHeight ?? 320;
+    setPhase("reading");
+    setSealCracking(false);
+    setLineIndex(lastIndex);
+    setCharCount(LETTER_LINES[lastIndex].length);
+    setTypingDone(true);
+    setShowAccessStamp(true);
+    setShowBeginCta(true);
+    setSheetY(
+      -Math.round(envH * (FIRST_LINE_EMERGE_RATIO + lastIndex * LINE_STEP_RATIO))
+    );
+  }
+
   function handleBeginQuest() {
-    const pioneer = getSchoolsArmorById("pioneer");
-    saveSchoolsArmor("pioneer");
-    actions.setProfile({
-      playerName: pioneer.title,
-      goal: state.goal ?? "Build investing mastery"
-    });
     actions.completeOpeningScreen();
     actions.completeWelcomeScreen();
 
     if (isSchoolsDemoPath(pathname)) {
-      navigateSchoolsDemoStep("onboarding", pathname, router);
+      navigateSchoolsDemoStep("name", pathname, router);
       return;
     }
 
-    markFunnelTransition("onboarding");
-    router.replace(
-      resolveSchoolsLearnerHref(SCHOOLS_SCREEN5_ONBOARDING_ROUTE, pathname)
-    );
+    markFunnelTransition("name");
+    router.replace(resolveSchoolsLearnerHref("/schools/name", pathname));
   }
 
   useEffect(() => {
-    router.prefetch(
-      resolveSchoolsLearnerHref(SCHOOLS_SCREEN5_ONBOARDING_ROUTE, pathname)
-    );
+    router.prefetch(resolveSchoolsLearnerHref("/schools/name", pathname));
   }, [pathname, router]);
 
-  const promptText =
-    phase === "envelope" ? "Click the seal" : "Click the seal to continue";
+  const sealAriaLabel = "Click the seal to open your invitation";
 
-  const sealAriaLabel =
-    phase === "envelope"
-      ? "Click the seal to open your invitation"
-      : "Click the seal to continue reading the letter";
-
-  const showPrompt = (phase === "envelope" || reading) && !acceptanceReady;
+  const showPrompt = phase === "envelope";
 
   return (
     <main className="iq-mbi-screen">
       <div className="iq-mbi-vignette" aria-hidden />
       <div className="iq-mbi-spotlight" aria-hidden />
 
-      <motion.img
-        src={MBI_LOGO_SRC}
-        alt="Investor Quest"
-        width={560}
-        height={140}
-        draggable={false}
-        className="iq-mbi-invitation__logo"
-        initial={{ opacity: 0, y: 8, filter: "blur(6px)" }}
-        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        transition={{ duration: 0.9, ease: EASE }}
-      />
+      {!showBeginCta ? (
+        <button
+          type="button"
+          className="iq-mbi-skip-button"
+          onClick={skipInvitationAnimation}
+        >
+          Skip
+        </button>
+      ) : null}
 
       <section className="iq-mbi-invitation">
         <div className="iq-mbi-stage">
           <motion.div
             className="iq-mbi-assembly"
             initial={{ opacity: 0, y: reduceMotion === true ? 0 : 48, scale: 0.97 }}
-            animate={
-              phase === "logo"
-                ? { opacity: 0, y: 48, scale: 0.97 }
-                : { opacity: 1, y: 0, scale: 1 }
-            }
+            animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.9, ease: EASE }}
           >
             <div className="iq-mbi-envelope-wrap">
@@ -517,7 +505,7 @@ export function SchoolsMissionBriefInvitationScreen() {
               exit={{ opacity: 0 }}
               transition={{ delay: 0.35, duration: 0.35 }}
             >
-              {promptText}
+              Click the seal
             </motion.p>
           ) : null}
 
