@@ -514,7 +514,7 @@ export function QuestDetailScreen({
               ? `Back to ${quest.objective}`
               : BACK_TO_ISLAND_LABEL
           }
-          className="group inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.16em] transition hover:brightness-110"
+          className="group inline-flex min-h-[44px] items-center gap-2 rounded-full border px-3 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.16em] transition hover:brightness-110"
           style={{
             borderColor: schoolsBusinessQuest
               ? pillarQuestTheme?.borderSoft ?? "rgba(202, 138, 4, 0.48)"

@@ -432,7 +432,7 @@ export function SchoolsHackerStyleScreen() {
   return (
     <main
       key={runId}
-      className="iq-hack-screen relative h-[100dvh] w-full overflow-hidden bg-[#020403]"
+      className="iq-hack-screen relative h-[100dvh] w-full overflow-y-auto bg-[#020403]"
       aria-label="Hacker style briefing preview"
     >
       <HackerCodeStream reduceMotion={reduceMotion} />

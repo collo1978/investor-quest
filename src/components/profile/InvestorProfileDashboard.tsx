@@ -310,7 +310,7 @@ function CompanyMasteryCard({
             type="button"
             onClick={() => onSelect(company.id)}
             className={[
-              "rounded-full border px-3 py-1.5 text-xs font-semibold transition",
+              "min-h-[44px] rounded-full border px-3 py-1.5 text-xs font-semibold transition",
               selected.id === company.id
                 ? "border-amber-300/45 bg-amber-300/10 text-amber-100"
                 : "border-white/10 bg-black/30 text-ink-1 hover:border-violet-400/35"

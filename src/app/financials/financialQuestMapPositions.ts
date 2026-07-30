@@ -5,8 +5,8 @@ import { LOCKED_FINANCIALS_HUB_SAFE_EMBLEM } from "@/lib/hub/lockedCompanyEmblem
 /** Master scene — overlays use % of this box (never viewport edges). */
 export const FINANCIALS_SCENE_STYLE: CSSProperties = {
   position: "relative",
-  width: "min(92vw, 1600px)",
-  aspectRatio: "16 / 9",
+  width: "min(100%, 1600px)",
+  aspectRatio: "16 / 10",
   marginLeft: "auto",
   marginRight: "auto",
   overflow: "visible"
@@ -14,11 +14,11 @@ export const FINANCIALS_SCENE_STYLE: CSSProperties = {
 
 /** Financials vault island — left column + right column slots. */
 export const FINANCIALS_MAP_CARD_POSITIONS: Record<number, CSSProperties> = {
-  1: { top: "24%", left: "6%" },
-  2: { top: "48%", left: "6%" },
-  3: { top: "72%", left: "6%" },
-  4: { top: "24%", right: "6%" },
-  5: { top: "56%", right: "6%" }
+  1: { top: "15%", left: "6%" },
+  2: { top: "43%", left: "6%" },
+  3: { top: "71%", left: "6%" },
+  4: { top: "15%", right: "6%" },
+  5: { top: "50%", right: "6%" }
 };
 
 export const FINANCIALS_MAP_CARD_WIDTH: CSSProperties = {

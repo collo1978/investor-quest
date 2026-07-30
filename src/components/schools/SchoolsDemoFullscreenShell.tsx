@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import { MobilePreviewEmbedNotifier } from "@/components/bank/MobilePreviewEmbedNotifier";
 import { SchoolsDemoGameFx } from "@/components/schools/SchoolsDemoGameFx";
@@ -24,10 +24,13 @@ const ROOT_CLASS = "iq-schools-demo-fullscreen";
  * Locks html/body for immersive mobile demo + optional Add-to-Home-Screen hint.
  */
 export function SchoolsDemoFullscreenShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const isPreviewEmbed =
     searchParams.get(MOBILE_PREVIEW_SEARCH_PARAM) === "1";
   const [showPwaHint, setShowPwaHint] = useState(false);
+  const showStandaloneHintHere =
+    pathname === "/schools/demo" || pathname === "/schools/demo/logo-intro";
 
   useEffect(() => {
     document.documentElement.classList.add(ROOT_CLASS);
@@ -60,7 +63,7 @@ export function SchoolsDemoFullscreenShell({ children }: { children: ReactNode }
       <div className="iq-schools-demo-scroll-host relative min-h-0 flex-1 overflow-y-auto">
         {children}
       </div>
-      {showPwaHint && !isPreviewEmbed ? (
+      {showPwaHint && !isPreviewEmbed && showStandaloneHintHere ? (
         <p
           className={`pointer-events-none absolute inset-x-0 bottom-[max(0.4rem,env(safe-area-inset-bottom))] z-[5] mx-auto max-w-[18rem] px-4 text-center text-[0.62rem] leading-snug tracking-[0.02em] text-violet-200/42 ${SCHOOLS_DEVICE.mobileOnly}`}
         >

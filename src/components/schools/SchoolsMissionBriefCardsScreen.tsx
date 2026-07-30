@@ -444,7 +444,7 @@ export function SchoolsMissionBriefCardsScreen() {
   return (
     <main
       key={runId}
-      className="iq-mbc-screen relative h-[100dvh] w-full overflow-hidden bg-[#05070a]"
+      className="iq-mbc-screen relative h-[100dvh] w-full overflow-y-auto bg-[#05070a]"
       aria-label="Mission brief cards"
     >
       <BriefingStarfield reduceMotion={reduceMotion} />

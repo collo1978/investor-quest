@@ -16,8 +16,8 @@ export function StartupPrefetchBootstrap() {
 
   useRunOnceOnMount(() => {
     if (isIsolatedDemoStoryModeActive()) return;
-    prefetchStartupAssets();
     if (isSchoolsDemoProtectedPath() || isSchoolsFunnelPath()) return;
+    prefetchStartupAssets();
     prefetchStartupRoutes((href) => {
       try {
         router.prefetch(href);

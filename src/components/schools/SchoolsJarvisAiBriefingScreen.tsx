@@ -511,7 +511,7 @@ export function SchoolsJarvisAiBriefingScreen() {
   return (
     <main
       key={runId}
-      className="iq-jarvis-screen relative h-[100dvh] w-full overflow-hidden bg-[#03060c]"
+      className="iq-jarvis-screen relative h-[100dvh] w-full overflow-y-auto bg-[#03060c]"
       aria-label="Jarvis AI briefing preview"
     >
       <JarvisBackdrop reduceMotion={reduceMotion} />

@@ -140,7 +140,7 @@ export function SchoolsLogoIntroScreen() {
 
   return (
     <main
-      className="iq-sli-screen relative h-[100dvh] w-full overflow-hidden bg-[#04050a]"
+      className="iq-sli-screen relative h-[100dvh] w-full overflow-y-auto bg-[#04050a]"
       aria-label="Investor Quest logo intro"
     >
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">

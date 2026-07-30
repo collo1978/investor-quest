@@ -167,23 +167,6 @@ export const SCHOOLS_INTEREST_CARDS: readonly SchoolsInterestCard[] = [
   }
 ] as const;
 
-const gridContainerVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.045, delayChildren: 0.06 }
-  }
-};
-
-const gridItemVariants = {
-  hidden: { opacity: 0, y: 18, scale: 0.96 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] as const }
-  }
-};
-
 function SceneParticles({ card }: { card: SchoolsInterestCard }) {
   const particles = [
     { x: 38, y: 32, r: 1.9, delay: 0 },
@@ -587,7 +570,7 @@ function CinematicInterestCard({
       aria-disabled={dimmed}
       aria-label={`Select ${card.label}`}
       onClick={handleSelect}
-      variants={gridItemVariants}
+      initial={false}
       whileHover={
         dimmed
           ? undefined
@@ -597,14 +580,13 @@ function CinematicInterestCard({
       }
       whileTap={dimmed ? undefined : { scale: 0.98 }}
       animate={{
-        y: selected ? [0, -3, 0] : [0, -1.5, 0],
-        scale: selected ? [1.018, 1.035, 1.018] : [1, 1.006, 1],
+        y: 0,
+        scale: selected ? 1.018 : 1,
         opacity: dimmed ? 0.42 : 1
       }}
       transition={{
-        duration: selected ? 2.6 : 4.2,
-        repeat: Infinity,
-        ease: "easeInOut"
+        duration: 0.28,
+        ease: [0.22, 1, 0.36, 1]
       }}
       className={[
         "group relative isolate flex h-[11.35rem] w-full flex-col items-stretch gap-2.5 rounded-3xl text-center md:h-[10.95rem]",
@@ -799,9 +781,6 @@ export function SchoolsPickInterestsScreen({
         <div className="iq-schools-interest-stage relative z-30 mx-auto w-full max-w-[min(1580px,96vw)] overflow-y-auto overflow-x-hidden px-6 py-6">
           <motion.div
             className="iq-schools-deck-pick-grid pointer-events-auto mx-auto grid w-full grid-cols-2 gap-4 md:grid-cols-4 md:gap-5 xl:grid-cols-6 xl:gap-7"
-            variants={gridContainerVariants}
-            initial="hidden"
-            animate="visible"
           >
             {SCHOOLS_INTEREST_CARDS.map((card) => {
               const active = selected.includes(card.id);

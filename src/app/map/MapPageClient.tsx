@@ -24,6 +24,7 @@ import {
   FINANCIAL_HUB_IMG_SRC,
   FORCES_HUB_IMG_SRC,
   MANAGEMENT_HUB_IMG_SRC,
+  BANK_MOBILE_MAP_PATH,
   DESKTOP_MAP_PATH
 } from "@/lib/screenAssetUrls";
 import { preloadImage } from "@/lib/preloadImage";
@@ -38,7 +39,7 @@ function QuestMapStaticFallback() {
         <img
           src={DESKTOP_MAP_PATH}
           alt="Quest Map"
-          className="h-full w-full select-none object-cover object-center"
+          className="h-full w-full select-none object-contain object-center"
         />
       </picture>
     </div>
@@ -82,6 +83,7 @@ export default function MapPageClient() {
     preloadImage(MANAGEMENT_HUB_IMG_SRC);
     preloadImage(FORCES_HUB_IMG_SRC);
     preloadImage(DESKTOP_MAP_PATH);
+    preloadImage(BANK_MOBILE_MAP_PATH);
   }, []);
 
   return (
@@ -109,6 +111,11 @@ export default function MapPageClient() {
               : schoolsDemoFullscreen
               ? "schools-demo-map-stage-height"
               : "quest-map-stage-height",
+          !isPreviewEmbed &&
+          !schoolsPreviewFullscreen &&
+          !schoolsDemoFullscreen
+            ? "standard-quest-map-stage"
+            : "",
           isPreviewEmbed ? "p-0" : "px-1.5 py-1 sm:px-2 sm:py-1.5 md:px-2.5 md:py-2",
           showMissionBrief ? "pointer-events-none" : "pointer-events-auto"
         ].join(" ")}

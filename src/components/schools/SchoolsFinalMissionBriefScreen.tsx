@@ -392,7 +392,7 @@ export function SchoolsFinalMissionBriefScreen() {
   return (
     <main
       key={runId}
-      className="iq-fmb-screen relative h-[100dvh] w-full overflow-hidden bg-[#05070a]"
+      className="iq-fmb-screen relative h-[100dvh] w-full overflow-y-auto bg-[#05070a]"
       aria-label="Final mission brief preview"
     >
       <BriefStarfield reduceMotion={reduceMotion} />

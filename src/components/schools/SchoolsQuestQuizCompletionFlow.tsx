@@ -208,7 +208,7 @@ function FloatingXpBurst({
   );
 }
 
-const MISSION_HEADING = "#92400e";
+const MISSION_HEADING = "#fbbf24";
 const MISSION_BODY = "#0f172a";
 const MISSION_MUTED = "#475569";
 const MISSION_INSIGHT_BORDER = "rgba(202, 138, 4, 0.42)";
@@ -293,7 +293,7 @@ export function SchoolsQuestQuizCompletionFlow({
   const mutedText = accent.textMuted ?? MISSION_MUTED;
   const cardSurface =
     accent.surface ??
-    "linear-gradient(168deg, #fffbeb 0%, #fef3c7 46%, #fde68a 100%)";
+    "linear-gradient(168deg, rgba(15, 23, 42, 0.96) 0%, rgba(8, 15, 30, 0.92) 46%, rgba(5, 7, 15, 0.98) 100%)";
   const skillTitle =
     completionCopy?.investorSkillHeading ?? SCHOOLS_COMPLETION_SKILL_HEADING;
   const learnedLabel =
@@ -405,9 +405,7 @@ export function SchoolsQuestQuizCompletionFlow({
             className="font-[var(--font-grotesk)] text-[clamp(1.85rem,5.8vw,2.45rem)] font-bold uppercase leading-[1.04] tracking-[0.09em]"
             style={{
               color: isMission ? MISSION_HEADING : accent.hi,
-              textShadow: isMission
-                ? "0 2px 0 rgba(255,255,255,0.55)"
-                : `0 0 40px ${accent.glowSoft}`
+              textShadow: `0 0 40px ${accent.glowSoft}`
             }}
           >
             {headline}

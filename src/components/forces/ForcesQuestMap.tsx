@@ -105,7 +105,10 @@ export function ForcesQuestMap({
           </motion.div>
 
           {/* Interactive cards above scene FX; slot 1 is top-left (was under z-30 map chrome at z-[2]). */}
-          <motion.div className="absolute inset-0 z-[40] overflow-visible pointer-events-none">
+          <motion.div
+            className="absolute inset-0 z-[40] overflow-visible pointer-events-none"
+            data-hub-card-layer
+          >
             {cards.length === 0 ? (
               <p className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 px-6 text-center text-sm text-[rgba(251,191,36,0.78)]">
                 No Forces quests loaded. Seed Supabase hub cards, then hard refresh
@@ -134,7 +137,7 @@ export function ForcesQuestMap({
             <Link
               href="/map"
               prefetch
-              className="pointer-events-auto inline-flex items-center gap-2 rounded-xl border border-[rgba(251,146,60,0.42)] bg-[rgba(8,6,4,0.88)] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[rgba(255,237,213,0.92)] shadow-[0_0_20px_rgba(251,146,60,0.2)] backdrop-blur-md transition hover:border-[rgba(251,191,36,0.65)] hover:bg-[rgba(12,8,4,0.95)]"
+              className="pointer-events-auto inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-[rgba(251,146,60,0.42)] bg-[rgba(8,6,4,0.88)] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[rgba(255,237,213,0.92)] shadow-[0_0_20px_rgba(251,146,60,0.2)] backdrop-blur-md transition hover:border-[rgba(251,191,36,0.65)] hover:bg-[rgba(12,8,4,0.95)]"
             >
               <span aria-hidden className="text-amber-300">
                 ←

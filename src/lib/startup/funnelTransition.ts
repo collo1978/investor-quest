@@ -9,7 +9,6 @@ export type FunnelTransitionTarget =
   | "welcome"
   | "name"
   | "pick-avatar"
-  | "avatar"
   | "onboarding"
   | "map"
   | "business";
@@ -40,7 +39,6 @@ export function getFunnelTransition(): FunnelTransitionTarget | null {
       v === "welcome" ||
       v === "name" ||
       v === "pick-avatar" ||
-      v === "avatar" ||
       v === "onboarding" ||
       v === "map" ||
       v === "business"

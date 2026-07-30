@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useAnimationControls } from "framer-motion";
 
 import { NeonButton } from "@/components/NeonButton";
@@ -80,9 +80,14 @@ function SchoolsDesktopAvatarGridCard({
   // off the face ("glitching") the moment any idle/talk motion played.
   const faceControls = useAnimationControls();
   const [talking, setTalking] = useState(false);
+  const mountedRef = useRef(false);
 
   useEffect(() => {
+    mountedRef.current = true;
     void faceControls.start(IDLE_LOOP);
+    return () => {
+      mountedRef.current = false;
+    };
   }, [faceControls]);
 
   const handleClick = () => {
@@ -94,6 +99,10 @@ function SchoolsDesktopAvatarGridCard({
       text: greeting,
       gender,
       onEnd: () => {
+        // Speech playback is async and can outlive this card (unmounted via
+        // navigation or a re-render) — guard against animating a controller
+        // whose owning component is no longer mounted.
+        if (!mountedRef.current) return;
         setTalking(false);
         void faceControls.start(IDLE_LOOP);
       }

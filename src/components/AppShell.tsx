@@ -175,13 +175,7 @@ export function AppShell({
     { href: "/schools/preview/mission-brief-cards", label: "Mission Brief Cards" },
     { href: "/schools/preview/logo-reveal", label: "Logo Reveal" },
     { href: "/schools/preview/tech-sector", label: "Technology Sector" },
-    { href: "/schools/preview/map-duolingo", label: "Map (Duolingo Path)" },
-    { href: "/schools/preview/map-cartoon", label: "Cartoon World (B)" },
     { href: "/schools/preview/map-prodigy", label: "Prodigy World (C)" },
-    { href: "/schools/preview/map-dragonbox", label: "DragonBox World (D)" },
-    { href: "/schools/preview/map-roblox", label: "Roblox World (E)" },
-    { href: "/schools/preview/map-khan", label: "Khan Academy (F)" },
-    { href: "/schools/preview/map-legends", label: "Legends of Learning (G)" },
     { href: "/schools/map", label: "Cinematic Map (A)" },
     { href: "/schools/business", label: "Business" },
     { href: "/schools/forces", label: "Forces" },
@@ -554,7 +548,7 @@ export function AppShell({
                 suppressHydrationWarning
                 value={state.activeCompanyId}
                 onChange={(e) => actions.setActiveCompany(e.target.value)}
-                className="min-w-0 flex-1 rounded-xl border border-panel-border bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[11px] text-ink-0 outline-none ring-neon-400/50 focus:ring-2"
+                className="min-h-[44px] min-w-0 flex-1 rounded-xl border border-panel-border bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[11px] text-ink-0 outline-none ring-neon-400/50 focus:ring-2"
               >
                 {playableCompanies.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -579,7 +573,7 @@ export function AppShell({
                     href={item.href}
                     prefetch={item.href !== "/profile"}
                     className={[
-                      "relative z-10 flex cursor-pointer flex-col items-center justify-center rounded-xl px-1 py-2 text-[10px] font-semibold leading-tight transition sm:px-2 sm:text-xs",
+                      "relative z-10 flex min-h-[44px] cursor-pointer flex-col items-center justify-center rounded-xl px-1 py-2 text-[10px] font-semibold leading-tight transition sm:px-2 sm:text-xs",
                       active
                         ? "border border-[rgba(139,92,246,0.35)] bg-[rgba(139,92,246,0.10)] text-neon-300"
                         : "text-ink-2 hover:bg-[rgba(255,255,255,0.04)] hover:text-ink-0"

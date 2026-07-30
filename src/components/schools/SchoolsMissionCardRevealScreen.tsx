@@ -421,7 +421,7 @@ export function SchoolsMissionCardRevealScreen() {
   return (
     <main
       key={runId}
-      className="iq-mcr-screen relative h-[100dvh] w-full overflow-hidden bg-[#05070a]"
+      className="iq-mcr-screen relative h-[100dvh] w-full overflow-y-auto bg-[#05070a]"
       aria-label="Mission card reveal preview"
     >
       <Starfield reduceMotion={reduceMotion} />

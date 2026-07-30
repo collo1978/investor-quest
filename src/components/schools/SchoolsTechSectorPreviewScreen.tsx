@@ -184,8 +184,8 @@ export function SchoolsTechSectorPreviewScreen() {
     <main
       className="iq-schools-tech-sector-preview pointer-events-auto relative overflow-hidden bg-black"
       style={{
-        width: "100vw",
-        height: "100vh",
+        width: "100%",
+        height: "100dvh",
         paddingTop: "max(env(safe-area-inset-top, 0px), 0px)"
       }}
       aria-label="Technology sector preview"
@@ -200,8 +200,8 @@ export function SchoolsTechSectorPreviewScreen() {
         fetchPriority="high"
         className="pointer-events-none absolute inset-0 z-0 select-none"
         style={{
-          width: "100vw",
-          height: "100vh",
+          width: "100%",
+          height: "100dvh",
           objectFit: "cover",
           objectPosition: TECH_SECTOR_IMAGE_OBJECT_POSITION
         }}

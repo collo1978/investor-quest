@@ -41,7 +41,6 @@ export const SCHOOLS_DEMO_STORY_STEPS = [
   "mission-brief-invitation",
   "name",
   "pick-avatar",
-  "avatar",
   "onboarding",
   "map-brief",
   "map",
@@ -217,8 +216,6 @@ function basePathForStep(step: SchoolsDemoStoryStep): string {
       return "/schools/name";
     case "pick-avatar":
       return "/schools/pick-avatar";
-    case "avatar":
-      return "/schools/avatar";
     case "onboarding":
       return "/schools/screen5-onboarding";
     case "map-brief":
@@ -328,8 +325,7 @@ export function schoolsDemoStepFromPathname(
     return "mission-brief-invitation";
   }
   if (path === "/schools/name") return "name";
-  if (path === "/schools/pick-avatar") return "pick-avatar";
-  if (path === "/schools/avatar") return "avatar";
+  if (path === "/schools/pick-avatar" || path === "/schools/avatar") return "pick-avatar";
   if (
     path === "/schools/onboarding" ||
     path === "/schools/screen5-onboarding" ||

@@ -13,6 +13,7 @@ import {
   postQuestGenerate,
   postSecExtract
 } from "@/lib/quests/runQuestGenerationClient";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type { PillarQuestAnswersPayload } from "@/lib/supabase/questCardAnswers/types";
 
 /** Entry quests to prewarm when a company is selected (fast first visit). */
@@ -38,6 +39,7 @@ export async function prewarmQuestAnswers(
 ): Promise<void> {
   if (isSchoolsDemoProtectedPath()) return;
   if (isClientFastQuestMode()) return;
+  if (!isSupabaseConfigured()) return;
 
   const config = getPillarQuestPipelineConfig(pillarId);
   if (!config) return;

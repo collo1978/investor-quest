@@ -4,7 +4,7 @@ import { LOCKED_FORCES_HUB_ROCKET_EMBLEM } from "@/lib/hub/lockedCompanyEmblemPo
 
 export const FORCES_SCENE_STYLE: CSSProperties = {
   position: "relative",
-  width: "min(92vw, 1600px)",
+  width: "min(100%, 1600px)",
   aspectRatio: "16 / 9",
   marginLeft: "auto",
   marginRight: "auto",

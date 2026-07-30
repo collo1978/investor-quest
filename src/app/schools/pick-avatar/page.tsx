@@ -3,16 +3,21 @@
 import { useCallback, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-import { SchoolsArmorAvatarScreen } from "@/components/schools/SchoolsArmorAvatarScreen";
+import { SchoolsAvatarArmorScreen } from "@/components/schools/SchoolsAvatarArmorScreen";
 import { useGame } from "@/components/GameProvider";
 import type { SchoolsAvatarId } from "@/lib/schools/avatars";
+import type { SchoolsArmorId } from "@/lib/schools/schoolsIdentities";
 import { isSchoolsDemoPath, resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
 import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
-import { warmSchoolsArmorPickerImage } from "@/lib/schools/prefetchSchoolsOnboardingAssets";
+import {
+  warmSchoolsArmorPickerImage,
+  warmSchoolsAvatarPortraitImages
+} from "@/lib/schools/prefetchSchoolsOnboardingAssets";
 import { saveSchoolsAvatar } from "@/lib/schools/schoolsAvatarStorage";
+import { saveSchoolsArmor } from "@/lib/schools/schoolsIdentityStorage";
 import { markFunnelTransition, releaseFunnelTransition } from "@/lib/startup/funnelTransition";
 
-/** Schools onboarding — pick a named avatar character (portrait art). */
+/** Schools onboarding — merged face (avatar) + archetype (armor) identity step. */
 export default function SchoolsPickAvatarPage() {
   const router = useRouter();
   const pathname = usePathname();
@@ -23,25 +28,29 @@ export default function SchoolsPickAvatarPage() {
   }, []);
 
   useEffect(() => {
-    router.prefetch(resolveSchoolsLearnerHref("/schools/avatar", pathname));
+    router.prefetch(resolveSchoolsLearnerHref("/schools/screen5-onboarding", pathname));
     warmSchoolsArmorPickerImage();
+    warmSchoolsAvatarPortraitImages();
   }, [pathname, router]);
 
   const onContinue = useCallback(
-    (avatarId: SchoolsAvatarId) => {
+    (avatarId: SchoolsAvatarId, armorId: SchoolsArmorId) => {
       saveSchoolsAvatar(avatarId);
-      actions.setSchoolsProfile({ avatarId });
+      saveSchoolsArmor(armorId);
+      actions.setSchoolsProfile({ avatarId, armorId });
 
       if (isSchoolsDemoPath(pathname)) {
-        navigateSchoolsDemoStep("avatar", pathname, router);
+        navigateSchoolsDemoStep("onboarding", pathname, router);
         return;
       }
 
-      markFunnelTransition("avatar");
-      router.replace(resolveSchoolsLearnerHref("/schools/avatar", pathname));
+      markFunnelTransition("onboarding");
+      router.replace(
+        resolveSchoolsLearnerHref("/schools/screen5-onboarding", pathname)
+      );
     },
     [actions, pathname, router]
   );
 
-  return <SchoolsArmorAvatarScreen onContinue={onContinue} />;
+  return <SchoolsAvatarArmorScreen onContinue={onContinue} />;
 }

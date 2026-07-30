@@ -346,6 +346,9 @@ export function SchoolsMissionBriefInvitationScreen() {
 
   return (
     <main className="iq-mbi-screen">
+      <div className="iq-mbi-vault-grid" aria-hidden />
+      <div className="iq-mbi-gold-ribbons" aria-hidden />
+      <div className="iq-mbi-paper-halo" aria-hidden />
       <div className="iq-mbi-vignette" aria-hidden />
       <div className="iq-mbi-spotlight" aria-hidden />
 

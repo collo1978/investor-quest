@@ -390,7 +390,7 @@ export function SchoolsMissionBriefTerminalScreen() {
   return (
     <main
       key={runId}
-      className="iq-mbt-screen relative h-[100dvh] w-full overflow-hidden bg-[#05070A]"
+      className="iq-mbt-screen relative h-[100dvh] w-full overflow-y-auto bg-[#05070A]"
       aria-label="Mission brief terminal preview"
     >
       <TerminalStarfield reduceMotion={reduceMotion} />

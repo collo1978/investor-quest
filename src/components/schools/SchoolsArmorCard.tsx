@@ -11,6 +11,7 @@ export type SchoolsArmorCardProps = {
   selected: boolean;
   onSelect: (id: SchoolsArmor["id"]) => void;
   className?: string;
+  disabled?: boolean;
 };
 
 /** Real interactive card cropped from the shared armor composite. */
@@ -18,11 +19,13 @@ export function SchoolsArmorCard({
   armor,
   selected,
   onSelect,
-  className = ""
+  className = "",
+  disabled = false
 }: SchoolsArmorCardProps) {
   const crop = getArmorCardCrop(armor.id);
 
   const handleClick = () => {
+    if (disabled) return;
     onSelect(armor.id);
     playSchoolsIdentityTalkSound({
       seed: armor.id,
@@ -35,11 +38,13 @@ export function SchoolsArmorCard({
       type="button"
       aria-label={armor.title}
       aria-pressed={selected}
+      aria-disabled={disabled}
+      disabled={disabled}
       onClick={handleClick}
       className={[
         "iq-schools-armor-card group relative w-full overflow-hidden rounded-2xl border-2 bg-[#05050f] text-left",
         "transition-[transform,border-color,box-shadow] duration-300 ease-out",
-        "hover:-translate-y-1 hover:scale-[1.02]",
+        disabled ? "cursor-not-allowed opacity-60" : "hover:-translate-y-1 hover:scale-[1.02]",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black",
         className
       ].join(" ")}

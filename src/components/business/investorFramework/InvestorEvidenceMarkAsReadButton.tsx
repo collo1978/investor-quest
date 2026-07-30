@@ -97,9 +97,9 @@ export function InvestorEvidenceMarkAsReadButton({
             background: showReadState
               ? "rgba(34,197,139,0.15)"
               : isMission
-                ? "rgba(255, 255, 255, 0.55)"
+                ? "rgba(255, 255, 255, 0.08)"
                 : "rgba(255,255,255,0.06)",
-            color: showReadState ? GREEN_HI : isMission ? "#92400e" : theme.hi
+            color: showReadState ? GREEN_HI : isMission ? "#fbbf24" : theme.hi
           }}
         >
           ✓

@@ -138,7 +138,7 @@ export function SchoolsSoundsLikeYouScreen({
             type="button"
             aria-label="Go back"
             onClick={onBack}
-            className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-xl border border-violet-500/35 bg-[rgba(8,6,18,0.75)] text-lg text-violet-200/90 shadow-[0_0_14px_rgba(139,92,246,0.18)] transition hover:border-violet-400/55 hover:bg-violet-500/10"
+            className="pointer-events-auto flex h-[44px] w-[44px] items-center justify-center rounded-xl border border-violet-500/35 bg-[rgba(8,6,18,0.75)] text-lg text-violet-200/90 shadow-[0_0_14px_rgba(139,92,246,0.18)] transition hover:border-violet-400/55 hover:bg-violet-500/10"
           >
             ‹
           </button>
@@ -153,7 +153,7 @@ export function SchoolsSoundsLikeYouScreen({
           </p>
         </header>
 
-        <div className="relative z-30 flex min-h-0 flex-1 items-center justify-center py-1">
+        <div className="relative z-30 flex min-h-0 flex-1 items-center justify-center overflow-y-auto py-1">
           <div className="iq-schools-stocks-experience-grid pointer-events-auto grid h-full w-full max-w-[min(920px,96vw)] grid-cols-1 gap-2 md:grid-cols-2 md:gap-2.5 [&>button:last-child:nth-child(odd)]:md:col-span-2 [&>button:last-child:nth-child(odd)]:md:max-w-md [&>button:last-child:nth-child(odd)]:md:justify-self-center">
             {SCHOOLS_STOCKS_EXPERIENCE_OPTIONS.map((option) => (
               <ExperienceOptionCard

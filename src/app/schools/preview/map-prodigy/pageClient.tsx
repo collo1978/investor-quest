@@ -15,7 +15,7 @@ export default function SchoolsProdigyMapPageClient() {
   return (
     <div
       className={[
-        "pointer-events-auto h-[100dvh] w-[100vw] overflow-hidden",
+        "pointer-events-auto h-[100dvh] w-full overflow-hidden",
         hydrationReady ? "" : "static-ui"
       ].join(" ")}
     >

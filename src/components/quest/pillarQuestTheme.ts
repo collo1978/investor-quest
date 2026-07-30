@@ -43,7 +43,7 @@ const BUSINESS_THEME: PillarQuestTheme = {
   cardChrome: "jewel"
 };
 
-/** Schools Business Island — cream/gold mission cards (matches hub). */
+/** Schools Business Island — dark mission cards with a gold accent (matches hub). */
 export const SCHOOLS_BUSINESS_MISSION_THEME: PillarQuestTheme = {
   hi: "#d97706",
   lo: "#fbbf24",
@@ -53,16 +53,16 @@ export const SCHOOLS_BUSINESS_MISSION_THEME: PillarQuestTheme = {
   border: "rgba(251, 191, 36, 0.88)",
   borderSoft: "rgba(202, 138, 4, 0.48)",
   rim: "rgba(253, 224, 71, 0.95)",
-  whyHi: "#1e3a5f",
-  whyGlow: "rgba(56, 189, 248, 0.22)",
-  whyWash: "rgba(191, 219, 254, 0.42)",
+  whyHi: "#93c5fd",
+  whyGlow: "rgba(56, 189, 248, 0.28)",
+  whyWash: "rgba(56, 189, 248, 0.12)",
   badgeText: "#92400e",
   markReadPulse: "rgba(251, 191, 36, 0.22)",
   cardChrome: "mission",
-  text: "#0f172a",
-  textMuted: "#475569",
+  text: "rgba(255, 255, 255, 0.92)",
+  textMuted: "rgba(255, 255, 255, 0.6)",
   surface:
-    "linear-gradient(168deg, #fffbeb 0%, #fef3c7 46%, #fde68a 100%)"
+    "linear-gradient(168deg, rgba(15, 23, 42, 0.96) 0%, rgba(8, 15, 30, 0.92) 46%, rgba(5, 7, 15, 0.98) 100%)"
 };
 
 const FINANCIALS_THEME: PillarQuestTheme = {
