@@ -20,12 +20,18 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Investor Quest",
-  description: "Gamified stock research platform."
+  description: "Gamified stock research platform.",
+  icons: {
+    icon: "/logos/investor-quest-logo.png",
+    shortcut: "/logos/investor-quest-logo.png",
+    apple: "/logos/investor-quest-logo.png"
+  }
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: "#070712"
 };
 

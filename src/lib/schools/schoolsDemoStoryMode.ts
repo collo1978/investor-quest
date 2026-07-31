@@ -39,6 +39,8 @@ export function isSchoolsDemoMapBriefPending(): boolean {
 
 export const SCHOOLS_DEMO_STORY_STEPS = [
   "mission-brief-invitation",
+  "name",
+  "pick-avatar",
   "onboarding",
   "map-brief",
   "map",
@@ -210,6 +212,10 @@ function basePathForStep(step: SchoolsDemoStoryStep): string {
   switch (step) {
     case "mission-brief-invitation":
       return "/schools/mission-brief-invitation";
+    case "name":
+      return "/schools/name";
+    case "pick-avatar":
+      return "/schools/pick-avatar";
     case "onboarding":
       return "/schools/screen5-onboarding";
     case "map-brief":
@@ -248,6 +254,9 @@ export const SCHOOLS_DEMO_STORY_PREFETCH_ROUTES = [
   "/schools/mission-brief-invitation",
   "/schools/mission-brief-cards",
   "/schools/logo-reveal",
+  "/schools/name",
+  "/schools/pick-avatar",
+  "/schools/avatar",
   "/schools/screen5-onboarding",
   "/schools/pick-interests",
   "/schools/company-reveal",
@@ -315,6 +324,8 @@ export function schoolsDemoStepFromPathname(
   if (path === "/schools" || path === "/schools/mission-brief-invitation") {
     return "mission-brief-invitation";
   }
+  if (path === "/schools/name") return "name";
+  if (path === "/schools/pick-avatar" || path === "/schools/avatar") return "pick-avatar";
   if (
     path === "/schools/onboarding" ||
     path === "/schools/screen5-onboarding" ||

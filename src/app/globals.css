@@ -131,6 +131,24 @@ h3 {
   height: calc(100dvh - 72px - var(--mobile-nav-h, 128px));
   min-height: 320px;
 }
+@media (max-width: 767px) {
+  .standard-quest-map-stage {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+  }
+
+  .standard-quest-map-stage
+    > [data-quest-map-scene][data-mobile-quest-map] {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    min-height: 100%;
+    aspect-ratio: 853 / 1843;
+  }
+}
 @media (min-width: 768px) {
   .quest-map-stage-height {
     height: calc(100dvh - 2rem);
@@ -270,12 +288,9 @@ h3 {
   flex: 1 1 auto;
   overflow-y: auto;
   overflow-x: hidden;
+  scroll-padding-block-end: max(1rem, env(safe-area-inset-bottom, 0px));
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
-}
-
-.iq-schools-demo-scroll-host main:not(.iq-schools-business-hub-main):not(.iq-schools-profile-hub-main):not(.iq-schools-avatar-deck):not(.iq-schools-business-quest--mission-shell) {
-  padding-bottom: max(9rem, calc(env(safe-area-inset-bottom, 0px) + 5rem));
 }
 
 /* Business island hub — wide 16:9 desktop; tall portrait stage on phones */
@@ -501,16 +516,16 @@ h3 {
       color-mix(in srgb, var(--mission-glow, rgba(251, 191, 36, 0.45)) 38%, transparent),
       transparent 58%
     ),
-    linear-gradient(168deg, #fffbeb 0%, #fef3c7 46%, #fde68a 100%);
+    linear-gradient(168deg, rgba(15, 23, 42, 0.96) 0%, rgba(8, 15, 30, 0.92) 46%, rgba(5, 7, 15, 0.98) 100%);
   padding: 12px 14px 14px;
   text-align: left;
   text-decoration: none;
   color: inherit;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.78),
-    inset 0 -2px 0 rgba(180, 83, 9, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.42),
-    0 10px 26px rgba(2, 6, 23, 0.22);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(251, 191, 36, 0.2),
+    0 10px 26px rgba(2, 6, 23, 0.45);
   transition:
     transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 200ms ease,
@@ -545,11 +560,11 @@ h3 {
 .iq-schools-hub-mission-card:hover {
   transform: translateY(-3px);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.86),
-    inset 0 -2px 0 rgba(180, 83, 9, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(251, 191, 36, 0.32),
     0 0 24px color-mix(in srgb, var(--mission-glow, rgba(251, 191, 36, 0.45)) 52%, transparent),
-    0 16px 32px rgba(2, 6, 23, 0.28);
+    0 16px 32px rgba(2, 6, 23, 0.5);
 }
 
 .iq-schools-hub-mission-card--primary {
@@ -570,23 +585,23 @@ h3 {
       rgba(74, 222, 128, 0.18),
       transparent 58%
     ),
-    linear-gradient(168deg, #ecfdf5 0%, #fef9c3 52%, #fde68a 100%);
+    linear-gradient(168deg, rgba(15, 30, 22, 0.96) 0%, rgba(8, 20, 15, 0.92) 52%, rgba(5, 7, 15, 0.98) 100%);
 }
 
 .iq-schools-hub-mission-card--locked {
   display: block;
   width: 100%;
-  border: 2px solid rgba(251, 191, 36, 0.82);
-  background: linear-gradient(168deg, rgba(241, 245, 249, 0.96) 0%, rgba(226, 232, 240, 0.92) 100%);
+  border: 2px solid rgba(148, 163, 184, 0.32);
+  background: linear-gradient(168deg, rgba(15, 23, 42, 0.9) 0%, rgba(8, 12, 22, 0.88) 100%);
   padding: 10px 12px 12px;
   text-align: center;
   cursor: not-allowed;
   filter: saturate(0.9);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.65),
-    inset 0 -1px 0 rgba(100, 116, 139, 0.14),
-    0 0 0 1px rgba(180, 83, 9, 0.22),
-    0 8px 20px rgba(2, 6, 23, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.24),
+    0 0 0 1px rgba(100, 116, 139, 0.22),
+    0 8px 20px rgba(2, 6, 23, 0.32);
 }
 
 .iq-schools-hub-mission-card--locked::before {
@@ -602,13 +617,13 @@ h3 {
   background:
     radial-gradient(
       ellipse 120% 80% at 50% -20%,
-      rgba(251, 191, 36, 0.42),
+      rgba(251, 191, 36, 0.28),
       transparent 58%
     ),
-    linear-gradient(168deg, #fffbeb 0%, #fef3c7 46%, #fde68a 100%);
+    linear-gradient(168deg, rgba(15, 23, 42, 0.96) 0%, rgba(8, 15, 30, 0.92) 46%, rgba(5, 7, 15, 0.98) 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.82),
-    inset 0 -2px 0 rgba(180, 83, 9, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.28),
     0 0 0 2px rgba(251, 191, 36, 0.55),
     0 0 28px rgba(251, 191, 36, 0.52),
     0 0 48px rgba(245, 158, 11, 0.28),
@@ -651,38 +666,38 @@ h3 {
   padding: 3px 10px;
   border-radius: 999px;
   border: 2px solid rgba(202, 138, 4, 0.5);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.08);
   font-size: clamp(15px, 1.05vw, 17px);
   font-weight: 900;
   line-height: 1;
-  color: #92400e;
+  color: #fbbf24;
 }
 
 .iq-schools-hub-mission-card__unlock-label {
   border-radius: 999px;
-  border: 1px solid rgba(251, 191, 36, 0.72);
-  background: linear-gradient(180deg, #fef9c3 0%, #fde68a 100%);
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  background: rgba(251, 191, 36, 0.16);
   padding: 3px 9px;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #92400e;
+  color: #fde68a;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    0 0 12px rgba(251, 191, 36, 0.35);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 12px rgba(251, 191, 36, 0.2);
 }
 
 .iq-schools-hub-mission-card__done-chip {
   border-radius: 999px;
   border: 1px solid rgba(34, 197, 94, 0.45);
-  background: rgba(220, 252, 231, 0.88);
+  background: rgba(34, 197, 94, 0.16);
   padding: 2px 8px;
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #15803d;
+  color: #86efac;
 }
 
 .iq-schools-hub-mission-card__title {
@@ -694,7 +709,7 @@ h3 {
   font-weight: 800;
   line-height: 1.25;
   letter-spacing: 0.01em;
-  color: #1e3a5f;
+  color: rgba(255, 255, 255, 0.92);
   text-wrap: balance;
 }
 
@@ -712,7 +727,7 @@ h3 {
   font-size: clamp(1.75rem, 2.4vw, 2.1rem);
   font-weight: 900;
   line-height: 1;
-  color: #15803d;
+  color: #4ade80;
   filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.45));
 }
 
@@ -723,10 +738,10 @@ h3 {
   font-family: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
   font-weight: 900;
   line-height: 1;
-  color: #92400e;
+  color: #fbbf24;
   text-shadow:
     0 0 18px rgba(251, 191, 36, 0.55),
-    0 1px 0 rgba(255, 255, 255, 0.35);
+    0 1px 0 rgba(0, 0, 0, 0.35);
 }
 
 .iq-business-quest-discovery-mark--marker {
@@ -749,18 +764,18 @@ h3 {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  border: 1px solid rgba(251, 191, 36, 0.55);
-  background: linear-gradient(180deg, rgba(254, 249, 195, 0.95) 0%, rgba(253, 224, 71, 0.88) 100%);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.14);
   padding: 2px 8px;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
-  color: #92400e;
+  color: #fde68a;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    0 0 10px rgba(251, 191, 36, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 10px rgba(251, 191, 36, 0.18);
 }
 
 .iq-business-quest-reveal-title {
@@ -783,7 +798,7 @@ h3 {
   font-size: clamp(0.72rem, 0.82vw, 0.84rem);
   font-weight: 600;
   line-height: 1.35;
-  color: #475569;
+  color: rgba(255, 255, 255, 0.68);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -806,8 +821,8 @@ h3 {
   height: 8px;
   overflow: hidden;
   border-radius: 999px;
-  border: 1px solid rgba(30, 58, 95, 0.16);
-  background: rgba(30, 58, 95, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .iq-schools-hub-mission-card__progress-fill {
@@ -828,7 +843,7 @@ h3 {
   font-size: 11px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  color: #92400e;
+  color: #fbbf24;
 }
 
 .iq-schools-hub-mission-card__cta {
@@ -1026,13 +1041,13 @@ h3 {
       rgba(251, 191, 36, 0.24),
       transparent 58%
     ),
-    linear-gradient(168deg, #fffbeb 0%, #fef3c7 52%, #fde68a 100%);
+    linear-gradient(168deg, rgba(15, 23, 42, 0.96) 0%, rgba(8, 15, 30, 0.92) 52%, rgba(5, 7, 15, 0.98) 100%);
   padding: 8px 12px 8px 8px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.78),
-    inset 0 -2px 0 rgba(180, 83, 9, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.42),
-    0 8px 22px rgba(2, 6, 23, 0.2);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(251, 191, 36, 0.2),
+    0 8px 22px rgba(2, 6, 23, 0.4);
 }
 
 .iq-schools-hub-progress-card::before {
@@ -1071,12 +1086,12 @@ h3 {
   justify-content: center;
   border-radius: 999px;
   border: 1.5px solid rgba(202, 138, 4, 0.45);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.08);
   font-family: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
   font-size: 0.72rem;
   font-weight: 900;
   line-height: 1;
-  color: #92400e;
+  color: #fbbf24;
 }
 
 .iq-schools-hub-progress-card__copy {
@@ -1093,7 +1108,7 @@ h3 {
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #92400e;
+  color: #fbbf24;
 }
 
 @media (min-width: 640px) {
@@ -1109,7 +1124,7 @@ h3 {
   font-weight: 900;
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
-  color: #1e3a5f;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 @media (min-width: 640px) {
@@ -1246,7 +1261,10 @@ h3 {
   background:
     radial-gradient(circle at 12% 0%, rgba(118, 185, 0, 0.08), transparent 34%),
     linear-gradient(180deg, #020617 0%, #070b16 52%, #020617 100%);
-  padding-bottom: 0 !important;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: visible;
+  padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px)) !important;
 }
 
 .iq-schools-business-quest__topbar {
@@ -1256,11 +1274,13 @@ h3 {
 
 .iq-schools-business-quest__mission {
   width: 100%;
-  min-height: calc(100dvh - env(safe-area-inset-top, 0px) - 5.5rem);
+  min-height: calc(100dvh - env(safe-area-inset-top, 0px) - 4.75rem);
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .iq-schools-business-quest__mission .iq-quest-checklist-layout--section-mission {
-  min-height: calc(100dvh - env(safe-area-inset-top, 0px) - 5.5rem);
+  min-height: calc(100dvh - env(safe-area-inset-top, 0px) - 4.75rem);
 }
 
 .iq-schools-mission-nav-btn--ready:not(:disabled) {
@@ -1487,16 +1507,16 @@ h3 {
 }
 
 .iq-schools-quiz-summary {
-  color: #0f172a;
+  color: rgba(255, 255, 255, 0.92);
 }
 
-/* Schools quiz — interactive answer choices on cream */
+/* Schools quiz — interactive answer choices on the dark theme, gold accent on select */
 .iq-schools-quiz-choice {
   border-width: 2px;
   border-style: solid;
   border-color: rgba(202, 138, 4, 0.42);
-  background: rgba(255, 255, 255, 0.78);
-  color: #0f172a;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
   transition:
     border-color 0.18s ease,
     background 0.18s ease,
@@ -1506,27 +1526,27 @@ h3 {
 
 .iq-schools-quiz-choice:hover:not(:disabled) {
   border-color: rgba(180, 83, 9, 0.58);
-  background: rgba(254, 243, 199, 0.92);
-  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
 }
 
 .iq-schools-quiz-choice--selected {
   border-color: rgba(180, 83, 9, 0.62) !important;
-  background: rgba(251, 191, 36, 0.28) !important;
-  color: #451a03 !important;
+  background: rgba(251, 191, 36, 0.22) !important;
+  color: rgba(255, 255, 255, 0.96) !important;
   box-shadow: 0 8px 20px -10px rgba(251, 191, 36, 0.42) !important;
 }
 
 .iq-schools-quiz-choice--review-correct {
   border-color: rgba(34, 197, 139, 0.55) !important;
-  background: rgba(34, 197, 139, 0.18) !important;
-  color: #14532d !important;
+  background: rgba(34, 197, 139, 0.16) !important;
+  color: #86efac !important;
 }
 
 .iq-schools-quiz-choice--review-wrong {
   border-color: rgba(244, 120, 120, 0.55) !important;
-  background: rgba(244, 120, 120, 0.16) !important;
-  color: #7f1d1d !important;
+  background: rgba(244, 120, 120, 0.14) !important;
+  color: #fca5a5 !important;
 }
 
 .iq-schools-quiz-blank {
@@ -3799,8 +3819,14 @@ h3 {
 }
 
 .iq-master-principles-panel--schools {
-  background: #fffbeb;
-  color: #0f172a;
+  background: rgba(8, 7, 18, 0.94);
+  color: rgba(255, 248, 225, 0.96);
+  border-color: rgba(245, 197, 71, 0.48);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -16px 28px rgba(0, 0, 0, 0.28),
+    0 18px 44px rgba(0, 0, 0, 0.45),
+    0 0 32px rgba(245, 197, 71, 0.1);
 }
 
 .iq-master-principles-panel--schools.iq-master-principles-panel--island {
@@ -4266,33 +4292,27 @@ h3 {
   color: rgba(148, 163, 184, 0.95);
 }
 
-/* Schools quest complete — readable navy/grey on cream */
+/* Schools quest complete — light foreground on the dark mission card */
 .iq-schools-quest-complete {
-  color: #0f172a;
-}
-
-.iq-schools-quest-complete .text-ink-0,
-.iq-schools-quest-complete .text-ink-1,
-.iq-schools-quest-complete .text-ink-2 {
-  color: #475569;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .iq-schools-quest-complete__achievement {
-  color: #0f172a;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .iq-schools-quest-complete__principle-hero {
-  color: #0f172a;
-  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 0 24px rgba(251, 191, 36, 0.28);
 }
 
 .iq-schools-quest-complete__principle-body strong {
-  color: #92400e;
+  color: #fbbf24;
   font-weight: 700;
 }
 
 .iq-schools-quest-complete__insight {
-  color: #0f172a;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .iq-schools-quest-complete__insight-blank {
@@ -5591,6 +5611,150 @@ h3 {
   animation: iq-schools-pick-interest-glow 2.8s ease-in-out infinite;
 }
 
+.iq-schools-interest-vault-bg {
+  opacity: 0.78;
+  background:
+    radial-gradient(ellipse 44% 18% at 50% 12%, rgba(196, 181, 253, 0.13), transparent 72%),
+    linear-gradient(112deg, transparent 0 17%, rgba(139, 92, 246, 0.1) 18%, transparent 25% 100%),
+    linear-gradient(248deg, transparent 0 72%, rgba(34, 211, 238, 0.08) 73%, transparent 79% 100%),
+    radial-gradient(ellipse 66% 36% at 50% 92%, rgba(245, 197, 71, 0.065), transparent 68%);
+}
+
+.iq-schools-interest-ribbon-bg {
+  opacity: 0.42;
+  background-image:
+    linear-gradient(to right, rgba(196, 181, 253, 0.075) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(196, 181, 253, 0.05) 1px, transparent 1px),
+    linear-gradient(135deg, transparent 0 48%, rgba(139, 92, 246, 0.12) 49%, transparent 50% 100%);
+  background-size: 56px 56px, 56px 56px, 180px 180px;
+  mask-image: radial-gradient(ellipse 84% 72% at 50% 42%, black 18%, transparent 86%);
+}
+
+.iq-schools-interest-stage {
+  max-height: min(35.5rem, calc(100dvh - 12.25rem));
+  border: 1px solid rgba(196, 181, 253, 0.12);
+  border-radius: 1.35rem;
+  background:
+    linear-gradient(180deg, rgba(13, 10, 28, 0.5), rgba(3, 3, 8, 0.12)),
+    radial-gradient(ellipse 80% 34% at 50% 0%, rgba(139, 92, 246, 0.12), transparent 70%);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.025),
+    0 18px 60px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.iq-schools-interest-back-btn {
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.1),
+    0 0 22px rgba(139, 92, 246, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.iq-schools-interest-back-btn:hover {
+  transform: translateY(-1px);
+}
+
+.iq-schools-interest-stage::-webkit-scrollbar {
+  width: 8px;
+}
+
+.iq-schools-interest-stage::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgba(167, 139, 250, 0.28);
+}
+
+.iq-schools-interest-cta-dock {
+  padding: 1.15rem 0 max(1rem, env(safe-area-inset-bottom));
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(3, 3, 8, 0.78) 26%, rgba(3, 3, 8, 0.96) 100%),
+    radial-gradient(ellipse 30rem 6rem at 50% 100%, rgba(139, 92, 246, 0.26), transparent 70%);
+}
+
+.iq-schools-interest-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.05rem;
+  border: 1px solid rgba(196, 181, 253, 0.16);
+  border-radius: 9999px;
+  background: rgba(8, 6, 18, 0.68);
+  padding: 0.45rem 1rem;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.035),
+    0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+.iq-schools-interest-continue-btn {
+  position: relative;
+  overflow: hidden;
+  max-width: 38rem;
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.16),
+    0 0 30px rgba(139, 92, 246, 0.2) !important;
+}
+
+.iq-schools-interest-continue-btn:disabled {
+  opacity: 0.46;
+  box-shadow: none !important;
+}
+
+.iq-schools-interest-continue-btn--armed {
+  border-color: rgba(196, 181, 253, 0.68) !important;
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.22),
+    0 0 34px rgba(139, 92, 246, 0.44),
+    0 10px 30px rgba(0, 0, 0, 0.42) !important;
+}
+
+/*
+ * Shared island hubs: tablet and phone layouts become a readable quest list.
+ * Percentage-positioned map cards are reserved for wide screens where the
+ * scene has enough room; below 1024px they otherwise collide and become
+ * impossible to tap or read.
+ */
+@media (max-width: 1023px) {
+  [data-financials-scene],
+  [data-management-scene],
+  [data-forces-scene] {
+    width: 100% !important;
+    min-height: calc(100dvh - 5rem);
+    aspect-ratio: auto !important;
+    overflow: hidden !important;
+    padding:
+      max(6.25rem, calc(env(safe-area-inset-top, 0px) + 5.5rem))
+      0.5rem
+      max(6.5rem, calc(env(safe-area-inset-bottom, 0px) + 5.5rem));
+  }
+
+  [data-financials-scene] [data-hub-card-layer],
+  [data-management-scene] [data-hub-card-layer],
+  [data-forces-scene] [data-hub-card-layer] {
+    position: relative !important;
+    inset: auto !important;
+    display: grid;
+    gap: 0.8rem;
+    overflow: visible !important;
+  }
+
+  [data-financials-scene] [data-hub-card-slot],
+  [data-management-scene] [data-hub-card-slot],
+  [data-forces-scene] [data-hub-card-slot] {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    transform: none !important;
+    padding-inline: 0.85rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .iq-schools-interest-stage {
+    max-height: calc(100dvh - 12rem);
+    padding: 0.85rem;
+  }
+}
+
 .iq-schools-opening-cta-dock {
   margin-top: -0.5rem;
   padding:
@@ -6801,12 +6965,846 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 }
 
 /* Schools choose armor — reference poster + per-card hover zones */
+.iq-schools-name-entry {
+  isolation: isolate;
+}
+
+.iq-schools-name-entry__grid {
+  opacity: 0.36;
+  background-image:
+    linear-gradient(to right, rgba(196, 181, 253, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(196, 181, 253, 0.055) 1px, transparent 1px),
+    linear-gradient(135deg, transparent 0 48%, rgba(245, 197, 71, 0.08) 49%, transparent 50% 100%);
+  background-size: 58px 58px, 58px 58px, 190px 190px;
+  mask-image: radial-gradient(ellipse 76% 68% at 50% 50%, black 18%, transparent 84%);
+}
+
+.iq-schools-name-entry__ribbons {
+  opacity: 0.82;
+  background:
+    linear-gradient(110deg, transparent 0 22%, rgba(139, 92, 246, 0.16) 23%, transparent 29% 100%),
+    linear-gradient(250deg, transparent 0 68%, rgba(34, 211, 238, 0.09) 69%, transparent 76% 100%),
+    radial-gradient(circle at 50% 50%, rgba(167, 139, 250, 0.16), transparent 26%);
+}
+
+.iq-schools-name-entry__orbits {
+  background:
+    radial-gradient(ellipse 26rem 9rem at 50% 50%, rgba(139, 92, 246, 0.18), transparent 68%),
+    radial-gradient(ellipse 18rem 6rem at 50% 52%, rgba(245, 197, 71, 0.1), transparent 68%);
+}
+
+.iq-schools-name-entry__card {
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.14),
+    0 0 52px rgba(139, 92, 246, 0.26),
+    0 24px 80px rgba(0, 0, 0, 0.62);
+}
+
+.iq-schools-name-entry__badge {
+  display: grid;
+  place-items: center;
+  width: 3.3rem;
+  height: 3.3rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(245, 197, 71, 0.5);
+  background:
+    radial-gradient(circle at 35% 26%, rgba(255, 255, 255, 0.48), transparent 22%),
+    linear-gradient(145deg, rgba(245, 197, 71, 0.95), rgba(120, 73, 13, 0.82));
+  color: rgba(26, 17, 3, 0.9);
+  font-family: var(--font-grotesk);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow:
+    0 0 24px rgba(245, 197, 71, 0.32),
+    inset 0 0 0 5px rgba(26, 17, 3, 0.16);
+}
+
+.iq-schools-name-entry__input {
+  min-height: 4.15rem;
+  letter-spacing: 0.02em;
+  box-shadow:
+    inset 0 0 0 1px rgba(196, 181, 253, 0.1),
+    0 0 28px rgba(139, 92, 246, 0.16);
+}
+
+.iq-schools-name-entry__input::placeholder {
+  text-align: center;
+}
+
 .iq-schools-choose-identity {
   background: #030208;
   width: 100%;
-  height: 100dvh;
-  max-height: 100dvh;
+  min-height: 100%;
+  height: auto;
+  max-height: none;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+.iq-schools-armor-grid > * {
+  min-width: 0;
+}
+
+.iq-schools-armor-card {
+  aspect-ratio: 372 / 775;
+}
+
+.iq-schools-identity-board {
+  isolation: isolate;
+  flex: none;
+  min-height: 0;
+}
+
+.iq-schools-identity-panel {
+  position: relative;
+  height: auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: visible;
+  border: 1px solid rgba(245, 197, 71, 0.14);
+  border-radius: 1.35rem;
+  background:
+    linear-gradient(145deg, rgba(12, 10, 24, 0.78), rgba(4, 4, 14, 0.66)),
+    radial-gradient(circle at 14% 0%, rgba(245, 197, 71, 0.1), transparent 34%),
+    radial-gradient(circle at 94% 94%, rgba(139, 92, 246, 0.14), transparent 38%);
+  padding: 1rem;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.035),
+    0 18px 44px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.iq-schools-identity-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.4;
+  background-image:
+    linear-gradient(to right, rgba(245, 197, 71, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(196, 181, 253, 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 80% 74% at 50% 44%, black 12%, transparent 88%);
+}
+
+.iq-schools-step-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+  color: rgba(221, 214, 254, 0.78);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.iq-schools-step-kicker span {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(245, 197, 71, 0.34);
+  background: rgba(245, 197, 71, 0.12);
+  color: #fde68a;
+  box-shadow: 0 0 18px rgba(245, 197, 71, 0.12);
+}
+
+.iq-schools-identity-panel-title {
+  margin-bottom: 0.85rem;
+  color: rgba(255, 248, 225, 0.96);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: clamp(1rem, 1.6vw, 1.22rem);
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.iq-schools-avatar-pick-shell {
+  --iq-avatar-card-max: 6rem;
+}
+
+.iq-schools-smooth-art,
+.iq-schools-path-dossier__art {
+  image-rendering: auto;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.iq-schools-avatar-selection-panel {
+  border: 1px solid rgba(245, 197, 71, 0.18);
+  background:
+    linear-gradient(145deg, rgba(13, 10, 24, 0.82), rgba(5, 5, 16, 0.66)),
+    radial-gradient(circle at 18% 18%, rgba(245, 197, 71, 0.12), transparent 34%),
+    radial-gradient(circle at 92% 86%, rgba(139, 92, 246, 0.16), transparent 38%);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.035),
+    0 18px 38px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.iq-schools-avatar-pick-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: min(100%, 14rem);
+}
+
+.iq-schools-avatar-row-btn {
+  position: relative;
+  display: grid;
+  width: min(100%, var(--iq-avatar-card-max));
+  min-width: 0;
+  gap: 0.32rem;
+  justify-items: center;
+  padding: 0.28rem;
+  touch-action: manipulation;
+  transition:
+    filter 0.22s ease,
+    transform 0.22s ease;
+}
+
+.iq-schools-avatar-row-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 1.15rem;
+  border: 1px solid rgba(196, 181, 253, 0.1);
+  background: rgba(9, 8, 20, 0.34);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    border-color 0.22s ease,
+    background 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.iq-schools-avatar-row-btn:hover::before {
+  border-color: rgba(245, 197, 71, 0.24);
+  background: rgba(18, 14, 31, 0.56);
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.iq-schools-avatar-row-btn--selected {
+  filter: saturate(1.08);
+}
+
+.iq-schools-avatar-row-btn--selected::before {
+  border-color: rgba(245, 197, 71, 0.44);
+  background:
+    linear-gradient(160deg, rgba(245, 197, 71, 0.13), rgba(139, 92, 246, 0.12)),
+    rgba(12, 10, 22, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(245, 197, 71, 0.12),
+    0 0 30px rgba(245, 197, 71, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.iq-schools-avatar-row-btn--selected::after {
+  content: "";
+  position: absolute;
+  inset: -0.28rem;
+  z-index: -2;
+  border-radius: 1.3rem;
+  border: 1px solid rgba(245, 197, 71, 0.42);
+  opacity: 0.78;
+  animation: iq-schools-avatar-select-halo 2.5s ease-in-out infinite;
+}
+
+.iq-schools-avatar-row-name {
+  max-width: 100%;
+  min-height: 1.15rem;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 248, 225, 0.84);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.iq-schools-investigator-card {
+  min-height: 6.25rem;
+}
+
+.iq-schools-investigator-status {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(245, 197, 71, 0.18);
+  background: rgba(245, 197, 71, 0.08);
+  padding: 0.32rem 0.58rem;
+  color: rgba(221, 214, 254, 0.68);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.iq-schools-investigator-status span {
+  color: rgba(253, 230, 138, 0.92);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.iq-schools-path-panel {
+  align-self: stretch;
+  transition:
+    border-color 0.28s ease,
+    box-shadow 0.28s ease,
+    filter 0.28s ease;
+}
+
+.iq-schools-path-panel--locked {
+  border-color: rgba(148, 163, 184, 0.16);
+  filter: saturate(0.76);
+}
+
+.iq-schools-path-panel--locked .iq-schools-step-kicker span {
+  border-color: rgba(148, 163, 184, 0.28);
+  background: rgba(148, 163, 184, 0.08);
+  color: rgba(226, 232, 240, 0.72);
+  box-shadow: none;
+}
+
+.iq-schools-path-panel--unlocked {
+  border-color: rgba(245, 197, 71, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(245, 197, 71, 0.08),
+    0 20px 48px rgba(0, 0, 0, 0.38),
+    0 0 38px rgba(245, 197, 71, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.iq-schools-path-carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.iq-schools-path-carousel__stage {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  width: min(70vw, 15rem);
+  overflow: hidden;
+}
+
+.iq-schools-path-carousel__nav {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(245, 197, 71, 0.24);
+  background: rgba(8, 7, 15, 0.6);
+  color: rgba(253, 230, 138, 0.85);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.iq-schools-path-carousel__nav:not(:disabled):hover {
+  border-color: rgba(245, 197, 71, 0.5);
+  background: rgba(245, 197, 71, 0.12);
+  transform: translateY(-1px);
+}
+
+.iq-schools-path-carousel__nav:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.iq-schools-path-carousel__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.iq-schools-path-carousel__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(245, 197, 71, 0.3);
+  background: rgba(245, 197, 71, 0.12);
+  padding: 0;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.iq-schools-path-carousel__dot--active {
+  border-color: #f5c547;
+  background: #f5c547;
+  transform: scale(1.25);
+  box-shadow: 0 0 12px rgba(245, 197, 71, 0.5);
+}
+
+.iq-schools-path-carousel__dot:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.iq-schools-path-dossier--carousel .iq-schools-path-dossier__overlay {
+  padding: 0.85rem;
+  gap: 0.45rem;
+}
+
+.iq-schools-path-dossier--carousel .iq-schools-path-dossier__title {
+  font-size: 1.05rem;
+}
+
+.iq-schools-path-dossier--carousel .iq-schools-path-dossier__status {
+  padding: 0.36rem 0.56rem;
+  font-size: 0.62rem;
+}
+
+.iq-schools-path-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.iq-schools-path-back {
+  border-radius: 9999px;
+  border: 1px solid rgba(245, 197, 71, 0.26);
+  background: rgba(8, 7, 15, 0.58);
+  padding: 0.48rem 0.72rem;
+  color: rgba(253, 230, 138, 0.88);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.iq-schools-path-back:hover {
+  border-color: rgba(245, 197, 71, 0.48);
+  background: rgba(245, 197, 71, 0.1);
+  transform: translateY(-1px);
+}
+
+.iq-schools-path-dossier {
+  --iq-path-accent: #f5c547;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 372 / 775;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--iq-path-accent) 34%, rgba(255, 255, 255, 0.08));
+  border-radius: 1rem;
+  background: #05050f;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: left;
+  touch-action: manipulation;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 10px 24px rgba(0, 0, 0, 0.28);
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    opacity 0.22s ease;
+}
+
+.iq-schools-path-dossier:not(:disabled):hover {
+  z-index: 8;
+}
+
+.iq-schools-path-dossier::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 0.24rem;
+  background: var(--iq-path-accent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--iq-path-accent) 70%, transparent);
+}
+
+.iq-schools-path-dossier:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--iq-path-accent) 64%, white);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 1px color-mix(in srgb, var(--iq-path-accent) 20%, transparent),
+    0 16px 30px rgba(0, 0, 0, 0.34),
+    0 0 24px color-mix(in srgb, var(--iq-path-accent) 18%, transparent);
+}
+
+.iq-schools-path-dossier--selected {
+  border-color: color-mix(in srgb, var(--iq-path-accent) 76%, white);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--iq-path-accent) 24%, transparent), transparent 50%),
+    linear-gradient(145deg, rgba(14, 12, 26, 0.96), rgba(5, 5, 14, 0.88));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 0 1px color-mix(in srgb, var(--iq-path-accent) 26%, transparent),
+    0 0 28px color-mix(in srgb, var(--iq-path-accent) 26%, transparent),
+    0 16px 34px rgba(0, 0, 0, 0.38);
+}
+
+.iq-schools-path-dossier--locked {
+  cursor: not-allowed;
+}
+
+.iq-schools-path-dossier__art {
+  position: absolute;
+  inset: -0.18rem;
+  background-repeat: no-repeat;
+  transform: translateZ(0) scale(1.015);
+  transition:
+    filter 0.28s ease,
+    transform 0.28s ease;
+}
+
+.iq-schools-path-dossier::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgba(3, 2, 8, 0.56), rgba(3, 2, 8, 0.1) 34%, transparent 64%),
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--iq-path-accent) 14%, transparent), transparent 56%);
+}
+
+.iq-schools-path-dossier:not(:disabled):hover .iq-schools-path-dossier__art {
+  filter: saturate(1.03);
+  transform: translateZ(0) scale(1.045);
+}
+
+.iq-schools-path-dossier__overlay {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.55rem;
+  padding: 0.5rem;
+  opacity: 0.72;
+  transition: opacity 0.2s ease;
+}
+
+.iq-schools-path-dossier:hover .iq-schools-path-dossier__overlay,
+.iq-schools-path-dossier--selected .iq-schools-path-dossier__overlay {
+  opacity: 1;
+}
+
+.iq-schools-path-dossier__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 248, 225, 0.96);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.iq-schools-path-dossier__status {
+  display: inline-grid;
+  place-items: center;
+  min-width: 3.2rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--iq-path-accent) 36%, rgba(255, 255, 255, 0.08));
+  background: color-mix(in srgb, var(--iq-path-accent) 12%, rgba(255, 255, 255, 0.04));
+  padding: 0.3rem 0.42rem;
+  color: color-mix(in srgb, var(--iq-path-accent) 86%, white);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: 0.54rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.iq-schools-armor-grid--compact {
+  max-width: min(100%, 25rem);
+  margin-inline: auto;
+}
+
+@keyframes iq-schools-avatar-select-halo {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scale(0.985);
+  }
+  50% {
+    opacity: 0.82;
+    transform: scale(1.025);
+  }
+}
+
+.iq-schools-armor-vault-bg {
+  opacity: 0.78;
+  background:
+    linear-gradient(112deg, transparent 0 16%, rgba(245, 158, 11, 0.09) 17%, transparent 23% 100%),
+    linear-gradient(248deg, transparent 0 68%, rgba(14, 165, 233, 0.1) 69%, transparent 76% 100%),
+    radial-gradient(ellipse 54% 34% at 50% 50%, rgba(245, 197, 71, 0.07), transparent 68%);
+}
+
+.iq-schools-armor-circuit-bg {
+  opacity: 0.34;
+  background-image:
+    linear-gradient(to right, rgba(245, 197, 71, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(125, 211, 252, 0.055) 1px, transparent 1px),
+    linear-gradient(135deg, transparent 0 48%, rgba(168, 85, 247, 0.1) 49%, transparent 50% 100%);
+  background-size: 54px 54px, 54px 54px, 170px 170px;
+  mask-image: radial-gradient(ellipse 86% 74% at 50% 42%, black 18%, transparent 84%);
+}
+
+.iq-schools-armor-spotlight-bg {
+  background:
+    radial-gradient(circle at 24% 38%, rgba(245, 158, 11, 0.14), transparent 24%),
+    radial-gradient(circle at 74% 36%, rgba(14, 165, 233, 0.11), transparent 27%),
+    linear-gradient(180deg, transparent 0 68%, rgba(3, 2, 8, 0.86) 100%);
+}
+
+.iq-schools-armor-caption {
+  max-width: 31rem;
+  border: 1px solid rgba(245, 197, 71, 0.16);
+  border-radius: 9999px;
+  background: rgba(8, 7, 15, 0.62);
+  padding: 0.55rem 1rem;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.035),
+    0 12px 28px rgba(0, 0, 0, 0.32);
+}
+
+.iq-schools-armor-continue-btn {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px !important;
+  border-width: 2px !important;
+  transition:
+    opacity 0.24s ease,
+    border-color 0.24s ease,
+    box-shadow 0.24s ease,
+    transform 0.24s ease;
+}
+
+.iq-schools-armor-continue-btn:disabled {
+  opacity: 0.44;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.iq-schools-armor-continue-btn--armed {
+  border-color: rgba(245, 197, 71, 0.68) !important;
+  box-shadow:
+    0 0 0 1px rgba(245, 197, 71, 0.2),
+    0 0 30px rgba(245, 158, 11, 0.36),
+    0 10px 28px rgba(0, 0, 0, 0.42) !important;
+}
+
+.iq-schools-armor-continue-btn--armed::after {
+  content: "";
+  position: absolute;
+  inset: -45% -70%;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.24) 50%,
+    transparent 62%
+  );
+  animation: iq-schools-armor-cta-shimmer 3.4s ease-in-out infinite;
+}
+
+@media (max-width: 767px) {
+  .iq-schools-avatar-pick-shell {
+    --iq-avatar-card-max: 6.55rem;
+  }
+
+  .iq-schools-path-carousel__stage {
+    width: min(58vw, 12.5rem);
+  }
+
+  .iq-schools-path-dossier__overlay {
+    padding: 0.65rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.38rem;
+  }
+
+  .iq-schools-path-dossier__status {
+    min-width: 0;
+    padding-inline: 0.46rem;
+  }
+
+  .iq-schools-armor-grid {
+    max-width: min(100%, 27rem);
+  }
+}
+
+@media (min-width: 640px) {
+  .iq-schools-avatar-pick-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    max-width: min(100%, 31rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .iq-schools-choose-identity {
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .iq-schools-identity-board {
+    flex: 1 1 0%;
+    min-height: min(34rem, calc(100dvh - 12.8rem));
+  }
+
+  .iq-schools-identity-panel {
+    height: 100%;
+    padding: 0.9rem;
+  }
+
+  .iq-schools-avatar-selection-panel {
+    margin-bottom: 0.75rem;
+    padding-block: 0.72rem;
+  }
+
+  .iq-schools-avatar-pick-shell {
+    --iq-avatar-card-max: 7.6rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .iq-schools-avatar-pick-grid {
+    max-width: min(100%, 37rem);
+    gap: 1.15rem;
+    margin-block: auto;
+  }
+
+  .iq-schools-avatar-row-name {
+    min-height: 1.05rem;
+    font-size: 0.7rem;
+  }
+
+  .iq-schools-path-panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .iq-schools-path-carousel {
+    flex: 1 1 0%;
+    min-height: 0;
+    gap: 1.1rem;
+  }
+
+  .iq-schools-path-carousel__stage {
+    width: auto;
+    height: 100%;
+  }
+
+  .iq-schools-path-carousel__nav {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .iq-schools-path-dossier--carousel {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+  }
+
+  .iq-schools-path-dossier__overlay {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.36rem;
+    padding: 0.7rem;
+  }
+
+  .iq-schools-path-dossier--carousel .iq-schools-path-dossier__title {
+    font-size: 1.3rem;
+  }
+
+  .iq-schools-path-dossier--carousel .iq-schools-path-dossier__status {
+    min-width: 0;
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 767px) and (max-height: 740px) {
+  .iq-schools-choose-identity {
+    padding-top: max(0.85rem, env(safe-area-inset-top));
+    padding-bottom: max(0.85rem, env(safe-area-inset-bottom));
+  }
+
+  .iq-schools-choose-identity header p {
+    margin-top: 0.35rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+  }
+
+  .iq-schools-avatar-pick-shell {
+    --iq-avatar-card-max: 5.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .iq-schools-avatar-selection-panel {
+    margin-bottom: 0.75rem;
+    padding: 0.55rem 0.75rem;
+  }
+
+  .iq-schools-armor-grid {
+    gap: 0.55rem;
+    max-width: min(100%, 23rem);
+  }
+
+  .iq-schools-armor-grid button {
+    border-radius: 0.85rem;
+  }
+
+  .iq-schools-armor-grid button > span:last-child {
+    padding: 0.55rem;
+  }
+
+  .iq-schools-armor-grid button > span:last-child span:first-child {
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+  }
+
+  .iq-schools-armor-grid button > span:last-child span:last-child {
+    font-size: 0.62rem;
+    line-height: 1.15;
+  }
+}
+
+@media (min-width: 768px) and (max-height: 760px) {
+  .iq-schools-choose-identity {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .iq-schools-armor-grid {
+    max-width: min(100%, 58rem);
+    gap: 0.85rem;
+  }
 }
 
 /* Fit inside viewport — centered, no crop (profile hub pattern) */
@@ -7419,6 +8417,31 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
     0 0 28px rgba(139, 92, 246, 0.14);
 }
 
+.iq-schools-avatar-desktop-bg {
+  background:
+    linear-gradient(115deg, rgba(139, 92, 246, 0.08) 0%, transparent 34%),
+    linear-gradient(245deg, rgba(14, 165, 233, 0.07) 0%, transparent 36%),
+    radial-gradient(ellipse 70% 42% at 50% 106%, rgba(245, 197, 71, 0.08), transparent 68%);
+}
+
+.iq-schools-avatar-tech-grid {
+  opacity: 0.42;
+  background-image:
+    linear-gradient(to right, rgba(196, 181, 253, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(196, 181, 253, 0.06) 1px, transparent 1px),
+    linear-gradient(135deg, transparent 0 48%, rgba(139, 92, 246, 0.1) 49%, transparent 50% 100%);
+  background-size: 52px 52px, 52px 52px, 180px 180px;
+  mask-image: radial-gradient(ellipse 80% 72% at 50% 45%, black 24%, transparent 82%);
+}
+
+.iq-schools-avatar-light-ribbons {
+  opacity: 0.72;
+  background:
+    linear-gradient(104deg, transparent 0 18%, rgba(139, 92, 246, 0.16) 19%, transparent 25% 100%),
+    linear-gradient(76deg, transparent 0 70%, rgba(34, 211, 238, 0.1) 71%, transparent 77% 100%),
+    linear-gradient(180deg, transparent 0 72%, rgba(3, 3, 8, 0.72) 100%);
+}
+
 .iq-schools-avatar-identity-tagline {
   text-shadow:
     0 0 32px rgba(167, 139, 250, 0.72),
@@ -7513,6 +8536,50 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   margin-top: 0;
   margin-bottom: 0;
   overflow: hidden;
+}
+
+@media (max-width: 767px) and (max-height: 720px) {
+  .iq-schools-avatar-mobile-header {
+    padding-top: max(0.45rem, env(safe-area-inset-top));
+  }
+
+  .iq-schools-avatar-mobile-hero-title {
+    font-size: clamp(1.06rem, 5.1vw, 1.24rem);
+    line-height: 1.1;
+  }
+
+  .iq-schools-avatar-swipe-nudge {
+    margin-top: 0.28rem;
+    margin-bottom: 0.28rem;
+    font-size: 0.58rem;
+  }
+
+  .iq-schools-avatar-mobile-carousel {
+    padding-top: 4px;
+  }
+
+  .iq-schools-avatar-mobile-identity-stack {
+    gap: 0.34rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .iq-schools-avatar-mobile-identity-plate {
+    padding: 0.48rem 0.68rem 0.55rem;
+  }
+
+  .iq-schools-avatar-mobile-name {
+    font-size: clamp(0.98rem, 4.8vw, 1.12rem);
+  }
+
+  .iq-schools-avatar-identity-desc--mobile {
+    margin-top: 0.3rem;
+    font-size: clamp(0.76rem, 3.45vw, 0.88rem);
+    line-height: 1.28;
+  }
+
+  .iq-schools-avatar-mobile-footer {
+    padding-bottom: max(0.18rem, env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .iq-schools-avatar-mobile-identity-stack {
@@ -7818,6 +8885,46 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   animation: iq-schools-armor-cta-glow-pulse-armed 4.2s ease-in-out infinite;
 }
 
+.iq-schools-avatar-continue-btn {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px !important;
+  border-width: 2px !important;
+  transition:
+    opacity 0.24s ease,
+    border-color 0.24s ease,
+    box-shadow 0.24s ease,
+    transform 0.24s ease;
+}
+
+.iq-schools-avatar-continue-btn:disabled {
+  opacity: 0.42;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.iq-schools-avatar-continue-btn--armed {
+  border-color: rgba(196, 181, 253, 0.66) !important;
+  box-shadow:
+    0 0 0 1px rgba(196, 181, 253, 0.22),
+    0 0 28px rgba(139, 92, 246, 0.42),
+    0 10px 28px rgba(0, 0, 0, 0.42) !important;
+}
+
+.iq-schools-avatar-continue-btn--armed::after {
+  content: "";
+  position: absolute;
+  inset: -45% -70%;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.24) 50%,
+    transparent 62%
+  );
+  animation: iq-schools-armor-cta-shimmer 3.4s ease-in-out infinite;
+}
+
 @keyframes iq-schools-armor-cta-glow-pulse {
   0%,
   100% {
@@ -7889,6 +8996,9 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   .iq-schools-armor-cta-premium,
   .iq-schools-armor-cta--armed,
   .iq-schools-armor-cta-premium::after,
+  .iq-schools-armor-continue-btn--armed::after,
+  .iq-schools-avatar-continue-btn--armed::after,
+  .iq-schools-avatar-row-btn--selected::after,
   .iq-schools-avatar-portrait--selected {
     animation: none !important;
   }
@@ -12007,10 +13117,10 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 /* -------------------------------------------------------------------------- */
 
 .iq-prodigy-map {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  width: 100vw;
-  height: 100dvh;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
   /* Dark NVIDIA overworld — charcoal ocean with green energy tint. */
@@ -12175,15 +13285,23 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   min-height: 0;
 }
 
+/* The map rail is a docked column, so it should run to the viewport edge.
+   The Back to map control sits above it as an overlay. */
+.iq-schools-business-hub-island--map-camera
+  .iq-schools-island-hud__academy--companion {
+  bottom: 0;
+}
+
 .iq-schools-island-checklist-companion {
   display: flex;
   flex-direction: column;
   min-height: 0;
   height: 100%;
-  border-radius: 0 18px 18px 0;
+  border-radius: 0 18px 0 0;
   overflow: hidden;
   border: 1px solid rgba(118, 185, 0, 0.42);
   border-left: 0;
+  border-bottom: 0;
   background:
     radial-gradient(circle at 85% 0%, rgba(118, 185, 0, 0.2) 0%, transparent 45%),
     linear-gradient(180deg, #050505 0%, #0a0a0a 42%, #050505 100%);
@@ -13563,15 +14681,20 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 
 .iq-business-island-story-marker__pulse {
   position: absolute;
-  inset: -0.25rem;
+  top: 50%;
+  left: 50%;
+  width: calc(100% + 0.5rem);
+  height: calc(100% + 0.5rem);
   border-radius: 999px;
   border: 1.5px solid rgba(190, 242, 100, 0.7);
+  transform: translate(-50%, -50%);
   animation: iq-business-island-quest-marker-pulse 2s ease-in-out infinite;
   pointer-events: none;
 }
 
 .iq-business-island-story-marker__pulse--outer {
-  inset: -0.55rem;
+  width: calc(100% + 1.1rem);
+  height: calc(100% + 1.1rem);
   border-color: rgba(118, 185, 0, 0.35);
   animation: iq-business-island-quest-marker-pulse-outer 2s ease-in-out infinite;
 }
@@ -14424,6 +15547,45 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   pointer-events: auto;
 }
 
+/*
+ * The island shell itself is viewport-locked, so the opened evidence lesson
+ * must own vertical scrolling. Keep the short mission brief centred, then
+ * switch to a top-aligned scroll surface for the longer evidence flow.
+ */
+.iq-hq-mission--active {
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.iq-hq-mission--active > .iq-hq-mission__flow {
+  flex: 0 0 auto;
+  margin: 0 auto;
+}
+
+/*
+ * Once a Headquarters lesson is open, the checklist and lesson become one
+ * edge-to-edge workspace instead of two floating HUD cards.
+ */
+.iq-schools-business-hub-island--map-camera:has(.iq-hq-mission--active)
+  .iq-schools-island-hud__academy--companion {
+  bottom: 0;
+}
+
+.iq-schools-business-hub-island--map-camera:has(.iq-hq-mission--active)
+  .iq-schools-island-checklist-companion {
+  border-radius: 0;
+  border-bottom: 0;
+  border-top: 0;
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.04),
+    8px 0 24px rgba(0, 0, 0, 0.28);
+}
+
 .iq-hq-mission__exit {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
@@ -14802,9 +15964,9 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   flex-direction: column;
   align-items: center;
   width: min(100%, 46rem);
-  max-height: calc(100dvh - 4rem);
+  max-height: none;
   margin: auto;
-  overflow-y: auto;
+  overflow: visible;
 }
 
 /* The flow (or district panel) owns scrolling — the inner evidence screen
@@ -21912,6 +23074,43 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   color: #f8fafc;
 }
 
+.iq-mbi-vault-grid {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.34;
+  background-image:
+    linear-gradient(to right, rgba(245, 197, 71, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(196, 181, 253, 0.05) 1px, transparent 1px),
+    linear-gradient(135deg, transparent 0 48%, rgba(139, 92, 246, 0.1) 49%, transparent 50% 100%);
+  background-size: 58px 58px, 58px 58px, 190px 190px;
+  mask-image: radial-gradient(ellipse 82% 74% at 50% 48%, black 18%, transparent 86%);
+}
+
+.iq-mbi-gold-ribbons {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.72;
+  background:
+    linear-gradient(112deg, transparent 0 20%, rgba(245, 197, 71, 0.1) 21%, transparent 28% 100%),
+    linear-gradient(248deg, transparent 0 70%, rgba(139, 92, 246, 0.11) 71%, transparent 78% 100%),
+    radial-gradient(circle at 26% 42%, rgba(245, 158, 11, 0.1), transparent 18%),
+    radial-gradient(circle at 75% 38%, rgba(167, 139, 250, 0.1), transparent 22%);
+}
+
+.iq-mbi-paper-halo {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 34rem 18rem at 50% 38%, rgba(245, 197, 71, 0.1), transparent 72%),
+    radial-gradient(ellipse 24rem 12rem at 50% 64%, rgba(30, 41, 59, 0.44), transparent 76%);
+}
+
 .iq-mbi-vignette {
   pointer-events: none;
   position: absolute;
@@ -21928,6 +23127,42 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
     radial-gradient(ellipse 38% 32% at 50% 44%, rgba(212, 175, 55, 0.07) 0%, transparent 72%),
     radial-gradient(ellipse 28% 22% at 50% 42%, rgba(255, 248, 230, 0.04) 0%, transparent 70%);
   z-index: 1;
+}
+
+.iq-mbi-skip-button {
+  position: fixed;
+  top: max(0.85rem, env(safe-area-inset-top));
+  right: max(0.9rem, env(safe-area-inset-right));
+  z-index: 20;
+  border: 1px solid rgba(245, 197, 71, 0.32);
+  border-radius: 9999px;
+  background: rgba(8, 7, 12, 0.72);
+  color: rgba(254, 243, 199, 0.88);
+  padding: 0.48rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.035),
+    0 0 18px rgba(245, 197, 71, 0.16),
+    0 10px 26px rgba(0, 0, 0, 0.36);
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.iq-mbi-skip-button:hover {
+  border-color: rgba(245, 197, 71, 0.56);
+  color: rgba(255, 251, 235, 0.98);
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 24px rgba(245, 197, 71, 0.24),
+    0 10px 26px rgba(0, 0, 0, 0.38);
 }
 
 .iq-mbi-invitation__logo {
@@ -24599,30 +25834,88 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-quest-checklist-layout--section-mission {
   display: grid;
   grid-template-columns: minmax(17.5rem, 22rem) minmax(0, 1fr);
-  align-items: stretch;
+  align-items: start;
   gap: 0;
   width: 100%;
   min-height: calc(100dvh - env(safe-area-inset-top, 0px) - 4.25rem);
   margin: 0;
+  padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
   background: #020617;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .iq-quest-checklist-layout--section-mission .iq-quest-checklist-layout__sidebar {
   position: sticky;
   top: 0;
   align-self: start;
-  height: calc(100dvh - env(safe-area-inset-top, 0px) - 5.5rem);
-  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 5.5rem);
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - env(safe-area-inset-top, 0px) - 4.75rem);
+  max-height: none;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: visible;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
+  scrollbar-width: none;
   border-right: 1px solid rgba(118, 185, 0, 0.28);
   background:
     radial-gradient(circle at 70% 0%, rgba(118, 185, 0, 0.12), transparent 42%),
     linear-gradient(180deg, #020617 0%, #0b1224 48%, #020617 100%);
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.03);
+}
+
+.iq-quest-checklist-layout--section-mission .iq-quest-checklist-layout__sidebar::-webkit-scrollbar,
+.iq-quest-checklist-layout--section-mission .iq-island-tracker__list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.iq-quest-checklist-layout--section-mission .iq-island-tracker__list {
+  overflow: visible;
+  scrollbar-width: none;
+}
+
+.iq-quest-checklist-layout--section-mission .iq-island-tracker {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+.iq-quest-checklist-layout__map-return {
+  position: sticky;
+  bottom: max(0.85rem, env(safe-area-inset-bottom, 0px));
+  z-index: 8;
+  display: inline-flex;
+  width: fit-content;
+  max-width: calc(100% - 1.7rem);
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  margin: auto 0.85rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(245, 197, 71, 0.42);
+  background: rgba(7, 7, 18, 0.92);
+  padding: 0.7rem 1rem;
+  color: rgba(253, 230, 138, 0.95);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: 0.74rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.38),
+    0 0 18px rgba(245, 197, 71, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.iq-quest-checklist-layout__map-return:hover {
+  border-color: rgba(245, 197, 71, 0.68);
+  background: rgba(24, 18, 35, 0.94);
+  color: #fff7cc;
 }
 
 .iq-quest-checklist-layout--section-mission .iq-quest-checklist-layout__mission-tracker,
@@ -24684,7 +25977,9 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-quest-checklist-layout--section-mission .iq-quest-checklist-layout__main {
   min-width: 0;
   min-height: 100%;
-  padding: 0;
+  overflow-x: hidden;
+  overflow-y: visible;
+  padding: 0 0 max(2.25rem, env(safe-area-inset-bottom, 0px));
   background:
     radial-gradient(circle at 88% 8%, rgba(118, 185, 0, 0.06), transparent 36%),
     linear-gradient(180deg, rgba(2, 6, 23, 0.2) 0%, rgba(2, 6, 23, 0.55) 100%);
@@ -24694,6 +25989,19 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   padding-left: 0.35rem;
   padding-right: 0.35rem;
   max-width: 48rem;
+  overflow-x: clip;
+}
+
+.iq-quest-checklist-layout--section-mission .iq-quest-checklist-layout__main img,
+.iq-quest-checklist-layout--section-mission .iq-quest-checklist-layout__main canvas,
+.iq-quest-checklist-layout--section-mission .iq-quest-checklist-layout__main svg {
+  max-width: 100%;
+}
+
+.iq-quest-checklist-layout--section-mission .iq-hq-mission__flow,
+.iq-quest-checklist-layout--section-mission .iq-hq-mission__screen {
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 /* Company Evolution needs the full lesson column — card + far-right timeline */
@@ -24710,11 +26018,13 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   .iq-quest-checklist-layout--section-mission {
     grid-template-columns: 1fr;
     min-height: 0;
+    padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
   }
 
   .iq-quest-checklist-layout--section-mission .iq-quest-checklist-layout__sidebar {
     position: relative;
     top: 0;
+    min-height: 0;
     height: auto;
     max-height: none;
     border-right: 0;
@@ -24729,6 +26039,13 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 
   .iq-quest-checklist-layout--section-mission .iq-quest-checklist-layout__main > .relative {
     max-width: none;
+  }
+
+  .iq-quest-checklist-layout__map-return {
+    position: relative;
+    bottom: auto;
+    margin-top: 0.35rem;
+    margin-bottom: 1rem;
   }
 }
 
@@ -32046,4 +33363,37 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-business-section-quest-panel__row-head-toggle .iq-investor-quality-quest-panel__label {
   flex: 1;
   min-width: 0;
+}
+
+/* Primary action targets remain comfortably tappable on compact WebViews. */
+.iq-investor-challenge__type-toggle,
+.iq-investor-challenge__cta,
+.iq-mbt-ctrl,
+.iq-hack-ctrl,
+.iq-fmb-ctrl,
+.iq-jarvis-ctrl,
+.iq-mbc-ctrl,
+.iq-mcr-ctrl,
+.iq-ras-ctrl,
+.iq-slr-ctrl {
+  min-height: 44px;
+}
+
+/*
+ * Compact checklist hints keep their visual size while receiving a larger
+ * invisible pointer target. The pseudo-element belongs to the button.
+ */
+.iq-business-checklist-info-hint,
+.iq-investor-quality-tooltip--hint,
+.iq-investor-quality-tooltip__trigger {
+  position: relative;
+}
+
+.iq-business-checklist-info-hint::before,
+.iq-investor-quality-tooltip--hint::before,
+.iq-investor-quality-tooltip__trigger::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: 999px;
 }

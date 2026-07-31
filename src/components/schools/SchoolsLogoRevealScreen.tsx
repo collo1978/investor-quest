@@ -26,10 +26,8 @@ import {
   SCHOOLS_LOGO_REVEAL_UNLOCK_PROGRESS
 } from "@/lib/schools/schoolsLogoRevealContent";
 import { useGame } from "@/components/GameProvider";
-import { getSchoolsArmorById } from "@/lib/schools/schoolsIdentities";
 import { navigateSchoolsDemoStep } from "@/lib/schools/navigateSchoolsDemoStep";
 import { isSchoolsDemoPath, resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
-import { saveSchoolsArmor } from "@/lib/schools/schoolsIdentityStorage";
 import { markFunnelTransition } from "@/lib/startup/funnelTransition";
 
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
@@ -374,7 +372,7 @@ function DraggableJourneyPanel({
 export function SchoolsLogoRevealScreen() {
   const router = useRouter();
   const pathname = usePathname();
-  const { state, actions } = useGame();
+  const { actions } = useGame();
   const reduceMotion = useReducedMotion();
   const [runId, setRunId] = useState(0);
   const [glowStrength, setGlowStrength] = useState(0);
@@ -654,23 +652,17 @@ export function SchoolsLogoRevealScreen() {
   const handleStartQuest = useCallback(() => {
     if (!unlockedRef.current) return;
 
-    const pioneer = getSchoolsArmorById("pioneer");
-    saveSchoolsArmor("pioneer");
-    actions.setProfile({
-      playerName: pioneer.title,
-      goal: state.goal ?? "Build investing mastery"
-    });
     actions.completeOpeningScreen();
     actions.completeWelcomeScreen();
 
     if (isSchoolsDemoPath(pathname)) {
-      navigateSchoolsDemoStep("onboarding", pathname, router);
+      navigateSchoolsDemoStep("name", pathname, router);
       return;
     }
 
-    markFunnelTransition("onboarding");
-    router.replace(resolveSchoolsLearnerHref("/schools/screen5-onboarding", pathname));
-  }, [actions, pathname, router, state.goal]);
+    markFunnelTransition("name");
+    router.replace(resolveSchoolsLearnerHref("/schools/name", pathname));
+  }, [actions, pathname, router]);
 
   return (
     <main

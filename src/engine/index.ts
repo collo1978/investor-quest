@@ -15,12 +15,14 @@ export type {
   QuizProgress,
   BoardProgress,
   TerminalProgress,
-  TenKRookieChallengeRecord
+  TenKRookieChallengeRecord,
+  SchoolsLearnerProfile
 } from "@/engine/progression/state";
 export {
   initialState,
   initialCompanyProgress,
   emptyPillarStates,
+  emptySchoolsLearnerProfile,
   questWorkKey,
   STATE_VERSION,
   STORAGE_KEY

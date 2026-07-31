@@ -2,6 +2,8 @@ import { loadState } from "@/engine/progression/persistence";
 import { initialState, type GameState } from "@/engine/progression/state";
 
 const LOG_PREFIX = "[quest-progress]";
+const DEBUG_LOG_MIN_INTERVAL_MS = 1000;
+const lastDebugLogAt = new Map<string, number>();
 
 /** `?questProgressDebug=1` or `localStorage.setItem('iq-quest-progress-debug','1')` */
 export function isQuestProgressDebugEnabled(): boolean {
@@ -21,6 +23,11 @@ export function logQuestProgress(
   detail?: Record<string, unknown>
 ): void {
   if (!isQuestProgressDebugEnabled()) return;
+  const now = Date.now();
+  const lastLoggedAt = lastDebugLogAt.get(event) ?? 0;
+  if (now - lastLoggedAt < DEBUG_LOG_MIN_INTERVAL_MS) return;
+  lastDebugLogAt.set(event, now);
+
   if (detail) {
     console.info(LOG_PREFIX, event, detail);
   } else {

@@ -41,7 +41,7 @@ export const SCHOOLS_AVATAR_ACCENT_RING: Record<SchoolsAvatarAccent, string> = {
 type Props = {
   avatarId: SchoolsAvatarId;
   accent: SchoolsAvatarAccent;
-  width: number;
+  width: number | string;
   active?: boolean;
   selected?: boolean;
   /** Scales portrait height (mobile carousel uses ~0.88). */
@@ -59,7 +59,10 @@ export function SchoolsAvatarPortraitCard({
   heightScale = 1,
   className = ""
 }: Props) {
-  const height = (width / SCHOOLS_AVATAR_PORTRAIT_ASPECT) * heightScale;
+  const numericWidth = typeof width === "number" ? width : null;
+  const height = numericWidth
+    ? (numericWidth / SCHOOLS_AVATAR_PORTRAIT_ASPECT) * heightScale
+    : null;
   const ring = selected
     ? SCHOOLS_AVATAR_ACCENT_RING_SELECTED[accent]
     : active
@@ -73,7 +76,14 @@ export function SchoolsAvatarPortraitCard({
         ring,
         className
       ].join(" ")}
-      style={{ width, height }}
+      style={
+        numericWidth
+          ? { width: numericWidth, height: height ?? undefined }
+          : {
+              width,
+              aspectRatio: `${SCHOOLS_AVATAR_PORTRAIT_ASPECT / heightScale}`
+            }
+      }
     >
       <img
         src={getSchoolsAvatarPortraitSrc(avatarId)}
@@ -81,7 +91,10 @@ export function SchoolsAvatarPortraitCard({
         aria-hidden
         draggable={false}
         decoding="async"
-        className="pointer-events-none block h-full w-full select-none object-cover object-top"
+        className={[
+          "iq-schools-smooth-art pointer-events-none block h-full w-full select-none object-cover object-top transition-transform duration-300 ease-out",
+          selected ? "scale-[1.08]" : active ? "scale-[1.035]" : "scale-100"
+        ].join(" ")}
       />
       <div
         aria-hidden

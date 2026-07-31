@@ -45,7 +45,7 @@ export default function HomeHubPage() {
   const financialsCard = islandFor("financials");
   const managementCard = islandFor("management");
   return (
-    <main className="relative min-h-[calc(100vh-72px)] overflow-hidden bg-bg-0">
+    <main className="relative min-h-[calc(100dvh-72px)] overflow-hidden bg-bg-0">
       <SkyBackdrop />
 
       <div className="relative mx-auto w-full max-w-6xl px-6 py-10 md:py-14">

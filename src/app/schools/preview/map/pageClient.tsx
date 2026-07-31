@@ -8,7 +8,7 @@ import { DESKTOP_MAP_PATH } from "@/lib/screenAssetUrls";
 /**
  * Fullscreen Schools production preview of the quest map.
  * - No AppShell chrome (handled in `AppShell` for `/schools/preview/*`)
- * - 100vw × 100vh viewport
+ * - full width x 100dvh viewport
  * - Background uses `cover` so editors/sidebars don't skew judgement
  * - Interactive scene remains centered and letterbox-aligned to protect hotspots
  */
@@ -22,7 +22,7 @@ export default function SchoolsPreviewMapPageClient() {
   return (
     <main
       className={[
-        "pointer-events-auto relative h-[100vh] w-[100vw] overflow-hidden",
+        "pointer-events-auto relative h-[100dvh] w-full overflow-hidden",
         hydrationReady ? "" : "static-ui"
       ].join(" ")}
       style={{

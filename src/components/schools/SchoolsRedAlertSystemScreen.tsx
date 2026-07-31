@@ -421,7 +421,7 @@ export function SchoolsRedAlertSystemScreen() {
   return (
     <main
       key={runId}
-      className="iq-ras-screen relative h-[100dvh] w-full overflow-hidden bg-[#080406]"
+      className="iq-ras-screen relative h-[100dvh] w-full overflow-y-auto bg-[#080406]"
       aria-label="Red alert system preview"
     >
       <RedAlertBackdrop reduceMotion={reduceMotion} stabilized={screenPhase === "finale"} />

@@ -11,11 +11,11 @@ export function computeDesktopCoverImageBox(
   let w: number;
   let h: number;
   if (stageAspect > aspect) {
-    w = stageWidth;
-    h = w / aspect;
-  } else {
     h = stageHeight;
     w = h * aspect;
+  } else {
+    w = stageWidth;
+    h = w / aspect;
   }
   return { w: Math.round(w), h: Math.round(h) };
 }

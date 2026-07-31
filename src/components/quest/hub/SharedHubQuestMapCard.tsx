@@ -1011,6 +1011,7 @@ function CardSlot({
       style={{ ...position, ...cardWidth }}
       title={title}
       aria-label={ariaLabel}
+      data-hub-card-slot
     >
       {children}
     </div>

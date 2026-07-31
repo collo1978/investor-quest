@@ -82,8 +82,8 @@ export const MISSION_BRIEF_IMAGE_PATH =
 /** Bank/broker mobile preview quest map (`public/logos/mobile-map.png`). */
 export const BANK_MOBILE_MAP_PATH = "/logos/mobile-map.png" as const;
 
-/** Desktop / widescreen quest map (`public/logos/desktop-map.png`). */
-export const DESKTOP_MAP_PATH = "/logos/desktop-map.png" as const;
+/** Desktop / widescreen quest map (16:9 shared hub artwork). */
+export const DESKTOP_MAP_PATH = "/logos/latest-map-schools.png" as const;
 
 /** Schools identity picker (`public/images/schools/choose-identity.jpg`). */
 export const SCHOOLS_CHOOSE_IDENTITY_PATH =

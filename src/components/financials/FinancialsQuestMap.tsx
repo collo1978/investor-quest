@@ -100,7 +100,10 @@ export function FinancialsQuestMap({
           </motion.div>
 
           <HubTrailBridgeBeacon pillarId="financials" />
-          <motion.div className="absolute inset-0 z-[2] overflow-visible pointer-events-none">
+          <motion.div
+            className="absolute inset-0 z-[2] overflow-visible pointer-events-none"
+            data-hub-card-layer
+          >
             {cards.length === 0 ? (
               <p className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 px-6 text-center text-sm text-[rgba(134,239,172,0.75)]">
                 No Financials quests loaded. Seed Supabase quest cards, then hard

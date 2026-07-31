@@ -1,4 +1,13 @@
-import { buildDemoGameState, buildFreshSchoolsBusinessDemoProgress, DEMO_PROFILE_NEW_USER } from "@/lib/demo/demoProfiles";
+import {
+  buildDemoGameState,
+  buildFreshSchoolsBusinessDemoProgress,
+  buildNewUserDemoState,
+  DEMO_PROFILE_NEW_USER
+} from "@/lib/demo/demoProfiles";
+import { clearSchoolsArmor } from "@/lib/schools/schoolsIdentityStorage";
+import { clearSchoolsAvatar } from "@/lib/schools/schoolsAvatarStorage";
+import { clearSchoolsStocksExperienceSelections } from "@/lib/schools/schoolsStocksExperience";
+import { clearPickInterestsSelection } from "@/lib/bank/pickInterestsState";
 import {
   clearDemoSessionFlags,
   setActiveDemoProfileLabel
@@ -33,6 +42,21 @@ import {
 } from "@/lib/schools/schoolsDemoStoryMode";
 
 export const SCHOOLS_DEMO_RESET_EVENT = "iq-schools-demo-reset";
+export type SchoolsDemoResetKind = "progress" | "profile";
+
+let pendingSchoolsDemoResetKind: SchoolsDemoResetKind = "progress";
+
+export function consumeSchoolsDemoResetKind(): SchoolsDemoResetKind {
+  const kind = pendingSchoolsDemoResetKind;
+  pendingSchoolsDemoResetKind = "progress";
+  return kind;
+}
+
+function dispatchSchoolsDemoReset(kind: SchoolsDemoResetKind): void {
+  if (typeof window === "undefined") return;
+  pendingSchoolsDemoResetKind = kind;
+  window.dispatchEvent(new Event(SCHOOLS_DEMO_RESET_EVENT));
+}
 
 /** Fresh presenter save — Business card 1 only, no quest reads, onboarding already done. */
 export function buildSchoolsDemoPresenterResetState(): GameState {
@@ -109,9 +133,41 @@ export function resetSchoolsDemoProgress(
     actions.replaceGameState(nextState);
   }
 
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new Event(SCHOOLS_DEMO_RESET_EVENT));
-  }
+  dispatchSchoolsDemoReset("progress");
 
   router.replace(resolveSchoolsLearnerHref("/schools/map", pathname));
+}
+
+/**
+ * Replay the profile-creation flow from scratch: clears the entered name,
+ * avatar/armor picks, learner-type and interests selections, and resets
+ * onboarding so the learner is prompted through the whole flow again.
+ * Always exits to the canonical (non-demo-prefixed) opening screen so the
+ * real profile-creation UI shows, even when triggered from a scripted
+ * Demo Story Mode session (which otherwise skips straight past it).
+ */
+export function resetSchoolsProfileCreation(
+  router: ResetRouter,
+  actions?: ResetActions
+): void {
+  const nextState: GameState = {
+    ...buildNewUserDemoState(),
+    lastActivityAt: Date.now()
+  };
+
+  clearSchoolsArmor();
+  clearSchoolsAvatar();
+  clearSchoolsStocksExperienceSelections();
+  clearPickInterestsSelection();
+  clearDemoSessionFlags();
+
+  clearPersistedSnapshots();
+  savePersistedSnapshot(nextState, { mergeIfDiskNewer: false });
+  if (actions) {
+    actions.replaceGameState(nextState);
+  }
+
+  dispatchSchoolsDemoReset("profile");
+
+  router.replace("/schools/opening");
 }

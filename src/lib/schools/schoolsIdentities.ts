@@ -16,6 +16,8 @@ export type SchoolsArmor = {
   shortTitle: string;
   tagline: string;
   accent: string;
+  /** Spoken + shown in a speech bubble when this armor is selected. */
+  greeting: string;
 };
 
 /** Schools armor picker — four archetypes on choose-your-armor art. */
@@ -25,28 +27,32 @@ export const SCHOOLS_ARMOR_TYPES: readonly SchoolsArmor[] = [
     title: "The Builder",
     shortTitle: "Builder",
     tagline: "Steady foundations.",
-    accent: "#f59e0b"
+    accent: "#f59e0b",
+    greeting: "I'm the Builder! Let's build something great."
   },
   {
     id: "pioneer",
     title: "The Pioneer",
     shortTitle: "Pioneer",
     tagline: "First into the unknown.",
-    accent: "#22c55e"
+    accent: "#22c55e",
+    greeting: "I'm the Pioneer! Let's explore new frontiers."
   },
   {
     id: "titan",
     title: "The Titan",
     shortTitle: "Titan",
     tagline: "Power through conviction.",
-    accent: "#ef4444"
+    accent: "#ef4444",
+    greeting: "I'm the Titan! Let's dominate the markets."
   },
   {
     id: "visionary",
     title: "The Visionary",
     shortTitle: "Visionary",
     tagline: "See what others miss.",
-    accent: "#a855f7"
+    accent: "#a855f7",
+    greeting: "I'm the Visionary! Let's shape the future."
   }
 ] as const;
 

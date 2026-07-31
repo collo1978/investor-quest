@@ -23,11 +23,11 @@ import {
   isEmojiSectionHeadline
 } from "@/lib/quests/takeawayAnswer";
 
-/** Schools mission cards — high-contrast readable palette on cream. */
-const MISSION_HEADING = "#0f172a";
-const MISSION_BODY = "#475569";
-const MISSION_BODY_STRONG = "#334155";
-const MISSION_ACCENT = "#92400e";
+/** Schools mission cards - high-contrast readable palette on the dark Schools shell. */
+const MISSION_HEADING = "#fbbf24";
+const MISSION_BODY = "rgba(255, 255, 255, 0.72)";
+const MISSION_BODY_STRONG = "rgba(255, 255, 255, 0.88)";
+const MISSION_ACCENT = "#fbbf24";
 const MISSION_BULLET = "#d97706";
 
 function isMissionTheme(theme?: PillarQuestTheme): boolean {
@@ -66,10 +66,10 @@ function missionInfoPanelStyle(theme?: PillarQuestTheme): CSSProperties {
     };
   }
   return {
-    borderColor: "rgba(191, 219, 254, 0.55)",
+    borderColor: "rgba(147, 197, 253, 0.28)",
     background:
-      "linear-gradient(168deg, rgba(240, 249, 255, 0.72) 0%, rgba(255, 251, 235, 0.58) 100%)",
-    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.82)"
+      "linear-gradient(168deg, rgba(56, 189, 248, 0.09) 0%, rgba(255, 255, 255, 0.035) 100%)",
+    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.08)"
   };
 }
 
@@ -85,8 +85,8 @@ function missionTakeawayPanelStyle(theme?: PillarQuestTheme): CSSProperties {
   }
   return {
     borderColor: "rgba(251, 191, 36, 0.42)",
-    background: "rgba(255, 255, 255, 0.48)",
-    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.75)"
+    background: "rgba(251, 191, 36, 0.08)",
+    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.08)"
   };
 }
 

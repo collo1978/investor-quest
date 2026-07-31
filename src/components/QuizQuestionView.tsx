@@ -59,10 +59,10 @@ const GREEN_HI = "#22C58B";
 const GREEN_BORDER = "rgba(34, 197, 139, 0.55)";
 const RED_HI = "#F47878";
 const RED_BORDER = "rgba(244, 120, 120, 0.55)";
-const MISSION_HEADING = "#92400e";
-const MISSION_BODY = "#0f172a";
-const MISSION_MUTED = "#475569";
-const MISSION_LABEL = "#64748b";
+const MISSION_HEADING = "#fbbf24";
+const MISSION_BODY = "rgba(255, 255, 255, 0.92)";
+const MISSION_MUTED = "rgba(255, 255, 255, 0.62)";
+const MISSION_LABEL = "rgba(255, 255, 255, 0.58)";
 
 function isMissionQuizSurface(theme?: PillarQuestTheme): boolean {
   return theme?.cardChrome === "mission";
@@ -86,7 +86,7 @@ export type QuizQuestionViewProps = {
   celebrateCorrect?: boolean;
   /** XP earned on the current correct answer (Schools flow). */
   successXp?: number;
-  /** Schools Business Island — cream/gold quiz card surface. */
+  /** Schools Business Island — dark mission quiz card surface. */
   surfaceTheme?: PillarQuestTheme;
 };
 
@@ -135,7 +135,7 @@ export function QuizQuestionView(props: QuizQuestionViewProps) {
           ? "rgba(255,255,255,0.42)"
           : "rgba(255,255,255,0.03)"
         : isMissionSurface
-          ? "rgba(255,255,255,0.62)"
+          ? "rgba(255,255,255,0.045)"
           : "rgba(255,255,255,0.02)";
   const feedbackShadow = celebrating
     ? "0 0 36px -6px rgba(34,197,139,0.44), 0 0 24px -8px rgba(245,197,71,0.28)"
@@ -429,7 +429,7 @@ function QuestionPrompt({
         style={{
           borderColor: missionSurface ? "rgba(202, 138, 4, 0.42)" : GOLD_BORDER,
           background: missionSurface
-            ? "rgba(255, 255, 255, 0.62)"
+            ? "rgba(255, 255, 255, 0.055)"
             : "linear-gradient(135deg, rgba(245,197,71,0.12) 0%, rgba(245,197,71,0.04) 100%)",
           boxShadow: missionSurface
             ? "inset 0 1px 0 rgba(255,255,255,0.72)"
@@ -993,7 +993,7 @@ function TrueFalseInput({
                   ? RED_HI
                   : isSelected
                   ? missionSurface
-                    ? "#451a03"
+                      ? MISSION_BODY
                     : GOLD_HI
                   : missionSurface
                     ? MISSION_HEADING
@@ -1019,7 +1019,7 @@ function TrueFalseInput({
                     : RED_HI
                   : isSelected
                   ? missionSurface
-                    ? "#451a03"
+                    ? MISSION_BODY
                     : "#fff"
                   : missionSurface
                     ? MISSION_BODY
@@ -1473,7 +1473,7 @@ function MatchInput({
                       ? "rgba(244,120,120,0.10)"
                       : "rgba(244,120,120,0.05)"
                   : missionSurface
-                    ? "rgba(255,255,255,0.62)"
+                    ? "rgba(255,255,255,0.055)"
                     : "rgba(255,255,255,0.015)"
             }}
           >
@@ -2512,7 +2512,7 @@ function choiceStyle({
         return {
           borderColor: GREEN_BORDER,
           background: "rgba(34,197,139,0.18)",
-          color: "#14532d",
+          color: "#86efac",
           cursor: "default",
           boxShadow: "0 0 16px -4px rgba(34,197,139,0.45)"
         };
@@ -2521,15 +2521,15 @@ function choiceStyle({
         return {
           borderColor: RED_BORDER,
           background: "rgba(244,120,120,0.16)",
-          color: "#7f1d1d",
+          color: "#fca5a5",
           cursor: "default",
           boxShadow: "0 0 16px -4px rgba(244,120,120,0.4)"
         };
       }
       return {
         borderColor: "rgba(202, 138, 4, 0.28)",
-        background: "rgba(255,255,255,0.35)",
-        color: "#64748b",
+        background: "rgba(255,255,255,0.035)",
+        color: MISSION_LABEL,
         cursor: "default"
       };
     }
@@ -2539,8 +2539,8 @@ function choiceStyle({
         : "rgba(202, 138, 4, 0.42)",
       background: isSelected
         ? "rgba(251, 191, 36, 0.28)"
-        : "rgba(255, 255, 255, 0.78)",
-      color: isSelected ? "#451a03" : MISSION_BODY,
+        : "rgba(255, 255, 255, 0.06)",
+      color: isSelected ? "rgba(255, 255, 255, 0.96)" : MISSION_BODY,
       boxShadow: isSelected
         ? "0 8px 20px -10px rgba(251, 191, 36, 0.42)"
         : undefined

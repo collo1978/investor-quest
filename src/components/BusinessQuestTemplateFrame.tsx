@@ -52,13 +52,13 @@ const JEWEL_CARD_BG = "rgba(6, 6, 14, 0.995)";
 const JEWEL_CARD_SHADOW =
   "0 24px 56px -32px rgba(0,0,0,0.94), inset 0 1px 0 rgba(255, 228, 170, 0.18)";
 
-/** Schools mission card — cream/gold (matches Business Island hub). */
+/** Schools mission card — dark shell with gold accents (matches Business Island hub). */
 const MISSION_CARD_BORDER = "rgba(251, 191, 36, 0.88)";
 const MISSION_SECTION_DIVIDER = "rgba(202, 138, 4, 0.35)";
 const MISSION_CARD_BG =
-  "linear-gradient(168deg, #fffbeb 0%, #fef3c7 46%, #fde68a 100%)";
+  "linear-gradient(168deg, rgba(15, 23, 42, 0.96) 0%, rgba(8, 15, 30, 0.92) 46%, rgba(5, 7, 15, 0.98) 100%)";
 const MISSION_CARD_SHADOW =
-  "inset 0 1px 0 rgba(255, 255, 255, 0.78), inset 0 -2px 0 rgba(180, 83, 9, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.42), 0 10px 26px rgba(2, 6, 23, 0.22)";
+  "inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -2px 0 rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(251, 191, 36, 0.20), 0 10px 26px rgba(2, 6, 23, 0.45)";
 
 /** Premium jewel cards — Q/A circle badges beside question and answer. */
 const BADGE_SIZE_CLASS = "h-9 w-9 shrink-0 sm:h-10 sm:w-10";
@@ -153,7 +153,11 @@ function HeaderCompanyName({ name, theme }: { name: string; theme: PillarQuestTh
   return (
     <span
       className="max-w-[52%] truncate text-right font-[var(--font-grotesk)] text-[10.5px] font-medium tracking-wide sm:max-w-none sm:text-[11px]"
-      style={{ color: isMission ? theme.textMuted ?? "#475569" : "rgba(210,210,220,0.72)" }}
+      style={{
+        color: isMission
+          ? theme.textMuted ?? "rgba(255, 255, 255, 0.6)"
+          : "rgba(210,210,220,0.72)"
+      }}
       title={label}
     >
       {label}
@@ -388,7 +392,7 @@ export function PillarQuestTemplateFrame({
     : isJewel
       ? JEWEL_SECTION_DIVIDER
       : theme.borderSoft;
-  const bodyTextColor = isMission ? theme.text ?? "#0f172a" : undefined;
+  const bodyTextColor = isMission ? theme.text ?? "rgba(255, 255, 255, 0.92)" : undefined;
   const labelTextColor = isMission ? theme.badgeText ?? "#92400e" : undefined;
   const pulsePeakGlow = isNeon ? theme.glow : theme.whyGlow;
 
@@ -584,7 +588,7 @@ export function PillarQuestTemplateFrame({
                     ].join(" ")}
                     style={{
                       color: isMission
-                        ? theme.textMuted ?? "#475569"
+                        ? theme.textMuted ?? "rgba(255, 255, 255, 0.6)"
                         : isJewel
                           ? undefined
                           : "rgba(210,210,220,0.72)"
@@ -667,7 +671,7 @@ export function PillarQuestTemplateFrame({
             layout
             className={[
               "relative z-[1] shrink-0 border-b px-4 sm:px-5",
-              isMission ? "bg-[rgba(255,251,235,0.58)]" : "",
+              isMission ? "bg-white/[0.035]" : "",
               isMission
                 ? answerDominant
                   ? "py-2 sm:py-2.5"
@@ -677,7 +681,7 @@ export function PillarQuestTemplateFrame({
                   : "py-4 sm:py-5"
             ].join(" ")}
             style={{
-              borderColor: isMission ? "rgba(202, 138, 4, 0.38)" : sectionDivider,
+              borderColor: isMission ? "rgba(251, 191, 36, 0.22)" : sectionDivider,
               borderBottomWidth: isMission ? 2 : undefined
             }}
           >
@@ -811,7 +815,7 @@ export function PillarQuestTemplateFrame({
             <footer
               className={[
                 "relative z-[1] shrink-0 border-t px-4 sm:px-5",
-                isMission ? "bg-white/35" : "bg-black/20",
+                isMission ? "bg-white/[0.035]" : "bg-black/20",
                 isMission
                   ? answerDominant
                     ? "py-4 sm:py-5"

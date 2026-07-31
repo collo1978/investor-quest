@@ -15,10 +15,26 @@ import type {
   GameState,
   PillarState,
   QuestWork,
-  QuizProgress
+  QuizProgress,
+  SchoolsLearnerProfile
 } from "@/engine/progression/state";
 import { computeLevel } from "@/engine/progression/xp";
 import { migrateBusinessIslandProgress } from "@/lib/business/businessSlugMigration";
+
+function mergeSchoolsProfile(
+  inMemory: SchoolsLearnerProfile,
+  loaded: SchoolsLearnerProfile
+): SchoolsLearnerProfile {
+  return {
+    avatarId: inMemory.avatarId ?? loaded.avatarId,
+    armorId: inMemory.armorId ?? loaded.armorId,
+    learnerType: [
+      ...new Set([...loaded.learnerType, ...inMemory.learnerType])
+    ],
+    interests: [...new Set([...loaded.interests, ...inMemory.interests])],
+    updatedAt: Math.max(inMemory.updatedAt ?? 0, loaded.updatedAt ?? 0) || null
+  };
+}
 
 function mergeStreakState(a: StreakState, b: StreakState): StreakState {
   if (a.streak > b.streak) return a;
@@ -401,6 +417,10 @@ export function mergeLoadedGameState(
     lastActivityAt: Math.max(
       inMemory.lastActivityAt ?? 0,
       loaded.lastActivityAt ?? 0
-    ) || null
+    ) || null,
+    schoolsProfile: mergeSchoolsProfile(
+      inMemory.schoolsProfile,
+      loaded.schoolsProfile
+    )
   });
 }

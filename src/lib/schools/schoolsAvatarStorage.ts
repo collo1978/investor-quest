@@ -42,3 +42,12 @@ export function readSchoolsAvatar(): StoredSchoolsAvatar | null {
 export function hasSchoolsAvatarSelected(): boolean {
   return readSchoolsAvatar() != null || hasSchoolsArmorSelected();
 }
+
+export function clearSchoolsAvatar(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}

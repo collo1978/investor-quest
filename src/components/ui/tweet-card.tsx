@@ -165,11 +165,9 @@ export const TweetBody = ({ tweet }: { tweet: EnrichedTweet }) => (
           )
         case "text":
           return (
-            <span
-              key={idx}
-              className="text-foreground text-[15px] font-normal"
-              dangerouslySetInnerHTML={{ __html: entity.text }}
-            />
+            <span key={idx} className="text-foreground text-[15px] font-normal">
+              {entity.text}
+            </span>
           )
         default:
           return null

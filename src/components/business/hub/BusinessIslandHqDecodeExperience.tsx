@@ -15,17 +15,24 @@ type HqPhase = "brief" | "mission";
 type Props = {
   location: BusinessIslandStoryLocationDef;
   companyName: string;
+  /** Checklist deep-link — begin with the matching district question. */
+  startIndex?: number;
   onMissionMastered: (questionId: InvestorNotebookQuestionId) => void;
   onLeave: () => void;
 };
 
 /**
- * Headquarters — Brief case file → for each HQ question:
+ * Shared Business Island case-file experience — brief → for each district question:
  * (Evidence → Decode → Answer → Checklist tick) → return to island.
+ *
+ * Headquarters established the visual language for this flow. Every NVIDIA
+ * district now uses this same shell so the island feels like one connected
+ * investigation rather than a collection of different modal layouts.
  */
 export function BusinessIslandHqDecodeExperience({
   location,
   companyName,
+  startIndex = 0,
   onMissionMastered,
   onLeave
 }: Props) {
@@ -35,7 +42,10 @@ export function BusinessIslandHqDecodeExperience({
 
   return (
     <motion.div
-      className="iq-hq-mission"
+      className={[
+        "iq-hq-mission",
+        phase === "mission" ? "iq-hq-mission--active" : "iq-hq-mission--brief"
+      ].join(" ")}
       role="dialog"
       aria-modal="true"
       aria-label={`${location.placeName} mission`}
@@ -66,7 +76,7 @@ export function BusinessIslandHqDecodeExperience({
             <div className="iq-hq-mission-brief">
               <Image
                 src={HQ_MISSION_BRIEF_SRC}
-                alt="Your mission case file — access NVIDIA's official 10-K Business section evidence"
+                alt={`Your ${location.placeName} mission case file — access NVIDIA's official 10-K Business section evidence`}
                 width={1536}
                 height={1024}
                 className="iq-hq-mission-brief__image"
@@ -98,6 +108,7 @@ export function BusinessIslandHqDecodeExperience({
             <BusinessIslandMissionFlow
               questionIds={location.notebookQuestionIds}
               companyName={companyName}
+              startIndex={startIndex}
               onQuestionMastered={onMissionMastered}
               onComplete={onLeave}
               completeLabel="Return to the island →"

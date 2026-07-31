@@ -57,6 +57,15 @@ export function hasSchoolsArmorSelected(): boolean {
   return readSchoolsArmor() != null;
 }
 
+export function clearSchoolsArmor(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 /** @deprecated Use {@link hasSchoolsArmorSelected}. */
 export function hasSchoolsIdentitySelected(): boolean {
   return hasSchoolsArmorSelected();

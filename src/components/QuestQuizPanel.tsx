@@ -159,7 +159,6 @@ const GOLD_BORDER = "rgba(245, 197, 71, 0.40)";
 const GOLD_BORDER_SOFT = "rgba(245, 197, 71, 0.22)";
 const GOLD_GLOW = "rgba(245, 197, 71, 0.45)";
 const GREEN_HI = "#22C58B";
-const GREEN_MISSION = "#15803d";
 const GREEN_BORDER = "rgba(34, 197, 139, 0.55)";
 const RED_HI = "#F47878";
 const RED_BORDER = "rgba(244, 120, 120, 0.55)";
@@ -610,10 +609,10 @@ export function QuestQuizPanel({
         borderColor: isPassedDisplay ? GREEN_BORDER : accent.border,
         background:
           accent.surface ??
-          "linear-gradient(168deg, #fffbeb 0%, #fef3c7 46%, #fde68a 100%)",
+          "linear-gradient(168deg, rgba(15, 23, 42, 0.96) 0%, rgba(8, 15, 30, 0.92) 46%, rgba(5, 7, 15, 0.98) 100%)",
         boxShadow: isPassedDisplay
-          ? "0 16px 36px rgba(2, 6, 23, 0.18), inset 0 0 0 1px rgba(34,197,139,0.28)"
-          : "inset 0 1px 0 rgba(255, 255, 255, 0.78), inset 0 -2px 0 rgba(180, 83, 9, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.42), 0 10px 26px rgba(2, 6, 23, 0.22)"
+          ? "0 16px 36px rgba(2, 6, 23, 0.45), inset 0 0 0 1px rgba(34,197,139,0.28)"
+          : "inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -2px 0 rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(251, 191, 36, 0.20), 0 10px 26px rgba(2, 6, 23, 0.45)"
       }
     : {
         borderColor: isPassedDisplay ? GREEN_BORDER : accent.border,
@@ -1305,12 +1304,12 @@ function SummaryBody({
         : `You got ${score} of ${total}. Need ${requiredCorrect} of ${total} to pass.`
       : "";
 
-  const failTitleColor = isSchoolsMission ? "#991b1b" : "#fff";
-  const summaryBodyColor = isSchoolsMission ? "#475569" : undefined;
+  const failTitleColor = isSchoolsMission ? RED_HI : "#fff";
+  const summaryBodyColor = isSchoolsMission ? "rgba(255, 255, 255, 0.7)" : undefined;
   const summaryHeadingColor = isSchoolsMission
     ? didPass
-      ? GREEN_MISSION
-      : "#991b1b"
+      ? GREEN_HI
+      : RED_HI
     : didPass
       ? GREEN_HI
       : failTitleColor;

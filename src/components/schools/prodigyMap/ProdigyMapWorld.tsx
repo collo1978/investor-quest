@@ -752,7 +752,14 @@ export function ProdigyHubPlatform({ cx, cy, r = 145 }: { cx: number; cy: number
       />
       <circle cx={cx} cy={cy} r={r - 86} fill="none" stroke="#c4b5fd" strokeWidth="3" opacity="0.75" />
       {/* Glowing core — gold prize light at the centre */}
-      <circle cx={cx} cy={cy} r={r - 104} fill="url(#prod-hub-core)" opacity="0.98" className="iq-prodigy-landmark__hub-core" />
+      <circle
+        cx={cx}
+        cy={cy}
+        r={Math.max(2, r - 104)}
+        fill="url(#prod-hub-core)"
+        opacity="0.98"
+        className="iq-prodigy-landmark__hub-core"
+      />
       <circle
         cx={cx}
         cy={cy}

@@ -19,6 +19,13 @@ import {
   type BusinessInvestorFrameworkStoredState
 } from "@/lib/business/businessInvestorFrameworkStorage";
 import { getPlayableDemoCompanies } from "@/lib/demo/playableDemo";
+import { getSchoolsAvatarById, type SchoolsAvatarId } from "@/lib/schools/avatars";
+import {
+  getSchoolsArmorById,
+  type SchoolsArmorId
+} from "@/lib/schools/schoolsIdentities";
+import { SCHOOLS_STOCKS_EXPERIENCE_OPTIONS } from "@/lib/schools/schoolsStocksExperience";
+import { schoolsInterestLabel } from "@/lib/schools/schoolsInterestLabels";
 
 const EMPTY_FRAMEWORK_STATE: BusinessInvestorFrameworkStoredState = {
   naPrinciples: {},
@@ -313,6 +320,43 @@ function resolveAchievements(
   });
 }
 
+function resolveSchoolsIdentity(
+  game: GameState
+): InvestorProfileSnapshot["schoolsIdentity"] {
+  const profile = game.schoolsProfile;
+  const hasAny =
+    profile.avatarId != null ||
+    profile.armorId != null ||
+    profile.learnerType.length > 0 ||
+    profile.interests.length > 0;
+  if (!hasAny) return null;
+
+  const avatar = profile.avatarId
+    ? getSchoolsAvatarById(profile.avatarId as SchoolsAvatarId)
+    : null;
+  const armor = profile.armorId
+    ? getSchoolsArmorById(profile.armorId as SchoolsArmorId)
+    : null;
+
+  const learnerTypeLabels = profile.learnerType.map((id) => {
+    const option = SCHOOLS_STOCKS_EXPERIENCE_OPTIONS.find((o) => o.id === id);
+    return option?.label ?? id;
+  });
+
+  const interestLabels = profile.interests.map((id) => schoolsInterestLabel(id));
+
+  return {
+    avatar: avatar
+      ? { id: avatar.id, name: avatar.name, accent: avatar.accent }
+      : null,
+    armor: armor
+      ? { id: armor.id, title: armor.title, accent: armor.accent }
+      : null,
+    learnerTypeLabels,
+    interestLabels
+  };
+}
+
 export function resolveInvestorProfileSnapshot(
   game: GameState,
   opts?: { includeClientStorage?: boolean }
@@ -344,6 +388,7 @@ export function resolveInvestorProfileSnapshot(
   return {
     playerName,
     initials,
+    schoolsIdentity: resolveSchoolsIdentity(game),
     level: progress?.level ?? 1,
     xp,
     title: investorTitleFromXp(xp),

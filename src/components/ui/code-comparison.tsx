@@ -20,6 +20,15 @@ interface CodeComparisonProps {
   highlightColor?: string
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
 export function CodeComparison({
   beforeCode,
   afterCode,
@@ -76,8 +85,8 @@ export function CodeComparison({
         setHighlightedAfter(after)
       } catch (error) {
         console.error("Error highlighting code:", error)
-        setHighlightedBefore(`<pre>${beforeCode}</pre>`)
-        setHighlightedAfter(`<pre>${afterCode}</pre>`)
+        setHighlightedBefore(`<pre>${escapeHtml(beforeCode)}</pre>`)
+        setHighlightedAfter(`<pre>${escapeHtml(afterCode)}</pre>`)
       }
     }
     highlightCode()

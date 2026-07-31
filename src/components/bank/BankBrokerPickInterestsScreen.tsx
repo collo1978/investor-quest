@@ -133,7 +133,7 @@ export function BankBrokerPickInterestsScreen({ onContinue, onBack }: Props) {
             type="button"
             aria-label="Go back"
             onClick={handleBack}
-            className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl border border-violet-500/35 bg-[rgba(8,6,18,0.75)] text-violet-200/90 shadow-[0_0_12px_rgba(139,92,246,0.15)] transition hover:border-violet-400/50 hover:bg-violet-500/10"
+            className="mb-4 flex h-[44px] w-[44px] items-center justify-center rounded-xl border border-violet-500/35 bg-[rgba(8,6,18,0.75)] text-violet-200/90 shadow-[0_0_12px_rgba(139,92,246,0.15)] transition hover:border-violet-400/50 hover:bg-violet-500/10"
           >
             ‹
           </button>

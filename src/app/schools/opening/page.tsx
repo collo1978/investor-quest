@@ -145,8 +145,8 @@ export default function SchoolsOpeningPage() {
       clearDemoFreshStart();
     }
 
-    markFunnelTransition("avatar");
-    router.replace(resolveSchoolsLearnerHref("/schools/avatar", pathname));
+    markFunnelTransition("name");
+    router.replace(resolveSchoolsLearnerHref("/schools/name", pathname));
     queueMicrotask(() => {
       actions.completeOpeningScreen();
       actions.completeWelcomeScreen();

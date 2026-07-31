@@ -24,7 +24,7 @@ export function Header({ onOpenMenu, menuOpen = false }: HeaderProps) {
             <button
               type="button"
               onClick={onOpenMenu}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 text-ink-0 transition hover:border-violet-400/40 hover:bg-white/[0.05] active:scale-[0.98]"
+              className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-xl border border-white/10 text-ink-0 transition hover:border-violet-400/40 hover:bg-white/[0.05] active:scale-[0.98]"
               aria-label="Open menu"
               aria-controls="mobile-nav-drawer"
               aria-expanded={menuOpen}

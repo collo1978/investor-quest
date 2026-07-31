@@ -1,11 +1,11 @@
 import type { PillarId } from "@/data/pillars";
 
-/** Desktop / widescreen map art (`public/logos/desktop-map.png`). */
-export const DESKTOP_MAP_PATH = "/logos/desktop-map.png";
+/** Desktop / widescreen map art (16:9 Schools map retained as shared hub art). */
+export const DESKTOP_MAP_PATH = "/logos/latest-map-schools.png";
 
 /** 16:9 desktop map (1920×1080). */
-export const DESKTOP_MAP_NATURAL_W = 1920;
-export const DESKTOP_MAP_NATURAL_H = 1080;
+export const DESKTOP_MAP_NATURAL_W = 1672;
+export const DESKTOP_MAP_NATURAL_H = 941;
 export const DESKTOP_MAP_ASPECT =
   DESKTOP_MAP_NATURAL_W / DESKTOP_MAP_NATURAL_H;
 

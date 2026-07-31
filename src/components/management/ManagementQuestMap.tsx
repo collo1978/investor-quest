@@ -92,7 +92,10 @@ export function ManagementQuestMap({
           </motion.div>
 
           <HubTrailBridgeBeacon pillarId="management" />
-          <motion.div className="absolute inset-0 z-[2] overflow-visible pointer-events-none">
+          <motion.div
+            className="absolute inset-0 z-[2] overflow-visible pointer-events-none"
+            data-hub-card-layer
+          >
             {cards.map((card, i) => {
               const slot = MANAGEMENT_MAP_CARD_POSITIONS[card.orderNumber];
               if (!slot) return null;

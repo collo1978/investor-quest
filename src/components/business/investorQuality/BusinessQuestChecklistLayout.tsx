@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, type ReactNode } from "react";
+import Link from "next/link";
 
 import { BusinessChecklistChapterNav } from "@/components/business/checklist/BusinessChecklistChapterNav";
 import { BusinessChecklistSectionWorkspace } from "@/components/business/checklist/BusinessChecklistSectionWorkspace";
@@ -72,6 +73,13 @@ function ChecklistLayoutInner({
             aria-label="Investor Checklist"
           >
             <BusinessInvestorNotebookPanel companyId={companyId} />
+            <Link
+              href="/schools/demo/map"
+              className="iq-quest-checklist-layout__map-return"
+            >
+              <span aria-hidden>←</span>
+              Back to Map
+            </Link>
           </aside>
           <div className="iq-quest-checklist-layout__main">{children}</div>
         </div>

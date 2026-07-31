@@ -18,7 +18,7 @@ import type { CompanyStreaks } from "@/engine/progression/streaks";
 import { isQuestMapDefaultUnlocked } from "@/engine/progression/pillarUnlockPolicy";
 import { emptyStreaks } from "@/engine/progression/streaks";
 
-export const STATE_VERSION = 13;
+export const STATE_VERSION = 14;
 export const STORAGE_KEY = "investor-quest::state";
 
 export type QuizProgress = {
@@ -153,6 +153,34 @@ export type OnboardingState = {
   welcomeScreenSeenAt: number | null;
 };
 
+/**
+ * Schools funnel — profile-creation choices (name lives on `playerName`).
+ * Scoped separately from core progression so it can be reset/replayed
+ * independent of quest/XP progress.
+ */
+export type SchoolsLearnerProfile = {
+  /** Named-character avatar id (`SchoolsAvatarId`). */
+  avatarId: string | null;
+  /** Archetype id (`SchoolsArmorId`). */
+  armorId: string | null;
+  /** "Sounds like you" stocks-experience multiselect (`SchoolsStocksExperienceId[]`). */
+  learnerType: string[];
+  /** Pick-interests selection (interest ids). */
+  interests: string[];
+  /** Epoch ms of the last profile-creation write; `null` until any field is set. */
+  updatedAt: number | null;
+};
+
+export function emptySchoolsLearnerProfile(): SchoolsLearnerProfile {
+  return {
+    avatarId: null,
+    armorId: null,
+    learnerType: [],
+    interests: [],
+    updatedAt: null
+  };
+}
+
 export type GameState = {
   version: number;
   playerName: string | null;
@@ -168,6 +196,7 @@ export type GameState = {
   onboarding: OnboardingState;
   /** Epoch ms of the last engine-affecting action across the whole save. */
   lastActivityAt: number | null;
+  schoolsProfile: SchoolsLearnerProfile;
 };
 
 export function emptyPillarStates(): Record<PillarId, PillarState> {
@@ -231,7 +260,8 @@ export function initialState(): GameState {
       openingScreenSeenAt: null,
       welcomeScreenSeenAt: null
     },
-    lastActivityAt: null
+    lastActivityAt: null,
+    schoolsProfile: emptySchoolsLearnerProfile()
   };
 }
 

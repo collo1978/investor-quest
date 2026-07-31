@@ -6,8 +6,8 @@ import type { CSSProperties } from "react";
  */
 export const MANAGEMENT_SCENE_STYLE: CSSProperties = {
   position: "relative",
-  width: "min(92vw, 1600px)",
-  aspectRatio: "16 / 9",
+  width: "min(100%, 1600px)",
+  aspectRatio: "16 / 10",
   marginLeft: "auto",
   marginRight: "auto",
   overflow: "visible"
@@ -16,23 +16,23 @@ export const MANAGEMENT_SCENE_STYLE: CSSProperties = {
 /** Management boardroom island — symmetric executive slots. */
 export const MANAGEMENT_MAP_CARD_POSITIONS: Record<number, CSSProperties> = {
   1: {
-    top: "18%",
+    top: "14%",
     left: "5%"
   },
   2: {
-    top: "18%",
+    top: "14%",
     right: "5%"
   },
   3: {
-    top: "56%",
+    top: "44%",
     left: "5%"
   },
   4: {
-    top: "56%",
+    top: "44%",
     right: "5%"
   },
   5: {
-    bottom: "6%",
+    bottom: "4%",
     left: "50%",
     transform: "translateX(-50%)"
   }

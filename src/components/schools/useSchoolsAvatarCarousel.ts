@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { animate, useMotionValue, useReducedMotion, type PanInfo } from "framer-motion";
 
 import { SCHOOLS_AVATARS, type SchoolsAvatar, type SchoolsAvatarId } from "@/lib/schools/avatars";
+import { SCHOOLS_AVATAR_PORTRAIT_ASPECT } from "@/lib/schools/schoolsAvatarPortraits";
 
 export type SchoolsAvatarCarouselConfig = {
   slideVw: number;
@@ -11,6 +12,7 @@ export type SchoolsAvatarCarouselConfig = {
   velocityThreshold?: number;
   /** When false, swiping only moves the carousel — selection happens on tap. */
   selectOnSnap?: boolean;
+  portraitHeightScale?: number;
 };
 
 export function useSchoolsAvatarCarousel(
@@ -20,16 +22,24 @@ export function useSchoolsAvatarCarousel(
     slideVw,
     slideGap,
     velocityThreshold = 280,
-    selectOnSnap = true
+    selectOnSnap = true,
+    portraitHeightScale = 1
   }: SchoolsAvatarCarouselConfig
 ) {
   const reduceMotion = useReducedMotion();
   const trackRef = useRef<HTMLDivElement>(null);
   const [viewportWidth, setViewportWidth] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
   const [index, setIndex] = useState(0);
   const x = useMotionValue(0);
 
-  const slideWidth = viewportWidth > 0 ? viewportWidth * slideVw : 280;
+  const widthFromViewport = viewportWidth > 0 ? viewportWidth * slideVw : 280;
+  const widthFromHeight =
+    viewportHeight > 0
+      ? (viewportHeight * 0.9 * SCHOOLS_AVATAR_PORTRAIT_ASPECT) /
+        portraitHeightScale
+      : Number.POSITIVE_INFINITY;
+  const slideWidth = Math.max(168, Math.min(widthFromViewport, widthFromHeight));
   const slideStep = slideWidth + slideGap;
   const sideInset = viewportWidth > 0 ? (viewportWidth - slideWidth) / 2 : 0;
 
@@ -60,7 +70,10 @@ export function useSchoolsAvatarCarousel(
     const el = trackRef.current;
     if (!el) return;
 
-    const measure = () => setViewportWidth(el.clientWidth);
+    const measure = () => {
+      setViewportWidth(el.clientWidth);
+      setViewportHeight(el.clientHeight);
+    };
     measure();
 
     const ro = new ResizeObserver(measure);

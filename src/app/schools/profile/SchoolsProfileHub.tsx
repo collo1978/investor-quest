@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 
 import { InvestorProfileDashboard } from "@/components/profile/InvestorProfileDashboard";
+import { SchoolsProfileReplayButton } from "@/components/schools/SchoolsProfileReplayButton";
 import { resolveSchoolsLearnerHref } from "@/lib/schools/schoolsDemoHref";
 
 /** Schools profile — same live dashboard as the main app. */
@@ -15,6 +16,7 @@ export default function SchoolsProfileHub() {
       variant="schools"
       backHref={backHref}
       backLabel="Back to map"
+      headerExtra={<SchoolsProfileReplayButton />}
     />
   );
 }

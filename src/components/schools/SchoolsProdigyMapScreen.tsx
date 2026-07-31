@@ -432,17 +432,42 @@ export function SchoolsProdigyMapScreen({
     return compute({ width: stageW, height: stageH }, { width: canvasW, height: canvasH }, undefined, offset);
   };
 
+  /**
+   * Business-hub HUD (`.iq-schools-business-hub-island__playfield`) is a sibling
+   * overlay, not a child of the canvas — it can't rely on percentage layout to
+   * track the canvas box, since the canvas is letterboxed to a fixed aspect
+   * ratio and shrinks independently of the stage on tall/narrow viewports.
+   * Publish the canvas's real rendered box as CSS vars on the document root so
+   * the sibling overlay can anchor to it instead of assuming canvas ≈ stage.
+   */
+  const publishIslandHubMetrics = () => {
+    const stage = stageRef.current;
+    const canvas = canvasRef.current;
+    if (!stage || !canvas) return;
+    const canvasH = canvas.offsetHeight;
+    const stageH = stage.clientHeight;
+    if (canvasH <= 0 || stageH <= 0) return;
+    const letterboxGap = Math.max(0, (stageH - canvasH) / 2);
+    const root = document.documentElement.style;
+    root.setProperty("--iq-island-hub-height", `${canvasH * 0.86}px`);
+    root.setProperty("--iq-island-hub-bottom", `${letterboxGap + canvasH * 0.06}px`);
+  };
+
   useLayoutEffect(() => {
     if (!cameraEngaged) {
       setCameraFrame({ scale: 1, x: 0, y: 0 });
       return;
     }
     setCameraFrame(measureIslandCamera());
+    publishIslandHubMetrics();
   }, [cameraEngaged, cameraMode]);
 
   useEffect(() => {
     if (!cameraEngaged) return;
-    const onResize = () => setCameraFrame(measureIslandCamera());
+    const onResize = () => {
+      setCameraFrame(measureIslandCamera());
+      publishIslandHubMetrics();
+    };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [cameraEngaged, cameraMode]);

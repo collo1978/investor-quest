@@ -64,7 +64,7 @@ export default function QuestPage() {
   return (
     <Suspense
       fallback={
-        <main className="relative min-h-[calc(100vh-72px)] overflow-hidden bg-bg-0" />
+        <main className="relative min-h-[calc(100dvh-72px)] overflow-hidden bg-bg-0" />
       }
     >
       <QuestPageInner />

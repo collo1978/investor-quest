@@ -68,11 +68,19 @@ export type ProfileStatistics = {
   quizStreak: number;
 };
 
+export type ProfileSchoolsIdentity = {
+  avatar: { id: string; name: string; accent: string } | null;
+  armor: { id: string; title: string; accent: string } | null;
+  learnerTypeLabels: string[];
+  interestLabels: string[];
+};
+
 export type InvestorProfileSnapshot = {
   playerName: string;
   initials: string;
   level: number;
   xp: number;
+  schoolsIdentity: ProfileSchoolsIdentity | null;
   title: string;
   xpInBand: number;
   xpBandTotal: number;

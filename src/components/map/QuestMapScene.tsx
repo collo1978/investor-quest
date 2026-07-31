@@ -260,15 +260,15 @@ function QuestMapOverallProgressHud({ progressPct }: { progressPct: number }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 8 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="pointer-events-none absolute right-2 top-2 z-[25] w-[min(9rem,32vw)] sm:right-3 sm:top-3 sm:w-36"
+      className="pointer-events-none absolute inset-x-0 top-2 z-[25] flex justify-center sm:top-3"
       role="status"
       aria-label={`Quest map progress ${pct} percent`}
     >
       <motion.div
-        className="rounded-xl border border-[rgba(139,92,246,0.45)] bg-[rgba(8,6,18,0.85)] px-3 py-2.5 shadow-[0_0_24px_rgba(139,92,246,0.22),0_10px_32px_rgba(0,0,0,0.5)] backdrop-blur-md"
+        className="w-[min(9rem,32vw)] rounded-xl border border-[rgba(139,92,246,0.45)] bg-[rgba(8,6,18,0.85)] px-3 py-2.5 shadow-[0_0_24px_rgba(139,92,246,0.22),0_10px_32px_rgba(0,0,0,0.5)] backdrop-blur-md sm:w-36"
         initial={false}
         animate={
           pct >= 100
@@ -491,6 +491,7 @@ export function QuestMapScene() {
       ref={stageRef}
       className="absolute inset-0 overflow-hidden rounded-3xl bg-[#05050F]"
       data-quest-map-scene
+      data-mobile-quest-map={bankMobileGame ? "" : undefined}
     >
       {/* Soft ambient wash behind the artwork so letterbox bands never
           read as flat black. Decorative; never blocks pointer events. */}
@@ -563,7 +564,7 @@ export function QuestMapScene() {
             draggable={false}
             className={[
               "pointer-events-none absolute inset-0 h-full w-full select-none",
-              bankMobileGame ? "object-contain" : "object-cover object-center"
+              "object-contain object-center"
             ].join(" ")}
             style={{ x: imgPx, y: imgPy }}
           />
