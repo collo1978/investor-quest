@@ -66,7 +66,12 @@ export function InvestorProfileDashboard({
       />
 
       <main className="relative z-[1] mx-auto max-w-6xl px-5 pb-16 pt-8 md:px-8 md:pt-10">
-        <header className="mb-8 flex flex-col gap-5 border-b border-white/[0.08] pb-7 md:flex-row md:items-start md:justify-between">
+        <header
+          className={[
+            "mb-8 flex flex-col gap-5 border-b border-white/[0.08] pb-7 md:flex-row md:items-start md:justify-between",
+            isSchools ? "iq-schools-profile-header" : ""
+          ].join(" ")}
+        >
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-8">
             {!isSchools ? (
               <Link href="/home" className="relative z-10 shrink-0">

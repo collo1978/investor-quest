@@ -46,6 +46,8 @@ type Props = {
   /** HQ zoom beat before navigating to a quest. */
   onBeforeQuestNavigate?: (href: string) => void;
   onEnterHub?: () => void;
+  /** Map-camera companion only — renders Back to map as an in-flow footer. */
+  onBackToMap?: () => void;
 };
 
 /**
@@ -67,7 +69,8 @@ export function SchoolsBusinessHubIslandLayout({
   entryPhase = "revealed",
   mapCameraHub = false,
   onBeforeQuestNavigate,
-  onEnterHub
+  onEnterHub,
+  onBackToMap
 }: Props) {
   const reduceMotion = useReducedMotion();
   const [storyTick, setStoryTick] = useState(0);
@@ -75,6 +78,7 @@ export function SchoolsBusinessHubIslandLayout({
     useState<BusinessIslandStoryLocationId | null>(null);
   const [openQuestionId, setOpenQuestionId] =
     useState<InvestorNotebookQuestionId | null>(null);
+  const [checklistCollapsed, setChecklistCollapsed] = useState(false);
 
   const handleOpenMasteryQuestion = (questionId: InvestorNotebookQuestionId) => {
     const progress = readBusinessIslandStoryProgress(company.id);
@@ -237,6 +241,11 @@ export function SchoolsBusinessHubIslandLayout({
       ]
         .filter(Boolean)
         .join(" ")}
+      style={
+        mapCameraHub && checklistCollapsed
+          ? ({ "--iq-island-companion-width": "2.75rem" } as CSSProperties)
+          : undefined
+      }
     >
       {showEntryCard ? (
         <motion.div
@@ -305,11 +314,38 @@ export function SchoolsBusinessHubIslandLayout({
       {mapCameraHub ? (
         <>
           <motion.aside
-            className="iq-schools-island-hud__academy iq-schools-island-hud__academy--companion pointer-events-none"
+            className={[
+              "iq-schools-island-hud__academy iq-schools-island-hud__academy--companion pointer-events-none",
+              checklistCollapsed ? "iq-schools-island-hud__academy--collapsed" : "",
+              onBackToMap ? "iq-schools-island-hud__academy--has-footer" : ""
+            ]
+              .filter(Boolean)
+              .join(" ")}
             {...riseIn}
             transition={{ duration: 0.5, delay: showUi ? 0.2 : 0, ease: [0.22, 1, 0.36, 1] }}
           >
+            <button
+              type="button"
+              className="iq-schools-island-checklist-toggle pointer-events-auto"
+              aria-expanded={!checklistCollapsed}
+              aria-label={checklistCollapsed ? "Show investor checklist" : "Hide investor checklist"}
+              onClick={() => setChecklistCollapsed((collapsed) => !collapsed)}
+            >
+              <span aria-hidden>{checklistCollapsed ? "›" : "‹"}</span>
+            </button>
             {principlesPanel}
+            {onBackToMap ? (
+              <div className="iq-schools-island-checklist-footer pointer-events-auto">
+                <button
+                  type="button"
+                  className="iq-island-tracker__back-to-map"
+                  onClick={onBackToMap}
+                >
+                  <span aria-hidden>←</span>
+                  <span className="iq-island-tracker__back-to-map-label">Back to map</span>
+                </button>
+              </div>
+            ) : null}
           </motion.aside>
           <motion.div
             className="iq-schools-island-hud__quest-markers pointer-events-none"
