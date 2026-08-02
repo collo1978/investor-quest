@@ -137,23 +137,8 @@ export function SchoolsMapBusinessIslandHubUiOverlay({
         onBeforeQuestNavigate={onQuestEnterRequest}
         entryGateActive={false}
         entryPhase="revealed"
+        onBackToMap={onBackToMap}
       />
-
-      <div
-        className="pointer-events-none absolute bottom-3 left-2 z-[50] sm:bottom-4 sm:left-4"
-        style={{ paddingBottom: "max(0px, env(safe-area-inset-bottom))" }}
-      >
-        <button
-          type="button"
-          onClick={onBackToMap}
-          className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-[rgba(245,197,71,0.42)] bg-[rgba(8,7,4,0.88)] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[rgba(255,229,141,0.96)] shadow-[0_0_20px_rgba(245,197,71,0.18)] backdrop-blur-md transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/70 sm:px-3.5 sm:py-2.5 sm:text-[11.5px]"
-        >
-          <span aria-hidden className="text-[14px] leading-none">
-            ←
-          </span>
-          Back to map
-        </button>
-      </div>
     </div>
   );
 }

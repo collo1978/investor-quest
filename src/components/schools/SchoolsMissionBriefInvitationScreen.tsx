@@ -26,6 +26,11 @@ const STAMP_TO_CTA_MS = 780;
 const OPENING_RATIO = 0.36;
 const EMERGE_MARGIN = 10;
 const SEAL_CLEARANCE = 12;
+/** Breathing room between the stamp/last line and the envelope's front
+ *  panel edge — wider than EMERGE_MARGIN (which only needs to stop actual
+ *  overlap) so the stamp doesn't end up sitting flush against that edge,
+ *  reading as visually cramped/cut off even though nothing is clipped. */
+const BODY_PANEL_BREATHING_ROOM = 34;
 const OPEN_EMERGE_RATIO = 0.22;
 const FIRST_LINE_EMERGE_RATIO = 0.3;
 const LINE_STEP_RATIO = 0.034;
@@ -56,6 +61,22 @@ export function SchoolsMissionBriefInvitationScreen() {
   const typeTimerRef = useRef<number | null>(null);
   const acceptanceTimerRef = useRef<number | null>(null);
   const autoLineTimerRef = useRef<number | null>(null);
+  /**
+   * Set right before `skipInvitationAnimation` jumps `lineIndex` straight to
+   * the last line. The effect below re-types whenever `lineIndex` changes —
+   * necessary for normal line-by-line progression, but skip already set
+   * `charCount`/`typingDone` to their finished values directly, and that
+   * effect doesn't know the difference. Left unchecked it stomps those
+   * back to 0/false and replays the typewriter for ~1s, which in turn
+   * toggles `acceptanceReady` off and back on, hiding the stamp/CTA that
+   * skip had just revealed and re-triggering the letter's position
+   * calculation — the visible "up and down" jump and the CTA staying
+   * missing for another ~1.7s after skip. A plain ref (not a dependency)
+   * lets the effect tell "line changed because we skipped" apart from
+   * "line changed because the reader advanced" without reacting to its
+   * own reads.
+   */
+  const justSkippedRef = useRef(false);
 
   const opened = phase === "opening" || phase === "reading";
   const reading = phase === "reading";
@@ -81,19 +102,48 @@ export function SchoolsMissionBriefInvitationScreen() {
       return;
     }
 
-    if (!inner || !seal) return;
+    const pocket = pocketRef.current;
+    if (!inner || !seal || !pocket) return;
 
     const envBox = envelope.getBoundingClientRect();
     const bodyTop = envBox.height * OPENING_RATIO;
     const sealTop = seal.getBoundingClientRect().top - envBox.top;
-    const innerBox = inner.getBoundingClientRect();
-    const currentY = new DOMMatrix(getComputedStyle(sheet).transform).m42;
-    const innerTopAtZero = innerBox.top - currentY - envBox.top;
-    const innerBottomAtZero = innerBox.bottom - currentY - envBox.top;
+
+    // Measure the sheet's *untransformed* box straight from layout
+    // (`offsetTop`/`offsetHeight` ignore `transform` entirely) instead of
+    // reading its live, transformed screen position and subtracting the
+    // currently-applied translateY to "undo" it. That subtraction needed
+    // the exact transform that's *currently painted* — but framer-motion
+    // commits `animate` targets on its own rAF schedule, so a value this
+    // function just requested isn't necessarily on screen yet when it (or
+    // the next effect) reads it back. The mismatch produced a wrong
+    // intermediate target that got animated to and then abruptly
+    // corrected a moment later — the letter visibly jumping to one
+    // position and snapping back to another. Layout geometry has no such
+    // lag: `pocket` itself is never transformed, so its box is always
+    // trustworthy, and offsetTop/offsetHeight report the sheet's box as
+    // laid out regardless of any transform currently animating on it.
+    const pocketBox = pocket.getBoundingClientRect();
+    const sheetBottomAtZero = pocketBox.bottom - envBox.top;
+    const sheetTopAtZero = sheetBottomAtZero - sheet.offsetHeight;
+    const innerTopAtZero = sheetTopAtZero + inner.offsetTop;
+    const innerBottomAtZero = innerTopAtZero + inner.offsetHeight;
     let pull = 0;
 
     if (innerBottomAtZero > sealTop - SEAL_CLEARANCE) {
       pull = sealTop - SEAL_CLEARANCE - innerBottomAtZero;
+    }
+
+    // The envelope's solid front panel (`.iq-mbi-envelope__body`) starts at
+    // `bodyTop` and paints above the pocket (z-index 12 vs 10) — anything
+    // whose bottom edge dips past that line is hidden behind it, not just
+    // visually crowded like the seal check above. This is the real ceiling
+    // for what counts as "revealed"; the seal clearance alone isn't enough
+    // because the seal sits further down the envelope than the panel edge,
+    // so satisfying it doesn't guarantee staying above the panel too.
+    const bodyClearance = bodyTop - BODY_PANEL_BREATHING_ROOM;
+    if (innerBottomAtZero > bodyClearance) {
+      pull = Math.min(pull, bodyClearance - innerBottomAtZero);
     }
 
     const innerTop = innerTopAtZero + pull;
@@ -102,8 +152,19 @@ export function SchoolsMissionBriefInvitationScreen() {
       pull -= innerTop - revealTop;
     }
 
+    // `stepPull` guesses how far to pull per line from a fixed ratio of the
+    // envelope's height — good enough for visual pacing on the earlier
+    // lines, but it doesn't know the "Access Granted" stamp is about to be
+    // appended below the last line. On a short envelope (compact phones)
+    // that guess over-pulls past what's actually needed, dragging the stamp
+    // above the pocket's visible top edge. `pull` is measured from the real
+    // DOM (it already accounts for whatever is currently rendered, stamp
+    // included) and is always the smaller, sufficient correction — trust it
+    // alone once we're on the final line instead of compounding it with the
+    // formula guess.
+    const isLastLine = lineIndex === LETTER_LINES.length - 1;
     const stepPull = -Math.round(envH * (FIRST_LINE_EMERGE_RATIO + lineIndex * LINE_STEP_RATIO));
-    let target = Math.min(0, pull, stepPull);
+    let target = isLastLine ? Math.min(0, pull) : Math.min(0, pull, stepPull);
 
     if (lineIndex === 0) {
       const titleClearLine = sealTop - SEAL_CLEARANCE - 28;
@@ -182,6 +243,10 @@ export function SchoolsMissionBriefInvitationScreen() {
 
   useEffect(() => {
     if (lineIndex < 0) return;
+    if (justSkippedRef.current) {
+      justSkippedRef.current = false;
+      return;
+    }
     startTyping(LETTER_LINES[lineIndex] ?? "");
     return () => {
       if (typeTimerRef.current != null) {
@@ -311,6 +376,7 @@ export function SchoolsMissionBriefInvitationScreen() {
 
     const lastIndex = LETTER_LINES.length - 1;
     const envH = envelopeRef.current?.offsetHeight ?? 320;
+    justSkippedRef.current = true;
     setPhase("reading");
     setSealCracking(false);
     setLineIndex(lastIndex);
@@ -465,8 +531,23 @@ export function SchoolsMissionBriefInvitationScreen() {
                 <motion.div
                   className="iq-mbi-envelope__flap"
                   aria-hidden
-                  animate={opened ? { rotateX: -168 } : { rotateX: 0 }}
-                  transition={{ duration: reduceMotion === true ? 0.15 : 1.05, ease: EASE }}
+                  animate={
+                    reading
+                      ? { rotateX: -168, opacity: 0 }
+                      : opened
+                        ? { rotateX: -168, opacity: 1 }
+                        : { rotateX: 0, opacity: 1 }
+                  }
+                  transition={{
+                    rotateX: { duration: reduceMotion === true ? 0.15 : 1.05, ease: EASE },
+                    // The folded-back flap shares its rotation pivot with the
+                    // letter's fold line — at this near-180deg angle the two
+                    // coplanar 3D surfaces z-fight, flickering a sliver of
+                    // the flap's edge through the letter text. It has no
+                    // visual purpose once reading starts, so fade it out
+                    // instead of leaving it to clash indefinitely.
+                    opacity: { duration: reduceMotion === true ? 0.01 : 0.3 }
+                  }}
                 />
 
                 <button

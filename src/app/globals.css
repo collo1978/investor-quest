@@ -291,6 +291,14 @@ h3 {
   scroll-padding-block-end: max(1rem, env(safe-area-inset-bottom, 0px));
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.iq-schools-demo-scroll-host::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* Business island hub — wide 16:9 desktop; tall portrait stage on phones */
@@ -1270,6 +1278,29 @@ h3 {
 .iq-schools-business-quest__topbar {
   position: relative;
   z-index: 20;
+  /* The Schools nav menu is a fixed, portaled circle pinned at
+     left: calc(safe-area + 12px), 44px wide, z-index 250 — always above this
+     in-flow topbar. Reserve the same clearance so "Back to Island" doesn't
+     render underneath it. */
+  padding-left: calc(env(safe-area-inset-left, 0px) + 4.25rem);
+}
+
+/* Same fixed Schools nav circle collides with the "How XP Works" button,
+   which stacks to full-width at the top of this header below `sm`. Reserve
+   vertical clearance so it renders below the circle instead of under it. */
+@media (max-width: 639px) {
+  .iq-schools-xp-ladder-inner > header {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 3.25rem);
+  }
+}
+
+/* Same fixed Schools nav circle collides with the profile dashboard's
+   "Investor dashboard / Your Profile" eyebrow, which starts flush at the
+   page's top-left corner on narrow screens. */
+@media (max-width: 767px) {
+  .iq-schools-profile-header {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 3.25rem);
+  }
 }
 
 .iq-schools-business-quest__mission {
@@ -7367,10 +7398,6 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   gap: 0.45rem;
 }
 
-.iq-schools-path-dossier--carousel .iq-schools-path-dossier__title {
-  font-size: 1.05rem;
-}
-
 .iq-schools-path-dossier--carousel .iq-schools-path-dossier__status {
   padding: 0.36rem 0.56rem;
   font-size: 0.62rem;
@@ -7408,6 +7435,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 
 .iq-schools-path-dossier {
   --iq-path-accent: #f5c547;
+  container-type: inline-size;
   position: relative;
   width: 100%;
   aspect-ratio: 372 / 775;
@@ -7517,7 +7545,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   white-space: nowrap;
   color: rgba(255, 248, 225, 0.96);
   font-family: var(--font-grotesk), ui-sans-serif, system-ui;
-  font-size: 0.76rem;
+  font-size: clamp(0.72rem, 9cqi, 1.15rem);
   font-weight: 900;
   line-height: 1;
   text-transform: uppercase;
@@ -7670,7 +7698,16 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
     height: 100dvh;
     min-height: 100dvh;
     max-height: 100dvh;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .iq-schools-choose-identity::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   .iq-schools-identity-board {
@@ -7692,6 +7729,17 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
     --iq-avatar-card-max: 7.6rem;
     display: flex;
     flex-direction: column;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .iq-schools-avatar-pick-shell::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   .iq-schools-avatar-pick-grid {
@@ -7737,10 +7785,6 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
     align-items: flex-start;
     gap: 0.36rem;
     padding: 0.7rem;
-  }
-
-  .iq-schools-path-dossier--carousel .iq-schools-path-dossier__title {
-    font-size: 1.3rem;
   }
 
   .iq-schools-path-dossier--carousel .iq-schools-path-dossier__status {
@@ -13161,6 +13205,54 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   overflow: hidden;
 }
 
+/* Narrow/portrait viewports: the canvas is a fixed-aspect landscape artboard
+   (2272×941). Letterboxing it to 100vw squashes it to a sliver only ~150px
+   tall, cramming all four island anchors on top of each other. Size it by
+   height instead and let the stage scroll horizontally so each island keeps
+   the same physical spacing it has on desktop. */
+@media (max-width: 900px) {
+  .iq-prodigy-map__stage {
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-inline: 8vw;
+  }
+
+  .iq-prodigy-map__stage::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .iq-prodigy-map__canvas {
+    width: auto;
+    height: min(60dvh, calc(100dvh - 300px));
+    min-height: 300px;
+    max-width: none;
+    max-height: none;
+    flex: 0 0 auto;
+  }
+
+  .iq-prodigy-map--zooming-business .iq-prodigy-map__stage,
+  .iq-prodigy-map--island-hub .iq-prodigy-map__stage,
+  .iq-prodigy-map--hq-zoom .iq-prodigy-map__stage {
+    padding-inline: 0;
+  }
+
+  .iq-prodigy-map--zooming-business .iq-prodigy-map__canvas,
+  .iq-prodigy-map--island-hub .iq-prodigy-map__canvas,
+  .iq-prodigy-map--hq-zoom .iq-prodigy-map__canvas {
+    /* The camera-zoom transform pans/scales this same box — once engaged it
+       must go back to filling the stage like the desktop layout, not stay
+       pinned to its scrolled-list sizing. */
+    width: min(100vw, calc(96dvh * var(--prodigy-canvas-w, 2272) / var(--prodigy-canvas-h, 941)));
+    height: auto;
+  }
+}
+
 .iq-prodigy-map--zooming-business .iq-prodigy-map__art {
   filter: saturate(0.72) brightness(0.82);
   transition: filter 520ms ease, opacity 520ms ease;
@@ -13273,30 +13365,161 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   z-index: 240;
 }
 
-/* Always-visible Investor Checklist companion beside the island */
+/* Always-visible Investor Checklist companion beside the island.
+   Anchored with an explicit viewport height (dvh, with a vh fallback for
+   browsers that don't support it yet) rather than top+bottom insets, so the
+   rail always spans the real visible viewport at any resolution or zoom
+   level instead of relying on a guessed pixel offset. */
 .iq-schools-island-hud__academy--companion {
   left: 0;
-  top: calc(env(safe-area-inset-top, 0px) + 0px);
-  bottom: max(64px, calc(env(safe-area-inset-bottom, 0px) + 56px));
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
   width: var(--iq-island-companion-width, min(360px, 32vw));
   max-width: calc(100vw - 72px - env(safe-area-inset-right, 0px));
   display: flex;
   flex-direction: column;
   min-height: 0;
+  transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* The map rail is a docked column, so it should run to the viewport edge.
-   The Back to map control sits above it as an overlay. */
-.iq-schools-business-hub-island--map-camera
-  .iq-schools-island-hud__academy--companion {
-  bottom: 0;
+.iq-schools-island-hud__academy--collapsed {
+  min-width: 2.75rem;
+  /* The checklist content fades out below, so the rail needs its own
+     backdrop — otherwise the app's base page background shows through
+     as a bare, mismatched strip instead of a clean, intentional rail. */
+  background: linear-gradient(180deg, #050505 0%, #0a0a0a 42%, #050505 100%);
+  border-right: 1px solid rgba(118, 185, 0, 0.28);
+}
+
+/* Collapsed rail is only 2.75rem wide, the same footprint as the fixed
+   hamburger menu button pinned at top-left — push the re-expand handle
+   below that button so the two never sit on top of each other. */
+.iq-schools-island-hud__academy--collapsed .iq-schools-island-checklist-toggle {
+  top: 4.25rem;
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.iq-schools-island-hud__academy--collapsed .iq-schools-island-checklist-companion {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.15s ease,
+    visibility 0s linear 0.15s;
+}
+
+.iq-schools-island-checklist-toggle {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.6rem;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(118, 185, 0, 0.42);
+  background: rgba(8, 8, 8, 0.92);
+  color: #d9f99d;
+  font-size: 1rem;
+  line-height: 1;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.iq-schools-island-checklist-toggle:hover {
+  border-color: rgba(118, 185, 0, 0.72);
+  background: rgba(118, 185, 0, 0.14);
+}
+
+/* In-flow footer — a sibling of .iq-schools-island-checklist-companion (not
+   a descendant), so it stays visible and clickable even while the rail
+   above it is collapsed/faded out. flex: 0 0 auto keeps it pinned to the
+   bottom of the column at its natural height, and the checklist body above
+   it (flex: 1 1 auto, min-height: 0) shrinks to fill exactly what's left. */
+.iq-schools-island-checklist-footer {
+  flex: 0 0 auto;
+  padding: 0.65rem 0.85rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
+  border: 1px solid rgba(118, 185, 0, 0.42);
+  border-left: 0;
+  border-bottom: 0;
+  border-top-color: rgba(118, 185, 0, 0.22);
+  border-radius: 0 0 18px 0;
+  background:
+    radial-gradient(circle at 85% 100%, rgba(118, 185, 0, 0.16), transparent 45%),
+    linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
+  box-shadow: 16px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+.iq-island-tracker__back-to-map {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(245, 197, 71, 0.42);
+  background: rgba(8, 7, 4, 0.88);
+  padding: 0.6rem 1rem;
+  color: rgba(255, 229, 141, 0.96);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.38), 0 0 18px rgba(245, 197, 71, 0.1);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.iq-island-tracker__back-to-map:hover {
+  border-color: rgba(245, 197, 71, 0.68);
+  background: rgba(24, 18, 35, 0.94);
+  color: #fff7cc;
+}
+
+/* Collapsed rail: shrink the footer to an icon-only button so the exit
+   action stays reachable without the full-width label. */
+.iq-schools-island-hud__academy--collapsed .iq-schools-island-checklist-footer {
+  padding: 0.5rem;
+}
+
+.iq-schools-island-hud__academy--collapsed .iq-island-tracker__back-to-map {
+  padding: 0.55rem;
+}
+
+.iq-schools-island-hud__academy--collapsed .iq-island-tracker__back-to-map-label {
+  display: none;
+}
+
+/* Back to map is normally an in-flow footer (see
+   .iq-schools-island-checklist-footer) sized by flexbox like everything
+   else in this rail, so the checklist body naturally shrinks to make room
+   for it — no guessed pixel clearance needed. The one caller that doesn't
+   supply that footer (the legacy floating-card business hub, which renders
+   its own separately-positioned Back to map overlay) still reserves a
+   fallback gap here so that overlay never overlaps the rail's content. */
+.iq-schools-island-hud__academy--companion:not(.iq-schools-island-hud__academy--has-footer)
+  .iq-schools-island-checklist-companion {
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 .iq-schools-island-checklist-companion {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  height: 100%;
+  flex: 1 1 auto;
   border-radius: 0 18px 0 0;
   overflow: hidden;
   border: 1px solid rgba(118, 185, 0, 0.42);
@@ -13315,6 +13538,86 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   height: 0;
   min-height: 0;
   overflow: hidden;
+}
+
+.iq-schools-island-checklist-companion .iq-island-tracker__list {
+  padding-bottom: 1rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.iq-schools-island-checklist-companion .iq-island-tracker__list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* The fixed hamburger menu button sits at a constant 12px/44px box in the
+   top-left corner of the viewport, independent of this panel's own layout.
+   Reserve that same clearance at the top of the header, at every height
+   tier below, so header content can never render underneath it. */
+.iq-schools-island-checklist-companion .iq-island-tracker__header {
+  padding-top: calc(3.5rem + env(safe-area-inset-top, 0px));
+}
+
+/* Compact header for constrained viewport heights (browser zoom on common
+   laptop resolutions shrinks the effective viewport the same way a short
+   screen does). Design is untouched at normal heights — this only trims
+   the decorative hero art and spacing so the checklist list underneath
+   stays visible without excessive scrolling. */
+@media (max-height: 720px) {
+  .iq-schools-island-checklist-companion .iq-island-tracker__header {
+    padding: calc(3.5rem + env(safe-area-inset-top, 0px)) 0.85rem 0.45rem;
+  }
+
+  .iq-schools-island-checklist-companion .iq-island-tracker__brand-stack {
+    gap: 0.2rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .iq-schools-island-checklist-companion .iq-island-tracker__hero-eye {
+    width: clamp(2.5rem, 16%, 3.5rem);
+  }
+
+  .iq-schools-island-checklist-companion .iq-island-tracker__cta {
+    margin-top: 0.3rem;
+    gap: 0.2rem;
+  }
+
+  .iq-schools-island-checklist-companion .iq-island-tracker__cta-bonus {
+    display: none;
+  }
+
+  .iq-schools-island-checklist-companion .iq-island-tracker__progress-block {
+    margin: 0 0.85rem 0.5rem;
+    padding: 0.45rem 0.6rem 0.5rem;
+  }
+
+  .iq-schools-island-checklist-companion .iq-island-tracker__progress-head {
+    margin-bottom: 0.25rem;
+  }
+}
+
+@media (max-height: 520px) {
+  .iq-schools-island-checklist-companion .iq-island-tracker__hero-eye {
+    display: none;
+  }
+
+  .iq-schools-island-checklist-companion .iq-island-tracker__header {
+    padding: calc(3.5rem + env(safe-area-inset-top, 0px)) 0.85rem 0.3rem;
+  }
+
+  .iq-schools-island-checklist-companion .iq-island-tracker__brand-stack {
+    margin-bottom: 0;
+  }
+
+  .iq-schools-island-checklist-companion .iq-island-tracker__title {
+    font-size: 1.1rem;
+  }
+
+  .iq-schools-island-checklist-companion .iq-island-tracker__cta-lead {
+    display: none;
+  }
 }
 
 .iq-schools-island-hud__academy .iq-schools-island-prop--notice-board {
@@ -13350,6 +13653,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   bottom: 0;
   z-index: 44;
   overflow: visible;
+  transition: left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .iq-business-island-quest-markers {
@@ -15571,11 +15875,6 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
  * Once a Headquarters lesson is open, the checklist and lesson become one
  * edge-to-edge workspace instead of two floating HUD cards.
  */
-.iq-schools-business-hub-island--map-camera:has(.iq-hq-mission--active)
-  .iq-schools-island-hud__academy--companion {
-  bottom: 0;
-}
-
 .iq-schools-business-hub-island--map-camera:has(.iq-hq-mission--active)
   .iq-schools-island-checklist-companion {
   border-radius: 0;
@@ -18539,11 +18838,41 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   }
 
   .iq-schools-island-hud__academy--companion {
+    /* `.iq-schools-island-hud__academy` (no modifier, styled just above for
+       a different on-map sign) matches this element too since it shares
+       the base class, and its `left: 66px` was winning here by source
+       order — pinning the sidebar 66px off the left edge instead of
+       flush, and clipping ~11px off its right edge in the process. Restore
+       the flush-left rail position from the unqualified (desktop) rule. */
     left: 0;
-    top: calc(env(safe-area-inset-top, 0px) + 8px);
-    bottom: max(88px, calc(env(safe-area-inset-bottom, 0px) + 80px));
-    width: min(320px, 88vw);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
+    /* Stays a `var()`, not a literal — see the mobile override on
+       `.iq-schools-business-hub-island--map-camera` below for why. */
+    width: var(--iq-island-companion-width, min(320px, 88vw));
     max-width: calc(100vw - env(safe-area-inset-right, 0px));
+  }
+
+  /* `--iq-island-companion-width` defaults to a desktop-sized
+     `min(360px, 32vw)` here (see the unconditional rule above, outside
+     this media query) — 32vw of a phone screen is only ~120px. The
+     collapse toggle overrides it inline (`style={{
+     "--iq-island-companion-width": "2.75rem" }}`) directly on *this*
+     element when collapsed, and inline styles always beat stylesheet
+     rules, so redeclaring the mobile-sized default here is safe: it only
+     ever wins when the toggle hasn't set an inline override. (Setting it
+     on the companion child instead, as a first pass at this fix did, was
+     wrong — a rule targeting an element directly always beats a value
+     that element only *inherited* from an ancestor, so it permanently
+     shadowed the toggle's inline value on the ancestor and the rail could
+     no longer collapse at all on mobile.) */
+  .iq-schools-business-hub-island--map-camera,
+  .iq-schools-map-camera-hub-ui {
+    --iq-island-companion-width: min(320px, 88vw);
+  }
+
+  .iq-schools-island-hud__academy--companion:not(.iq-schools-island-hud__academy--has-footer)
+    .iq-schools-island-checklist-companion {
+    padding-bottom: max(5.5rem, calc(env(safe-area-inset-bottom, 0px) + 5rem));
   }
 
   .iq-schools-island-hud__mission {
@@ -19448,6 +19777,35 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
     linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.45) 45%, transparent 72%);
   transform: translateX(-100%);
   animation: iq-prodigy-progress-shine 2.4s ease-in-out infinite;
+}
+
+/* Narrow viewports: the centered company-logo pill and the right-anchored
+   progress panel are both `position: fixed` and were sized for desktop
+   width, so they physically overlap (the panel's "Quest Progress" label
+   renders half-hidden behind the logo). Stack them instead of letting them
+   collide. */
+@media (max-width: 900px) {
+  .iq-prodigy-map__company-logo {
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    height: 40px;
+    min-width: 108px;
+  }
+
+  .iq-prodigy-map__company-logo span {
+    font-size: 14px;
+  }
+
+  .iq-prodigy-map__progress-hud {
+    top: calc(env(safe-area-inset-top, 0px) + 58px);
+    left: 12px;
+    right: 12px;
+    width: auto;
+    padding: 8px 12px 9px;
+  }
+
+  .iq-prodigy-map__mission-envelope-hud {
+    top: calc(env(safe-area-inset-top, 0px) + 130px);
+  }
 }
 
 .iq-prodigy-map__progress-value {
@@ -23189,7 +23547,13 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: clamp(6.5rem, 16vh, 8.5rem) clamp(1rem, 4vw, 2.5rem) clamp(2rem, 5vw, 3rem);
+  /* Top padding's floor used to be a flat 6.5rem (104px) regardless of
+     viewport height — fine on a normal phone/desktop, but on a short
+     viewport (landscape phones, a zoomed-in laptop window) that alone can
+     eat a quarter of the available height before the envelope even
+     starts. Let it shrink further so there's room left for the envelope
+     and the CTA below it to actually fit. */
+  padding: clamp(2.75rem, 16vh, 8.5rem) clamp(1rem, 4vw, 2.5rem) clamp(2rem, 5vw, 3rem);
 }
 
 .iq-mbi-stage {
@@ -23198,7 +23562,17 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   align-items: center;
   justify-content: center;
   width: 100%;
-  max-width: min(520px, 92vw);
+  /* Width-only sizing (with height merely following the envelope's fixed
+     aspect-ratio) doesn't know or care whether the resulting height fits
+     the viewport — on a wide-but-short viewport it doesn't, and the
+     "Begin Quest" CTA that sits below this stage in normal flow gets
+     pushed past the bottom edge. The third `min()` branch caps the stage
+     by the height actually left over (roughly: viewport height minus this
+     screen's top/bottom padding, the stage's own gap, and the CTA
+     button), converted through the envelope's own aspect ratio, so the
+     whole assembly — envelope *and* CTA — stays on-screen without
+     requiring a scroll on any viewport shape. */
+  max-width: min(520px, 92vw, calc((100dvh - 200px) * 1.42));
   gap: clamp(1.35rem, 3.5vh, 2rem);
 }
 
