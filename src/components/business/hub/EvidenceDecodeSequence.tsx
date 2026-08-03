@@ -47,6 +47,7 @@ export function EvidenceDecodeSequence({
   const evidenceTotal = evidence.length;
   const [evidenceIndex, setEvidenceIndex] = useState(0);
   const [decoded, setDecoded] = useState(false);
+  const translatorRef = useRef<HTMLDivElement>(null);
 
   // Mission-wide term memory (persists across evidence pieces).
   const decodedHistoryRef = useRef<Set<string>>(new Set());
@@ -63,6 +64,31 @@ export function EvidenceDecodeSequence({
   useEffect(() => {
     setDecodeHeading(pickHqDecodeHeading());
   }, [evidenceIndex]);
+
+  /*
+   * Decoding appends the translation below a tall evidence file. Without
+   * moving the viewport, the CTA simply disappears and the newly available
+   * step remains below the fold. Bring that step into view and focus its
+   * labelled region so the transition is also clear to keyboard and screen
+   * reader users.
+   */
+  useEffect(() => {
+    if (!decoded) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const translator = translatorRef.current;
+      if (!translator) return;
+
+      translator.focus({ preventScroll: true });
+      translator.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "start",
+        inline: "nearest"
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [decoded, evidenceIndex, reduceMotion]);
 
   const segments = useMemo(
     () => (piece ? buildHqDecodeParagraphSegments(piece) : []),
@@ -114,6 +140,9 @@ export function EvidenceDecodeSequence({
 
   if (!piece) return null;
 
+  const translatorRegionId = `evidence-translation-${piece.id}`;
+  const translatorHeadingId = `${translatorRegionId}-heading`;
+
   return (
     <motion.section
       key={`mission-${piece.id}`}
@@ -130,6 +159,8 @@ export function EvidenceDecodeSequence({
               type="button"
               className="iq-evidence-file__decode"
               onClick={() => setDecoded(true)}
+              aria-controls={translatorRegionId}
+              aria-expanded={decoded}
             >
               <span aria-hidden>⚡</span> Decode
             </button>
@@ -158,14 +189,28 @@ export function EvidenceDecodeSequence({
         {decoded ? (
           <motion.div
             key={`translator-${piece.id}`}
+            ref={translatorRef}
+            id={translatorRegionId}
             className="iq-investor-translator iq-investor-translator--under-file"
+            role="region"
+            aria-labelledby={translatorHeadingId}
+            tabIndex={-1}
             initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={reduceMotion ? undefined : { opacity: 0, y: 8 }}
             transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
           >
+            <p className="iq-investor-translator__continue-cue" role="status">
+              <span aria-hidden>✓</span>
+              Evidence decoded — continue with the investor translation
+            </p>
             <header className="iq-investor-translator__hero">
-              <h2 className="iq-investor-translator__headline">{decodeHeading}</h2>
+              <h2
+                id={translatorHeadingId}
+                className="iq-investor-translator__headline"
+              >
+                {decodeHeading}
+              </h2>
             </header>
 
             <InvestorDecodeTakeaways
