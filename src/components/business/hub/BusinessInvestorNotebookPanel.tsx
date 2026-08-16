@@ -28,6 +28,8 @@ import {
 
 type Props = {
   companyId: CompanyId;
+  /** Review mode: allow every checklist question to open without path gating. */
+  unlockAllQuestions?: boolean;
   /** Open the campus learning experience for this mastery question. */
   onOpenMasteryQuestion?: (questionId: InvestorNotebookQuestionId) => void;
   /** Fired when a Dig Deeper is turned into a Bonus Investigation (marker armed). */
@@ -274,6 +276,7 @@ function MasteryRow({
  */
 export function BusinessInvestorNotebookPanel({
   companyId,
+  unlockAllQuestions = false,
   onOpenMasteryQuestion,
   onStartBonusInvestigation
 }: Props) {
@@ -442,6 +445,7 @@ export function BusinessInvestorNotebookPanel({
         {INVESTOR_NOTEBOOK_QUESTIONS.map((question) => {
           const mastered = masteredIds.has(question.id);
           const locked =
+            !unlockAllQuestions &&
             !mastered &&
             !isInvestorNotebookQuestionUnlocked(question.id, progress);
           const current = !locked && !mastered;

@@ -83,6 +83,7 @@ export function SchoolsBusinessHubIslandLayout({
   const handleOpenMasteryQuestion = (questionId: InvestorNotebookQuestionId) => {
     const progress = readBusinessIslandStoryProgress(company.id);
     if (
+      !mapCameraHub &&
       !progress.masteredQuestionIds.includes(questionId) &&
       !isInvestorNotebookQuestionUnlocked(questionId, progress)
     ) {
@@ -166,6 +167,7 @@ export function SchoolsBusinessHubIslandLayout({
     <div className="iq-schools-island-checklist-companion pointer-events-auto">
       <BusinessInvestorNotebookPanel
         companyId={company.id}
+        unlockAllQuestions={mapCameraHub}
         onOpenMasteryQuestion={handleOpenMasteryQuestion}
       />
     </div>
