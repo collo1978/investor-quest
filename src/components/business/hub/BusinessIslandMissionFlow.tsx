@@ -6,7 +6,10 @@ import { useCallback, useMemo, useState } from "react";
 import { BusinessInvestorChallengeCard } from "@/components/business/investorFramework/BusinessInvestorChallengeCard";
 import { EvidenceDecodeSequence } from "@/components/business/hub/EvidenceDecodeSequence";
 import { KeyTermsCheck } from "@/components/business/hub/KeyTermsCheck";
-import { BusinessIslandValuePropCardFlip } from "@/components/business/hub/BusinessIslandValuePropCardFlip";
+import {
+  BusinessIslandMissionActivity,
+  hasBusinessIslandMissionActivity
+} from "@/components/business/hub/BusinessIslandMissionActivity";
 import { SCHOOLS_BUSINESS_MISSION_THEME } from "@/components/quest/pillarQuestTheme";
 import {
   formatInvestorNotebookQuestion,
@@ -49,7 +52,7 @@ type SubPhase = "evidence" | "terms-check" | "activity" | "answer" | "tick";
 function initialSubPhaseForQuestion(
   questionId: InvestorNotebookQuestionId | undefined
 ): SubPhase {
-  return questionId === "explain-value-prop" ? "activity" : "evidence";
+  return hasBusinessIslandMissionActivity(questionId) ? "activity" : "evidence";
 }
 
 /**
@@ -88,7 +91,7 @@ export function BusinessIslandMissionFlow({
   const hasKeyTermsCheck = questionId
     ? KEY_TERMS_CHECK_QUESTION_IDS.has(questionId)
     : false;
-  const hasValuePropActivity = questionId === "explain-value-prop";
+  const hasActivity = hasBusinessIslandMissionActivity(questionId);
   const missionTerms = useMemo(
     () => (hasKeyTermsCheck && questionId ? resolveHqDecodeMissionTerms(questionId) : []),
     [hasKeyTermsCheck, questionId]
@@ -172,9 +175,10 @@ export function BusinessIslandMissionFlow({
             xpReason={`Key Terms Check: ${questionId}`}
             onComplete={() => setSub("answer")}
           />
-        ) : sub === "activity" && hasValuePropActivity ? (
-          <BusinessIslandValuePropCardFlip
+        ) : sub === "activity" && hasActivity ? (
+          <BusinessIslandMissionActivity
             key={`activity-${questionId}`}
+            questionId={questionId}
             companyName={companyName}
             onComplete={() => setSub("answer")}
           />
