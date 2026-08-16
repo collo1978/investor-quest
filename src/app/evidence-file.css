@@ -407,6 +407,30 @@
   padding-inline: 1.75rem;
 }
 
+.iq-schools-business-hub-island--map-camera .iq-hq-mission__screen--brief {
+  width: min(100%, 48rem);
+  overflow-x: hidden;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.iq-schools-business-hub-island--map-camera .iq-hq-mission-brief {
+  min-width: 0;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.iq-schools-business-hub-island--map-camera .iq-hq-mission-brief__image {
+  width: 100%;
+  max-height: 42dvh;
+}
+
+.iq-schools-business-hub-island--map-camera .iq-hq-mission-brief__panel {
+  flex-basis: auto;
+  min-width: 0;
+  max-height: none;
+}
+
 @media (max-height: 780px) {
   .iq-hq-mission-brief__image {
     max-height: calc(100dvh - 6.75rem);
