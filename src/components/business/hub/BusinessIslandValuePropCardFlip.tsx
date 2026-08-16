@@ -5,25 +5,32 @@ import { useMemo, useState } from "react";
 
 type ValuePropFlipCard = {
   id: string;
-  problem: string;
+  persona: string;
+  question: string;
   solution: string;
 };
 
 const VALUE_PROP_FLIP_CARDS: readonly ValuePropFlipCard[] = [
   {
     id: "ai-speed",
-    problem: "AI teams need far more computing power than ordinary servers can provide.",
-    solution: "NVIDIA gives them accelerated computing platforms built for huge AI workloads."
+    persona: "AI lab lead",
+    question: "How do we train bigger AI models without waiting forever?",
+    solution:
+      "NVIDIA answers with accelerated computing platforms built for huge AI workloads."
   },
   {
     id: "developer-tools",
-    problem: "Developers do not want raw chips. They need tools that make the chips useful.",
-    solution: "NVIDIA adds CUDA, software libraries and developer tools around the hardware."
+    persona: "Software team",
+    question: "How do our engineers use these chips without rebuilding everything?",
+    solution:
+      "NVIDIA answers with CUDA, software libraries and tools around the hardware."
   },
   {
     id: "full-platform",
-    problem: "Large customers want complete systems, not a pile of disconnected parts.",
-    solution: "NVIDIA sells a full platform across chips, systems, networking and software."
+    persona: "Data center buyer",
+    question: "Can we buy a complete AI system instead of stitching parts together?",
+    solution:
+      "NVIDIA answers with a full platform across chips, systems, networking and software."
   }
 ] as const;
 
@@ -62,7 +69,7 @@ export function BusinessIslandValuePropCardFlip({
           Reveal why customers choose {companyName}
         </h3>
         <p className="iq-value-prop-flip__copy">
-          Flip each customer problem to uncover how {companyName} solves it.
+          Flip each customer question to uncover how {companyName} solves it.
           Then explain the pattern in your own words.
         </p>
       </div>
@@ -86,17 +93,22 @@ export function BusinessIslandValuePropCardFlip({
               <span className="iq-value-prop-flip-card__inner">
                 <span className="iq-value-prop-flip-card__face iq-value-prop-flip-card__front">
                   <span className="iq-value-prop-flip-card__kicker">
-                    Problem {index + 1}
+                    Customer question {index + 1}
+                  </span>
+                  <span className="iq-value-prop-flip-card__persona">
+                    {card.persona}
                   </span>
                   <span className="iq-value-prop-flip-card__text">
-                    {card.problem}
+                    "{card.question}"
                   </span>
                   <span className="iq-value-prop-flip-card__hint">
                     Tap to reveal solution
                   </span>
                 </span>
                 <span className="iq-value-prop-flip-card__face iq-value-prop-flip-card__back">
-                  <span className="iq-value-prop-flip-card__kicker">Solution</span>
+                  <span className="iq-value-prop-flip-card__kicker">
+                    NVIDIA answer
+                  </span>
                   <span className="iq-value-prop-flip-card__text">
                     {card.solution}
                   </span>

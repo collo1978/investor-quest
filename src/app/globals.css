@@ -16370,8 +16370,8 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 1.25rem;
   background:
-    radial-gradient(circle at 8% 0%, rgba(34, 211, 238, 0.13), transparent 42%),
-    radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.18), transparent 46%),
+    radial-gradient(circle at 8% 0%, rgba(34, 211, 238, 0.18), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.25), transparent 46%),
     linear-gradient(155deg, rgba(12, 11, 28, 0.8), rgba(2, 6, 23, 0.72));
   box-shadow:
     0 24px 72px rgba(0, 0, 0, 0.34),
@@ -16414,20 +16414,27 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-value-prop-flip__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.8rem;
+  gap: 1rem;
 }
 
 .iq-value-prop-flip-card {
   position: relative;
   display: block;
-  min-height: 13rem;
+  min-height: 16rem;
   border: 0;
-  border-radius: 1rem;
+  border-radius: 1.2rem;
   padding: 0;
   color: inherit;
   background: transparent;
   cursor: pointer;
   perspective: 1100px;
+  text-align: left;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.iq-value-prop-flip-card:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.06);
 }
 
 .iq-value-prop-flip-card:focus-visible {
@@ -16456,28 +16463,42 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   justify-content: space-between;
   gap: 0.7rem;
   border-radius: inherit;
-  padding: 1rem;
+  padding: 1.05rem;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  overflow: hidden;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 18px 44px rgba(0, 0, 0, 0.24);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 22px 54px rgba(0, 0, 0, 0.32),
+    0 0 28px rgba(139, 92, 246, 0.12);
+}
+
+.iq-value-prop-flip-card__face::before {
+  content: "";
+  position: absolute;
+  inset: -30% -15% auto auto;
+  width: 9rem;
+  height: 9rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.2), transparent 66%);
+  pointer-events: none;
 }
 
 .iq-value-prop-flip-card__front {
   background:
-    radial-gradient(circle at 12% 10%, rgba(251, 191, 36, 0.14), transparent 42%),
-    linear-gradient(160deg, rgba(30, 27, 75, 0.82), rgba(15, 23, 42, 0.9));
+    linear-gradient(150deg, rgba(49, 46, 129, 0.86), rgba(8, 13, 38, 0.94) 58%, rgba(2, 6, 23, 0.96)),
+    radial-gradient(circle at 12% 10%, rgba(34, 211, 238, 0.22), transparent 42%);
 }
 
 .iq-value-prop-flip-card__back {
   transform: rotateY(180deg);
   background:
-    radial-gradient(circle at 88% 0%, rgba(34, 211, 238, 0.18), transparent 44%),
-    linear-gradient(160deg, rgba(49, 46, 129, 0.88), rgba(8, 47, 73, 0.72));
+    linear-gradient(150deg, rgba(14, 116, 144, 0.72), rgba(30, 27, 75, 0.9) 58%, rgba(3, 7, 18, 0.96)),
+    radial-gradient(circle at 88% 0%, rgba(34, 211, 238, 0.28), transparent 44%);
 }
 
 .iq-value-prop-flip-card__kicker {
+  position: relative;
   color: rgba(103, 232, 249, 0.92);
   font-size: 0.68rem;
   font-weight: 850;
@@ -16485,42 +16506,39 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   text-transform: uppercase;
 }
 
+.iq-value-prop-flip-card__persona {
+  position: relative;
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid rgba(196, 181, 253, 0.26);
+  border-radius: 999px;
+  padding: 0.34rem 0.55rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(221, 214, 254, 0.92);
+  font-size: 0.72rem;
+  font-weight: 820;
+}
+
 .iq-value-prop-flip-card__text {
+  position: relative;
   color: rgba(248, 250, 252, 0.95);
-  font-size: clamp(0.95rem, 2.2vw, 1.05rem);
-  font-weight: 720;
-  line-height: 1.35;
+  font-size: clamp(1rem, 2.35vw, 1.2rem);
+  font-weight: 780;
+  line-height: 1.32;
+  letter-spacing: -0.015em;
 }
 
 .iq-value-prop-flip-card__hint {
-  color: rgba(196, 181, 253, 0.86);
+  position: relative;
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.38rem 0.6rem;
+  background: rgba(34, 211, 238, 0.1);
+  color: rgba(196, 181, 253, 0.9);
   font-size: 0.76rem;
-  font-weight: 760;
-}
-
-.iq-value-prop-builder {
-  margin: 1rem 0 0;
-  padding: 0.9rem 1rem;
-  border: 1px solid rgba(34, 211, 238, 0.22);
-  border-radius: 1rem;
-  background: rgba(8, 13, 30, 0.62);
-}
-
-.iq-value-prop-builder__label {
-  margin: 0 0 0.35rem;
-  color: rgba(103, 232, 249, 0.9);
-  font-size: 0.68rem;
-  font-weight: 850;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.iq-value-prop-builder__statement {
-  margin: 0;
-  color: rgba(248, 250, 252, 0.92);
-  font-size: 0.95rem;
-  font-weight: 620;
-  line-height: 1.5;
+  font-weight: 820;
 }
 
 .iq-value-prop-flip__cta {
@@ -16529,6 +16547,9 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 }
 
 .iq-value-prop-flip__cta:disabled {
+  background: rgba(71, 85, 105, 0.58);
+  color: rgba(15, 23, 42, 0.7);
+  box-shadow: none;
   cursor: not-allowed;
 }
 
@@ -16538,7 +16559,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   }
 
   .iq-value-prop-flip-card {
-    min-height: 11rem;
+    min-height: 13rem;
   }
 }
 
