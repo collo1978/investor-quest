@@ -15890,6 +15890,11 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
     8px 0 24px rgba(0, 0, 0, 0.28);
 }
 
+.iq-schools-business-hub-island--map-camera:has(.iq-hq-mission)
+  .iq-schools-island-hud__progress {
+  display: none;
+}
+
 .iq-hq-mission__exit {
   position: absolute;
   top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
