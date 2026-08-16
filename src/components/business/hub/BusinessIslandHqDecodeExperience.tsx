@@ -107,7 +107,6 @@ export function BusinessIslandHqDecodeExperience({
           >
             <BusinessIslandMissionFlow
               questionIds={location.notebookQuestionIds}
-              locationId={location.id}
               companyName={companyName}
               startIndex={startIndex}
               onQuestionMastered={onMissionMastered}
