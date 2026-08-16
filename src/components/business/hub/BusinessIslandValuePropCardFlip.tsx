@@ -7,27 +7,23 @@ type ValuePropFlipCard = {
   id: string;
   problem: string;
   solution: string;
-  builderPhrase: string;
 };
 
 const VALUE_PROP_FLIP_CARDS: readonly ValuePropFlipCard[] = [
   {
     id: "ai-speed",
     problem: "AI teams need far more computing power than ordinary servers can provide.",
-    solution: "NVIDIA gives them accelerated computing platforms built for huge AI workloads.",
-    builderPhrase: "accelerated computing for hard AI workloads"
+    solution: "NVIDIA gives them accelerated computing platforms built for huge AI workloads."
   },
   {
     id: "developer-tools",
     problem: "Developers do not want raw chips. They need tools that make the chips useful.",
-    solution: "NVIDIA adds CUDA, software libraries and developer tools around the hardware.",
-    builderPhrase: "software and tools that make the hardware easier to use"
+    solution: "NVIDIA adds CUDA, software libraries and developer tools around the hardware."
   },
   {
     id: "full-platform",
     problem: "Large customers want complete systems, not a pile of disconnected parts.",
-    solution: "NVIDIA sells a full platform across chips, systems, networking and software.",
-    builderPhrase: "a full platform across chips, systems, networking and software"
+    solution: "NVIDIA sells a full platform across chips, systems, networking and software."
   }
 ] as const;
 
@@ -51,12 +47,6 @@ export function BusinessIslandValuePropCardFlip({
     );
   };
 
-  const builderText = allFlipped
-    ? `${companyName} helps customers solve hard computing problems with ${VALUE_PROP_FLIP_CARDS.map(
-        (card) => card.builderPhrase
-      ).join(", ")}.`
-    : "Flip every problem card to assemble the value proposition.";
-
   return (
     <motion.section
       className="iq-value-prop-flip"
@@ -72,8 +62,8 @@ export function BusinessIslandValuePropCardFlip({
           Reveal why customers choose {companyName}
         </h3>
         <p className="iq-value-prop-flip__copy">
-          Flip each customer problem to uncover the solution. Each revealed solution
-          gets added to the value proposition builder.
+          Flip each customer problem to uncover how {companyName} solves it.
+          Then explain the pattern in your own words.
         </p>
       </div>
 
@@ -111,7 +101,7 @@ export function BusinessIslandValuePropCardFlip({
                     {card.solution}
                   </span>
                   <span className="iq-value-prop-flip-card__hint">
-                    Added to builder
+                    Solution revealed
                   </span>
                 </span>
               </span>
@@ -120,18 +110,13 @@ export function BusinessIslandValuePropCardFlip({
         })}
       </div>
 
-      <div className="iq-value-prop-builder">
-        <p className="iq-value-prop-builder__label">Value Proposition Builder</p>
-        <p className="iq-value-prop-builder__statement">{builderText}</p>
-      </div>
-
       <button
         type="button"
         className="iq-hq-mission__primary iq-value-prop-flip__cta"
         disabled={!allFlipped}
         onClick={onComplete}
       >
-        Build my value proposition answer →
+        Continue to answer →
       </button>
     </motion.section>
   );
