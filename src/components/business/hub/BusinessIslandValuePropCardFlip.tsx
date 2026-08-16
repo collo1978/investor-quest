@@ -64,7 +64,6 @@ export function BusinessIslandValuePropCardFlip({
       aria-label={`${companyName} value proposition card flip`}
     >
       <div className="iq-value-prop-flip__header">
-        <p className="iq-value-prop-flip__eyebrow">Problem to Solution Card Flip</p>
         <h3 className="iq-value-prop-flip__title">
           Reveal why customers choose {companyName}
         </h3>
