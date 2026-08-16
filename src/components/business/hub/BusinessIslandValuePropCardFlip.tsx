@@ -99,7 +99,7 @@ export function BusinessIslandValuePropCardFlip({
                     {card.persona}
                   </span>
                   <span className="iq-value-prop-flip-card__text">
-                    "{card.question}"
+                    {card.question}
                   </span>
                   <span className="iq-value-prop-flip-card__hint">
                     Tap to reveal solution
