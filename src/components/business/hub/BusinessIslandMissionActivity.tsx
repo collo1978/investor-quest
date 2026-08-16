@@ -68,7 +68,6 @@ export function BusinessIslandMissionActivity({
 }
 
 function ActivityShell({
-  eyebrow,
   title,
   copy,
   progressLabel,
@@ -97,7 +96,6 @@ function ActivityShell({
       transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="iq-learning-activity__header">
-        <p className="iq-learning-activity__eyebrow">{eyebrow}</p>
         <h3 className="iq-learning-activity__title">{title}</h3>
         <p className="iq-learning-activity__copy">{copy}</p>
         <p className="iq-learning-activity__progress">{progressLabel}</p>
