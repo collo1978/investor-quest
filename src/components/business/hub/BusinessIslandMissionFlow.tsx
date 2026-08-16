@@ -46,6 +46,12 @@ type Props = {
 
 type SubPhase = "evidence" | "terms-check" | "activity" | "answer" | "tick";
 
+function initialSubPhaseForQuestion(
+  questionId: InvestorNotebookQuestionId | undefined
+): SubPhase {
+  return questionId === "explain-value-prop" ? "activity" : "evidence";
+}
+
 /**
  * Chained mission — for each checklist question, gather all 10-K evidence,
  * answer the question, then play a checklist-tick before the next question.
@@ -63,7 +69,10 @@ export function BusinessIslandMissionFlow({
   const [index, setIndex] = useState(() =>
     startIndex > 0 && startIndex < questionIds.length ? startIndex : 0
   );
-  const [sub, setSub] = useState<SubPhase>("evidence");
+  const [sub, setSub] = useState<SubPhase>(() => {
+    const start = startIndex > 0 && startIndex < questionIds.length ? startIndex : 0;
+    return initialSubPhaseForQuestion(questionIds[start]);
+  });
 
   const questionId = questionIds[index];
   const isLastQuestion = index >= questionIds.length - 1;
@@ -105,9 +114,12 @@ export function BusinessIslandMissionFlow({
       onComplete();
       return;
     }
-    setIndex((prev) => prev + 1);
-    setSub("evidence");
-  }, [isLastQuestion, onComplete]);
+    setIndex((prev) => {
+      const next = prev + 1;
+      setSub(initialSubPhaseForQuestion(questionIds[next]));
+      return next;
+    });
+  }, [isLastQuestion, onComplete, questionIds]);
 
   if (!questionId) return null;
 
@@ -143,17 +155,13 @@ export function BusinessIslandMissionFlow({
             finalCtaLabel={
               hasKeyTermsCheck
                 ? "Key Terms Check →"
-                : hasValuePropActivity
-                  ? "Open card flip →"
-                  : "Answer this question →"
+                : "Answer this question →"
             }
             onFinal={() =>
               setSub(
                 hasKeyTermsCheck
                   ? "terms-check"
-                  : hasValuePropActivity
-                    ? "activity"
-                    : "answer"
+                  : "answer"
               )
             }
           />
