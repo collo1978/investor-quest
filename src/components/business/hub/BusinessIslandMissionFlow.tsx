@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState } from "react";
 import { BusinessInvestorChallengeCard } from "@/components/business/investorFramework/BusinessInvestorChallengeCard";
 import { EvidenceDecodeSequence } from "@/components/business/hub/EvidenceDecodeSequence";
 import { KeyTermsCheck } from "@/components/business/hub/KeyTermsCheck";
+import { BusinessIslandValuePropCardFlip } from "@/components/business/hub/BusinessIslandValuePropCardFlip";
 import { SCHOOLS_BUSINESS_MISSION_THEME } from "@/components/quest/pillarQuestTheme";
 import {
   formatInvestorNotebookQuestion,
@@ -43,7 +44,7 @@ type Props = {
   completeLabel?: string;
 };
 
-type SubPhase = "evidence" | "terms-check" | "answer" | "tick";
+type SubPhase = "evidence" | "terms-check" | "activity" | "answer" | "tick";
 
 /**
  * Chained mission — for each checklist question, gather all 10-K evidence,
@@ -78,6 +79,7 @@ export function BusinessIslandMissionFlow({
   const hasKeyTermsCheck = questionId
     ? KEY_TERMS_CHECK_QUESTION_IDS.has(questionId)
     : false;
+  const hasValuePropActivity = questionId === "explain-value-prop";
   const missionTerms = useMemo(
     () => (hasKeyTermsCheck && questionId ? resolveHqDecodeMissionTerms(questionId) : []),
     [hasKeyTermsCheck, questionId]
@@ -139,15 +141,33 @@ export function BusinessIslandMissionFlow({
             key={`evidence-${questionId}`}
             evidence={evidence}
             finalCtaLabel={
-              hasKeyTermsCheck ? "Key Terms Check →" : "Answer this question →"
+              hasKeyTermsCheck
+                ? "Key Terms Check →"
+                : hasValuePropActivity
+                  ? "Open card flip →"
+                  : "Answer this question →"
             }
-            onFinal={() => setSub(hasKeyTermsCheck ? "terms-check" : "answer")}
+            onFinal={() =>
+              setSub(
+                hasKeyTermsCheck
+                  ? "terms-check"
+                  : hasValuePropActivity
+                    ? "activity"
+                    : "answer"
+              )
+            }
           />
         ) : sub === "terms-check" && hasKeyTermsCheck ? (
           <KeyTermsCheck
             key={`terms-check-${questionId}`}
             terms={missionTerms}
             xpReason={`Key Terms Check: ${questionId}`}
+            onComplete={() => setSub("answer")}
+          />
+        ) : sub === "activity" && hasValuePropActivity ? (
+          <BusinessIslandValuePropCardFlip
+            key={`activity-${questionId}`}
+            companyName={companyName}
             onComplete={() => setSub("answer")}
           />
         ) : sub === "answer" && challenge ? (
