@@ -16296,6 +16296,63 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   text-transform: uppercase;
 }
 
+.iq-mission-flow__loop {
+  width: min(100%, 42rem);
+  margin: 0 auto 1rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(139, 92, 246, 0.28);
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(34, 211, 238, 0.12), transparent 44%),
+    linear-gradient(155deg, rgba(15, 16, 42, 0.72), rgba(2, 6, 23, 0.58));
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+}
+
+.iq-mission-flow__loop-title {
+  margin: 0 0 0.5rem;
+  color: rgba(248, 250, 252, 0.98);
+  font-family: var(--font-grotesk, inherit);
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  font-weight: 820;
+  letter-spacing: -0.01em;
+}
+
+.iq-mission-flow__loop-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.iq-mission-flow__loop-grid span {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.6rem 0.65rem;
+  border: 1px solid rgba(168, 85, 247, 0.18);
+  border-radius: 0.78rem;
+  color: rgba(226, 232, 240, 0.84);
+  font-size: 0.82rem;
+  font-weight: 560;
+  line-height: 1.35;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.iq-mission-flow__loop-grid strong {
+  color: rgba(103, 232, 249, 0.9);
+  font-size: 0.62rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 560px) {
+  .iq-mission-flow__loop-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .iq-mission-flow__answer {
   width: 100%;
 }
@@ -17250,12 +17307,13 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   transform: translateX(-50%);
   padding: 1rem 1.1rem 1.05rem;
   border-radius: 1.05rem;
-  border: 1px solid rgba(251, 191, 36, 0.38);
+  border: 1px solid rgba(139, 92, 246, 0.38);
   background:
-    linear-gradient(165deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 23, 0.92));
+    radial-gradient(circle at 0% 0%, rgba(34, 211, 238, 0.12), transparent 44%),
+    linear-gradient(165deg, rgba(15, 16, 42, 0.94), rgba(2, 6, 23, 0.92));
   box-shadow:
     0 18px 40px rgba(2, 6, 23, 0.55),
-    0 0 28px rgba(251, 191, 36, 0.12);
+    0 0 30px rgba(139, 92, 246, 0.16);
   backdrop-filter: blur(14px);
 }
 
@@ -17263,7 +17321,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(circle at 20% 0%, rgba(251, 191, 36, 0.14), transparent 55%);
+  background: radial-gradient(circle at 20% 0%, rgba(139, 92, 246, 0.18), transparent 55%);
   pointer-events: none;
 }
 
@@ -17298,15 +17356,17 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 999px;
-  border: 1px solid rgba(251, 191, 36, 0.4);
-  color: #fef9c3;
-  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  color: #ede9fe;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(34, 211, 238, 0.16), transparent 58%),
+    rgba(30, 27, 75, 0.72);
 }
 
 .iq-business-island-story-dock__place {
   position: relative;
   margin: 0 0 0.2rem;
-  color: rgba(252, 211, 77, 0.92);
+  color: rgba(196, 181, 253, 0.96);
   font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -17334,10 +17394,41 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-business-island-story-dock__missions {
   position: relative;
   margin: 0 0 0.85rem;
-  color: #bef264;
+  color: rgba(103, 232, 249, 0.9);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.04em;
+}
+
+.iq-business-island-story-dock__loop {
+  position: relative;
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.75rem 0 0.85rem;
+}
+
+.iq-business-island-story-dock__loop-item {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.58rem 0.65rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.iq-business-island-story-dock__loop-label {
+  color: rgba(103, 232, 249, 0.9);
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.iq-business-island-story-dock__loop-copy {
+  color: rgba(241, 245, 249, 0.88);
+  font-size: 0.74rem;
+  font-weight: 650;
+  line-height: 1.32;
 }
 
 .iq-business-island-story-dock__cta {
@@ -17349,12 +17440,12 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   min-height: 2.5rem;
   border: 0;
   border-radius: 999px;
-  background: linear-gradient(135deg, #a3e635, #76b900);
-  color: #050505;
+  background: linear-gradient(135deg, #22d3ee, #8b5cf6);
+  color: #f8fafc;
   font-size: 0.88rem;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 0 22px rgba(118, 185, 0, 0.4);
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.34);
 }
 
 /* ── Island Investor Checklist (mission tracker — ref mockup) ── */

@@ -28,9 +28,8 @@ export function BusinessIslandStoryLocationDock({
   onContinue
 }: Props) {
   const reduceMotion = useReducedMotion();
-  const roomName = location
-    ? resolveLocationExperience(location.id).roomName
-    : "";
+  const experience = location ? resolveLocationExperience(location.id) : null;
+  const roomName = experience?.roomName ?? "";
   const missionTotal = location?.notebookQuestionIds.length ?? 0;
   const isActive = state === "active";
   const isCleared = state === "visited";
@@ -78,13 +77,44 @@ export function BusinessIslandStoryLocationDock({
             <p className="iq-business-island-story-dock__teaser">{mission}</p>
           ) : isCleared ? (
             <p className="iq-business-island-story-dock__teaser">
-              District cleared — revisit missions anytime.
+              District cleared. Revisit missions anytime.
             </p>
           ) : (
             <p className="iq-business-island-story-dock__teaser">
               Continue the campus path to unlock this district.
             </p>
           )}
+          {experience ? (
+            <div
+              className="iq-business-island-story-dock__loop"
+              aria-label={`${roomName} learning loop`}
+            >
+              <div className="iq-business-island-story-dock__loop-item">
+                <span className="iq-business-island-story-dock__loop-label">
+                  Discover
+                </span>
+                <span className="iq-business-island-story-dock__loop-copy">
+                  {experience.discoveryMechanic}
+                </span>
+              </div>
+              <div className="iq-business-island-story-dock__loop-item">
+                <span className="iq-business-island-story-dock__loop-label">
+                  Own it
+                </span>
+                <span className="iq-business-island-story-dock__loop-copy">
+                  {experience.ownershipChallenge}
+                </span>
+              </div>
+              <div className="iq-business-island-story-dock__loop-item">
+                <span className="iq-business-island-story-dock__loop-label">
+                  Earn
+                </span>
+                <span className="iq-business-island-story-dock__loop-copy">
+                  {experience.achievementReward}
+                </span>
+              </div>
+            </div>
+          ) : null}
           {missionTotal > 0 ? (
             <p className="iq-business-island-story-dock__missions">
               {masteredCount}/{missionTotal} checklist missions cleared

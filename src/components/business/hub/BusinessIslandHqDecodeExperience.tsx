@@ -7,6 +7,7 @@ import { useState } from "react";
 import { BusinessIslandMissionFlow } from "@/components/business/hub/BusinessIslandMissionFlow";
 import type { InvestorNotebookQuestionId } from "@/lib/business/businessIslandInvestorNotebook";
 import type { BusinessIslandStoryLocationDef } from "@/lib/business/businessIslandStoryLocations";
+import { resolveLocationExperience } from "@/lib/business/businessIslandLocationExperience";
 
 const HQ_MISSION_BRIEF_SRC = "/images/business-island/hq-mission-brief.png";
 
@@ -39,6 +40,7 @@ export function BusinessIslandHqDecodeExperience({
   const reduceMotion = useReducedMotion();
   const [phase, setPhase] = useState<HqPhase>("brief");
   const [sessionKey, setSessionKey] = useState(0);
+  const experience = resolveLocationExperience(location.id);
 
   return (
     <motion.div
@@ -76,13 +78,55 @@ export function BusinessIslandHqDecodeExperience({
             <div className="iq-hq-mission-brief">
               <Image
                 src={HQ_MISSION_BRIEF_SRC}
-                alt={`Your ${location.placeName} mission case file — access NVIDIA's official 10-K Business section evidence`}
+                alt={`Your ${location.placeName} mission case file, access NVIDIA's official 10-K Business section evidence`}
                 width={1536}
                 height={1024}
                 className="iq-hq-mission-brief__image"
                 priority
                 unoptimized
               />
+              <div className="iq-hq-mission-brief__panel">
+                <p className="iq-hq-mission-brief__eyebrow">
+                  Biz Island Learning
+                </p>
+                <h2 className="iq-hq-mission-brief__title">
+                  {location.placeName}
+                </h2>
+                <p className="iq-hq-mission-brief__copy">
+                  {experience.ambience}
+                </p>
+
+                <div className="iq-hq-mission-brief__loop" aria-label="Mission loop">
+                  <div>
+                    <span>Discover</span>
+                    <strong>{experience.discoveryMechanic}</strong>
+                  </div>
+                  <div>
+                    <span>Own it</span>
+                    <strong>{experience.ownershipChallenge}</strong>
+                  </div>
+                  <div>
+                    <span>Earn</span>
+                    <strong>{experience.achievementReward}</strong>
+                  </div>
+                </div>
+
+                <ul className="iq-hq-mission-brief__mission-list">
+                  {experience.missions.map((mission) => (
+                    <li key={mission.questionId}>
+                      <span className="iq-hq-mission-brief__mission-title">
+                        {mission.missionTitle}
+                      </span>
+                      <span className="iq-hq-mission-brief__mission-meta">
+                        {mission.discoveryMechanic}
+                      </span>
+                      <span className="iq-hq-mission-brief__mission-challenge">
+                        {mission.ownershipChallenge}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
             <button
@@ -107,6 +151,7 @@ export function BusinessIslandHqDecodeExperience({
           >
             <BusinessIslandMissionFlow
               questionIds={location.notebookQuestionIds}
+              locationId={location.id}
               companyName={companyName}
               startIndex={startIndex}
               onQuestionMastered={onMissionMastered}

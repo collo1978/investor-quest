@@ -253,9 +253,9 @@
 
 /* Headquarters mission brief — case-file artwork + Access CTA */
 .iq-hq-mission__screen--brief {
-  width: min(100%, 56rem);
+  width: min(100%, 72rem);
   max-height: calc(100dvh - 2.5rem);
-  overflow: hidden;
+  overflow: auto;
   align-items: center;
   justify-content: center;
   gap: 0.85rem;
@@ -263,9 +263,11 @@
 }
 
 .iq-hq-mission-brief {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: clamp(0.9rem, 2.5vw, 1.4rem);
   flex: 1 1 auto;
   min-height: 0;
   width: 100%;
@@ -283,6 +285,118 @@
   user-select: none;
 }
 
+.iq-hq-mission-brief__panel {
+  position: relative;
+  flex: 0 1 24rem;
+  max-height: calc(100dvh - 7.5rem);
+  overflow: auto;
+  border: 1px solid rgba(139, 92, 246, 0.34);
+  border-radius: 1.25rem;
+  padding: clamp(1rem, 2.5vw, 1.35rem);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(34, 211, 238, 0.14), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.2), transparent 45%),
+    linear-gradient(155deg, rgba(12, 11, 28, 0.86), rgba(7, 8, 20, 0.78));
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.42),
+    0 0 34px rgba(139, 92, 246, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.iq-hq-mission-brief__eyebrow,
+.iq-hq-mission-brief__mission-meta {
+  color: rgba(103, 232, 249, 0.9);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.iq-hq-mission-brief__eyebrow {
+  margin: 0 0 0.35rem;
+}
+
+.iq-hq-mission-brief__title {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.98);
+  font-family: var(--font-grotesk, inherit);
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.iq-hq-mission-brief__copy {
+  margin: 0.65rem 0 0;
+  color: rgba(226, 232, 240, 0.86);
+  font-size: 0.92rem;
+  font-weight: 560;
+  line-height: 1.5;
+}
+
+.iq-hq-mission-brief__loop {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.95rem 0;
+}
+
+.iq-hq-mission-brief__loop > div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid rgba(168, 85, 247, 0.22);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.iq-hq-mission-brief__loop span {
+  color: rgba(196, 181, 253, 0.92);
+  font-size: 0.66rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.iq-hq-mission-brief__loop strong {
+  color: rgba(248, 250, 252, 0.94);
+  font-size: 0.86rem;
+  font-weight: 720;
+  line-height: 1.35;
+}
+
+.iq-hq-mission-brief__mission-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.iq-hq-mission-brief__mission-list li {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.75rem;
+  border-radius: 0.9rem;
+  background:
+    linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(14, 165, 233, 0.07));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+
+.iq-hq-mission-brief__mission-title {
+  color: rgba(248, 250, 252, 0.98);
+  font-size: 0.9rem;
+  font-weight: 820;
+}
+
+.iq-hq-mission-brief__mission-challenge {
+  color: rgba(226, 232, 240, 0.82);
+  font-size: 0.82rem;
+  font-weight: 560;
+  line-height: 1.35;
+}
+
 .iq-hq-mission-brief__cta {
   flex-shrink: 0;
   width: auto;
@@ -297,7 +411,33 @@
     max-height: calc(100dvh - 6.75rem);
   }
 
+  .iq-hq-mission-brief__panel {
+    max-height: calc(100dvh - 6.75rem);
+  }
+
   .iq-hq-mission__screen--brief {
     gap: 0.65rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .iq-hq-mission__screen--brief {
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .iq-hq-mission-brief {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .iq-hq-mission-brief__image {
+    width: 100%;
+    max-height: 34dvh;
+  }
+
+  .iq-hq-mission-brief__panel {
+    flex-basis: auto;
+    max-height: none;
   }
 }

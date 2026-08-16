@@ -12,6 +12,8 @@ import {
   INVESTOR_NOTEBOOK_QUESTIONS,
   type InvestorNotebookQuestionId
 } from "@/lib/business/businessIslandInvestorNotebook";
+import type { BusinessIslandStoryLocationId } from "@/lib/business/businessIslandStoryLocations";
+import { resolveDistrictMission } from "@/lib/business/businessIslandLocationExperience";
 import {
   resolveHqDecodeEvidence,
   resolveHqDecodeMissionTerms
@@ -29,6 +31,7 @@ const KEY_TERMS_CHECK_QUESTION_IDS = new Set<InvestorNotebookQuestionId>([
 type Props = {
   /** Questions handled in order: evidence → answer → tick → next. */
   questionIds: readonly InvestorNotebookQuestionId[];
+  locationId: BusinessIslandStoryLocationId;
   companyName: string;
   /** Index to begin at (checklist deep-link). */
   startIndex?: number;
@@ -48,6 +51,7 @@ type SubPhase = "evidence" | "terms-check" | "answer" | "tick";
  */
 export function BusinessIslandMissionFlow({
   questionIds,
+  locationId,
   companyName,
   startIndex = 0,
   onQuestionMastered,
@@ -66,6 +70,10 @@ export function BusinessIslandMissionFlow({
   const evidence = useMemo(
     () => (questionId ? resolveHqDecodeEvidence(questionId) : []),
     [questionId]
+  );
+  const mission = useMemo(
+    () => (questionId ? resolveDistrictMission(locationId, questionId) : undefined),
+    [locationId, questionId]
   );
   const hasKeyTermsCheck = questionId
     ? KEY_TERMS_CHECK_QUESTION_IDS.has(questionId)
@@ -107,6 +115,22 @@ export function BusinessIslandMissionFlow({
         <p className="iq-mission-flow__progress">
           Question {index + 1} of {questionIds.length}
         </p>
+      ) : null}
+
+      {mission ? (
+        <div className="iq-mission-flow__loop" aria-label={`${mission.missionTitle} mission loop`}>
+          <p className="iq-mission-flow__loop-title">{mission.missionTitle}</p>
+          <div className="iq-mission-flow__loop-grid">
+            <span>
+              <strong>Discover</strong>
+              {mission.discoveryMechanic}
+            </span>
+            <span>
+              <strong>Own it</strong>
+              {mission.ownershipChallenge}
+            </span>
+          </div>
+        </div>
       ) : null}
 
       <AnimatePresence mode="wait">
