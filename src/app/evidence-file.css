@@ -288,6 +288,7 @@
 .iq-hq-mission-brief__panel {
   position: relative;
   flex: 0 1 24rem;
+  min-width: min(22rem, 100%);
   max-height: calc(100dvh - 7.5rem);
   overflow: auto;
   border: 1px solid rgba(139, 92, 246, 0.34);
@@ -417,6 +418,29 @@
 
   .iq-hq-mission__screen--brief {
     gap: 0.65rem;
+  }
+}
+
+@media (max-width: 1180px) {
+  .iq-hq-mission__screen--brief {
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .iq-hq-mission-brief {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .iq-hq-mission-brief__image {
+    width: 100%;
+    max-height: 42dvh;
+  }
+
+  .iq-hq-mission-brief__panel {
+    flex-basis: auto;
+    min-width: 0;
+    max-height: none;
   }
 }
 
