@@ -3,11 +3,10 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { SCHOOLS_MISSION_BRIEF_IMG_SRC } from "@/lib/schools/schoolsMapConfig";
-
 const HUB_DIM_SCRIM = "rgba(0, 0, 0, 0.55)";
+const BUSINESS_ISLAND_BRIEF_IMG_SRC = "/logos/business-island-entry-brief.svg";
 
-/** Intrinsic size of `public/logos/schools-mission-brief.png`. */
+/** Intrinsic size of `public/logos/business-island-entry-brief.svg`. */
 const BRIEF_IMG_W = 1024;
 const BRIEF_IMG_H = 1536;
 
@@ -92,7 +91,7 @@ export function BusinessIslandMissionBriefOverlay({ open, onDismiss }: Props) {
       </h2>
 
       <img
-        src={SCHOOLS_MISSION_BRIEF_IMG_SRC}
+        src={BUSINESS_ISLAND_BRIEF_IMG_SRC}
         alt="Your Business Island mission brief"
         width={BRIEF_IMG_W}
         height={BRIEF_IMG_H}
@@ -106,7 +105,7 @@ export function BusinessIslandMissionBriefOverlay({ open, onDismiss }: Props) {
         onClick={onDismiss}
         className="iq-mission-brief-cta relative z-10 mt-5 w-full max-w-sm shrink-0"
       >
-        START MISSION
+        ▶ ENTER BUSINESS ISLAND
       </button>
     </div>,
     document.body
