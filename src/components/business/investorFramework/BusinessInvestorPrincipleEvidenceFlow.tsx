@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BusinessInvestorChallengeCard } from "@/components/business/investorFramework/BusinessInvestorChallengeCard";
 import { BusinessInvestorEvidenceCardPanel } from "@/components/business/investorFramework/BusinessInvestorEvidenceCardPanel";
 import { CompanyEvolutionInteractiveTimeline } from "@/components/business/investorFramework/CompanyEvolutionInteractiveTimeline";
+import { NvidiaValuePropositionMission } from "@/components/business/investorFramework/NvidiaValuePropositionMission";
 import type { InvestorEvidenceCardPhase } from "@/lib/business/businessInvestorEvidencePhaseStorage";
 import { useInvestorPrincipleEvidenceFly } from "@/components/business/investorFramework/InvestorPrincipleEvidenceFly";
 import type { PillarQuestTheme } from "@/components/quest/pillarQuestTheme";
@@ -874,6 +875,10 @@ function BusinessInvestorLegacyPrincipleEvidenceFlow({
 }
 
 export function BusinessInvestorPrincipleEvidenceFlow(props: Props) {
+  if (props.company.id === "nvda" && props.principleId === "value-proposition") {
+    return <NvidiaValuePropositionMission />;
+  }
+
   if (usesInvestorChallengeFlow(props.principleId)) {
     return (
       <BusinessInvestorChallengePrincipleFlow

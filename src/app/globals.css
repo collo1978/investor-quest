@@ -27854,6 +27854,125 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   width: 100%;
 }
 
+/* NVIDIA Value Proposition — focused mission intro and one premium flip card. */
+.iq-value-mission {
+  display: grid;
+  min-height: clamp(34rem, 68vh, 47rem);
+  width: 100%;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(118, 185, 0, 0.22);
+  border-radius: 1.75rem;
+  background:
+    radial-gradient(circle at 50% 15%, rgba(118, 185, 0, 0.13), transparent 32rem),
+    linear-gradient(145deg, #111713 0%, #080b09 62%, #050706 100%);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.32);
+  color: #fff;
+}
+
+.iq-value-mission--intro { padding: clamp(2rem, 7vw, 5rem) 1.25rem; }
+
+.iq-value-mission__intro-content { max-width: 46rem; text-align: center; }
+.iq-value-mission__eyebrow,
+.iq-value-card__answer-label,
+.iq-value-card__value-label {
+  margin: 0;
+  color: #9be21b;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.iq-value-mission__intro-content h2 {
+  margin: 0.8rem auto 1.6rem;
+  max-width: 42rem;
+  font-size: clamp(2.25rem, 6vw, 4.25rem);
+  font-weight: 950;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.iq-value-mission__brief { color: rgba(255, 255, 255, 0.76); font-size: clamp(1rem, 2.5vw, 1.18rem); line-height: 1.55; }
+.iq-value-mission__brief p { margin: 0.22rem 0; font-weight: 700; }
+
+.iq-value-mission__start {
+  margin-top: 2.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: #76b900;
+  box-shadow: 0 12px 34px rgba(118, 185, 0, 0.24);
+  color: #071000;
+  cursor: pointer;
+  padding: 1rem 1.55rem;
+  font-size: 0.9rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+.iq-value-mission__start:hover { background: #8bd310; transform: translateY(-2px); }
+.iq-value-mission__start:focus-visible,
+.iq-value-card:focus-visible { outline: 3px solid #b7f34d; outline-offset: 5px; }
+
+.iq-value-mission--cards { padding: clamp(1.5rem, 5vw, 3.5rem); perspective: 1400px; }
+.iq-value-card {
+  width: min(100%, 28rem);
+  aspect-ratio: 5 / 7;
+  border: 0;
+  border-radius: 1.45rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  perspective: 1400px;
+  -webkit-tap-highlight-color: transparent;
+}
+.iq-value-card__inner { display: block; position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 720ms cubic-bezier(0.2, 0.75, 0.2, 1); }
+.iq-value-card--flipped .iq-value-card__inner { transform: rotateY(180deg); }
+.iq-value-card__face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(7, 13, 9, 0.14);
+  border-radius: 1.45rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.48), inset 0 0 0 7px rgba(255, 255, 255, 0.4);
+}
+.iq-value-card__face--front { background: linear-gradient(145deg, #fff 0%, #f5f6f2 100%); color: #101511; }
+.iq-value-card__face--back { background: radial-gradient(circle at 50% 15%, #25351b, transparent 48%), #10160f; color: #fff; transform: rotateY(180deg); box-shadow: 0 30px 75px rgba(0,0,0,.55), inset 0 0 0 2px rgba(118,185,0,.72), inset 0 0 0 8px rgba(255,255,255,.035); }
+.iq-value-card__corner { position: absolute; z-index: 2; width: 3.25rem; height: 2rem; }
+.iq-value-card__corner img { width: 100%; height: 100%; object-fit: contain; }
+.iq-value-card__corner--top { top: 1.25rem; left: 1.25rem; }
+.iq-value-card__corner--bottom { right: 1.25rem; bottom: 1.25rem; transform: rotate(180deg); }
+.iq-value-card__face--back .iq-value-card__corner { filter: brightness(0) invert(1); opacity: 0.88; }
+.iq-value-card__front-content,
+.iq-value-card__answer-content { display: flex; width: 100%; flex-direction: column; align-items: center; padding: 4.6rem clamp(1.5rem, 6vw, 3rem); text-align: center; }
+.iq-value-card__quote { font-size: clamp(1.65rem, 5.2vw, 2.35rem); font-weight: 900; letter-spacing: -0.035em; line-height: 1.12; text-wrap: balance; }
+.iq-value-card__question { margin-top: 1.5rem; color: #4e5a50; font-size: 1rem; font-weight: 800; }
+.iq-value-card__flip-cue { position: absolute; bottom: 1.3rem; left: 50%; color: #667067; font-size: 0.7rem; font-weight: 850; letter-spacing: 0.1em; text-transform: uppercase; transform: translateX(-50%); white-space: nowrap; }
+.iq-value-card__flip-cue span { display: inline-block; margin-right: 0.3rem; font-size: 1rem; vertical-align: -0.08em; }
+.iq-value-card__answer-title { margin-top: 0.55rem; color: #fff; font-size: clamp(1.8rem, 5.5vw, 2.65rem); font-weight: 950; letter-spacing: -0.04em; line-height: 1; text-wrap: balance; }
+.iq-value-card__answer-copy { margin-top: 1.25rem; color: rgba(255,255,255,.76); font-size: clamp(.9rem, 2.5vw, 1.05rem); font-weight: 600; line-height: 1.55; }
+.iq-value-card__divider { width: min(10rem, 55%); height: 1px; margin: 1.65rem 0 1.35rem; background: linear-gradient(90deg, transparent, #76b900, transparent); }
+.iq-value-card__value-title { margin-top: .4rem; color: #a6ed29; font-size: clamp(1.65rem, 5vw, 2.3rem); font-weight: 950; letter-spacing: -.035em; }
+
+@media (max-width: 640px) {
+  .iq-value-mission { min-height: min(42rem, calc(100dvh - 7rem)); border-radius: 1.2rem; }
+  .iq-value-mission--cards { padding: 1rem; }
+  .iq-value-card { width: min(100%, 22rem); max-height: calc(100dvh - 9rem); }
+  .iq-value-card__corner--top { top: 1rem; left: 1rem; }
+  .iq-value-card__corner--bottom { right: 1rem; bottom: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iq-value-card__inner { transition-duration: 1ms; }
+}
+
 /* Company Evolution — evidence card left/center, timeline docks to far right */
 .iq-company-evolution-stage {
   display: grid;
