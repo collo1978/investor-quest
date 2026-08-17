@@ -87,7 +87,7 @@ export function BusinessIslandValuePropCardFlip({ companyName, onComplete }: Pro
           <motion.div key="intro" className="iq-value-mission-intro" exit={reduceMotion ? undefined : { opacity: 0, scale: 0.98 }}>
             <p className="iq-value-mission-intro__eyebrow">Value Proposition</p>
             <h2>Why do customers choose NVIDIA?</h2>
-            <p>A company can have great products — but that doesn't explain why customers actually buy them.</p>
+            <p>A company can have great products — but that doesn&apos;t explain why customers actually buy them.</p>
             <div className="iq-value-mission-intro__mission">
               <strong>Your Mission</strong>
               <span>Discover the problems, then reveal how NVIDIA solves them.</span>
@@ -121,7 +121,7 @@ export function BusinessIslandValuePropCardFlip({ companyName, onComplete }: Pro
                   <CardCorner number={card.id} />
                   <CardCorner number={card.id} inverted />
                   <span className="iq-value-card__content">
-                    <span className="iq-value-card__kicker">NVIDIA's Solution</span>
+                    <span className="iq-value-card__kicker">NVIDIA&apos;s Solution</span>
                     <strong className="iq-value-card__headline">{card.solution}</strong>
                     <span className="iq-value-card__body">{card.explanation}</span>
                     <span className="iq-value-card__value"><small>Value Created</small><b>{card.icon} {card.value}</b></span>
