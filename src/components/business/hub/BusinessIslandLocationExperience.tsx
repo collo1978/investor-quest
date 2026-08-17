@@ -21,7 +21,7 @@ type Props = {
 
 /**
  * Every district uses the Headquarters case-file UI:
- * brief → evidence → answer → checklist tick → next question.
+ * evidence → answer → checklist tick → next question.
  */
 export function BusinessIslandLocationExperience({
   location,
@@ -62,7 +62,7 @@ export function BusinessIslandLocationExperience({
   };
 
   const leaveIsland = () => {
-    // Headquarters historically counts as visited as soon as its brief opens.
+    // Headquarters historically counts as visited as soon as its experience opens.
     // Other districts retain their existing progression semantics: visiting
     // without completing a mission does not clear the district.
     onLeave(

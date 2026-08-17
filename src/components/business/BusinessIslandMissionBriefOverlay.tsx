@@ -3,13 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { SCHOOLS_MISSION_BRIEF_IMG_SRC } from "@/lib/schools/schoolsMapConfig";
-
 const HUB_DIM_SCRIM = "rgba(0, 0, 0, 0.55)";
-
-/** Intrinsic size of `public/logos/schools-mission-brief.png`. */
-const BRIEF_IMG_W = 1024;
-const BRIEF_IMG_H = 1536;
 
 type Props = {
   open: boolean;
@@ -91,22 +85,27 @@ export function BusinessIslandMissionBriefOverlay({ open, onDismiss }: Props) {
         Business Island mission brief
       </h2>
 
-      <img
-        src={SCHOOLS_MISSION_BRIEF_IMG_SRC}
-        alt="Your Business Island mission brief"
-        width={BRIEF_IMG_W}
-        height={BRIEF_IMG_H}
-        decoding="async"
-        fetchPriority="high"
-        className="relative z-10 block h-auto w-auto max-h-[75vh] max-w-[60vw] shrink object-contain object-center select-none"
-      />
+      <section className="iq-business-entry-brief relative z-10" aria-labelledby="business-island-entry-title">
+        <p className="iq-business-entry-brief__eyebrow">Welcome to Business Island</p>
+        <h3 id="business-island-entry-title">
+          You’re about to explore the Business section of NVIDIA’s 10-K Annual Report.
+        </h3>
+        <p className="iq-business-entry-brief__copy">
+          It’s over 5,000 words long. We’ve extracted only what matters.
+        </p>
+
+        <div className="iq-business-entry-brief__mission">
+          <strong>Your mission</strong>
+          <p>Complete the checklist to understand NVIDIA’s business like a pro.</p>
+        </div>
+      </section>
 
       <button
         type="button"
         onClick={onDismiss}
         className="iq-mission-brief-cta relative z-10 mt-5 w-full max-w-sm shrink-0"
       >
-        START MISSION
+        ▶ Enter Business Island
       </button>
     </div>,
     document.body
