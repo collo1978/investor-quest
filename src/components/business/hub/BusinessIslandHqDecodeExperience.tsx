@@ -37,7 +37,13 @@ export function BusinessIslandHqDecodeExperience({
   onLeave
 }: Props) {
   const reduceMotion = useReducedMotion();
-  const [phase, setPhase] = useState<HqPhase>("brief");
+  // A checklist deep-link to Value Proposition is an activity entry, not a
+  // second visit to the general Business Island 10-K briefing.
+  const startsWithValueProp =
+    location.notebookQuestionIds[startIndex] === "explain-value-prop";
+  const [phase, setPhase] = useState<HqPhase>(() =>
+    startsWithValueProp ? "mission" : "brief"
+  );
   const [sessionKey, setSessionKey] = useState(0);
 
   return (
