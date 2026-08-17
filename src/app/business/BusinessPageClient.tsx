@@ -23,7 +23,6 @@ import {
 } from "@/lib/businessIslandBriefSession";
 import { SCHOOLS_DEMO_RESET_EVENT } from "@/lib/schools/resetSchoolsDemoProgress";
 import { companyById, type CompanyId } from "@/data/companies";
-import { SCHOOLS_MISSION_BRIEF_IMG_SRC } from "@/lib/schools/schoolsMapConfig";
 import { BUSINESS_HUB_IMG_SRC } from "@/lib/screenAssetUrls";
 import { preloadImage } from "@/lib/preloadImage";
 import { prewarmQuestAnswers } from "@/lib/quests/questPrewarmClient";
@@ -56,7 +55,6 @@ export default function BusinessPageClient({ showDevPanel = false }: Props) {
     if (!isSchoolsBusinessHub) {
       preloadImage(BUSINESS_HUB_IMG_SRC);
     }
-    preloadImage(SCHOOLS_MISSION_BRIEF_IMG_SRC);
     preloadQuestDetailChunks();
   }, [actions, isSchoolsBusinessHub]);
 
