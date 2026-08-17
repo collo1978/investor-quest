@@ -167,6 +167,12 @@ export function BusinessIslandMissionFlow({
             exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
+            {questionId === "explain-value-prop" ? (
+              <header className="iq-value-connect-heading">
+                <p>Now Connect the Dots</p>
+                <h2>Why do customers choose NVIDIA?</h2>
+              </header>
+            ) : null}
             <BusinessInvestorChallengeCard
               challenge={challenge}
               theme={SCHOOLS_BUSINESS_MISSION_THEME}

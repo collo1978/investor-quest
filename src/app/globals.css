@@ -16362,211 +16362,182 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   width: 100%;
 }
 
-/* ── Value proposition activity: problem → solution card flip ── */
+/* ── Value proposition mission: collectible problem cards ── */
 .iq-value-prop-flip {
-  width: min(100%, 58rem);
+  width: min(100%, 46rem);
+  min-height: min(43rem, calc(100dvh - 9rem));
   margin: 0 auto;
-  padding: clamp(1rem, 3vw, 1.35rem);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  border-radius: 1.25rem;
-  background:
-    radial-gradient(circle at 8% 0%, rgba(34, 211, 238, 0.18), transparent 42%),
-    radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.25), transparent 46%),
-    linear-gradient(155deg, rgba(12, 11, 28, 0.8), rgba(2, 6, 23, 0.72));
-  box-shadow:
-    0 24px 72px rgba(0, 0, 0, 0.34),
-    0 0 32px rgba(139, 92, 246, 0.13),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px);
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 3vw, 2rem);
 }
 
-.iq-value-prop-flip__header {
-  margin-bottom: 1rem;
+.iq-value-mission-intro {
+  width: min(100%, 38rem);
+  text-align: center;
 }
 
-.iq-value-prop-flip__eyebrow {
-  margin: 0 0 0.35rem;
-  color: rgba(103, 232, 249, 0.92);
-  font-size: 0.7rem;
-  font-weight: 850;
-  letter-spacing: 0.13em;
+.iq-value-mission-intro__eyebrow,
+.iq-value-card__kicker,
+.iq-value-card__value small {
+  color: #76b900;
+  font-size: .7rem;
+  font-weight: 900;
+  letter-spacing: .17em;
   text-transform: uppercase;
 }
 
-.iq-value-prop-flip__title {
-  margin: 0;
-  color: rgba(248, 250, 252, 0.98);
+.iq-value-mission-intro h2 {
+  margin: .65rem 0 1rem;
+  color: #f8fafc;
   font-family: var(--font-grotesk, inherit);
-  font-size: clamp(1.35rem, 3.5vw, 2rem);
-  font-weight: 850;
-  letter-spacing: -0.03em;
-  line-height: 1.08;
+  font-size: clamp(2rem, 6vw, 3.55rem);
+  font-weight: 900;
+  letter-spacing: -.045em;
+  line-height: .98;
 }
 
-.iq-value-prop-flip__copy {
-  max-width: 44rem;
-  margin: 0.55rem 0 0;
-  color: rgba(226, 232, 240, 0.84);
-  font-size: 0.95rem;
-  line-height: 1.5;
+.iq-value-mission-intro > p:not(.iq-value-mission-intro__eyebrow) {
+  max-width: 32rem;
+  margin: 0 auto;
+  color: rgba(226,232,240,.78);
+  font-size: clamp(.95rem, 2vw, 1.08rem);
+  line-height: 1.55;
 }
 
-.iq-value-prop-flip__grid {
+.iq-value-mission-intro__mission {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  gap: .35rem;
+  margin: 2.2rem auto;
 }
 
-.iq-value-prop-flip-card {
-  position: relative;
-  display: block;
-  min-height: 16rem;
+.iq-value-mission-intro__mission strong {
+  color: #76b900;
+  font-size: .72rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.iq-value-mission-intro__mission span { color: #f8fafc; font-weight: 700; }
+.iq-value-mission-intro .iq-hq-mission__primary { width: min(100%, 20rem); }
+
+.iq-value-card-stage {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+}
+
+.iq-value-card-stage__progress {
+  margin: 0 0 .75rem;
+  color: #76b900;
+  font-size: .74rem;
+  font-weight: 900;
+  letter-spacing: .15em;
+}
+.iq-value-card-stage__progress span { color: rgba(226,232,240,.45); }
+
+.iq-value-card {
+  width: min(100%, 23rem);
+  aspect-ratio: 2.5 / 3.5;
   border: 0;
-  border-radius: 1.2rem;
+  border-radius: 1.45rem;
   padding: 0;
-  color: inherit;
   background: transparent;
+  color: inherit;
   cursor: pointer;
-  perspective: 1100px;
+  perspective: 1400px;
   text-align: left;
-  transition: transform 180ms ease, filter 180ms ease;
+  filter: drop-shadow(0 30px 34px rgba(0,0,0,.55));
 }
 
-.iq-value-prop-flip-card:hover {
-  transform: translateY(-3px);
-  filter: brightness(1.06);
-}
+.iq-value-card:hover { transform: translateY(-3px) rotateX(1deg); }
+.iq-value-card:focus-visible { outline: 3px solid #76b900; outline-offset: 6px; }
 
-.iq-value-prop-flip-card:focus-visible {
-  outline: 2px solid rgba(103, 232, 249, 0.9);
-  outline-offset: 3px;
-}
-
-.iq-value-prop-flip-card__inner {
+.iq-value-card__inner {
   position: absolute;
   inset: 0;
   display: block;
   border-radius: inherit;
   transform-style: preserve-3d;
-  transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 700ms cubic-bezier(.2,.75,.2,1);
 }
+.iq-value-card--flipped .iq-value-card__inner { transform: rotateY(180deg); }
 
-.iq-value-prop-flip-card--flipped .iq-value-prop-flip-card__inner {
-  transform: rotateY(180deg);
-}
-
-.iq-value-prop-flip-card__face {
+.iq-value-card__face {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 0.7rem;
+  display: grid;
+  border: 1px solid rgba(255,255,255,.17);
   border-radius: inherit;
-  padding: 1.05rem;
+  overflow: hidden;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  overflow: hidden;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
-    0 22px 54px rgba(0, 0, 0, 0.32),
-    0 0 28px rgba(139, 92, 246, 0.12);
+  box-shadow: inset -7px -5px 0 rgba(0,0,0,.22), inset 2px 2px 0 rgba(255,255,255,.1), 0 0 0 2px rgba(2,6,23,.8);
 }
-
-.iq-value-prop-flip-card__face::before {
-  content: "";
-  position: absolute;
-  inset: -30% -15% auto auto;
-  width: 9rem;
-  height: 9rem;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.2), transparent 66%);
-  pointer-events: none;
+.iq-value-card__front {
+  background: radial-gradient(circle at 50% 24%, rgba(118,185,0,.11), transparent 32%), repeating-linear-gradient(135deg, transparent 0 16px, rgba(255,255,255,.018) 16px 17px), linear-gradient(145deg,#151a20,#070a0e 70%);
 }
-
-.iq-value-prop-flip-card__front {
-  background:
-    linear-gradient(150deg, rgba(49, 46, 129, 0.86), rgba(8, 13, 38, 0.94) 58%, rgba(2, 6, 23, 0.96)),
-    radial-gradient(circle at 12% 10%, rgba(34, 211, 238, 0.22), transparent 42%);
-}
-
-.iq-value-prop-flip-card__back {
+.iq-value-card__back {
   transform: rotateY(180deg);
-  background:
-    linear-gradient(150deg, rgba(14, 116, 144, 0.72), rgba(30, 27, 75, 0.9) 58%, rgba(3, 7, 18, 0.96)),
-    radial-gradient(circle at 88% 0%, rgba(34, 211, 238, 0.28), transparent 44%);
+  background: radial-gradient(circle at 50% 20%, rgba(118,185,0,.22), transparent 36%), linear-gradient(145deg,#172015,#080d08 72%);
+}
+.iq-value-card__face::after {
+  content:""; position:absolute; inset:10px; border:1px solid rgba(255,255,255,.08); border-radius:1rem; pointer-events:none;
 }
 
-.iq-value-prop-flip-card__kicker {
+.iq-value-card__corner {
+  position: absolute;
+  z-index: 2;
+  top: 1.15rem;
+  left: 1.15rem;
+  display: grid;
+  justify-items: center;
+  color: #f8fafc;
+  font-size: .75rem;
+  letter-spacing: .08em;
+}
+.iq-value-card__corner img { width: 1.55rem; height: 1.55rem; }
+.iq-value-card__corner--inverted { inset: auto 1.15rem 1.15rem auto; transform: rotate(180deg); }
+
+.iq-value-card__content {
   position: relative;
-  color: rgba(103, 232, 249, 0.92);
-  font-size: 0.68rem;
-  font-weight: 850;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  z-index: 1;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(.75rem, 2vh, 1.2rem);
+  padding: 3.9rem 2.4rem;
+  text-align: center;
 }
-
-.iq-value-prop-flip-card__persona {
-  position: relative;
-  display: inline-flex;
-  width: fit-content;
-  max-width: 100%;
-  border: 1px solid rgba(196, 181, 253, 0.26);
-  border-radius: 999px;
-  padding: 0.34rem 0.55rem;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(221, 214, 254, 0.92);
-  font-size: 0.72rem;
-  font-weight: 820;
+.iq-value-card__headline {
+  color: #fff;
+  font-family: var(--font-grotesk, inherit);
+  font-size: clamp(1.45rem, 4vw, 2rem);
+  font-weight: 900;
+  letter-spacing: -.035em;
+  line-height: 1.08;
 }
+.iq-value-card__body { color: rgba(226,232,240,.8); font-size: .9rem; font-weight: 600; line-height: 1.5; }
+.iq-value-card__flip { margin-top: .35rem; color: #8bcf18; font-size: .72rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.iq-value-card__value { display:grid; gap:.4rem; padding-top:.85rem; border-top:1px solid rgba(118,185,0,.35); }
+.iq-value-card__value b { color:#f8fafc; font-size:.93rem; line-height:1.35; }
+.iq-value-card-stage__next { width:min(100%, 20rem); margin-top:1rem; }
+.iq-value-card-stage__next-space { height:3.8rem; }
 
-.iq-value-prop-flip-card__text {
-  position: relative;
-  color: rgba(248, 250, 252, 0.95);
-  font-size: clamp(1rem, 2.35vw, 1.2rem);
-  font-weight: 780;
-  line-height: 1.32;
-  letter-spacing: -0.015em;
-}
+.iq-value-connect-heading { margin: 0 auto 1.25rem; text-align: center; }
+.iq-value-connect-heading p { margin: 0 0 .35rem; color: #76b900; font-size: .7rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+.iq-value-connect-heading h2 { margin: 0; color: #f8fafc; font-size: clamp(1.55rem, 4vw, 2.35rem); font-weight: 900; letter-spacing: -.035em; }
 
-.iq-value-prop-flip-card__hint {
-  position: relative;
-  display: inline-flex;
-  width: fit-content;
-  border-radius: 999px;
-  padding: 0.38rem 0.6rem;
-  background: rgba(34, 211, 238, 0.1);
-  color: rgba(196, 181, 253, 0.9);
-  font-size: 0.76rem;
-  font-weight: 820;
-}
-
-.iq-value-prop-flip__cta {
-  width: min(100%, 24rem);
-  margin: 1rem auto 0;
-}
-
-.iq-value-prop-flip__cta:disabled {
-  background: rgba(71, 85, 105, 0.58);
-  color: rgba(15, 23, 42, 0.7);
-  box-shadow: none;
-  cursor: not-allowed;
-}
-
-@media (max-width: 780px) {
-  .iq-value-prop-flip__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .iq-value-prop-flip-card {
-    min-height: 13rem;
-  }
+@media (max-height: 760px) and (min-width: 600px) {
+  .iq-value-card { width: 18rem; }
+  .iq-value-card__content { gap: .65rem; padding: 3.2rem 2rem; }
+  .iq-value-card__headline { font-size: 1.45rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .iq-value-prop-flip-card__inner {
-    transition: none;
-  }
+  .iq-value-card, .iq-value-card__inner { transition: none; }
+  .iq-value-card:hover { transform: none; }
 }
 
 /* ── Shared Business Island learning activities ── */

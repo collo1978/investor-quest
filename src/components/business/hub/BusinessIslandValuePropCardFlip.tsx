@@ -1,57 +1,77 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
-import { useMemo, useState } from "react";
+import Image from "next/image";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useState } from "react";
 
 type ValuePropFlipCard = {
   id: string;
-  persona: string;
-  question: string;
+  problem: string;
+  context: string;
   solution: string;
+  explanation: string;
+  value: string;
+  icon: string;
 };
 
 const VALUE_PROP_FLIP_CARDS: readonly ValuePropFlipCard[] = [
   {
-    id: "ai-speed",
-    persona: "AI lab lead",
-    question: "How do we train bigger AI models without waiting forever?",
-    solution:
-      "NVIDIA answers with accelerated computing platforms built for huge AI workloads."
+    id: "01",
+    problem: "“My computer is painfully slow.”",
+    context: "Why does everything take forever when I ask it to do something demanding?",
+    solution: "Accelerated Computing",
+    explanation:
+      "GPUs can perform huge numbers of calculations at the same time, helping demanding tasks happen much faster.",
+    value: "Faster, more powerful computing.",
+    icon: "⚡"
   },
   {
-    id: "developer-tools",
-    persona: "Software team",
-    question: "How do our engineers use these chips without rebuilding everything?",
-    solution:
-      "NVIDIA answers with CUDA, software libraries and tools around the hardware."
+    id: "02",
+    problem: "“I have a great idea — but why is building it so complicated?”",
+    context: "Powerful technology is not much use if you cannot turn your idea into something real.",
+    solution: "CUDA + Developer Ecosystem",
+    explanation:
+      "NVIDIA also gives developers software, libraries and tools that help them build with its computing power.",
+    value: "Powerful technology becomes easier to build with.",
+    icon: "🛠️"
   },
   {
-    id: "full-platform",
-    persona: "Data center buyer",
-    question: "Can we buy a complete AI system instead of stitching parts together?",
-    solution:
-      "NVIDIA answers with a full platform across chips, systems, networking and software."
+    id: "03",
+    problem: "“Why doesn't all my technology just work together?”",
+    context: "Connecting lots of separate pieces can quickly become complicated.",
+    solution: "Full-Stack Platform",
+    explanation:
+      "NVIDIA provides more than a chip: its chips, systems, networking and software are designed as one connected platform.",
+    value: "Customers get technology designed to work together.",
+    icon: "🧩"
   }
 ] as const;
 
-type Props = {
-  companyName: string;
-  onComplete: () => void;
-};
+type Props = { companyName: string; onComplete: () => void };
 
-export function BusinessIslandValuePropCardFlip({
-  companyName,
-  onComplete
-}: Props) {
+function CardCorner({ number, inverted = false }: { number: string; inverted?: boolean }) {
+  return (
+    <span className={`iq-value-card__corner${inverted ? " iq-value-card__corner--inverted" : ""}`} aria-hidden>
+      <Image src="/logos/companies/nvda.svg" alt="" width={25} height={25} />
+      <b>{number}</b>
+    </span>
+  );
+}
+
+export function BusinessIslandValuePropCardFlip({ companyName, onComplete }: Props) {
   const reduceMotion = useReducedMotion();
-  const [flippedIds, setFlippedIds] = useState<readonly string[]>([]);
-  const flippedSet = useMemo(() => new Set(flippedIds), [flippedIds]);
-  const allFlipped = flippedIds.length >= VALUE_PROP_FLIP_CARDS.length;
+  const [phase, setPhase] = useState<"intro" | "cards">("intro");
+  const [index, setIndex] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const card = VALUE_PROP_FLIP_CARDS[index];
 
-  const toggleCard = (cardId: string) => {
-    setFlippedIds((prev) =>
-      prev.includes(cardId) ? prev.filter((id) => id !== cardId) : [...prev, cardId]
-    );
+  const next = () => {
+    if (index === VALUE_PROP_FLIP_CARDS.length - 1) {
+      onComplete();
+      return;
+    }
+    setFlipped(false);
+    setIndex((current) => current + 1);
   };
 
   return (
@@ -60,75 +80,64 @@ export function BusinessIslandValuePropCardFlip({
       initial={reduceMotion ? false : { opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
-      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-      aria-label={`${companyName} value proposition card flip`}
+      aria-label={`${companyName} value proposition mission`}
     >
-      <div className="iq-value-prop-flip__header">
-        <h3 className="iq-value-prop-flip__title">
-          Reveal why customers choose {companyName}
-        </h3>
-        <p className="iq-value-prop-flip__copy">
-          Flip each customer question to uncover how {companyName} solves it.
-          Then explain the pattern in your own words.
-        </p>
-      </div>
-
-      <div className="iq-value-prop-flip__grid">
-        {VALUE_PROP_FLIP_CARDS.map((card, index) => {
-          const flipped = flippedSet.has(card.id);
-          return (
+      <AnimatePresence mode="wait">
+        {phase === "intro" ? (
+          <motion.div key="intro" className="iq-value-mission-intro" exit={reduceMotion ? undefined : { opacity: 0, scale: 0.98 }}>
+            <p className="iq-value-mission-intro__eyebrow">Value Proposition</p>
+            <h2>Why do customers choose NVIDIA?</h2>
+            <p>A company can have great products — but that doesn't explain why customers actually buy them.</p>
+            <div className="iq-value-mission-intro__mission">
+              <strong>Your Mission</strong>
+              <span>Discover the problems, then reveal how NVIDIA solves them.</span>
+            </div>
+            <button type="button" className="iq-hq-mission__primary" onClick={() => setPhase("cards")}>
+              Start Mission →
+            </button>
+          </motion.div>
+        ) : (
+          <motion.div key={`card-${card.id}`} className="iq-value-card-stage" initial={reduceMotion ? false : { opacity: 0, x: 28, rotateZ: 1.5 }} animate={{ opacity: 1, x: 0, rotateZ: 0 }}>
+            <p className="iq-value-card-stage__progress" aria-label={`Problem ${index + 1} of 3`}>{card.id} <span>/ 03</span></p>
             <button
-              key={card.id}
               type="button"
-              className={[
-                "iq-value-prop-flip-card",
-                flipped ? "iq-value-prop-flip-card--flipped" : ""
-              ]
-                .filter(Boolean)
-                .join(" ")}
+              className={`iq-value-card${flipped ? " iq-value-card--flipped" : ""}`}
               aria-pressed={flipped}
-              onClick={() => toggleCard(card.id)}
+              aria-label={`${flipped ? "Show everyday problem" : "Flip to discover NVIDIA's solution"}: ${card.problem}`}
+              onClick={() => setFlipped((value) => !value)}
             >
-              <span className="iq-value-prop-flip-card__inner">
-                <span className="iq-value-prop-flip-card__face iq-value-prop-flip-card__front">
-                  <span className="iq-value-prop-flip-card__kicker">
-                    Customer question {index + 1}
-                  </span>
-                  <span className="iq-value-prop-flip-card__persona">
-                    {card.persona}
-                  </span>
-                  <span className="iq-value-prop-flip-card__text">
-                    {card.question}
-                  </span>
-                  <span className="iq-value-prop-flip-card__hint">
-                    Tap to reveal solution
+              <span className="iq-value-card__inner">
+                <span className="iq-value-card__face iq-value-card__front">
+                  <CardCorner number={card.id} />
+                  <CardCorner number={card.id} inverted />
+                  <span className="iq-value-card__content">
+                    <span className="iq-value-card__kicker">Everyday Problem</span>
+                    <strong className="iq-value-card__headline">{card.problem}</strong>
+                    <span className="iq-value-card__body">{card.context}</span>
+                    <span className="iq-value-card__flip">↻ Flip to discover</span>
                   </span>
                 </span>
-                <span className="iq-value-prop-flip-card__face iq-value-prop-flip-card__back">
-                  <span className="iq-value-prop-flip-card__kicker">
-                    NVIDIA answer
-                  </span>
-                  <span className="iq-value-prop-flip-card__text">
-                    {card.solution}
-                  </span>
-                  <span className="iq-value-prop-flip-card__hint">
-                    Solution revealed
+                <span className="iq-value-card__face iq-value-card__back">
+                  <CardCorner number={card.id} />
+                  <CardCorner number={card.id} inverted />
+                  <span className="iq-value-card__content">
+                    <span className="iq-value-card__kicker">NVIDIA's Solution</span>
+                    <strong className="iq-value-card__headline">{card.solution}</strong>
+                    <span className="iq-value-card__body">{card.explanation}</span>
+                    <span className="iq-value-card__value"><small>Value Created</small><b>{card.icon} {card.value}</b></span>
+                    <span className="iq-value-card__flip">↻ Flip back</span>
                   </span>
                 </span>
               </span>
             </button>
-          );
-        })}
-      </div>
-
-      <button
-        type="button"
-        className="iq-hq-mission__primary iq-value-prop-flip__cta"
-        disabled={!allFlipped}
-        onClick={onComplete}
-      >
-        Continue to answer →
-      </button>
+            {flipped ? (
+              <motion.button type="button" className="iq-hq-mission__primary iq-value-card-stage__next" initial={reduceMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} onClick={next}>
+                {index === 2 ? "Now connect the dots →" : "Next problem →"}
+              </motion.button>
+            ) : <span className="iq-value-card-stage__next-space" aria-hidden />}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.section>
   );
 }
