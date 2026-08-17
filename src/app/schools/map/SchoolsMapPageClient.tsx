@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
+import { BusinessIslandMissionBriefOverlay } from "@/components/business/BusinessIslandMissionBriefOverlay";
 import { MissionEnvelopeBriefSequence } from "@/components/schools/MissionEnvelopeBriefSequence";
 import { SchoolsMapBusinessIslandHubUiOverlay } from "@/components/schools/SchoolsMapBusinessIslandHubUiOverlay";
 import { SchoolsProdigyMapScreen } from "@/components/schools/SchoolsProdigyMapScreen";
@@ -57,6 +58,7 @@ export default function SchoolsMapPageClient() {
   const [envelopeBriefOpen, setEnvelopeBriefOpen] = useState(false);
   const [guidePhase, setGuidePhase] = useState<GuidePhase>("idle");
   const [showBusinessGuideLabel, setShowBusinessGuideLabel] = useState(false);
+  const [businessBriefDismissed, setBusinessBriefDismissed] = useState(false);
   const [mapSessionKey, setMapSessionKey] = useState(0);
   const navigateAfterUnlockRef = useRef<number | null>(null);
   const [businessProgressTier, setBusinessProgressTier] = useState(0);
@@ -74,11 +76,14 @@ export default function SchoolsMapPageClient() {
   const missionBriefGateActive = showMapEnvelopeBrief;
 
   const mapInteractionLocked =
-    (!useProdigyMap && guidePhase === "animating") || guidePhase === "zooming";
+    (!useProdigyMap && guidePhase === "animating") ||
+    guidePhase === "zooming" ||
+    (schoolsDemoFullscreen && guidePhase === "hub" && !businessBriefDismissed);
 
   const exitBusinessIslandHub = useCallback(() => {
     clearSchoolsBusinessIslandHubEntered();
     setBusinessProgressTier(0);
+    setBusinessBriefDismissed(false);
     setGuidePhase("landed");
   }, []);
 
@@ -230,6 +235,7 @@ export default function SchoolsMapPageClient() {
   useEffect(() => {
     const onDemoReset = () => {
       setSchoolsBriefDismissed(false);
+      setBusinessBriefDismissed(false);
       setEnvelopeBriefOpen(false);
       setGuidePhase("idle");
       setShowBusinessGuideLabel(false);
@@ -309,6 +315,14 @@ export default function SchoolsMapPageClient() {
           />
         )}
       </div>
+      <BusinessIslandMissionBriefOverlay
+        open={
+          schoolsDemoFullscreen &&
+          guidePhase === "hub" &&
+          !businessBriefDismissed
+        }
+        onDismiss={() => setBusinessBriefDismissed(true)}
+      />
       {useProdigyMap ? (
         <MissionEnvelopeBriefSequence
           open={envelopeBriefOpen && missionBriefGateActive}
