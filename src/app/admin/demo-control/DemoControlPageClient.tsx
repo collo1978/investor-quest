@@ -21,8 +21,7 @@ export function DemoControlPageClient() {
           — not production user accounts.
         </p>
         <p className="mt-3 text-xs text-white/45">
-          The same controls appear in-game as a floating{" "}
-          <span className="text-violet-200">Demo</span> tab on every screen.
+          Demo controls are available here in Mission Control only.
         </p>
       </header>
 
