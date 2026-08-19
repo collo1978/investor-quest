@@ -468,10 +468,14 @@ function SegmentExplorer({
 }) {
   const reduceMotion = useReducedMotion();
   type ProductId =
+    | "dgx-cloud"
+    | "ai-enterprise"
     | "geforce-rtx"
-    | "dgx"
+    | "geforce-now"
     | "nvidia-rtx"
-    | "nvidia-drive";
+    | "omniverse"
+    | "drive-agx"
+    | "drive-hyperion";
   type DestinationId =
     | "gaming"
     | "data-center"
@@ -487,32 +491,60 @@ function SegmentExplorer({
 
   const products: readonly Product[] = [
     {
+      id: "dgx-cloud",
+      name: "DGX / DGX Cloud",
+      visual: "☁️",
+      destinationId: "data-center",
+      explanation: "Access powerful NVIDIA AI computing through the cloud."
+    },
+    {
+      id: "ai-enterprise",
+      name: "NVIDIA AI Enterprise",
+      visual: "🧠",
+      destinationId: "data-center",
+      explanation: "Software for building and running AI in businesses."
+    },
+    {
       id: "geforce-rtx",
       name: "GeForce RTX",
       visual: "🎮",
       destinationId: "gaming",
-      explanation: "Powerful chips made for gaming."
+      explanation: "Powerful graphics cards made for PC gaming."
     },
     {
-      id: "dgx",
-      name: "DGX",
-      visual: "🧠",
-      destinationId: "data-center",
-      explanation: "AI computers built for data centers."
+      id: "geforce-now",
+      name: "GeForce NOW",
+      visual: "🕹️",
+      destinationId: "gaming",
+      explanation: "Play PC games through the cloud, even on less powerful devices."
     },
     {
       id: "nvidia-rtx",
       name: "NVIDIA RTX",
       visual: "🎨",
       destinationId: "professional-visualization",
-      explanation: "Graphics technology for 3D design and creative work."
+      explanation: "Graphics technology for professional 3D design and simulation."
     },
     {
-      id: "nvidia-drive",
-      name: "NVIDIA DRIVE",
+      id: "omniverse",
+      name: "NVIDIA Omniverse",
+      visual: "🧊",
+      destinationId: "professional-visualization",
+      explanation: "A platform for building and simulating 3D worlds."
+    },
+    {
+      id: "drive-agx",
+      name: "DRIVE AGX",
       visual: "🚗",
       destinationId: "automotive",
-      explanation: "Computing platform made for smart cars."
+      explanation: "The computer inside the vehicle that helps power automated driving."
+    },
+    {
+      id: "drive-hyperion",
+      name: "DRIVE Hyperion / DRIVE OS",
+      visual: "🛣️",
+      destinationId: "automotive",
+      explanation: "Hardware and software that help automated driving systems work together."
     }
   ];
 
@@ -523,28 +555,28 @@ function SegmentExplorer({
     description: string;
   }[] = [
     {
+      id: "data-center",
+      label: "Data Center",
+      visual: "☁️",
+      description: "AI and large-scale computing"
+    },
+    {
       id: "gaming",
       label: "Gaming",
       visual: "🎮",
-      description: "Gaming graphics products"
-    },
-    {
-      id: "data-center",
-      label: "Data Center",
-      visual: "🧠",
-      description: "AI and data center systems"
+      description: "Gaming graphics and cloud gaming"
     },
     {
       id: "professional-visualization",
       label: "Professional Visualization",
       visual: "🎨",
-      description: "3D design and visual work"
+      description: "Professional 3D design and simulation"
     },
     {
       id: "automotive",
       label: "Automotive",
       visual: "🚗",
-      description: "Vehicle computing platforms"
+      description: "Automated and intelligent driving"
     }
   ];
 
@@ -611,11 +643,11 @@ function SegmentExplorer({
       aria-label={`${companyName} products activity`}
     >
       <header className="iq-product-lab__header">
-        <h3>Where do NVIDIA&apos;s products fit?</h3>
+        <h3>{phase === "demo" ? "What does NVIDIA sell?" : "Now you do it."}</h3>
         <p>
           {phase === "demo"
-            ? "Pick a product and see which part of the business it belongs to."
-            : "Now you do it."}
+            ? "Pick a product and see where it belongs."
+            : "Put each product into the right market."}
         </p>
         <span>
           {phase === "demo"
