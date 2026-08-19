@@ -16573,6 +16573,305 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   }
 }
 
+.iq-problem-wall {
+  width: min(100%, 64rem);
+  margin: 0 auto;
+  padding: clamp(1rem, 2.5vw, 1.35rem);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(34, 211, 238, 0.13), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.2), transparent 46%),
+    linear-gradient(155deg, rgba(12, 11, 28, 0.82), rgba(2, 6, 23, 0.74));
+  box-shadow:
+    0 24px 72px rgba(0, 0, 0, 0.34),
+    0 0 32px rgba(139, 92, 246, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.iq-problem-wall__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.iq-problem-wall__header h3 {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.98);
+  font-family: var(--font-grotesk, inherit);
+  font-size: clamp(1.4rem, 3.2vw, 2.2rem);
+  font-weight: 860;
+  letter-spacing: -0.035em;
+}
+
+.iq-problem-wall__header p {
+  margin: 0.35rem 0 0;
+  color: rgba(226, 232, 240, 0.84);
+  font-size: 0.98rem;
+}
+
+.iq-problem-wall__header > span {
+  flex: 0 0 auto;
+  border: 1px solid rgba(118, 185, 0, 0.35);
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  background: rgba(118, 185, 0, 0.12);
+  color: rgba(190, 242, 100, 0.96);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.iq-problem-wall__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.iq-problem-card {
+  --problem-accent: #22d3ee;
+  position: relative;
+  min-height: 13.5rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--problem-accent) 34%, transparent);
+  border-radius: 1.15rem;
+  padding: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  color: rgba(248, 250, 252, 0.96);
+  background:
+    radial-gradient(circle at 50% 6%, color-mix(in srgb, var(--problem-accent) 32%, transparent), transparent 42%),
+    linear-gradient(155deg, rgba(30, 27, 75, 0.86), rgba(2, 6, 23, 0.92));
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    filter 180ms ease;
+}
+
+.iq-problem-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  filter: brightness(1.06);
+}
+
+.iq-problem-card--gaming { --problem-accent: #a3e635; }
+.iq-problem-card--creation { --problem-accent: #f472b6; }
+.iq-problem-card--ai { --problem-accent: #22d3ee; }
+.iq-problem-card--cars { --problem-accent: #60a5fa; }
+.iq-problem-card--health { --problem-accent: #34d399; }
+.iq-problem-card--weather { --problem-accent: #38bdf8; }
+.iq-problem-card--robotics { --problem-accent: #f59e0b; }
+.iq-problem-card--data { --problem-accent: #8b5cf6; }
+
+.iq-problem-card__image {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 4.8rem;
+  margin-bottom: 0.7rem;
+  border-radius: 0.9rem;
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--problem-accent) 28%, transparent), transparent 62%),
+    rgba(255, 255, 255, 0.05);
+  font-size: 2.6rem;
+}
+
+.iq-problem-card__category {
+  color: color-mix(in srgb, var(--problem-accent) 80%, white);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.iq-problem-card__problem {
+  margin-top: 0.42rem;
+  font-size: clamp(0.9rem, 1.55vw, 1.05rem);
+  font-weight: 820;
+  line-height: 1.28;
+}
+
+.iq-problem-card__hint,
+.iq-problem-card__solved {
+  margin-top: auto;
+  border-radius: 999px;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.iq-problem-card__hint {
+  color: rgba(226, 232, 240, 0.72);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.iq-problem-card__solved {
+  color: rgba(5, 46, 22, 0.95);
+  background: #76b900;
+}
+
+.iq-problem-card--solved {
+  border-color: rgba(118, 185, 0, 0.6);
+}
+
+.iq-problem-focus {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 2rem);
+  background: rgba(2, 6, 23, 0.72);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.iq-problem-focus__card {
+  --problem-accent: #22d3ee;
+  position: relative;
+  width: min(100%, 42rem);
+  min-height: min(74vh, 32rem);
+  border: 1px solid color-mix(in srgb, var(--problem-accent) 36%, transparent);
+  border-radius: 1.35rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--problem-accent) 22%, transparent), transparent 48%),
+    linear-gradient(155deg, rgba(15, 16, 42, 0.96), rgba(2, 6, 23, 0.94));
+  box-shadow:
+    0 32px 96px rgba(0, 0, 0, 0.48),
+    0 0 40px color-mix(in srgb, var(--problem-accent) 18%, transparent);
+}
+
+.iq-problem-focus__card--gaming { --problem-accent: #a3e635; }
+.iq-problem-focus__card--creation { --problem-accent: #f472b6; }
+.iq-problem-focus__card--ai { --problem-accent: #22d3ee; }
+.iq-problem-focus__card--cars { --problem-accent: #60a5fa; }
+.iq-problem-focus__card--health { --problem-accent: #34d399; }
+.iq-problem-focus__card--weather { --problem-accent: #38bdf8; }
+.iq-problem-focus__card--robotics { --problem-accent: #f59e0b; }
+.iq-problem-focus__card--data { --problem-accent: #8b5cf6; }
+
+.iq-problem-focus__close {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: rgba(248, 250, 252, 0.86);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.iq-problem-focus__front,
+.iq-problem-focus__back {
+  min-height: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  padding: clamp(1.3rem, 4vw, 2.2rem);
+}
+
+.iq-problem-focus__visual {
+  display: grid;
+  place-items: center;
+  min-height: 9rem;
+  border-radius: 1.1rem;
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--problem-accent) 30%, transparent), transparent 64%),
+    rgba(255, 255, 255, 0.05);
+  font-size: clamp(4rem, 11vw, 7rem);
+}
+
+.iq-problem-focus__category,
+.iq-problem-focus__label {
+  margin: 0;
+  color: color-mix(in srgb, var(--problem-accent) 82%, white);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.iq-problem-focus h4 {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.98);
+  font-family: var(--font-grotesk, inherit);
+  font-size: clamp(1.65rem, 4vw, 2.55rem);
+  font-weight: 860;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.iq-problem-focus__back p:not(.iq-problem-focus__label) {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.88);
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  font-weight: 560;
+  line-height: 1.55;
+}
+
+.iq-problem-focus__back span {
+  width: fit-content;
+  border: 1px solid color-mix(in srgb, var(--problem-accent) 38%, transparent);
+  border-radius: 999px;
+  padding: 0.48rem 0.7rem;
+  color: color-mix(in srgb, var(--problem-accent) 82%, white);
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.iq-problem-focus__flip {
+  width: min(100%, 22rem);
+  margin-top: 0.5rem;
+}
+
+.iq-problem-wall__cta {
+  width: min(100%, 24rem);
+  margin: 1rem auto 0;
+}
+
+.iq-problem-wall__cta:disabled {
+  background: rgba(71, 85, 105, 0.58);
+  color: rgba(15, 23, 42, 0.7);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .iq-problem-wall__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .iq-problem-wall__header {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .iq-problem-wall__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Shared Business Island learning activities ── */
 .iq-learning-activity {
   width: min(100%, 58rem);
