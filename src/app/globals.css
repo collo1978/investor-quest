@@ -16968,7 +16968,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 
 .iq-nvidia-jigsaw-stage {
   position: relative;
-  min-height: clamp(28rem, 58vh, 34rem);
+  min-height: clamp(26rem, 56vh, 32rem);
   overflow: visible;
 }
 
@@ -16977,8 +16977,8 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   left: 50%;
   top: 50%;
   z-index: 1;
-  width: min(44vw, 30rem);
-  max-width: calc(100% - 18rem);
+  width: min(52vw, 34rem);
+  max-width: calc(100% - 16rem);
   padding: clamp(0.65rem, 1.5vw, 0.9rem);
   transform: translate(-50%, -48%);
 }
@@ -16998,7 +16998,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece {
   position: absolute;
   z-index: 3;
-  width: clamp(6.4rem, 11vw, 8.9rem);
+  width: clamp(7.2rem, 12vw, 10rem);
   transform: rotate(var(--jigsaw-rotation, 0deg));
   pointer-events: auto;
 }
@@ -17053,6 +17053,71 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   background:
     radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08), transparent 58%),
     rgba(15, 23, 42, 0.5);
+}
+
+.iq-nvidia-jigsaw-game {
+  --nvidia-jigsaw-shape: polygon(
+    0 0,
+    40% 0,
+    40% 9%,
+    60% 9%,
+    60% 0,
+    100% 0,
+    100% 40%,
+    91% 40%,
+    91% 60%,
+    100% 60%,
+    100% 100%,
+    60% 100%,
+    60% 91%,
+    40% 91%,
+    40% 100%,
+    0 100%,
+    0 60%,
+    9% 60%,
+    9% 40%,
+    0 40%
+  );
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw__board {
+  gap: 0;
+  overflow: hidden;
+  border-color: rgba(103, 232, 249, 0.25);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.12), transparent 62%),
+    rgba(2, 6, 23, 0.82);
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece,
+.iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot,
+.iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot__logo {
+  clip-path: var(--nvidia-jigsaw-shape);
+}
+
+.iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot {
+  margin: -1px;
+  border-radius: 0;
+  border-color: rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.46);
+}
+
+.iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot::before,
+.iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot::after,
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece::before,
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece::after {
+  display: none;
+}
+
+.iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot__empty {
+  inset: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012));
+}
+
+.iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot__logo {
+  background-color: transparent;
 }
 
 .iq-segment-explorer {

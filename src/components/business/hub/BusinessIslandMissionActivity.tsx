@@ -237,7 +237,7 @@ function NvidiaLogoJigsaw({
     }
     setPlacedIds((prev) => [...prev, pieceId]);
     setSelectedPieceId(null);
-    setMessage(`${piece.term} placed. The ${companyName} logo is forming.`);
+    setMessage("");
   };
 
   const handleDrop = (slot: number, event: DragEvent<HTMLButtonElement>) => {
@@ -262,7 +262,7 @@ function NvidiaLogoJigsaw({
       </header>
 
       <p className="iq-nvidia-jigsaw-game__message" aria-live="polite">
-        {complete ? "Logo complete. Moving to your answer..." : message}
+        {complete ? "" : message}
       </p>
 
       <div className="iq-nvidia-jigsaw-stage">
