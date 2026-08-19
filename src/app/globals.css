@@ -16666,8 +16666,9 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   position: relative;
   display: grid;
   gap: 0.35rem;
-  width: min(100%, 9.5rem);
-  min-height: 5.4rem;
+  width: min(100%, 7.5rem);
+  min-height: 0;
+  aspect-ratio: 1 / 1;
   border: 1px solid rgba(103, 232, 249, 0.24);
   border-radius: 1rem;
   padding: 0.75rem;
@@ -16757,8 +16758,9 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-nvidia-jigsaw__board {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  min-height: 12rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(100%, 27rem);
+  min-height: 0;
   border: 1px solid rgba(139, 92, 246, 0.24);
   border-radius: 1.1rem;
   padding: 2.35rem 0.9rem 0.9rem;
@@ -16781,7 +16783,8 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 
 .iq-nvidia-jigsaw-slot {
   position: relative;
-  min-height: 9.5rem;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
   border: 1px dashed rgba(148, 163, 184, 0.26);
   border-radius: 1rem;
   background: rgba(15, 23, 42, 0.55);
@@ -16839,7 +16842,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   position: absolute;
   inset: 0;
   background-repeat: no-repeat;
-  background-size: 500% 100%;
+  background-size: 300% 200%;
   background-color: rgba(118, 185, 0, 0.96);
 }
 
@@ -17249,11 +17252,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   }
 
   .iq-nvidia-jigsaw__board {
-    grid-template-columns: 1fr;
-  }
-
-  .iq-nvidia-jigsaw-slot {
-    min-height: 5.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

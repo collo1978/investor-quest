@@ -134,7 +134,7 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     analogy:
       "Like a kitchen with hundreds of cooks working together instead of one cook doing every job.",
     slot: 0,
-    bgPosition: "0% 50%"
+    bgPosition: "0% 0%"
   },
   {
     id: "cuda",
@@ -144,7 +144,7 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     analogy:
       "Like giving builders a shared set of tools so they can use a powerful machine without inventing every tool themselves.",
     slot: 1,
-    bgPosition: "25% 50%"
+    bgPosition: "50% 0%"
   },
   {
     id: "accelerated-computing",
@@ -154,7 +154,7 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     analogy:
       "Like using an express lane for the hardest jobs instead of making every job wait in the same slow line.",
     slot: 2,
-    bgPosition: "50% 50%"
+    bgPosition: "100% 0%"
   },
   {
     id: "data-center-systems",
@@ -164,7 +164,7 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     analogy:
       "Like the engine room behind a huge app, doing the heavy work users never see.",
     slot: 3,
-    bgPosition: "75% 50%"
+    bgPosition: "0% 100%"
   },
   {
     id: "full-stack-computing",
@@ -174,7 +174,17 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     analogy:
       "Like buying the whole game console, controller, online service and game library together instead of separate parts that may not fit.",
     slot: 4,
-    bgPosition: "100% 50%"
+    bgPosition: "50% 100%"
+  },
+  {
+    id: "ai-software",
+    term: "AI Software",
+    explanation:
+      "AI software helps customers train, run and manage AI models using NVIDIA's hardware and tools.",
+    analogy:
+      "Like the apps and operating system that make a powerful phone useful instead of just a piece of hardware.",
+    slot: 5,
+    bgPosition: "100% 100%"
   }
 ] as const;
 
