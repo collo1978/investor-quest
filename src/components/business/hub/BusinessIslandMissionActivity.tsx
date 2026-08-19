@@ -283,6 +283,9 @@ function NvidiaLogoJigsaw({
         </div>
 
         <div className="iq-nvidia-jigsaw__board" aria-label="Empty NVIDIA logo puzzle board">
+          <span className="iq-nvidia-jigsaw__board-label">
+            Build the NVIDIA logo here
+          </span>
           {NVIDIA_LOGO_PIECES.map((piece, slot) => {
             const placedPiece = NVIDIA_LOGO_PIECES.find(
               (item) => item.slot === slot && placedSet.has(item.id)
