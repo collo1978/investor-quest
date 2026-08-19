@@ -16916,7 +16916,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 }
 
 .iq-nvidia-jigsaw-game {
-  width: min(100%, 66rem);
+  width: min(100%, 72rem);
   margin: 0 auto;
   padding: clamp(0.85rem, 2vw, 1.15rem);
   border: 1px solid rgba(139, 92, 246, 0.28);
@@ -16968,7 +16968,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 
 .iq-nvidia-jigsaw-stage {
   position: relative;
-  min-height: clamp(26rem, 56vh, 32rem);
+  min-height: clamp(34rem, 66vh, 42rem);
   overflow: visible;
 }
 
@@ -16977,8 +16977,8 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   left: 50%;
   top: 50%;
   z-index: 1;
-  width: min(52vw, 34rem);
-  max-width: calc(100% - 16rem);
+  width: min(68vw, 48rem);
+  max-width: calc(100% - 22rem);
   padding: clamp(0.65rem, 1.5vw, 0.9rem);
   transform: translate(-50%, -48%);
 }
@@ -16998,39 +16998,39 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece {
   position: absolute;
   z-index: 3;
-  width: clamp(7.2rem, 12vw, 10rem);
+  width: clamp(7.8rem, 11vw, 10.25rem);
   transform: rotate(var(--jigsaw-rotation, 0deg));
   pointer-events: auto;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(1) {
-  left: 4%;
-  top: 8%;
+  left: 0;
+  top: 4%;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(2) {
-  right: 9%;
-  top: 6%;
+  right: 0;
+  top: 4%;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(3) {
-  left: 0%;
-  top: 42%;
+  left: 0;
+  top: 36%;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(4) {
-  right: 1%;
-  top: 42%;
+  right: 0;
+  top: 36%;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(5) {
-  left: 12%;
-  bottom: 3%;
+  left: 0;
+  top: 68%;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(6) {
-  right: 13%;
-  bottom: 2%;
+  right: 0;
+  top: 68%;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:hover:not(:disabled),

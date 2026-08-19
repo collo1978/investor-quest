@@ -247,7 +247,7 @@ function JigsawPieceSvg({
           y={piece.row * -100}
           width="360"
           height="200"
-          preserveAspectRatio="none"
+          preserveAspectRatio="xMidYMid meet"
           clipPath={`url(#${clipId})`}
         />
       ) : empty ? (
@@ -348,7 +348,7 @@ function NvidiaLogoJigsaw({
     >
       <header className="iq-nvidia-jigsaw-game__header">
         <h3>What does NVIDIA actually do?</h3>
-        <p>Click each piece to learn. Then put the pieces together.</p>
+        <p>Discover each piece of NVIDIA&apos;s business, then put the picture together.</p>
         <span>{placedIds.length}/6 pieces placed</span>
       </header>
 
