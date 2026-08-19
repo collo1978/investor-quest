@@ -16915,6 +16915,146 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   margin-top: 0.2rem;
 }
 
+.iq-nvidia-jigsaw-game {
+  width: min(100%, 66rem);
+  margin: 0 auto;
+  padding: clamp(0.85rem, 2vw, 1.15rem);
+  border: 1px solid rgba(139, 92, 246, 0.28);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(34, 211, 238, 0.14), transparent 42%),
+    radial-gradient(circle at 92% 8%, rgba(139, 92, 246, 0.18), transparent 44%),
+    rgba(2, 6, 23, 0.68);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.iq-nvidia-jigsaw-game__header {
+  display: grid;
+  gap: 0.25rem;
+  max-width: 46rem;
+  margin-bottom: 0.35rem;
+}
+
+.iq-nvidia-jigsaw-game__header h3 {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.98);
+  font-family: var(--font-grotesk, inherit);
+  font-size: clamp(1.5rem, 3vw, 2.35rem);
+  font-weight: 860;
+  letter-spacing: -0.035em;
+}
+
+.iq-nvidia-jigsaw-game__header p {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.86);
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  line-height: 1.45;
+}
+
+.iq-nvidia-jigsaw-game__header span,
+.iq-nvidia-jigsaw-game__message {
+  color: rgba(103, 232, 249, 0.92);
+  font-size: 0.8rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+.iq-nvidia-jigsaw-game__message {
+  min-height: 1.2rem;
+  margin: 0.45rem 0 0;
+}
+
+.iq-nvidia-jigsaw-stage {
+  position: relative;
+  min-height: clamp(28rem, 58vh, 34rem);
+  overflow: visible;
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw__board {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: min(44vw, 30rem);
+  max-width: calc(100% - 18rem);
+  padding: clamp(0.65rem, 1.5vw, 0.9rem);
+  transform: translate(-50%, -48%);
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw__pieces {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: block;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  pointer-events: none;
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece {
+  position: absolute;
+  z-index: 3;
+  width: clamp(6.4rem, 11vw, 8.9rem);
+  transform: rotate(var(--jigsaw-rotation, 0deg));
+  pointer-events: auto;
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(1) {
+  left: 4%;
+  top: 8%;
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(2) {
+  right: 9%;
+  top: 6%;
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(3) {
+  left: 0%;
+  top: 42%;
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(4) {
+  right: 1%;
+  top: 42%;
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(5) {
+  left: 12%;
+  bottom: 3%;
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(6) {
+  right: 13%;
+  bottom: 2%;
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:hover:not(:disabled),
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece--selected {
+  transform: rotate(var(--jigsaw-rotation, 0deg)) translateY(-4px) scale(1.03);
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece--placed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot {
+  border-radius: 1.05rem;
+}
+
+.iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot__empty {
+  inset: 0.35rem;
+  border-radius: 0.75rem;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08), transparent 58%),
+    rgba(15, 23, 42, 0.5);
+}
+
 .iq-segment-explorer {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);

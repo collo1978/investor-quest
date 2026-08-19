@@ -1,8 +1,8 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import type { DragEvent, ReactNode } from "react";
-import { useMemo, useState } from "react";
+import type { CSSProperties, DragEvent, ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { BusinessIslandValuePropCardFlip } from "@/components/business/hub/BusinessIslandValuePropCardFlip";
 import type { InvestorNotebookQuestionId } from "@/lib/business/businessIslandInvestorNotebook";
@@ -195,6 +195,7 @@ function NvidiaLogoJigsaw({
   companyName: string;
   onComplete: () => void;
 }) {
+  const reduceMotion = useReducedMotion();
   const [activePieceId, setActivePieceId] = useState<string | null>(null);
   const [explainedIds, setExplainedIds] = useState<readonly string[]>([]);
   const [placedIds, setPlacedIds] = useState<readonly string[]>([]);
@@ -207,6 +208,12 @@ function NvidiaLogoJigsaw({
   const activePiece =
     NVIDIA_LOGO_PIECES.find((piece) => piece.id === activePieceId) ?? null;
   const complete = placedIds.length === NVIDIA_LOGO_PIECES.length;
+
+  useEffect(() => {
+    if (!complete) return;
+    const t = window.setTimeout(onComplete, 1200);
+    return () => window.clearTimeout(t);
+  }, [complete, onComplete]);
 
   const markExplained = (pieceId: string) => {
     setExplainedIds((prev) =>
@@ -225,7 +232,7 @@ function NvidiaLogoJigsaw({
       return;
     }
     if (piece.slot !== slot) {
-      setMessage("That piece belongs somewhere else. Try another position.");
+      setMessage("Not quite — try again.");
       return;
     }
     setPlacedIds((prev) => [...prev, pieceId]);
@@ -240,62 +247,26 @@ function NvidiaLogoJigsaw({
   };
 
   return (
-    <ActivityShell
-      eyebrow="Jigsaw Puzzle"
-      title={`Build what ${companyName} does`}
-      copy="Each piece teaches one idea behind the business. Understand the term, place the piece, and reveal the logo as you go."
-      progressLabel={`${placedIds.length}/${NVIDIA_LOGO_PIECES.length} pieces placed`}
-      complete={complete}
-      completeLabel="Explain what NVIDIA does →"
-      onComplete={onComplete}
+    <motion.section
+      className="iq-nvidia-jigsaw-game"
+      initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+      aria-label={`What ${companyName} actually does puzzle`}
     >
-      <p className="iq-learning-activity__hint">{message}</p>
-      <div className="iq-nvidia-jigsaw">
-        <div className="iq-nvidia-jigsaw__pieces" aria-label="Jigsaw pieces">
-          {NVIDIA_LOGO_PIECES.map((piece) => {
-            const explained = explainedSet.has(piece.id);
-            const placed = placedSet.has(piece.id);
-            return (
-              <button
-                key={piece.id}
-                type="button"
-                className={[
-                  "iq-nvidia-jigsaw-piece",
-                  explained ? "iq-nvidia-jigsaw-piece--ready" : "",
-                  placed ? "iq-nvidia-jigsaw-piece--placed" : "",
-                  selectedPieceId === piece.id ? "iq-nvidia-jigsaw-piece--selected" : ""
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                draggable={explained && !placed}
-                disabled={placed}
-                onDragStart={(event) => {
-                  event.dataTransfer.setData("text/plain", piece.id);
-                  setSelectedPieceId(piece.id);
-                }}
-                onClick={() => {
-                  if (placed) return;
-                  if (!explained) {
-                    setActivePieceId(piece.id);
-                    return;
-                  }
-                  setSelectedPieceId(piece.id);
-                  setMessage("Choose the matching slot on the puzzle board.");
-                }}
-              >
-                <span className="iq-nvidia-jigsaw-piece__term">{piece.term}</span>
-                <span className="iq-nvidia-jigsaw-piece__mark">
-                  {explained ? "Ready" : "?"}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+      <header className="iq-nvidia-jigsaw-game__header">
+        <h3>What does NVIDIA actually do?</h3>
+        <p>Click each piece to learn. Then put the pieces together.</p>
+        <span>{placedIds.length}/6 pieces placed</span>
+      </header>
 
+      <p className="iq-nvidia-jigsaw-game__message" aria-live="polite">
+        {complete ? "Logo complete. Moving to your answer..." : message}
+      </p>
+
+      <div className="iq-nvidia-jigsaw-stage">
         <div className="iq-nvidia-jigsaw__board" aria-label="Empty NVIDIA logo puzzle board">
-          <span className="iq-nvidia-jigsaw__board-label">
-            Build the NVIDIA logo here
-          </span>
           {NVIDIA_LOGO_PIECES.map((piece, slot) => {
             const placedPiece = NVIDIA_LOGO_PIECES.find(
               (item) => item.slot === slot && placedSet.has(item.id)
@@ -337,6 +308,50 @@ function NvidiaLogoJigsaw({
             );
           })}
         </div>
+
+        <div className="iq-nvidia-jigsaw__pieces" aria-label="Jigsaw pieces">
+          {NVIDIA_LOGO_PIECES.map((piece) => {
+            const explained = explainedSet.has(piece.id);
+            const placed = placedSet.has(piece.id);
+            return (
+              <button
+                key={piece.id}
+                type="button"
+                className={[
+                  "iq-nvidia-jigsaw-piece",
+                  explained ? "iq-nvidia-jigsaw-piece--ready" : "",
+                  placed ? "iq-nvidia-jigsaw-piece--placed" : "",
+                  selectedPieceId === piece.id ? "iq-nvidia-jigsaw-piece--selected" : ""
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                style={
+                  {
+                    "--jigsaw-rotation": `${[-8, 6, -5, 7, -7, 5][piece.slot]}deg`
+                  } as CSSProperties
+                }
+                draggable={explained && !placed}
+                disabled={placed}
+                onDragStart={(event) => {
+                  event.dataTransfer.setData("text/plain", piece.id);
+                  setSelectedPieceId(piece.id);
+                }}
+                onClick={() => {
+                  if (placed) return;
+                  if (!explained) {
+                    setActivePieceId(piece.id);
+                    return;
+                  }
+                  setSelectedPieceId(piece.id);
+                  setMessage("Choose the matching slot on the puzzle board.");
+                }}
+              >
+                <span className="iq-nvidia-jigsaw-piece__term">{piece.term}</span>
+                <span className="iq-nvidia-jigsaw-piece__mark">?</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {activePiece ? (
@@ -347,7 +362,7 @@ function NvidiaLogoJigsaw({
               {activePiece.explanation}
             </p>
             <div className="iq-nvidia-jigsaw-modal__analogy">
-              <span>Analogy</span>
+              <span>💡 Think of it like...</span>
               <p>{activePiece.analogy}</p>
             </div>
             <button
@@ -355,12 +370,12 @@ function NvidiaLogoJigsaw({
               className="iq-hq-mission__primary iq-nvidia-jigsaw-modal__cta"
               onClick={() => markExplained(activePiece.id)}
             >
-              Got it. Place this piece →
+              GOT IT
             </button>
           </div>
         </div>
       ) : null}
-    </ActivityShell>
+    </motion.section>
   );
 }
 
