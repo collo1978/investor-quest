@@ -234,12 +234,12 @@ function JigsawPieceSvg({
       </defs>
       {logo ? (
         <image
-          href="/logos/companies/nvda.svg"
+          href="/images/business-island/nvidia-jigsaw-logo.svg"
           x={piece.col * -120}
           y={piece.row * -100}
           width="360"
           height="200"
-          preserveAspectRatio="xMidYMid meet"
+          preserveAspectRatio="none"
           clipPath={`url(#${clipId})`}
         />
       ) : empty ? (
