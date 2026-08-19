@@ -132,9 +132,9 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     id: "gpus",
     term: "GPUs",
     explanation:
-      "NVIDIA makes powerful GPU chips that help customers run graphics, AI and scientific computing much faster.",
+      "NVIDIA designs GPU chips used for graphics, AI, scientific computing and other specialised computing work.",
     analogy:
-      "Like a kitchen with hundreds of cooks working together instead of one cook doing every job.",
+      "Like a specialised tool in a workshop, built for a certain kind of heavy-duty task.",
     slot: 0,
     col: 0,
     row: 0,
@@ -145,9 +145,9 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     id: "cuda",
     term: "CUDA",
     explanation:
-      "NVIDIA provides CUDA so developers can use NVIDIA chips to build AI, data and computing applications.",
+      "NVIDIA provides CUDA, a software platform developers use to write programs for NVIDIA GPUs.",
     analogy:
-      "Like giving builders a shared set of tools so they can use a powerful machine without inventing every tool themselves.",
+      "Like a common language that tells a specialised machine what instructions to follow.",
     slot: 1,
     col: 1,
     row: 0,
@@ -158,9 +158,9 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     id: "accelerated-computing",
     term: "Accelerated Computing",
     explanation:
-      "NVIDIA sells hardware and software that speed up hard computing jobs ordinary computers struggle to finish quickly.",
+      "NVIDIA builds specialised computing technology used for demanding work such as AI, scientific computing and graphics.",
     analogy:
-      "Like using an express lane for the hardest jobs instead of making every job wait in the same slow line.",
+      "Using specialised equipment built for heavy-duty jobs rather than one general-purpose tool for everything.",
     slot: 2,
     col: 2,
     row: 0,
@@ -171,9 +171,9 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     id: "data-center-systems",
     term: "Data Center Systems",
     explanation:
-      "NVIDIA sells complete computing systems and networking technology that cloud companies and data centers use to run AI and other demanding workloads.",
+      "NVIDIA builds computing systems, servers and networking technology used in data centers for AI and large-scale computing.",
     analogy:
-      "The engine room behind a huge digital service, doing the heavy computing work users never see.",
+      "The engine room inside a large digital building, full of machines doing the computing work behind the scenes.",
     slot: 3,
     col: 0,
     row: 1,
@@ -184,9 +184,9 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     id: "full-stack-computing",
     term: "Full-Stack Computing",
     explanation:
-      "NVIDIA provides a full platform that combines chips, systems, networking, software and tools customers can use together.",
+      "NVIDIA provides several layers of computing technology, including chips, systems, networking, software and developer tools.",
     analogy:
-      "Like buying the whole game console, controller, online service and game library together instead of separate parts that may not fit.",
+      "Like seeing the whole stack of parts inside a machine, from the engine to the controls.",
     slot: 4,
     col: 1,
     row: 1,
@@ -197,9 +197,9 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     id: "ai-software",
     term: "AI Software",
     explanation:
-      "NVIDIA provides software that helps customers build, train, run and manage AI applications using NVIDIA hardware.",
+      "NVIDIA provides software used to build, train, run and manage AI applications on NVIDIA computing platforms.",
     analogy:
-      "Like the apps and operating system that make a powerful phone useful instead of just a piece of hardware.",
+      "Like the control system and programs that tell a powerful machine what kind of work to do.",
     slot: 5,
     col: 2,
     row: 1,
