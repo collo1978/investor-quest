@@ -16982,7 +16982,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   top: 50%;
   z-index: 1;
   width: min(70vw, 42.5rem);
-  max-width: calc(100% - 23rem);
+  max-width: calc(100% - 16rem);
   padding: clamp(0.65rem, 1.5vw, 0.9rem);
   transform: translate(-50%, -48%);
 }
