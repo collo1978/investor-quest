@@ -466,91 +466,300 @@ function SegmentExplorer({
   companyName: string;
   onComplete: () => void;
 }) {
-  const products = [
-    { id: "h100", label: "AI GPU systems", segment: "data-center" },
-    { id: "cuda", label: "CUDA software", segment: "data-center" },
-    { id: "geforce", label: "GeForce RTX", segment: "gaming" },
-    { id: "omniverse", label: "Omniverse tools", segment: "pro-visual" }
-  ] as const;
-  const segments = [
-    { id: "data-center", label: "Data Center" },
-    { id: "gaming", label: "Gaming" },
-    { id: "pro-visual", label: "Professional Visualization" }
-  ] as const;
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [matchedIds, setMatchedIds] = useState<readonly string[]>([]);
-  const [message, setMessage] = useState("Select a product, then choose its segment.");
-  const matchedSet = useMemo(() => new Set(matchedIds), [matchedIds]);
-  const complete = matchedIds.length === products.length;
-
-  const selected = products.find((product) => product.id === selectedId);
-
-  const assignSegment = (segmentId: string) => {
-    if (!selected || matchedSet.has(selected.id)) return;
-    if (selected.segment !== segmentId) {
-      setMessage(`${selected.label} belongs somewhere else. Try another segment.`);
-      return;
-    }
-    setMatchedIds((prev) => [...prev, selected.id]);
-    setSelectedId(null);
-    setMessage(`${selected.label} locked into ${segments.find((s) => s.id === segmentId)?.label}.`);
+  type ProductId =
+    | "geforce-rtx"
+    | "nvidia-dgx"
+    | "nvidia-rtx"
+    | "nvidia-drive"
+    | "cuda";
+  type DestinationId =
+    | "gaming"
+    | "data-center"
+    | "professional-visualization"
+    | "automotive"
+    | "platform-software";
+  type Product = {
+    id: ProductId;
+    name: string;
+    visual: string;
+    destinationId: DestinationId;
+    explanation: string;
   };
 
+  const products: readonly Product[] = [
+    {
+      id: "geforce-rtx",
+      name: "GeForce RTX",
+      visual: "🎮",
+      destinationId: "gaming",
+      explanation: "Powerful chips made for gaming."
+    },
+    {
+      id: "nvidia-dgx",
+      name: "NVIDIA DGX",
+      visual: "🧠",
+      destinationId: "data-center",
+      explanation: "AI computers built for data centers."
+    },
+    {
+      id: "nvidia-rtx",
+      name: "NVIDIA RTX",
+      visual: "🎨",
+      destinationId: "professional-visualization",
+      explanation: "Graphics technology for 3D design and creative work."
+    },
+    {
+      id: "nvidia-drive",
+      name: "NVIDIA DRIVE",
+      visual: "🚗",
+      destinationId: "automotive",
+      explanation: "Computing platform made for smart cars."
+    },
+    {
+      id: "cuda",
+      name: "CUDA",
+      visual: "⚙️",
+      destinationId: "platform-software",
+      explanation: "Software tools used across NVIDIA chips and systems."
+    }
+  ];
+
+  const destinations: readonly {
+    id: DestinationId;
+    label: string;
+    visual: string;
+    description: string;
+  }[] = [
+    {
+      id: "gaming",
+      label: "Gaming",
+      visual: "🎮",
+      description: "Games and player graphics"
+    },
+    {
+      id: "data-center",
+      label: "Data Center",
+      visual: "🧠",
+      description: "AI servers and big computing systems"
+    },
+    {
+      id: "professional-visualization",
+      label: "Professional Visualization",
+      visual: "🎨",
+      description: "3D design and creative work"
+    },
+    {
+      id: "automotive",
+      label: "Automotive",
+      visual: "🚗",
+      description: "Smart car computing"
+    },
+    {
+      id: "platform-software",
+      label: "Platform Software",
+      visual: "⚙️",
+      description: "Tools used across NVIDIA platforms"
+    }
+  ];
+
+  const [phase, setPhase] = useState<"demo" | "challenge">("demo");
+  const [demoPlacedIds, setDemoPlacedIds] = useState<readonly ProductId[]>([]);
+  const [activeDemoId, setActiveDemoId] = useState<ProductId | null>(null);
+  const [challengePlacedIds, setChallengePlacedIds] = useState<readonly ProductId[]>([]);
+  const [selectedId, setSelectedId] = useState<ProductId | null>(null);
+  const [message, setMessage] = useState("");
+  const demoPlacedSet = useMemo(() => new Set(demoPlacedIds), [demoPlacedIds]);
+  const challengePlacedSet = useMemo(
+    () => new Set(challengePlacedIds),
+    [challengePlacedIds]
+  );
+  const complete = challengePlacedIds.length === products.length;
+
+  const activateDemo = (product: Product) => {
+    if (phase !== "demo" || demoPlacedSet.has(product.id)) return;
+    setActiveDemoId(product.id);
+    setDemoPlacedIds((prev) => [...prev, product.id]);
+    setMessage(`${product.name}: ${product.explanation}`);
+  };
+
+  const startChallenge = () => {
+    setPhase("challenge");
+    setSelectedId(null);
+    setMessage("Now you do it.");
+  };
+
+  const placeChallengeProduct = (productId: ProductId, destinationId: DestinationId) => {
+    const product = products.find((item) => item.id === productId);
+    if (!product || challengePlacedSet.has(productId)) return;
+    if (product.destinationId !== destinationId) {
+      setSelectedId(null);
+      setMessage("Not quite. Try that product somewhere else.");
+      return;
+    }
+    setChallengePlacedIds((prev) => [...prev, productId]);
+    setSelectedId(null);
+    setMessage(`${product.name} placed.`);
+  };
+
+  const handleDrop = (
+    destinationId: DestinationId,
+    event: DragEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+    const productId = event.dataTransfer.getData("text/plain") as ProductId;
+    if (productId) placeChallengeProduct(productId, destinationId);
+  };
+
+  const placedProductsForDestination = (
+    destinationId: DestinationId,
+    ids: ReadonlySet<ProductId>
+  ) => products.filter((product) => product.destinationId === destinationId && ids.has(product.id));
+
   return (
-    <ActivityShell
-      eyebrow="Segment Explorer"
-      title={`Sort ${companyName}'s products`}
-      copy="Tap a product crate, then tap the segment it belongs to. This shows how products connect to the business model."
-      progressLabel={`${matchedIds.length}/${products.length} products matched`}
-      complete={complete}
-      completeLabel="Explain the product mix →"
-      onComplete={onComplete}
+    <motion.section
+      className="iq-product-lab"
+      initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+      aria-label={`${companyName} products activity`}
     >
-      <p className="iq-learning-activity__hint">{message}</p>
-      <div className="iq-segment-explorer">
-        <div className="iq-segment-explorer__products">
-          {products.map((product) => (
+      <header className="iq-product-lab__header">
+        <h3>What does NVIDIA sell?</h3>
+        <p>
+          {phase === "demo"
+            ? "Pick a product and watch where it belongs."
+            : "Now you do it."}
+        </p>
+        <span>
+          {phase === "demo"
+            ? `${demoPlacedIds.length} / ${products.length} PRODUCTS PLACED`
+            : `${challengePlacedIds.length} / ${products.length} PRODUCTS PLACED`}
+        </span>
+      </header>
+
+      <div className="iq-product-lab__shelf">
+        {products.map((product) => {
+          const placed =
+            phase === "demo"
+              ? demoPlacedSet.has(product.id)
+              : challengePlacedSet.has(product.id);
+          return (
             <button
               key={product.id}
               type="button"
               className={[
-                "iq-segment-product",
-                selectedId === product.id ? "iq-segment-product--selected" : "",
-                matchedSet.has(product.id) ? "iq-segment-product--matched" : ""
+                "iq-product-token",
+                placed ? "iq-product-token--placed" : "",
+                selectedId === product.id ? "iq-product-token--selected" : ""
               ]
                 .filter(Boolean)
                 .join(" ")}
-              disabled={matchedSet.has(product.id)}
-              onClick={() => setSelectedId(product.id)}
+              draggable={phase === "challenge" && !placed}
+              disabled={placed}
+              onDragStart={(event) => {
+                event.dataTransfer.setData("text/plain", product.id);
+                setSelectedId(product.id);
+              }}
+              onClick={() => {
+                if (phase === "demo") {
+                  activateDemo(product);
+                  return;
+                }
+                if (!placed) setSelectedId(product.id);
+              }}
             >
-              <span>Product crate</span>
-              {product.label}
+              <span className="iq-product-token__visual" aria-hidden>
+                {product.visual}
+              </span>
+              <span>{product.name}</span>
             </button>
-          ))}
-        </div>
-        <div className="iq-segment-explorer__segments">
-          {segments.map((segment) => (
-            <button
-              key={segment.id}
-              type="button"
-              className="iq-segment-bin"
-              onClick={() => assignSegment(segment.id)}
-            >
-              <span>{segment.label}</span>
-              <small>
-                {products
-                  .filter(
-                    (product) =>
-                      product.segment === segment.id && matchedSet.has(product.id)
-                  )
-                  .map((product) => product.label)
-                  .join(", ") || "Awaiting match"}
-              </small>
-            </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
-    </ActivityShell>
+
+      <div className="iq-product-lab__destinations">
+        {destinations.map((destination) => {
+          const demoProducts = placedProductsForDestination(
+            destination.id,
+            demoPlacedSet
+          );
+          const challengeProducts = placedProductsForDestination(
+            destination.id,
+            challengePlacedSet
+          );
+          const displayedProducts = phase === "demo" ? demoProducts : challengeProducts;
+          return (
+            <button
+              key={destination.id}
+              type="button"
+              className="iq-product-destination"
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => handleDrop(destination.id, event)}
+              onClick={() => {
+                if (phase === "challenge" && selectedId) {
+                  placeChallengeProduct(selectedId, destination.id);
+                }
+              }}
+            >
+              <span className="iq-product-destination__visual" aria-hidden>
+                {destination.visual}
+              </span>
+              <span className="iq-product-destination__label">
+                {destination.label}
+              </span>
+              <span className="iq-product-destination__copy">
+                {destination.description}
+              </span>
+              <span className="iq-product-destination__landing">
+                {displayedProducts.map((product) => (
+                  <motion.span
+                    key={product.id}
+                    className={[
+                      "iq-product-landed",
+                      activeDemoId === product.id ? "iq-product-landed--active" : ""
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    initial={phase === "demo" ? { opacity: 0, y: -90, scale: 0.86 } : false}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <strong>
+                      {product.name}
+                      {phase === "challenge" ? " ✓" : ""}
+                    </strong>
+                    <small>{product.explanation}</small>
+                  </motion.span>
+                ))}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {message ? <p className="iq-product-lab__message">{message}</p> : null}
+
+      {phase === "demo" && demoPlacedIds.length === products.length ? (
+        <button
+          type="button"
+          className="iq-hq-mission__primary iq-product-lab__cta"
+          onClick={startChallenge}
+        >
+          Start the challenge →
+        </button>
+      ) : null}
+
+      {phase === "challenge" && complete ? (
+        <button
+          type="button"
+          className="iq-hq-mission__primary iq-product-lab__cta"
+          onClick={onComplete}
+        >
+          Continue to answer →
+        </button>
+      ) : null}
+    </motion.section>
   );
 }
 
