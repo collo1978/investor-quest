@@ -13,6 +13,7 @@ import { useGame } from "@/components/GameProvider";
 import { useDemoStory } from "@/components/demo/DemoStoryProvider";
 
 import { DemoControlsPanel } from "@/components/demo/DemoControlsPanel";
+import { isDemoControlsEnabled } from "@/lib/demo/demoControlsEnabled";
 
 import {
 
