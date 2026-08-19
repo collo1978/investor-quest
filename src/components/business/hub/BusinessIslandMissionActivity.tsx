@@ -696,6 +696,10 @@ function SegmentExplorer({
         })}
       </div>
 
+      <p className="iq-product-lab__segment-label">
+        NVIDIA&apos;S 4 PRODUCT SEGMENTS
+      </p>
+
       <div className="iq-product-lab__destinations">
         {destinations.map((destination) => {
           const demoProducts = placedProductsForDestination(

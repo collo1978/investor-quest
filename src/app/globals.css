@@ -17993,6 +17993,15 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.iq-product-lab__segment-label {
+  margin: 0 0 0.55rem;
+  color: rgba(103, 232, 249, 0.78);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
 .iq-product-token {
   display: inline-flex;
   align-items: center;
