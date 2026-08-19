@@ -209,8 +209,8 @@ export function BusinessIslandValuePropCardFlip({
                     ✓ EXPLORED{bonusAwarded ? " +XP" : ""}
                   </span>
                 ) : (
-                  <span className="iq-problem-card__hint">
-                    SEE NVIDIA&apos;S SOLUTION →
+                  <span className="iq-problem-card__reveal" aria-hidden>
+                    ?
                   </span>
                 )}
               </button>

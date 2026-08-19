@@ -16747,6 +16747,37 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.iq-problem-card__reveal {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  margin-top: auto;
+  border: 1px solid color-mix(in srgb, var(--problem-accent) 46%, transparent);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--problem-accent) 28%, transparent), rgba(255, 255, 255, 0.04));
+  color: color-mix(in srgb, var(--problem-accent) 82%, white);
+  font-size: 1.85rem;
+  font-weight: 950;
+  line-height: 1;
+  box-shadow:
+    0 0 22px color-mix(in srgb, var(--problem-accent) 28%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+}
+
+.iq-problem-card:hover .iq-problem-card__reveal {
+  transform: scale(1.08) rotate(4deg);
+  filter: brightness(1.1);
+  box-shadow:
+    0 0 34px color-mix(in srgb, var(--problem-accent) 42%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
 .iq-problem-card__solved {
   color: rgba(5, 46, 22, 0.95);
   background: #76b900;
