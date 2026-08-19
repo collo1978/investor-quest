@@ -469,16 +469,14 @@ function SegmentExplorer({
   const reduceMotion = useReducedMotion();
   type ProductId =
     | "geforce-rtx"
-    | "nvidia-dgx"
+    | "dgx"
     | "nvidia-rtx"
-    | "nvidia-drive"
-    | "cuda";
+    | "nvidia-drive";
   type DestinationId =
     | "gaming"
     | "data-center"
     | "professional-visualization"
-    | "automotive"
-    | "platform-software";
+    | "automotive";
   type Product = {
     id: ProductId;
     name: string;
@@ -496,8 +494,8 @@ function SegmentExplorer({
       explanation: "Powerful chips made for gaming."
     },
     {
-      id: "nvidia-dgx",
-      name: "NVIDIA DGX",
+      id: "dgx",
+      name: "DGX",
       visual: "🧠",
       destinationId: "data-center",
       explanation: "AI computers built for data centers."
@@ -515,13 +513,6 @@ function SegmentExplorer({
       visual: "🚗",
       destinationId: "automotive",
       explanation: "Computing platform made for smart cars."
-    },
-    {
-      id: "cuda",
-      name: "CUDA",
-      visual: "⚙️",
-      destinationId: "platform-software",
-      explanation: "Software tools used across NVIDIA chips and systems."
     }
   ];
 
@@ -535,31 +526,25 @@ function SegmentExplorer({
       id: "gaming",
       label: "Gaming",
       visual: "🎮",
-      description: "Games and player graphics"
+      description: "Gaming graphics products"
     },
     {
       id: "data-center",
       label: "Data Center",
       visual: "🧠",
-      description: "AI servers and big computing systems"
+      description: "AI and data center systems"
     },
     {
       id: "professional-visualization",
       label: "Professional Visualization",
       visual: "🎨",
-      description: "3D design and creative work"
+      description: "3D design and visual work"
     },
     {
       id: "automotive",
       label: "Automotive",
       visual: "🚗",
-      description: "Smart car computing"
-    },
-    {
-      id: "platform-software",
-      label: "Platform Software",
-      visual: "⚙️",
-      description: "Tools used across NVIDIA platforms"
+      description: "Vehicle computing platforms"
     }
   ];
 
@@ -626,10 +611,10 @@ function SegmentExplorer({
       aria-label={`${companyName} products activity`}
     >
       <header className="iq-product-lab__header">
-        <h3>What does NVIDIA sell?</h3>
+        <h3>Where do NVIDIA&apos;s products fit?</h3>
         <p>
           {phase === "demo"
-            ? "Pick a product and watch where it belongs."
+            ? "Pick a product and see which part of the business it belongs to."
             : "Now you do it."}
         </p>
         <span>
