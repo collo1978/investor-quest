@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" role="img" aria-label="NVIDIA">
   <rect width="360" height="200" fill="transparent"/>
-  <g transform="translate(34 52) scale(4)">
+  <g transform="translate(18 43) scale(4.75)">
     <path fill="#76b900" d="M6.2 8.4h11.6v1.8H6.2V8.4zm0 3.2h11.6v1.8H6.2v-1.8zm0 3.2h8.4v1.8H6.2v-1.8z"/>
     <path fill="#76b900" d="M4.5 5.5h15v13H4.5V5.5zm1.7 1.7v9.6h11.6V7.2H6.2z" opacity=".55"/>
   </g>
   <text
-    x="135"
-    y="124"
+    x="140"
+    y="132"
     fill="#f8fafc"
     font-family="Arial, Helvetica, sans-serif"
-    font-size="58"
+    font-size="66"
     font-weight="900"
-    letter-spacing="-2"
+    letter-spacing="-4"
   >NVIDIA</text>
 </svg>
