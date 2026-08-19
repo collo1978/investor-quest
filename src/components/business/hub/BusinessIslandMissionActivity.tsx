@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import type { CSSProperties, DragEvent, ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 
 import { BusinessIslandValuePropCardFlip } from "@/components/business/hub/BusinessIslandValuePropCardFlip";
 import type { InvestorNotebookQuestionId } from "@/lib/business/businessIslandInvestorNotebook";
@@ -122,8 +122,13 @@ type JigsawPiece = {
   explanation: string;
   analogy: string;
   slot: number;
-  bgPosition: string;
+  col: number;
+  row: number;
+  path: string;
 };
+
+const NVIDIA_JIGSAW_PIECE_PATH =
+  "M8 2 H43 C43 15 77 15 77 2 H112 Q118 2 118 8 V36 C104 36 104 64 118 64 V92 Q118 98 112 98 H77 C77 85 43 85 43 98 H8 Q2 98 2 92 V64 C16 64 16 36 2 36 V8 Q2 2 8 2 Z";
 
 const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
   {
@@ -134,7 +139,9 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     analogy:
       "Like a kitchen with hundreds of cooks working together instead of one cook doing every job.",
     slot: 0,
-    bgPosition: "0% 0%"
+    col: 0,
+    row: 0,
+    path: NVIDIA_JIGSAW_PIECE_PATH
   },
   {
     id: "cuda",
@@ -144,7 +151,9 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     analogy:
       "Like giving builders a shared set of tools so they can use a powerful machine without inventing every tool themselves.",
     slot: 1,
-    bgPosition: "50% 0%"
+    col: 1,
+    row: 0,
+    path: NVIDIA_JIGSAW_PIECE_PATH
   },
   {
     id: "accelerated-computing",
@@ -154,7 +163,9 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     analogy:
       "Like using an express lane for the hardest jobs instead of making every job wait in the same slow line.",
     slot: 2,
-    bgPosition: "100% 0%"
+    col: 2,
+    row: 0,
+    path: NVIDIA_JIGSAW_PIECE_PATH
   },
   {
     id: "data-center-systems",
@@ -164,7 +175,9 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     analogy:
       "Like the engine room behind a huge app, doing the heavy work users never see.",
     slot: 3,
-    bgPosition: "0% 100%"
+    col: 0,
+    row: 1,
+    path: NVIDIA_JIGSAW_PIECE_PATH
   },
   {
     id: "full-stack-computing",
@@ -174,7 +187,9 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     analogy:
       "Like buying the whole game console, controller, online service and game library together instead of separate parts that may not fit.",
     slot: 4,
-    bgPosition: "50% 100%"
+    col: 1,
+    row: 1,
+    path: NVIDIA_JIGSAW_PIECE_PATH
   },
   {
     id: "ai-software",
@@ -184,9 +199,81 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     analogy:
       "Like the apps and operating system that make a powerful phone useful instead of just a piece of hardware.",
     slot: 5,
-    bgPosition: "100% 100%"
+    col: 2,
+    row: 1,
+    path: NVIDIA_JIGSAW_PIECE_PATH
   }
 ] as const;
+
+function termLines(term: string): string[] {
+  const words = term.split(" ");
+  if (words.length <= 1) return [term];
+  if (words.length === 2) return words;
+  return [words.slice(0, 2).join(" "), words.slice(2).join(" ")];
+}
+
+function JigsawPieceSvg({
+  piece,
+  clipId,
+  logo = false,
+  empty = false
+}: {
+  piece: JigsawPiece;
+  clipId: string;
+  logo?: boolean;
+  empty?: boolean;
+}) {
+  const lines = termLines(piece.term);
+
+  return (
+    <svg
+      className="iq-nvidia-jigsaw-piece-svg"
+      viewBox="0 0 120 100"
+      aria-hidden
+      focusable="false"
+    >
+      <defs>
+        <clipPath id={clipId}>
+          <path d={piece.path} />
+        </clipPath>
+      </defs>
+      {logo ? (
+        <image
+          href="/logos/companies/nvda.svg"
+          x={piece.col * -120}
+          y={piece.row * -100}
+          width="360"
+          height="200"
+          preserveAspectRatio="none"
+          clipPath={`url(#${clipId})`}
+        />
+      ) : empty ? (
+        <path
+          d={piece.path}
+          className="iq-nvidia-jigsaw-piece-svg__empty-fill"
+        />
+      ) : (
+        <>
+          <path
+            d={piece.path}
+            className="iq-nvidia-jigsaw-piece-svg__fill"
+          />
+          <g className="iq-nvidia-jigsaw-piece-svg__term">
+            {lines.map((line, index) => (
+              <text key={line} x="60" y={index === 0 ? 39 : 53}>
+                {line}
+              </text>
+            ))}
+          </g>
+          <text className="iq-nvidia-jigsaw-piece-svg__question" x="60" y="76">
+            ?
+          </text>
+        </>
+      )}
+      <path d={piece.path} className="iq-nvidia-jigsaw-piece-svg__stroke" />
+    </svg>
+  );
+}
 
 function NvidiaLogoJigsaw({
   companyName,
@@ -196,6 +283,7 @@ function NvidiaLogoJigsaw({
   onComplete: () => void;
 }) {
   const reduceMotion = useReducedMotion();
+  const idPrefix = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [activePieceId, setActivePieceId] = useState<string | null>(null);
   const [explainedIds, setExplainedIds] = useState<readonly string[]>([]);
   const [placedIds, setPlacedIds] = useState<readonly string[]>([]);
@@ -293,16 +381,17 @@ function NvidiaLogoJigsaw({
                 }
               >
                 {placedPiece ? (
-                  <span
-                    className="iq-nvidia-jigsaw-slot__logo"
-                    style={{
-                      backgroundImage: "url(/logos/companies/nvda.svg)",
-                      backgroundPosition: placedPiece.bgPosition
-                    }}
-                    aria-hidden
+                  <JigsawPieceSvg
+                    piece={placedPiece}
+                    clipId={`${idPrefix}-${placedPiece.id}-placed`}
+                    logo
                   />
                 ) : (
-                  <span className="iq-nvidia-jigsaw-slot__empty" aria-hidden />
+                  <JigsawPieceSvg
+                    piece={piece}
+                    clipId={`${idPrefix}-${piece.id}-empty`}
+                    empty
+                  />
                 )}
               </button>
             );
@@ -346,8 +435,10 @@ function NvidiaLogoJigsaw({
                   setMessage("Choose the matching slot on the puzzle board.");
                 }}
               >
-                <span className="iq-nvidia-jigsaw-piece__term">{piece.term}</span>
-                <span className="iq-nvidia-jigsaw-piece__mark">?</span>
+                <JigsawPieceSvg
+                  piece={piece}
+                  clipId={`${idPrefix}-${piece.id}-loose`}
+                />
               </button>
             );
           })}

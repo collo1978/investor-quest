@@ -17092,14 +17092,15 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece,
 .iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot,
 .iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot__logo {
-  clip-path: var(--nvidia-jigsaw-shape);
+  clip-path: none;
 }
 
 .iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot {
   margin: -1px;
   border-radius: 0;
-  border-color: rgba(148, 163, 184, 0.2);
-  background: rgba(15, 23, 42, 0.46);
+  border: 0;
+  background: transparent;
+  overflow: visible;
 }
 
 .iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot::before,
@@ -17118,6 +17119,72 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 
 .iq-nvidia-jigsaw-game .iq-nvidia-jigsaw-slot__logo {
   background-color: transparent;
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece {
+  clip-path: none;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  overflow: visible;
+}
+
+.iq-nvidia-jigsaw-piece-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.3));
+}
+
+.iq-nvidia-jigsaw-piece-svg__fill {
+  fill: rgba(30, 27, 75, 0.92);
+}
+
+.iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece .iq-nvidia-jigsaw-piece-svg__fill {
+  fill: rgba(30, 27, 75, 0.94);
+}
+
+.iq-nvidia-jigsaw-piece-svg__empty-fill {
+  fill: rgba(15, 23, 42, 0.48);
+}
+
+.iq-nvidia-jigsaw-piece-svg__stroke {
+  fill: none;
+  stroke: rgba(118, 185, 0, 0.78);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.iq-nvidia-jigsaw-slot .iq-nvidia-jigsaw-piece-svg__stroke {
+  stroke: rgba(148, 163, 184, 0.28);
+  stroke-dasharray: 4 4;
+}
+
+.iq-nvidia-jigsaw-slot--filled .iq-nvidia-jigsaw-piece-svg__stroke {
+  stroke: rgba(118, 185, 0, 0.75);
+  stroke-dasharray: none;
+}
+
+.iq-nvidia-jigsaw-piece-svg__term text,
+.iq-nvidia-jigsaw-piece-svg__question {
+  fill: rgba(248, 250, 252, 0.96);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-weight: 850;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.iq-nvidia-jigsaw-piece-svg__term text {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.iq-nvidia-jigsaw-piece-svg__question {
+  fill: #76b900;
+  font-size: 28px;
 }
 
 .iq-segment-explorer {
