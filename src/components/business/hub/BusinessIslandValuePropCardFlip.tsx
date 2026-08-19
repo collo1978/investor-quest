@@ -8,9 +8,8 @@ type ValuePropFlipCard = {
   category: string;
   visual: string;
   problem: string;
-  solutionTitle: string;
+  product: string;
   solution: string;
-  capability: string;
   tone: "gaming" | "creation" | "ai" | "cars" | "health" | "weather" | "robotics" | "data";
 };
 
@@ -20,10 +19,9 @@ const VALUE_PROP_FLIP_CARDS: readonly ValuePropFlipCard[] = [
     category: "Gaming",
     visual: "🎮",
     problem: "Why does my game keep freezing and stuttering?",
-    solutionTitle: "NVIDIA helps games render smoother worlds.",
+    product: "GeForce RTX GPUs",
     solution:
-      "GeForce RTX GPUs process graphics, lighting and AI-enhanced frames so demanding games can feel more fluid.",
-    capability: "NVIDIA SOLUTION: GeForce RTX / GPUs",
+      "Powerful chips that help games run smoothly and handle detailed graphics.",
     tone: "gaming"
   },
   {
@@ -31,10 +29,9 @@ const VALUE_PROP_FLIP_CARDS: readonly ValuePropFlipCard[] = [
     category: "AI Creation",
     visual: "🎬",
     problem: "Why is my AI video taking forever to make?",
-    solutionTitle: "NVIDIA helps speed up the heavy computing.",
+    product: "NVIDIA GPUs",
     solution:
-      "NVIDIA GPUs can handle lots of calculations at the same time, helping demanding AI creation tasks run faster.",
-    capability: "NVIDIA SOLUTION: GPU / Accelerated Computing",
+      "Powerful chips that handle lots of AI calculations at once, helping videos generate faster.",
     tone: "creation"
   },
   {
@@ -42,10 +39,9 @@ const VALUE_PROP_FLIP_CARDS: readonly ValuePropFlipCard[] = [
     category: "AI",
     visual: "🤖",
     problem: "How can AI answer millions of people at the same time?",
-    solutionTitle: "NVIDIA helps run AI models at huge scale.",
+    product: "NVIDIA Data Center GPUs",
     solution:
-      "NVIDIA data center GPUs and systems power servers that can run large AI models for many users at once.",
-    capability: "NVIDIA SOLUTION: Data Center GPUs / AI Systems",
+      "Powerful chips used in large servers so AI services can respond to many people at once.",
     tone: "ai"
   },
   {
@@ -53,10 +49,9 @@ const VALUE_PROP_FLIP_CARDS: readonly ValuePropFlipCard[] = [
     category: "Cars",
     visual: "🚗",
     problem: "How can a car spot something in the road and react instantly?",
-    solutionTitle: "NVIDIA helps cars process what their sensors see.",
+    product: "NVIDIA DRIVE",
     solution:
-      "NVIDIA automotive computing platforms process camera and sensor data so vehicle software can understand the road around it.",
-    capability: "NVIDIA SOLUTION: Automotive AI Computing",
+      "Computing technology that helps cars understand what's happening around them and react.",
     tone: "cars"
   },
   {
@@ -64,10 +59,9 @@ const VALUE_PROP_FLIP_CARDS: readonly ValuePropFlipCard[] = [
     category: "Healthcare",
     visual: "🏥",
     problem: "How can doctors analyse huge medical scans faster?",
-    solutionTitle: "NVIDIA helps medical AI handle large images.",
+    product: "NVIDIA Clara",
     solution:
-      "NVIDIA GPUs support medical imaging and AI software that can process very large scans and complex health data.",
-    capability: "NVIDIA SOLUTION: GPUs / Medical AI",
+      "Software and computing tools that help medical teams work with large scans and health data.",
     tone: "health"
   },
   {
@@ -75,10 +69,9 @@ const VALUE_PROP_FLIP_CARDS: readonly ValuePropFlipCard[] = [
     category: "Weather",
     visual: "🌦️",
     problem: "Why does predicting the weather need so much computing power?",
-    solutionTitle: "NVIDIA helps scientific models process massive data.",
+    product: "NVIDIA Earth-2",
     solution:
-      "NVIDIA accelerated computing supports weather and climate models that use huge amounts of data and simulation.",
-    capability: "NVIDIA SOLUTION: Accelerated Computing",
+      "Computing technology that helps weather systems work through huge amounts of climate data.",
     tone: "weather"
   },
   {
@@ -86,10 +79,9 @@ const VALUE_PROP_FLIP_CARDS: readonly ValuePropFlipCard[] = [
     category: "Robotics",
     visual: "🏭",
     problem: "How does a robot know what it's looking at and what to do next?",
-    solutionTitle: "NVIDIA helps robots use AI to understand the world.",
+    product: "NVIDIA Robotics / Jetson",
     solution:
-      "NVIDIA robotics platforms combine GPUs, AI software and simulation tools for machines that need to see, learn and act.",
-    capability: "NVIDIA SOLUTION: Robotics / AI Platforms",
+      "Small powerful computers that help robots see, understand and react to their surroundings.",
     tone: "robotics"
   },
   {
@@ -97,10 +89,9 @@ const VALUE_PROP_FLIP_CARDS: readonly ValuePropFlipCard[] = [
     category: "Data Centers",
     visual: "☁️",
     problem: "How do thousands of computers work together on one enormous job?",
-    solutionTitle: "NVIDIA helps data centers connect compute at scale.",
+    product: "NVIDIA Data Center Systems",
     solution:
-      "NVIDIA systems and networking technology help many servers work together on large AI and computing workloads.",
-    capability: "NVIDIA SOLUTION: Data Center Systems / Networking",
+      "Large computing systems that connect huge amounts of computing power for demanding AI jobs.",
     tone: "data"
   }
 ] as const;
@@ -203,19 +194,14 @@ export function BusinessIslandValuePropCardFlip({
               ×
             </button>
             <div className="iq-problem-focus__back">
-              <p className="iq-problem-focus__label">NVIDIA helps</p>
-              <p className="iq-problem-focus__problem-context">
-                Answering: {activeCard.problem}
-              </p>
-              <h4>{activeCard.solutionTitle}</h4>
+              <h4>{activeCard.product}</h4>
               <p>{activeCard.solution}</p>
-              <span>{activeCard.capability}</span>
               <button
                 type="button"
                 className="iq-hq-mission__primary iq-problem-focus__flip"
                 onClick={closeSolvedCard}
               >
-                ✓ GOT IT / PROBLEM SOLVED
+                ✓ SOLVED
               </button>
             </div>
           </motion.div>
