@@ -291,9 +291,7 @@ function NvidiaLogoJigsaw({
   const [explainedIds, setExplainedIds] = useState<readonly string[]>([]);
   const [placedIds, setPlacedIds] = useState<readonly string[]>([]);
   const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
-  const [message, setMessage] = useState(
-    "Click a piece to understand the term. Then place it in the puzzle."
-  );
+  const [message, setMessage] = useState("");
   const explainedSet = useMemo(() => new Set(explainedIds), [explainedIds]);
   const placedSet = useMemo(() => new Set(placedIds), [placedIds]);
   const activePiece =
@@ -352,9 +350,11 @@ function NvidiaLogoJigsaw({
         <span>{placedIds.length}/6 pieces placed</span>
       </header>
 
-      <p className="iq-nvidia-jigsaw-game__message" aria-live="polite">
-        {complete ? "" : message}
-      </p>
+      {!complete && message ? (
+        <p className="iq-nvidia-jigsaw-game__message" aria-live="polite">
+          {message}
+        </p>
+      ) : null}
 
       <div className="iq-nvidia-jigsaw-stage">
         <div className="iq-nvidia-jigsaw__board" aria-label="Empty NVIDIA logo puzzle board">
