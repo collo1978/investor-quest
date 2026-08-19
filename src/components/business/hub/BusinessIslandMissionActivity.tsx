@@ -127,9 +127,6 @@ type JigsawPiece = {
   path: string;
 };
 
-const NVIDIA_JIGSAW_PIECE_PATH =
-  "M8 2 H43 C43 15 77 15 77 2 H112 Q118 2 118 8 V36 C104 36 104 64 118 64 V92 Q118 98 112 98 H77 C77 85 43 85 43 98 H8 Q2 98 2 92 V64 C16 64 16 36 2 36 V8 Q2 2 8 2 Z";
-
 const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
   {
     id: "gpus",
@@ -141,7 +138,8 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     slot: 0,
     col: 0,
     row: 0,
-    path: NVIDIA_JIGSAW_PIECE_PATH
+    path:
+      "M0 0 H120 V35 C134 35 134 65 120 65 V100 H75 C75 114 45 114 45 100 H0 V0 Z"
   },
   {
     id: "cuda",
@@ -153,7 +151,8 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     slot: 1,
     col: 1,
     row: 0,
-    path: NVIDIA_JIGSAW_PIECE_PATH
+    path:
+      "M0 0 H120 V35 C106 35 106 65 120 65 V100 H75 C75 86 45 86 45 100 H0 V65 C14 65 14 35 0 35 V0 Z"
   },
   {
     id: "accelerated-computing",
@@ -165,7 +164,8 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     slot: 2,
     col: 2,
     row: 0,
-    path: NVIDIA_JIGSAW_PIECE_PATH
+    path:
+      "M0 0 H120 V100 H75 C75 114 45 114 45 100 H0 V65 C-14 65 -14 35 0 35 V0 Z"
   },
   {
     id: "data-center-systems",
@@ -177,7 +177,8 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     slot: 3,
     col: 0,
     row: 1,
-    path: NVIDIA_JIGSAW_PIECE_PATH
+    path:
+      "M0 0 H45 C45 14 75 14 75 0 H120 V35 C106 35 106 65 120 65 V100 H0 V0 Z"
   },
   {
     id: "full-stack-computing",
@@ -189,7 +190,8 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     slot: 4,
     col: 1,
     row: 1,
-    path: NVIDIA_JIGSAW_PIECE_PATH
+    path:
+      "M0 0 H45 C45 -14 75 -14 75 0 H120 V35 C134 35 134 65 120 65 V100 H0 V65 C-14 65 -14 35 0 35 V0 Z"
   },
   {
     id: "ai-software",
@@ -201,7 +203,8 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     slot: 5,
     col: 2,
     row: 1,
-    path: NVIDIA_JIGSAW_PIECE_PATH
+    path:
+      "M0 0 H45 C45 14 75 14 75 0 H120 V100 H0 V65 C14 65 14 35 0 35 V0 Z"
   }
 ] as const;
 
