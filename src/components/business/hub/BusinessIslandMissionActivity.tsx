@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import type { ReactNode } from "react";
+import type { DragEvent, ReactNode } from "react";
 import { useMemo, useState } from "react";
 
 import { BusinessIslandValuePropCardFlip } from "@/components/business/hub/BusinessIslandValuePropCardFlip";
@@ -14,6 +14,7 @@ type ActivityProps = {
 };
 
 const ACTIVITY_QUESTION_IDS = new Set<InvestorNotebookQuestionId>([
+  "explain-what-does",
   "explain-value-prop",
   "explain-products",
   "explain-makes-money",
@@ -46,6 +47,8 @@ export function BusinessIslandMissionActivity({
   }
 
   switch (questionId) {
+    case "explain-what-does":
+      return <NvidiaLogoJigsaw companyName={companyName} onComplete={onComplete} />;
     case "explain-products":
       return <SegmentExplorer companyName={companyName} onComplete={onComplete} />;
     case "explain-makes-money":
@@ -110,6 +113,241 @@ function ActivityShell({
         {completeLabel}
       </button>
     </motion.section>
+  );
+}
+
+type JigsawPiece = {
+  id: string;
+  term: string;
+  explanation: string;
+  analogy: string;
+  slot: number;
+  bgPosition: string;
+};
+
+const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
+  {
+    id: "gpus",
+    term: "GPUs",
+    explanation:
+      "GPUs are powerful chips that can handle many calculations at the same time. NVIDIA uses them to make graphics, AI and scientific computing run faster.",
+    analogy:
+      "Like a kitchen with hundreds of cooks working together instead of one cook doing every job.",
+    slot: 0,
+    bgPosition: "0% 50%"
+  },
+  {
+    id: "cuda",
+    term: "CUDA",
+    explanation:
+      "CUDA is NVIDIA's software toolkit that helps developers use NVIDIA chips for more than graphics, including AI and data work.",
+    analogy:
+      "Like giving builders a shared set of tools so they can use a powerful machine without inventing every tool themselves.",
+    slot: 1,
+    bgPosition: "25% 50%"
+  },
+  {
+    id: "accelerated-computing",
+    term: "Accelerated Computing",
+    explanation:
+      "Accelerated computing means using special hardware and software to finish hard computing jobs much faster than ordinary computers.",
+    analogy:
+      "Like using an express lane for the hardest jobs instead of making every job wait in the same slow line.",
+    slot: 2,
+    bgPosition: "50% 50%"
+  },
+  {
+    id: "data-center-systems",
+    term: "Data Center Systems",
+    explanation:
+      "Data center systems are the large-scale computers and networking gear that cloud companies use to power AI services.",
+    analogy:
+      "Like the engine room behind a huge app, doing the heavy work users never see.",
+    slot: 3,
+    bgPosition: "75% 50%"
+  },
+  {
+    id: "full-stack-computing",
+    term: "Full-Stack Computing",
+    explanation:
+      "Full-stack computing means NVIDIA offers more than one chip. It combines chips, systems, networking, software and tools into a complete platform.",
+    analogy:
+      "Like buying the whole game console, controller, online service and game library together instead of separate parts that may not fit.",
+    slot: 4,
+    bgPosition: "100% 50%"
+  }
+] as const;
+
+function NvidiaLogoJigsaw({
+  companyName,
+  onComplete
+}: {
+  companyName: string;
+  onComplete: () => void;
+}) {
+  const [activePieceId, setActivePieceId] = useState<string | null>(null);
+  const [explainedIds, setExplainedIds] = useState<readonly string[]>([]);
+  const [placedIds, setPlacedIds] = useState<readonly string[]>([]);
+  const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
+  const [message, setMessage] = useState(
+    "Click a piece to understand the term. Then place it in the puzzle."
+  );
+  const explainedSet = useMemo(() => new Set(explainedIds), [explainedIds]);
+  const placedSet = useMemo(() => new Set(placedIds), [placedIds]);
+  const activePiece =
+    NVIDIA_LOGO_PIECES.find((piece) => piece.id === activePieceId) ?? null;
+  const complete = placedIds.length === NVIDIA_LOGO_PIECES.length;
+
+  const markExplained = (pieceId: string) => {
+    setExplainedIds((prev) =>
+      prev.includes(pieceId) ? prev : [...prev, pieceId]
+    );
+    setSelectedPieceId(pieceId);
+    setActivePieceId(null);
+    setMessage("Now place that piece into its matching puzzle slot.");
+  };
+
+  const placePiece = (pieceId: string, slot: number) => {
+    const piece = NVIDIA_LOGO_PIECES.find((item) => item.id === pieceId);
+    if (!piece || placedSet.has(pieceId)) return;
+    if (!explainedSet.has(pieceId)) {
+      setActivePieceId(pieceId);
+      return;
+    }
+    if (piece.slot !== slot) {
+      setMessage("That piece belongs somewhere else. Try another position.");
+      return;
+    }
+    setPlacedIds((prev) => [...prev, pieceId]);
+    setSelectedPieceId(null);
+    setMessage(`${piece.term} placed. The ${companyName} logo is forming.`);
+  };
+
+  const handleDrop = (slot: number, event: DragEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    const pieceId = event.dataTransfer.getData("text/plain");
+    if (pieceId) placePiece(pieceId, slot);
+  };
+
+  return (
+    <ActivityShell
+      eyebrow="Jigsaw Puzzle"
+      title={`Build what ${companyName} does`}
+      copy="Each piece teaches one idea behind the business. Understand the term, place the piece, and reveal the logo as you go."
+      progressLabel={`${placedIds.length}/${NVIDIA_LOGO_PIECES.length} pieces placed`}
+      complete={complete}
+      completeLabel="Explain what NVIDIA does →"
+      onComplete={onComplete}
+    >
+      <p className="iq-learning-activity__hint">{message}</p>
+      <div className="iq-nvidia-jigsaw">
+        <div className="iq-nvidia-jigsaw__pieces" aria-label="Jigsaw pieces">
+          {NVIDIA_LOGO_PIECES.map((piece) => {
+            const explained = explainedSet.has(piece.id);
+            const placed = placedSet.has(piece.id);
+            return (
+              <button
+                key={piece.id}
+                type="button"
+                className={[
+                  "iq-nvidia-jigsaw-piece",
+                  explained ? "iq-nvidia-jigsaw-piece--ready" : "",
+                  placed ? "iq-nvidia-jigsaw-piece--placed" : "",
+                  selectedPieceId === piece.id ? "iq-nvidia-jigsaw-piece--selected" : ""
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                draggable={explained && !placed}
+                disabled={placed}
+                onDragStart={(event) => {
+                  event.dataTransfer.setData("text/plain", piece.id);
+                  setSelectedPieceId(piece.id);
+                }}
+                onClick={() => {
+                  if (placed) return;
+                  if (!explained) {
+                    setActivePieceId(piece.id);
+                    return;
+                  }
+                  setSelectedPieceId(piece.id);
+                  setMessage("Choose the matching slot on the puzzle board.");
+                }}
+              >
+                <span className="iq-nvidia-jigsaw-piece__term">{piece.term}</span>
+                <span className="iq-nvidia-jigsaw-piece__mark">
+                  {explained ? "Ready" : "?"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="iq-nvidia-jigsaw__board" aria-label="Empty NVIDIA logo puzzle board">
+          {NVIDIA_LOGO_PIECES.map((piece, slot) => {
+            const placedPiece = NVIDIA_LOGO_PIECES.find(
+              (item) => item.slot === slot && placedSet.has(item.id)
+            );
+            return (
+              <button
+                key={piece.id}
+                type="button"
+                className={[
+                  "iq-nvidia-jigsaw-slot",
+                  placedPiece ? "iq-nvidia-jigsaw-slot--filled" : ""
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => handleDrop(slot, event)}
+                onClick={() => {
+                  if (selectedPieceId) placePiece(selectedPieceId, slot);
+                }}
+                aria-label={
+                  placedPiece
+                    ? `${placedPiece.term} placed`
+                    : `Empty puzzle slot ${slot + 1}`
+                }
+              >
+                {placedPiece ? (
+                  <span
+                    className="iq-nvidia-jigsaw-slot__logo"
+                    style={{
+                      backgroundImage: "url(/logos/companies/nvda.svg)",
+                      backgroundPosition: placedPiece.bgPosition
+                    }}
+                    aria-hidden
+                  />
+                ) : (
+                  <span className="iq-nvidia-jigsaw-slot__empty" aria-hidden />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {activePiece ? (
+        <div className="iq-nvidia-jigsaw-modal" role="dialog" aria-modal="true">
+          <div className="iq-nvidia-jigsaw-modal__card">
+            <p className="iq-nvidia-jigsaw-modal__term">{activePiece.term}</p>
+            <p className="iq-nvidia-jigsaw-modal__text">
+              {activePiece.explanation}
+            </p>
+            <div className="iq-nvidia-jigsaw-modal__analogy">
+              <span>Analogy</span>
+              <p>{activePiece.analogy}</p>
+            </div>
+            <button
+              type="button"
+              className="iq-hq-mission__primary iq-nvidia-jigsaw-modal__cta"
+              onClick={() => markExplained(activePiece.id)}
+            >
+              Got it. Place this piece →
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </ActivityShell>
   );
 }
 
