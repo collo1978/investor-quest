@@ -17168,7 +17168,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 }
 
 .iq-nvidia-jigsaw-slot--filled .iq-nvidia-jigsaw-piece-svg__stroke {
-  stroke: rgba(118, 185, 0, 0.75);
+  stroke: transparent;
   stroke-dasharray: none;
 }
 

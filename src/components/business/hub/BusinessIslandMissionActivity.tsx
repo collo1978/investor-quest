@@ -132,7 +132,7 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     id: "gpus",
     term: "GPUs",
     explanation:
-      "GPUs are powerful chips that can handle many calculations at the same time. NVIDIA uses them to make graphics, AI and scientific computing run faster.",
+      "NVIDIA makes powerful GPU chips that help customers run graphics, AI and scientific computing much faster.",
     analogy:
       "Like a kitchen with hundreds of cooks working together instead of one cook doing every job.",
     slot: 0,
@@ -145,7 +145,7 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     id: "cuda",
     term: "CUDA",
     explanation:
-      "CUDA is NVIDIA's software toolkit that helps developers use NVIDIA chips for more than graphics, including AI and data work.",
+      "NVIDIA provides CUDA so developers can use NVIDIA chips to build AI, data and computing applications.",
     analogy:
       "Like giving builders a shared set of tools so they can use a powerful machine without inventing every tool themselves.",
     slot: 1,
@@ -158,7 +158,7 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     id: "accelerated-computing",
     term: "Accelerated Computing",
     explanation:
-      "Accelerated computing means using special hardware and software to finish hard computing jobs much faster than ordinary computers.",
+      "NVIDIA sells hardware and software that speed up hard computing jobs ordinary computers struggle to finish quickly.",
     analogy:
       "Like using an express lane for the hardest jobs instead of making every job wait in the same slow line.",
     slot: 2,
@@ -171,9 +171,9 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     id: "data-center-systems",
     term: "Data Center Systems",
     explanation:
-      "Data center systems are the large-scale computers and networking gear that cloud companies use to power AI services.",
+      "NVIDIA sells complete computing systems and networking technology that cloud companies and data centers use to run AI and other demanding workloads.",
     analogy:
-      "Like the engine room behind a huge app, doing the heavy work users never see.",
+      "The engine room behind a huge digital service, doing the heavy computing work users never see.",
     slot: 3,
     col: 0,
     row: 1,
@@ -184,7 +184,7 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     id: "full-stack-computing",
     term: "Full-Stack Computing",
     explanation:
-      "Full-stack computing means NVIDIA offers more than one chip. It combines chips, systems, networking, software and tools into a complete platform.",
+      "NVIDIA provides a full platform that combines chips, systems, networking, software and tools customers can use together.",
     analogy:
       "Like buying the whole game console, controller, online service and game library together instead of separate parts that may not fit.",
     slot: 4,
@@ -197,7 +197,7 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
     id: "ai-software",
     term: "AI Software",
     explanation:
-      "AI software helps customers train, run and manage AI models using NVIDIA's hardware and tools.",
+      "NVIDIA provides software that helps customers build, train, run and manage AI applications using NVIDIA hardware.",
     analogy:
       "Like the apps and operating system that make a powerful phone useful instead of just a piece of hardware.",
     slot: 5,
@@ -223,6 +223,7 @@ function JigsawPieceSvg({
     <svg
       className="iq-nvidia-jigsaw-piece-svg"
       viewBox="0 0 120 100"
+      preserveAspectRatio="none"
       aria-hidden
       focusable="false"
     >
@@ -441,7 +442,7 @@ function NvidiaLogoJigsaw({
               {activePiece.explanation}
             </p>
             <div className="iq-nvidia-jigsaw-modal__analogy">
-              <span>💡 Think of it like...</span>
+              <span>💡 THINK OF IT LIKE...</span>
               <p>{activePiece.analogy}</p>
             </div>
             <button
