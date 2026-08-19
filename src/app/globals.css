@@ -16625,16 +16625,48 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   letter-spacing: 0.08em;
 }
 
-.iq-problem-wall__grid {
+.iq-problem-carousel {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.85rem;
+  align-items: center;
+}
+
+.iq-problem-carousel__track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.iq-problem-carousel__nav {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border: 1px solid rgba(118, 185, 0, 0.34);
+  border-radius: 999px;
+  background: rgba(8, 12, 20, 0.84);
+  color: rgba(190, 242, 100, 0.95);
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 0 22px rgba(118, 185, 0, 0.12);
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    filter 160ms ease;
+}
+
+.iq-problem-carousel__nav:hover {
+  transform: translateY(-1px);
+  border-color: rgba(190, 242, 100, 0.58);
+  filter: brightness(1.08);
 }
 
 .iq-problem-card {
   --problem-accent: #22d3ee;
   position: relative;
-  min-height: 13.5rem;
+  min-height: 20rem;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--problem-accent) 34%, transparent);
   border-radius: 1.15rem;
@@ -16675,13 +16707,13 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   display: grid;
   place-items: center;
   width: 100%;
-  min-height: 4.8rem;
+  min-height: 8rem;
   margin-bottom: 0.7rem;
   border-radius: 0.9rem;
   background:
     radial-gradient(circle, color-mix(in srgb, var(--problem-accent) 28%, transparent), transparent 62%),
     rgba(255, 255, 255, 0.05);
-  font-size: 2.6rem;
+  font-size: 4rem;
 }
 
 .iq-problem-card__category {
@@ -16862,18 +16894,21 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 }
 
 @media (max-width: 900px) {
-  .iq-problem-wall__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .iq-problem-carousel {
+    grid-template-columns: 1fr;
+  }
+
+  .iq-problem-carousel__track {
+    grid-template-columns: 1fr;
+  }
+
+  .iq-problem-carousel__nav {
+    width: 100%;
+    height: 2.4rem;
   }
 
   .iq-problem-wall__header {
     flex-direction: column;
-  }
-}
-
-@media (max-width: 560px) {
-  .iq-problem-wall__grid {
-    grid-template-columns: 1fr;
   }
 }
 
