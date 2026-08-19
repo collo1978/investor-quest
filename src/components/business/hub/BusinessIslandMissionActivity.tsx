@@ -466,6 +466,7 @@ function SegmentExplorer({
   companyName: string;
   onComplete: () => void;
 }) {
+  const reduceMotion = useReducedMotion();
   type ProductId =
     | "geforce-rtx"
     | "nvidia-dgx"
