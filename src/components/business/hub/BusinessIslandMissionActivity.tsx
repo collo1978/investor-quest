@@ -208,13 +208,6 @@ const NVIDIA_LOGO_PIECES: readonly JigsawPiece[] = [
   }
 ] as const;
 
-function termLines(term: string): string[] {
-  const words = term.split(" ");
-  if (words.length <= 1) return [term];
-  if (words.length === 2) return words;
-  return [words.slice(0, 2).join(" "), words.slice(2).join(" ")];
-}
-
 function JigsawPieceSvg({
   piece,
   clipId,
@@ -226,8 +219,6 @@ function JigsawPieceSvg({
   logo?: boolean;
   empty?: boolean;
 }) {
-  const lines = termLines(piece.term);
-
   return (
     <svg
       className="iq-nvidia-jigsaw-piece-svg"
@@ -261,14 +252,7 @@ function JigsawPieceSvg({
             d={piece.path}
             className="iq-nvidia-jigsaw-piece-svg__fill"
           />
-          <g className="iq-nvidia-jigsaw-piece-svg__term">
-            {lines.map((line, index) => (
-              <text key={line} x="60" y={index === 0 ? 39 : 53}>
-                {line}
-              </text>
-            ))}
-          </g>
-          <text className="iq-nvidia-jigsaw-piece-svg__question" x="60" y="76">
+          <text className="iq-nvidia-jigsaw-piece-svg__question" x="60" y="55">
             ?
           </text>
         </>
@@ -424,6 +408,7 @@ function NvidiaLogoJigsaw({
                 }
                 draggable={explained && !placed}
                 disabled={placed}
+                aria-label={`${piece.term}. Click to learn, then place this puzzle piece.`}
                 onDragStart={(event) => {
                   event.dataTransfer.setData("text/plain", piece.id);
                   setSelectedPieceId(piece.id);

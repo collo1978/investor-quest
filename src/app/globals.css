@@ -17002,38 +17002,38 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece {
   position: absolute;
   z-index: 3;
-  width: clamp(8rem, 8vw, 9.5rem);
+  width: clamp(10.5rem, 12vw, 11.25rem);
   transform: rotate(var(--jigsaw-rotation, 0deg));
   pointer-events: auto;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(1) {
-  left: 0;
+  left: -2.5rem;
   top: 4%;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(2) {
-  right: 0;
+  right: -2.5rem;
   top: 4%;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(3) {
-  left: 0;
+  left: -2.5rem;
   top: 36%;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(4) {
-  right: 0;
+  right: -2.5rem;
   top: 36%;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(5) {
-  left: 0;
+  left: -2.5rem;
   top: 68%;
 }
 
 .iq-nvidia-jigsaw-stage .iq-nvidia-jigsaw-piece:nth-child(6) {
-  right: 0;
+  right: -2.5rem;
   top: 68%;
 }
 
@@ -17189,7 +17189,7 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 
 .iq-nvidia-jigsaw-piece-svg__question {
   fill: #76b900;
-  font-size: 28px;
+  font-size: 44px;
 }
 
 .iq-segment-explorer {
