@@ -16783,6 +16783,26 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   background: #76b900;
 }
 
+.iq-problem-card__seen {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin-top: auto;
+  border-radius: 999px;
+  background: #76b900;
+  color: rgba(5, 46, 22, 0.95);
+  font-size: 1.15rem;
+  font-weight: 950;
+  box-shadow: 0 0 18px rgba(118, 185, 0, 0.28);
+}
+
+.iq-problem-card__seen--bonus {
+  box-shadow:
+    0 0 18px rgba(118, 185, 0, 0.28),
+    0 0 0 3px rgba(250, 204, 21, 0.18);
+}
+
 .iq-problem-card--solved {
   border-color: rgba(118, 185, 0, 0.6);
 }
@@ -16910,6 +16930,48 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
 .iq-problem-focus__flip {
   width: min(100%, 22rem);
   margin-top: 0.5rem;
+}
+
+.iq-problem-focus__check {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  margin-top: 0.5rem;
+  border: 2px solid color-mix(in srgb, var(--problem-accent) 58%, transparent);
+  border-radius: 0.72rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(5, 46, 22, 0.98);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.iq-problem-focus__check:hover {
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--problem-accent) 24%, transparent);
+}
+
+.iq-problem-focus__check span {
+  font-size: 2rem;
+  font-weight: 950;
+  line-height: 1;
+  transform: scale(0);
+  transition: transform 180ms ease;
+}
+
+.iq-problem-focus__check--checked {
+  border-color: #76b900;
+  background: #76b900;
+  box-shadow: 0 0 28px rgba(118, 185, 0, 0.4);
+  transform: scale(1.04);
+}
+
+.iq-problem-focus__check--checked span {
+  transform: scale(1);
 }
 
 .iq-problem-wall__cta {

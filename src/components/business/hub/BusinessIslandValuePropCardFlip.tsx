@@ -112,6 +112,7 @@ export function BusinessIslandValuePropCardFlip({
   const reduceMotion = useReducedMotion();
   const game = useOptionalGame();
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
   const [solvedIds, setSolvedIds] = useState<readonly string[]>([]);
   const [bonusAwardedIds, setBonusAwardedIds] = useState<readonly string[]>([]);
   const [carouselStart, setCarouselStart] = useState(0);
@@ -147,6 +148,13 @@ export function BusinessIslandValuePropCardFlip({
       prev.includes(activeCard.id) ? prev : [...prev, activeCard.id]
     );
     setActiveId(null);
+    setChecking(false);
+  };
+
+  const confirmSolutionSeen = () => {
+    if (!activeCard || checking) return;
+    setChecking(true);
+    window.setTimeout(closeSolvedCard, 360);
   };
 
   return (
@@ -205,8 +213,16 @@ export function BusinessIslandValuePropCardFlip({
                 <span className="iq-problem-card__category">{card.category}</span>
                 <span className="iq-problem-card__problem">{card.problem}</span>
                 {solved ? (
-                  <span className="iq-problem-card__solved">
-                    ✓ EXPLORED{bonusAwarded ? " +XP" : ""}
+                  <span
+                    className={[
+                      "iq-problem-card__seen",
+                      bonusAwarded ? "iq-problem-card__seen--bonus" : ""
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    aria-label={bonusAwarded ? "Seen with bonus XP" : "Seen"}
+                  >
+                    ✓
                   </span>
                 ) : (
                   <span className="iq-problem-card__reveal" aria-hidden>
@@ -247,6 +263,7 @@ export function BusinessIslandValuePropCardFlip({
               aria-label="Close problem"
               onClick={() => {
                 setActiveId(null);
+                setChecking(false);
               }}
             >
               ×
@@ -256,10 +273,16 @@ export function BusinessIslandValuePropCardFlip({
               <p>{activeCard.solution}</p>
               <button
                 type="button"
-                className="iq-hq-mission__primary iq-problem-focus__flip"
-                onClick={closeSolvedCard}
+                className={[
+                  "iq-problem-focus__check",
+                  checking ? "iq-problem-focus__check--checked" : ""
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                aria-label="Mark solution seen"
+                onClick={confirmSolutionSeen}
               >
-                ✓ EXPLORED
+                <span aria-hidden>{checking ? "✓" : ""}</span>
               </button>
             </div>
           </motion.div>
