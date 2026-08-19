@@ -116,7 +116,6 @@ export function BusinessIslandValuePropCardFlip({
 }: Props) {
   const reduceMotion = useReducedMotion();
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [flipped, setFlipped] = useState(false);
   const [solvedIds, setSolvedIds] = useState<readonly string[]>([]);
   const solvedSet = useMemo(() => new Set(solvedIds), [solvedIds]);
   const activeCard =
@@ -129,7 +128,6 @@ export function BusinessIslandValuePropCardFlip({
       prev.includes(activeCard.id) ? prev : [...prev, activeCard.id]
     );
     setActiveId(null);
-    setFlipped(false);
   };
 
   return (
@@ -165,7 +163,6 @@ export function BusinessIslandValuePropCardFlip({
                 .join(" ")}
               onClick={() => {
                 setActiveId(card.id);
-                setFlipped(false);
               }}
             >
               <span className="iq-problem-card__image" aria-hidden>
@@ -188,8 +185,7 @@ export function BusinessIslandValuePropCardFlip({
           <motion.div
             className={[
               "iq-problem-focus__card",
-              `iq-problem-focus__card--${activeCard.tone}`,
-              flipped ? "iq-problem-focus__card--flipped" : ""
+              `iq-problem-focus__card--${activeCard.tone}`
             ].join(" ")}
             initial={reduceMotion ? false : { opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -202,41 +198,26 @@ export function BusinessIslandValuePropCardFlip({
               aria-label="Close problem"
               onClick={() => {
                 setActiveId(null);
-                setFlipped(false);
               }}
             >
               ×
             </button>
-            {!flipped ? (
-              <div className="iq-problem-focus__front">
-                <span className="iq-problem-focus__visual" aria-hidden>
-                  {activeCard.visual}
-                </span>
-                <p className="iq-problem-focus__category">{activeCard.category}</p>
-                <h4>{activeCard.problem}</h4>
-                <button
-                  type="button"
-                  className="iq-hq-mission__primary iq-problem-focus__flip"
-                  onClick={() => setFlipped(true)}
-                >
-                  Flip →
-                </button>
-              </div>
-            ) : (
-              <div className="iq-problem-focus__back">
-                <p className="iq-problem-focus__label">NVIDIA helps</p>
-                <h4>{activeCard.solutionTitle}</h4>
-                <p>{activeCard.solution}</p>
-                <span>{activeCard.capability}</span>
-                <button
-                  type="button"
-                  className="iq-hq-mission__primary iq-problem-focus__flip"
-                  onClick={closeSolvedCard}
-                >
-                  Solved. Back to wall →
-                </button>
-              </div>
-            )}
+            <div className="iq-problem-focus__back">
+              <p className="iq-problem-focus__label">NVIDIA helps</p>
+              <p className="iq-problem-focus__problem-context">
+                Answering: {activeCard.problem}
+              </p>
+              <h4>{activeCard.solutionTitle}</h4>
+              <p>{activeCard.solution}</p>
+              <span>{activeCard.capability}</span>
+              <button
+                type="button"
+                className="iq-hq-mission__primary iq-problem-focus__flip"
+                onClick={closeSolvedCard}
+              >
+                ✓ GOT IT / PROBLEM SOLVED
+              </button>
+            </div>
           </motion.div>
         </div>
       ) : null}

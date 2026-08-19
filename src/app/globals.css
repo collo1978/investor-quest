@@ -16827,6 +16827,11 @@ body.iq-schools-demo-fullscreen .iq-schools-xp-ladder-deck ol .rounded-2xl {
   line-height: 1.55;
 }
 
+.iq-problem-focus__problem-context {
+  border-left: 3px solid color-mix(in srgb, var(--problem-accent) 70%, transparent);
+  padding-left: 0.85rem;
+}
+
 .iq-problem-focus__back span {
   width: fit-content;
   border: 1px solid color-mix(in srgb, var(--problem-accent) 38%, transparent);
