@@ -39,10 +39,16 @@ export function BusinessIslandLocationExperience({
   const [completedThisVisit, setCompletedThisVisit] = useState(false);
 
   const startIndex = useMemo(() => {
-    if (!focusQuestionId) return 0;
-    const idx = location.notebookQuestionIds.indexOf(focusQuestionId);
-    return idx >= 0 ? idx : 0;
-  }, [focusQuestionId, location.notebookQuestionIds]);
+    if (focusQuestionId) {
+      const idx = location.notebookQuestionIds.indexOf(focusQuestionId);
+      return idx >= 0 ? idx : 0;
+    }
+
+    const firstUnmastered = location.notebookQuestionIds.findIndex(
+      (questionId) => !masteredSet.has(questionId)
+    );
+    return firstUnmastered >= 0 ? firstUnmastered : 0;
+  }, [focusQuestionId, location.notebookQuestionIds, masteredSet]);
 
   const allDistrictMastered = location.notebookQuestionIds.every((id) =>
     masteredSet.has(id)

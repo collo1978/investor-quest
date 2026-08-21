@@ -28,9 +28,8 @@ export function BusinessIslandStoryLocationDock({
   onContinue
 }: Props) {
   const reduceMotion = useReducedMotion();
-  const roomName = location
-    ? resolveLocationExperience(location.id).roomName
-    : "";
+  const experience = location ? resolveLocationExperience(location.id) : null;
+  const roomName = experience?.roomName ?? "";
   const missionTotal = location?.notebookQuestionIds.length ?? 0;
   const isActive = state === "active";
   const isCleared = state === "visited";
@@ -78,7 +77,7 @@ export function BusinessIslandStoryLocationDock({
             <p className="iq-business-island-story-dock__teaser">{mission}</p>
           ) : isCleared ? (
             <p className="iq-business-island-story-dock__teaser">
-              District cleared — revisit missions anytime.
+              District cleared. Revisit missions anytime.
             </p>
           ) : (
             <p className="iq-business-island-story-dock__teaser">

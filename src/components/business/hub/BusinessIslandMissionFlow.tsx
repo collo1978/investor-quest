@@ -6,6 +6,10 @@ import { useCallback, useMemo, useState } from "react";
 import { BusinessInvestorChallengeCard } from "@/components/business/investorFramework/BusinessInvestorChallengeCard";
 import { EvidenceDecodeSequence } from "@/components/business/hub/EvidenceDecodeSequence";
 import { KeyTermsCheck } from "@/components/business/hub/KeyTermsCheck";
+import {
+  BusinessIslandMissionActivity,
+  hasBusinessIslandMissionActivity
+} from "@/components/business/hub/BusinessIslandMissionActivity";
 import { SCHOOLS_BUSINESS_MISSION_THEME } from "@/components/quest/pillarQuestTheme";
 import {
   formatInvestorNotebookQuestion,
@@ -40,7 +44,13 @@ type Props = {
   completeLabel?: string;
 };
 
-type SubPhase = "evidence" | "terms-check" | "answer" | "tick";
+type SubPhase = "evidence" | "terms-check" | "activity" | "answer" | "tick";
+
+function initialSubPhaseForQuestion(
+  questionId: InvestorNotebookQuestionId | undefined
+): SubPhase {
+  return hasBusinessIslandMissionActivity(questionId) ? "activity" : "evidence";
+}
 
 /**
  * Chained mission — for each checklist question, gather all 10-K evidence,
@@ -58,7 +68,10 @@ export function BusinessIslandMissionFlow({
   const [index, setIndex] = useState(() =>
     startIndex > 0 && startIndex < questionIds.length ? startIndex : 0
   );
-  const [sub, setSub] = useState<SubPhase>("evidence");
+  const [sub, setSub] = useState<SubPhase>(() => {
+    const start = startIndex > 0 && startIndex < questionIds.length ? startIndex : 0;
+    return initialSubPhaseForQuestion(questionIds[start]);
+  });
 
   const questionId = questionIds[index];
   const isLastQuestion = index >= questionIds.length - 1;
@@ -70,6 +83,7 @@ export function BusinessIslandMissionFlow({
   const hasKeyTermsCheck = questionId
     ? KEY_TERMS_CHECK_QUESTION_IDS.has(questionId)
     : false;
+  const hasActivity = hasBusinessIslandMissionActivity(questionId);
   const missionTerms = useMemo(
     () => (hasKeyTermsCheck && questionId ? resolveHqDecodeMissionTerms(questionId) : []),
     [hasKeyTermsCheck, questionId]
@@ -95,9 +109,12 @@ export function BusinessIslandMissionFlow({
       onComplete();
       return;
     }
-    setIndex((prev) => prev + 1);
-    setSub("evidence");
-  }, [isLastQuestion, onComplete]);
+    setIndex((prev) => {
+      const next = prev + 1;
+      setSub(initialSubPhaseForQuestion(questionIds[next]));
+      return next;
+    });
+  }, [isLastQuestion, onComplete, questionIds]);
 
   if (!questionId) return null;
 
@@ -115,15 +132,30 @@ export function BusinessIslandMissionFlow({
             key={`evidence-${questionId}`}
             evidence={evidence}
             finalCtaLabel={
-              hasKeyTermsCheck ? "Key Terms Check →" : "Answer this question →"
+              hasKeyTermsCheck
+                ? "Key Terms Check →"
+                : "Answer this question →"
             }
-            onFinal={() => setSub(hasKeyTermsCheck ? "terms-check" : "answer")}
+            onFinal={() =>
+              setSub(
+                hasKeyTermsCheck
+                  ? "terms-check"
+                  : "answer"
+              )
+            }
           />
         ) : sub === "terms-check" && hasKeyTermsCheck ? (
           <KeyTermsCheck
             key={`terms-check-${questionId}`}
             terms={missionTerms}
             xpReason={`Key Terms Check: ${questionId}`}
+            onComplete={() => setSub("answer")}
+          />
+        ) : sub === "activity" && hasActivity ? (
+          <BusinessIslandMissionActivity
+            key={`activity-${questionId}`}
+            questionId={questionId}
+            companyName={companyName}
             onComplete={() => setSub("answer")}
           />
         ) : sub === "answer" && challenge ? (

@@ -52,7 +52,8 @@ export const BUSINESS_ISLAND_STORY_LOCATIONS: readonly BusinessIslandStoryLocati
       order: 1,
       placeName: "Headquarters",
       chapterTitle: "Headquarters",
-      missionLine: "Learn who NVIDIA is and the value it brings to customers.",
+      missionLine:
+        "Open evidence files, build your Understanding Board and explain the business in your own words.",
       evidenceLabel: "Company identity",
       emoji: "🏢",
       placeTheme: "headquarters",
@@ -67,7 +68,8 @@ export const BUSINESS_ISLAND_STORY_LOCATIONS: readonly BusinessIslandStoryLocati
       order: 2,
       placeName: "Products Center",
       chapterTitle: "Products Center",
-      missionLine: "Explore what NVIDIA sells and how its products work together.",
+      missionLine:
+        "Inspect product crates, sort them into segments and prove you know what NVIDIA sells.",
       evidenceLabel: "Products & platforms",
       emoji: "📦",
       placeTheme: "products-hall",
@@ -82,14 +84,14 @@ export const BUSINESS_ISLAND_STORY_LOCATIONS: readonly BusinessIslandStoryLocati
       order: 3,
       placeName: "Business Model Center",
       chapterTitle: "Business Model Center",
-      missionLine: "Discover how NVIDIA makes money and who its customers are.",
+      missionLine:
+        "Follow the money flow, reveal customer groups and explain who pays NVIDIA.",
       evidenceLabel: "Business model & markets",
       emoji: "💰",
       placeTheme: "division-hub",
       notebookQuestionIds: [
         "explain-makes-money",
-        "explain-customers",
-        "explain-where-operates"
+        "explain-customers"
       ],
       left: "22%",
       top: "48%",
@@ -101,11 +103,16 @@ export const BUSINESS_ISLAND_STORY_LOCATIONS: readonly BusinessIslandStoryLocati
       order: 4,
       placeName: "Global & History Center",
       chapterTitle: "Global & History Center",
-      missionLine: "Explore NVIDIA's global reach and how the business has evolved.",
+      missionLine:
+        "Use the global explorer and timeline to explain where NVIDIA sells and how it evolved.",
       evidenceLabel: "Evolution & growth",
       emoji: "🌍",
       placeTheme: "history-trail",
-      notebookQuestionIds: ["explain-evolution", "explain-future-growth"],
+      notebookQuestionIds: [
+        "explain-where-operates",
+        "explain-evolution",
+        "explain-future-growth"
+      ],
       left: "78%",
       top: "52%",
       mobileLeft: "78%",
@@ -116,7 +123,8 @@ export const BUSINESS_ISLAND_STORY_LOCATIONS: readonly BusinessIslandStoryLocati
       order: 5,
       placeName: "Operations Center",
       chapterTitle: "Operations Center",
-      missionLine: "Learn how NVIDIA designs, builds and delivers its business.",
+      missionLine:
+        "Run the operations conveyor from design to partner factories to delivery.",
       evidenceLabel: "Operations",
       emoji: "⚙️",
       placeTheme: "manufacturing",
@@ -131,7 +139,8 @@ export const BUSINESS_ISLAND_STORY_LOCATIONS: readonly BusinessIslandStoryLocati
       order: 6,
       placeName: "Competitive Advantage Center",
       chapterTitle: "Competitive Advantage Center",
-      missionLine: "Discover what gives NVIDIA its competitive edge and future growth potential.",
+      missionLine:
+        "Assemble the competitive shield and identify what could weaken NVIDIA's edge.",
       evidenceLabel: "Competitive advantage",
       emoji: "🏆",
       placeTheme: "competitive-arena",

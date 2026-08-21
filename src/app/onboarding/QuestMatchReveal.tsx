@@ -58,16 +58,6 @@ const BURST_PARTICLES = [
 
 const WINNER_LAYOUT_ID = "quest-match-winner-card";
 
-function revealBlurb(
-  winner: RecommendedCompanyCard,
-  controlledDemoReveal: boolean
-): string {
-  if (controlledDemoReveal || winner.id === CONTROLLED_DEMO_COMPANY_ID) {
-    return "The company behind many of the AI tools and games you already use.";
-  }
-  return `You unlocked your first quest — dive into ${winner.companyName} and build real conviction.`;
-}
-
 function BoardCard({
   card,
   active,
@@ -212,8 +202,6 @@ function QuestUnlockAtmosphere({ active }: { active: boolean }) {
 
 function RevealedQuestBeat({
   winner,
-  controlledDemoReveal,
-  continueLabel,
   enterQuestDisabled,
   onEnterQuest,
   deckCompact
@@ -226,6 +214,24 @@ function RevealedQuestBeat({
   deckCompact: boolean;
 }) {
   const reduceMotion = useReducedMotion();
+  const [decrypted, setDecrypted] = useState<readonly string[]>([]);
+  const allDecrypted = decrypted.length >= 3;
+  const decryptFields = [
+    { id: "who", label: "WHO", value: "NVIDIA Corporation" },
+    { id: "what", label: "WHAT", value: "Computing technology company" },
+    { id: "where", label: "WHERE", value: "Santa Clara, California" }
+  ] as const;
+
+  const decryptField = (fieldId: string) => {
+    setDecrypted((prev) =>
+      prev.includes(fieldId) ? prev : [...prev, fieldId]
+    );
+  };
+  const nextField = decryptFields[decrypted.length] ?? null;
+  const rotateSeal = () => {
+    if (!nextField) return;
+    decryptField(nextField.id);
+  };
 
   return (
     <motion.div
@@ -234,103 +240,103 @@ function RevealedQuestBeat({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
       className={[
-        "iq-schools-company-reveal-reveal-copy relative z-30 flex w-full max-w-xl flex-col items-center text-center",
-        deckCompact ? "gap-3 px-2 py-2" : "gap-5 px-4 py-6"
+        "iq-company-dossier relative z-30 flex w-full flex-col items-center",
+        deckCompact ? "px-2 py-2" : "px-4 py-5"
       ].join(" ")}
     >
-      <motion.h1
-        initial={reduceMotion ? false : { opacity: 0, y: 16, scale: 0.92 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: "spring", stiffness: 320, damping: 24, delay: 0.05 }}
-        className="iq-quest-unlock-headline relative font-[var(--font-grotesk)] text-[clamp(2.15rem,6.5vw,3.75rem)] font-black uppercase leading-[0.92] tracking-[0.1em] text-white"
-      >
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 blur-2xl"
-          style={{
-            background:
-              "radial-gradient(ellipse 80% 55% at 50% 50%, rgba(139,92,246,0.55), transparent 70%)"
-          }}
+      <div className="iq-company-dossier__target">
+        <p>TOP SECRET // COMPANY INTELLIGENCE</p>
+        <span>TARGET ACQUIRED</span>
+        <h1>NVIDIA</h1>
+        <CompanyLogo
+          src={winner.logo}
+          alt={winner.companyName}
+          className="iq-company-dossier__logo"
         />
-        Quest unlocked
-      </motion.h1>
+      </div>
 
-      <motion.div
-        layoutId={WINNER_LAYOUT_ID}
-        initial={reduceMotion ? false : { scale: 0.72, opacity: 0, rotate: -4 }}
-        animate={{ scale: 1, opacity: 1, rotate: 0 }}
-        transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.14 }}
-        className="iq-quest-unlock-card-wrap relative my-1"
+      <motion.article
+        className={[
+          "iq-company-case-file",
+          allDecrypted ? "iq-company-case-file--open" : ""
+        ].join(" ")}
+        initial={reduceMotion ? false : { opacity: 0, y: 28, rotateX: -8 }}
+        animate={{ opacity: 1, y: 0, rotateX: 0 }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.12 }}
       >
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -inset-10 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.55),rgba(109,40,217,0.18)_42%,transparent_72%)] blur-3xl"
-        />
-        {!reduceMotion ? (
-          <>
-            <motion.span
-              aria-hidden
-              className="pointer-events-none absolute -inset-5 rounded-[2rem] border border-violet-300/35"
-              animate={{ scale: [1, 1.06, 1], opacity: [0.55, 0.2, 0.55] }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.span
-              aria-hidden
-              className="pointer-events-none absolute -inset-8 rounded-[2.25rem] border border-violet-400/15"
-              animate={{ scale: [1.04, 1.12, 1.04], opacity: [0.35, 0.12, 0.35] }}
-              transition={{ duration: 3.1, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
-            />
-          </>
-        ) : null}
-        <div className="iq-quest-unlock-card relative rounded-[1.75rem] border-2 border-[rgba(196,181,253,0.82)] bg-[linear-gradient(165deg,rgba(28,14,48,0.98)_0%,rgba(10,6,20,0.98)_100%)] px-10 py-9 shadow-[0_0_80px_rgba(139,92,246,0.62),0_0_36px_rgba(245,197,71,0.28),0_0_120px_rgba(109,40,217,0.32),inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md sm:px-12 sm:py-10">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-[1.65rem] bg-[radial-gradient(ellipse_90%_70%_at_50%_0%,rgba(255,255,255,0.14),transparent_58%)]"
-          />
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -inset-px rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(196,181,253,0.35),transparent_40%,rgba(245,197,71,0.2))] opacity-60"
-          />
-          <CompanyLogo
-            src={winner.logo}
-            alt={winner.companyName}
-            className="relative mx-auto h-[5.5rem] w-[5.5rem] sm:h-28 sm:w-28 md:h-32 md:w-32"
-          />
-        </div>
-      </motion.div>
-
-      <motion.h2
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.32, duration: 0.45 }}
-        className="font-[var(--font-grotesk)] text-[clamp(1.85rem,4.8vw,2.75rem)] font-black uppercase leading-none tracking-[0.05em] text-white drop-shadow-[0_0_22px_rgba(139,92,246,0.45)]"
-      >
-        {winner.companyName}
-      </motion.h2>
-
-      <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.42, duration: 0.45 }}
-        className="iq-schools-company-reveal-blurb max-w-md text-sm leading-relaxed text-violet-100/90 sm:text-base"
-      >
-        {revealBlurb(winner, controlledDemoReveal)}
-      </motion.p>
-
-      <motion.div
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.52, duration: 0.45 }}
-        className="iq-schools-company-reveal-cta w-full max-w-md pt-1"
-      >
-        <NeonButton
-          className="iq-schools-opening-cta-primary min-h-[56px] w-full justify-center rounded-full border-2 border-violet-300/55 text-sm font-bold uppercase tracking-[0.16em] shadow-[0_0_32px_rgba(139,92,246,0.35)]"
-          onClick={onEnterQuest}
-          disabled={enterQuestDisabled}
-        >
-          {enterQuestDisabled ? "Loading your progress…" : continueLabel}
-        </NeonButton>
-      </motion.div>
+        {!allDecrypted ? (
+          <div className="iq-company-case-file__locked">
+            <div className="iq-company-case-file__folder">
+              <div className="iq-company-case-file__tab">CLASSIFIED COMPANY DOSSIER</div>
+              <div className="iq-company-case-file__status">
+                SECURITY CLEARANCE REQUIRED
+              </div>
+              <div className="iq-company-case-file__reveals">
+                {decryptFields.map((field) => {
+                  const done = decrypted.includes(field.id);
+                  return done ? (
+                    <p key={field.id}>
+                      <span>{field.label}</span>
+                      {field.value}
+                    </p>
+                  ) : null;
+                })}
+              </div>
+              <button
+                type="button"
+                className="iq-company-case-file__seal"
+                onClick={rotateSeal}
+                aria-label={
+                  nextField
+                    ? `Decrypt ${nextField.label}`
+                    : "Security clearance complete"
+                }
+              >
+                <span className="iq-company-case-file__seal-ring" aria-hidden />
+                <span className="iq-company-case-file__seal-mark">IQ</span>
+                <span className="iq-company-case-file__seal-next">
+                  {nextField ? nextField.label : "OPEN"}
+                </span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <motion.div
+            className="iq-company-case-file__open"
+            initial={reduceMotion ? false : { opacity: 0, y: 16, rotateX: -6 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="iq-company-case-file__paper">
+              <div className="iq-company-case-file__paper-top">
+                <span>CASE FILE // NVIDIA</span>
+                <strong>ACCESS VERIFIED ✓</strong>
+              </div>
+              <h2>NVIDIA CORPORATION</h2>
+              <p className="iq-company-case-file__meta">
+                EST. 1993 · SANTA CLARA, CALIFORNIA · TECHNOLOGY
+              </p>
+              <p className="iq-company-case-file__orientation">
+                NVIDIA develops computing hardware, software and systems used around the world.
+              </p>
+              <div className="iq-company-case-file__assignment">
+                <span>YOUR MISSION</span>
+                <h3>Investigate NVIDIA like a great investor.</h3>
+                <p>
+                  Piece together how the business really works and unlock the Final Challenge.
+                </p>
+                <NeonButton
+                  className="iq-company-case-file__accept"
+                  onClick={onEnterQuest}
+                  disabled={enterQuestDisabled}
+                >
+                  {enterQuestDisabled ? "Loading your progress…" : "ACCEPT MISSION →"}
+                </NeonButton>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </motion.article>
     </motion.div>
   );
 }
