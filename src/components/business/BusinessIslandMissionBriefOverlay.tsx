@@ -3,13 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { SCHOOLS_MISSION_BRIEF_IMG_SRC } from "@/lib/schools/schoolsMapConfig";
-
 const HUB_DIM_SCRIM = "rgba(0, 0, 0, 0.55)";
-
-/** Intrinsic size of `public/logos/schools-mission-brief.png`. */
-const BRIEF_IMG_W = 1024;
-const BRIEF_IMG_H = 1536;
 
 type Props = {
   open: boolean;
@@ -87,27 +81,37 @@ export function BusinessIslandMissionBriefOverlay({ open, onDismiss }: Props) {
         style={{ background: HUB_DIM_SCRIM }}
       />
 
-      <h2 id="business-island-brief-title" className="sr-only">
-        Business Island mission brief
-      </h2>
+      <section className="relative z-10 mx-5 w-full max-w-xl rounded-2xl border border-white/15 bg-slate-950 px-6 py-8 text-center shadow-2xl sm:px-10 sm:py-10">
+        <h2
+          id="business-island-brief-title"
+          className="text-2xl font-black tracking-wide text-white sm:text-3xl"
+        >
+          WELCOME TO BUSINESS ISLAND
+        </h2>
 
-      <img
-        src={SCHOOLS_MISSION_BRIEF_IMG_SRC}
-        alt="Your Business Island mission brief"
-        width={BRIEF_IMG_W}
-        height={BRIEF_IMG_H}
-        decoding="async"
-        fetchPriority="high"
-        className="relative z-10 block h-auto w-auto max-h-[75vh] max-w-[60vw] shrink object-contain object-center select-none"
-      />
+        <div className="mt-6 space-y-4 text-base font-bold leading-relaxed text-slate-200 sm:text-lg">
+          <p>
+            You’re about to explore the Business section of NVIDIA’s 10-K Annual
+            Report.
+          </p>
+          <p>It’s over 5,000 words long. We’ve extracted only what matters.</p>
+        </div>
 
-      <button
-        type="button"
-        onClick={onDismiss}
-        className="iq-mission-brief-cta relative z-10 mt-5 w-full max-w-sm shrink-0"
-      >
-        START MISSION
-      </button>
+        <h3 className="mt-8 text-sm font-black tracking-[0.22em] text-emerald-400">
+          YOUR MISSION
+        </h3>
+        <p className="mt-3 text-base font-bold leading-relaxed text-white sm:text-lg">
+          Complete the checklist to understand NVIDIA’s business like a pro.
+        </p>
+
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="iq-mission-brief-cta mt-8 w-full shrink-0"
+        >
+          ▶ ENTER BUSINESS ISLAND
+        </button>
+      </section>
     </div>,
     document.body
   );
