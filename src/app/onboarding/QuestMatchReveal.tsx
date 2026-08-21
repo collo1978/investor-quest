@@ -227,6 +227,11 @@ function RevealedQuestBeat({
       prev.includes(fieldId) ? prev : [...prev, fieldId]
     );
   };
+  const nextField = decryptFields[decrypted.length] ?? null;
+  const rotateSeal = () => {
+    if (!nextField) return;
+    decryptField(nextField.id);
+  };
 
   return (
     <motion.div
@@ -252,103 +257,85 @@ function RevealedQuestBeat({
 
       <motion.article
         className={[
-          "iq-company-dossier__file",
-          allDecrypted ? "iq-company-dossier__file--open" : ""
+          "iq-company-case-file",
+          allDecrypted ? "iq-company-case-file--open" : ""
         ].join(" ")}
         initial={reduceMotion ? false : { opacity: 0, y: 28, rotateX: -8 }}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.12 }}
       >
-        <div className="iq-company-dossier__file-head">
-          <div>
-            <p>CLASSIFIED COMPANY DOSSIER</p>
-            <h2>SECURITY CLEARANCE REQUIRED</h2>
-          </div>
-          <span>{allDecrypted ? "IDENTITY VERIFIED ✓" : "LOCKED"}</span>
-        </div>
-
-        <div className="iq-company-dossier__decrypt">
-          <div className="iq-company-dossier__seal" aria-label="IQ security seal">
-            <span className="iq-company-dossier__seal-ring" aria-hidden />
-            <span className="iq-company-dossier__seal-mark">IQ</span>
-            {decryptFields.map((field, index) => {
-              const done = decrypted.includes(field.id);
-              return (
-                <button
-                  key={field.id}
-                  type="button"
-                  className={[
-                    "iq-company-dossier__seal-node",
-                    `iq-company-dossier__seal-node--${index + 1}`,
-                    done ? "iq-company-dossier__seal-node--done" : ""
-                  ].join(" ")}
-                  onClick={() => decryptField(field.id)}
-                  disabled={done}
-                >
-                  {field.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="iq-company-dossier__intel">
-            {decryptFields.map((field) => {
-              const done = decrypted.includes(field.id);
-              return (
-                <div
-                  key={field.id}
-                  className={[
-                    "iq-company-dossier__intel-row",
-                    done ? "iq-company-dossier__intel-row--done" : ""
-                  ].join(" ")}
-                >
-                  <span>{field.label}</span>
-                  <strong>{done ? field.value : "///// DECRYPTING /////"}</strong>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {allDecrypted ? (
-          <motion.div
-            className="iq-company-dossier__opened"
-            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="iq-company-dossier__overview">
-              <h2>NVIDIA CORPORATION</h2>
-              <div>
-                <span>WHO</span>
-                <p>A technology company founded in 1993.</p>
+        {!allDecrypted ? (
+          <div className="iq-company-case-file__locked">
+            <div className="iq-company-case-file__folder">
+              <div className="iq-company-case-file__tab">CLASSIFIED COMPANY DOSSIER</div>
+              <div className="iq-company-case-file__status">
+                SECURITY CLEARANCE REQUIRED
               </div>
-              <div>
-                <span>WHAT</span>
-                <p>Develops computing hardware, software and systems.</p>
+              <div className="iq-company-case-file__reveals">
+                {decryptFields.map((field) => {
+                  const done = decrypted.includes(field.id);
+                  return done ? (
+                    <p key={field.id}>
+                      <span>{field.label}</span>
+                      {field.value}
+                    </p>
+                  ) : null;
+                })}
               </div>
-              <div>
-                <span>WHERE</span>
-                <p>Headquartered in Santa Clara, California, with a global business.</p>
-              </div>
-            </div>
-
-            <div className="iq-company-dossier__mission">
-              <p>YOUR MISSION</p>
-              <h3>Investigate NVIDIA like a great investor.</h3>
-              <span>
-                Piece together how the business really works and unlock the Final Challenge.
-              </span>
-              <NeonButton
-                className="iq-company-dossier__accept"
-                onClick={onEnterQuest}
-                disabled={enterQuestDisabled}
+              <button
+                type="button"
+                className="iq-company-case-file__seal"
+                onClick={rotateSeal}
+                aria-label={
+                  nextField
+                    ? `Decrypt ${nextField.label}`
+                    : "Security clearance complete"
+                }
               >
-                {enterQuestDisabled ? "Loading your progress…" : "CASE ACCEPTED →"}
-              </NeonButton>
+                <span className="iq-company-case-file__seal-ring" aria-hidden />
+                <span className="iq-company-case-file__seal-mark">IQ</span>
+                <span className="iq-company-case-file__seal-next">
+                  {nextField ? nextField.label : "OPEN"}
+                </span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <motion.div
+            className="iq-company-case-file__open"
+            initial={reduceMotion ? false : { opacity: 0, y: 16, rotateX: -6 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="iq-company-case-file__paper">
+              <div className="iq-company-case-file__paper-top">
+                <span>CASE FILE // NVIDIA</span>
+                <strong>ACCESS VERIFIED ✓</strong>
+              </div>
+              <h2>NVIDIA CORPORATION</h2>
+              <p className="iq-company-case-file__meta">
+                EST. 1993 · SANTA CLARA, CALIFORNIA · TECHNOLOGY
+              </p>
+              <p className="iq-company-case-file__orientation">
+                NVIDIA develops computing hardware, software and systems used around the world.
+              </p>
+              <div className="iq-company-case-file__assignment">
+                <span>YOUR MISSION</span>
+                <h3>Investigate NVIDIA like a great investor.</h3>
+                <p>
+                  Piece together how the business really works and unlock the Final Challenge.
+                </p>
+                <NeonButton
+                  className="iq-company-case-file__accept"
+                  onClick={onEnterQuest}
+                  disabled={enterQuestDisabled}
+                >
+                  {enterQuestDisabled ? "Loading your progress…" : "ACCEPT MISSION →"}
+                </NeonButton>
+              </div>
             </div>
           </motion.div>
-        ) : null}
+        )}
       </motion.article>
     </motion.div>
   );
