@@ -188,6 +188,307 @@ h3 {
   max-width: 100%;
 }
 
+.iq-company-dossier {
+  max-width: min(100%, 64rem);
+  gap: clamp(0.85rem, 2vw, 1.2rem);
+  text-align: center;
+}
+
+.iq-company-dossier__target {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+}
+
+.iq-company-dossier__target p,
+.iq-company-dossier__target span,
+.iq-company-dossier__file-head p,
+.iq-company-dossier__mission p,
+.iq-company-dossier__overview span {
+  margin: 0;
+  color: rgba(245, 197, 71, 0.82);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.iq-company-dossier__target span {
+  color: rgba(103, 232, 249, 0.92);
+}
+
+.iq-company-dossier__target h1 {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.98);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: clamp(2.4rem, 7vw, 4.8rem);
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  line-height: 0.92;
+  text-shadow: 0 0 36px rgba(139, 92, 246, 0.45);
+}
+
+.iq-company-dossier__logo {
+  width: clamp(4.25rem, 9vw, 6.25rem);
+  height: clamp(4.25rem, 9vw, 6.25rem);
+  filter: drop-shadow(0 0 24px rgba(118, 185, 0, 0.38));
+}
+
+.iq-company-dossier__file {
+  position: relative;
+  width: min(100%, 58rem);
+  overflow: hidden;
+  border: 1px solid rgba(245, 197, 71, 0.32);
+  border-radius: 1.35rem;
+  padding: clamp(1rem, 2.5vw, 1.35rem);
+  background:
+    linear-gradient(135deg, rgba(245, 197, 71, 0.12), transparent 18%),
+    radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.22), transparent 48%),
+    linear-gradient(155deg, rgba(13, 10, 22, 0.96), rgba(3, 6, 15, 0.95));
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.45),
+    0 0 48px rgba(245, 197, 71, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform-style: preserve-3d;
+}
+
+.iq-company-dossier__file::before {
+  content: "";
+  position: absolute;
+  inset: 0.65rem;
+  border: 1px solid rgba(245, 197, 71, 0.12);
+  border-radius: 1rem;
+  pointer-events: none;
+}
+
+.iq-company-dossier__file-head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  text-align: left;
+}
+
+.iq-company-dossier__file-head h2 {
+  margin: 0.25rem 0 0;
+  color: rgba(248, 250, 252, 0.94);
+  font-size: clamp(1.05rem, 2.3vw, 1.4rem);
+  font-weight: 850;
+  letter-spacing: 0.04em;
+}
+
+.iq-company-dossier__file-head > span {
+  border: 1px solid rgba(245, 197, 71, 0.32);
+  border-radius: 999px;
+  padding: 0.42rem 0.65rem;
+  color: rgba(245, 197, 71, 0.9);
+  background: rgba(245, 197, 71, 0.08);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.iq-company-dossier__decrypt {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.75fr) minmax(0, 1.25fr);
+  gap: clamp(1rem, 2.4vw, 1.5rem);
+  align-items: center;
+  margin-top: 1.2rem;
+}
+
+.iq-company-dossier__seal {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(100%, 16rem);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(245, 197, 71, 0.2), transparent 62%),
+    rgba(6, 4, 10, 0.72);
+}
+
+.iq-company-dossier__seal-ring {
+  position: absolute;
+  inset: 1.5rem;
+  border: 2px solid rgba(245, 197, 71, 0.38);
+  border-radius: 999px;
+  box-shadow:
+    0 0 28px rgba(245, 197, 71, 0.16),
+    inset 0 0 24px rgba(245, 197, 71, 0.08);
+}
+
+.iq-company-dossier__seal-mark {
+  display: grid;
+  place-items: center;
+  width: 5.25rem;
+  height: 5.25rem;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #facc15, #a16207);
+  color: #1f1300;
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-size: 1.65rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  box-shadow:
+    0 0 28px rgba(245, 197, 71, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+}
+
+.iq-company-dossier__seal-node {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  min-width: 4.6rem;
+  min-height: 2.35rem;
+  border: 1px solid rgba(245, 197, 71, 0.28);
+  border-radius: 999px;
+  background: rgba(6, 4, 10, 0.82);
+  color: rgba(245, 197, 71, 0.9);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.iq-company-dossier__seal-node:not(:disabled):hover {
+  transform: translateY(-1px) scale(1.04);
+  border-color: rgba(245, 197, 71, 0.62);
+  box-shadow: 0 0 20px rgba(245, 197, 71, 0.18);
+}
+
+.iq-company-dossier__seal-node--1 {
+  top: 0.15rem;
+}
+
+.iq-company-dossier__seal-node--2 {
+  left: -0.2rem;
+  bottom: 3rem;
+}
+
+.iq-company-dossier__seal-node--3 {
+  right: -0.2rem;
+  bottom: 3rem;
+}
+
+.iq-company-dossier__seal-node--done {
+  background: #facc15;
+  color: #1f1300;
+  box-shadow: 0 0 24px rgba(245, 197, 71, 0.34);
+}
+
+.iq-company-dossier__intel {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.iq-company-dossier__intel-row {
+  display: grid;
+  grid-template-columns: 4.4rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.85rem;
+  padding: 0.75rem 0.85rem;
+  background: rgba(255, 255, 255, 0.04);
+  text-align: left;
+}
+
+.iq-company-dossier__intel-row span {
+  color: rgba(103, 232, 249, 0.86);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.iq-company-dossier__intel-row strong {
+  color: rgba(148, 163, 184, 0.78);
+  font-size: 0.95rem;
+  font-weight: 760;
+}
+
+.iq-company-dossier__intel-row--done {
+  border-color: rgba(245, 197, 71, 0.28);
+  background: rgba(245, 197, 71, 0.06);
+}
+
+.iq-company-dossier__intel-row--done strong {
+  color: rgba(248, 250, 252, 0.96);
+}
+
+.iq-company-dossier__opened {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.82fr);
+  gap: 1rem;
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.iq-company-dossier__overview,
+.iq-company-dossier__mission {
+  border: 1px solid rgba(245, 197, 71, 0.18);
+  border-radius: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.iq-company-dossier__overview h2,
+.iq-company-dossier__mission h3 {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.98);
+  font-family: var(--font-grotesk), ui-sans-serif, system-ui;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.iq-company-dossier__overview h2 {
+  font-size: clamp(1.3rem, 2.7vw, 1.85rem);
+  margin-bottom: 0.85rem;
+}
+
+.iq-company-dossier__overview div + div {
+  margin-top: 0.75rem;
+}
+
+.iq-company-dossier__overview p,
+.iq-company-dossier__mission span {
+  margin: 0.25rem 0 0;
+  color: rgba(226, 232, 240, 0.86);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.iq-company-dossier__mission {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.iq-company-dossier__accept {
+  min-height: 3rem;
+  justify-content: center;
+  border-radius: 999px;
+  margin-top: auto;
+}
+
+@media (max-width: 760px) {
+  .iq-company-dossier__decrypt,
+  .iq-company-dossier__opened {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Schools map — subtle glow pulse while hovering a corner panel */
 @keyframes schools-map-box-glow-pulse {
   0%,
